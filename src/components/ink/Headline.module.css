@@ -1,0 +1,66 @@
+/*
+ * The page's headline. Positioning is left to each spread — they have wildly
+ * different layouts and the old pencil note was already placed by each one — so this
+ * owns only the type, the rule, and the arrival.
+ */
+.head {
+  position: relative;
+  z-index: var(--z-above);
+  max-width: 20ch;
+  padding-bottom: 0.34em;
+  /*
+   * Letterspaced OPEN, which is the opposite of what the previous condensed face
+   * wanted. A Bodoni at display size has hairlines a couple of pixels wide; set tight,
+   * the thin strokes of adjacent caps sit close enough to read as one grey mass. Air
+   * is what lets the contrast be seen, and it is most of why this reads as considered
+   * rather than shouted.
+   */
+  letter-spacing: 0.045em;
+  line-height: 1.06;
+  color: var(--ink);
+}
+
+/*
+ * THE RULE. A hairline under the words, in the spread's colour, drawn left to right.
+ *
+ * `transform-origin: left` so it draws from the start of the line rather than growing
+ * out of its middle — a rule that expands from the centre reads as a progress bar,
+ * and one that draws from the left reads as being ruled by hand.
+ *
+ * 2px flat rather than an em-relative height: this is a ruled line, and a ruled line
+ * is the same weight whatever the type above it is doing.
+ */
+.rule {
+  position: absolute;
+  bottom: 0.06em;
+  left: 0;
+  width: 100%;
+  background: var(--tint, var(--marine));
+  transform-origin: left center;
+  /*
+   * A hair thicker as the pointer nears the top of the page, which is where these
+   * headlines all sit — so the rule firms up under the cursor. Sub-pixel and deliberate:
+   * a rule that visibly thickened would read as a hover state on something that is not
+   * interactive. See `usePointer`.
+   */
+  height: calc(2px + var(--pdy, 0) * -0.6px);
+  transition: height 0.5s ease-out;
+}
+
+/*
+ * The page title. Deliberately NOT as large as the last card: STORMS / FLOODS / GODS
+ * is the loudest thing in the book and stays that way, so these sit a clear step
+ * below it and the ending still escalates.
+ */
+.lead {
+  font-size: clamp(1.9rem, 5.6vw, 4.4rem);
+}
+
+/*
+ * For a spread that already carries a big card. Its note still gets promoted out of
+ * pencil-caption territory, but it must not compete with the handwriting below it.
+ */
+.sub {
+  max-width: 24ch;
+  font-size: clamp(1.4rem, 3.6vw, 2.8rem);
+}

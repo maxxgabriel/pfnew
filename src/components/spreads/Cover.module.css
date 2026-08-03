@@ -1,0 +1,314 @@
+/*
+ * The shot. Clips the growing book so nothing spills outside the frame as it
+ * scales up past the point of coverage.
+ */
+.frame {
+  position: relative;
+  display: grid;
+  place-items: center;
+  height: 100%;
+  overflow: hidden;
+  /*
+   * Matches the page tone, so when the book has grown past the viewport the
+   * seam between surface and page is invisible whatever the window size.
+   */
+  background: var(--paper);
+}
+
+/*
+ * The surface the book lies on. A separate layer from .frame so it can fade out
+ * independently as the push-in takes over — once you are inside the page, the
+ * table it was resting on should no longer exist.
+ *
+ * Same paper tone as the pages, so the cover is the only thing out of the
+ * ordinary on this spread — the book lies on the page, not on a painted desk.
+ */
+.surface {
+  position: absolute;
+  inset: 0;
+  background: var(--paper);
+}
+
+/*
+ * The book. Portrait and sized off viewport height so it reads as an object
+ * rather than stretching to the window. Scaled from the centre by the push-in.
+ */
+.book {
+  position: relative;
+  width: min(30rem, 78vw);
+  aspect-ratio: 3 / 4;
+  max-height: 74vh;
+  /* clip the lifting board to the book, so it never slides across the surface */
+  overflow: hidden;
+  transform-origin: center;
+  will-change: transform;
+  /*
+   * The cover's own sizing frame. Everything on the board is set in `cqw`, so
+   * the masthead, the figure and the bursts scale WITH the book — the same
+   * composition at 480px wide and on a phone, with no mobile-specific CSS.
+   */
+  container-type: inline-size;
+  /*
+   * the hard comic shadow the reference gives every panel — it is real while
+   * the book is an object, and evaporates as the push-in takes over.
+   */
+  box-shadow: 0 0.9rem 0 0 rgb(26 26 24 / calc(0.8 * var(--detail, 1)));
+}
+
+/* page one, revealed by the lift and then flown into */
+.beneath {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  align-content: end;
+  justify-items: start;
+  padding: clamp(1.5rem, 4vw, 2.5rem);
+  background: var(--paper);
+  /* the gutter shadow belongs to the closed book, not to the page you enter */
+  box-shadow: inset 6px 0 18px rgb(26 26 24 / calc(0.08 * var(--detail, 1)));
+}
+
+.waiting {
+  rotate: -1deg;
+}
+
+/*
+ * The stack of sheets along the right and bottom edges. Faded out by --detail:
+ * once the page fills the screen there is no longer an edge to see, and leaving
+ * it in would read as a stray line across the paper.
+ */
+.pages {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: var(--detail, 1);
+  background: repeating-linear-gradient(
+    to right,
+    transparent calc(100% - 7px),
+    rgb(26 26 24 / 7%) calc(100% - 6px),
+    transparent 100%
+  );
+  box-shadow:
+    inset -3px 0 0 rgb(255 255 255 / 40%),
+    inset -6px 0 0 rgb(26 26 24 / 6%),
+    inset 0 -3px 0 rgb(255 255 255 / 30%);
+}
+
+/*
+ * THE BOARD. Lifts straight up and tips slightly, staying flat to the screen so
+ * the lettering on it stays legible for the whole move.
+ *
+ * THE COVER IS A COMIC SPLASH now, not a dark board. A hot punch-gradient, a
+ * halftone that shades from the bottom edge like a printed hero cover, and a
+ * sunburst behind the masthead — the book reads as a comic you are about to
+ * open before the first page.
+ */
+/*
+ * THE BOARD — the cover as a comic splash. A full punch-violine field (the book
+ * is the third comic primary up against the marine/punch desk), halftone that
+ * prints on from the bottom edge, a vignette, and a handled sheen. This is the
+ * loud thing the reader is looking at before they scroll.
+ */
+/*
+ * THE BOARD — the cover as a comic splash, straight out of the reference: a
+ * BRIGHT yellow field (not a dark red one), halftone dots printed over the
+ * whole face, a hard ink frame, and a sheen. Black ink on yellow is the
+ * loudest contrast the palette makes.
+ */
+.board {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: var(--highlight);
+  transform-origin: center bottom;
+  /* the hard ink frame + vignette */
+  box-shadow:
+    inset 0 0 0 4px var(--ink),
+    inset 0 0 60px rgb(26 26 24 / 0.25),
+    inset 0 0 120px rgb(26 26 24 / 0.12);
+  /* no transition: the transform is driven straight from scroll */
+}
+
+/* the halftone, printed over the whole face like the reference's dot paper */
+.board::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  /* comic halftone — dots that fade from the bottom edge */
+  background-image: radial-gradient(circle at 50% 50%, rgb(26 26 24 / 0.18) 0 1.2px, transparent 1.3px);
+  background-size: 8px 8px;
+  mask-image: linear-gradient(to top, rgb(0 0 0 / 1) 0%, rgb(0 0 0 / 0.6) 40%, transparent 80%);
+  -webkit-mask-image: linear-gradient(to top, rgb(0 0 0 / 1) 0%, rgb(0 0 0 / 0.6) 40%, transparent 80%);
+  pointer-events: none;
+}
+
+/* the sheen of a handled cover — diagonal highlight sweep */
+.board::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: linear-gradient(112deg, transparent 35%, rgb(255 255 255 / 14%) 48%, transparent 62%);
+  pointer-events: none;
+}
+
+/*
+ * The logo burst — the red comic starburst the masthead sits in. Static, so
+ * the title keeps all the legibility; the energy comes from the contrast.
+ */
+.logoBurst {
+  position: absolute;
+  left: 50%;
+  top: 24%;
+  z-index: 0;
+  width: 56cqw;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  background:
+    radial-gradient(circle at 50% 50%, var(--punch) 0 36%, transparent 38%),
+    repeating-conic-gradient(from -6deg, var(--punch) 0 6deg, transparent 6deg 11deg);
+}
+
+/* the bound edge, darker and slightly raised */
+.spine {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: clamp(1.5rem, 4%, 2.5rem);
+  background: linear-gradient(
+    to right,
+    rgb(0 0 0 / 45%),
+    rgb(0 0 0 / 12%) 60%,
+    transparent
+  );
+}
+
+/*
+ * The masthead — SKETCH over BOOK, stacked in the comic face like a logo and
+ * sized so the word never outruns the board. The title is the BOOM treatment
+ * from the reference: white ink with a hard black outline and one dropped
+ * shadow, sitting on the red burst. The two lines hold tiny opposing angles so
+ * the set never reads as typeset.
+ */
+.mast {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 3%;
+  z-index: 2;
+  text-align: center;
+}
+
+.line {
+  display: block;
+  font-family: var(--font-comic);
+  font-size: clamp(2rem, 19cqw, 6.2rem);
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  line-height: 0.92;
+  color: var(--paper);
+  -webkit-text-stroke: 0.03em var(--ink);
+  text-shadow: 0.05em 0.05em 0 rgb(0 0 0 / 0.7);
+  rotate: -1.2deg;
+}
+
+.lineSecond {
+  margin-top: 0.06em;
+  rotate: 1.1deg;
+}
+
+/*
+ * HIM — printed big, in his true ink, on the bright field. One red plate
+ * dropped behind him (see the inline filter in Cover.tsx) so he is as much a
+ * part of the cover print as the title. Sized to the board, and his feet rest
+ * on the nameplate band — the `10cqw` bottom puts them a beat into the band at
+ * every board size.
+ *
+ * Velocity-driven: motion blur scales with scroll speed.
+ */
+.hero {
+  position: absolute;
+  left: 44%;
+  bottom: 10cqw;
+  z-index: 2;
+  translate: -50% 0;
+  filter:
+    drop-shadow(0.06em 0.06em 0 rgb(224 38 43 / 0.9))
+    blur(calc(var(--velocity, 0) * 1.5px));
+  transition: filter 0.15s linear;
+}
+
+/* the impact words. Wham off his shoulder, pow free on the other side. */
+.wham {
+  position: absolute;
+  right: 1%;
+  top: 40%;
+  z-index: 2;
+  rotate: -7deg;
+}
+
+.pow {
+  position: absolute;
+  left: 2%;
+  top: 46%;
+  z-index: 2;
+  rotate: 6deg;
+}
+
+/* MAX, as the full-width nameplate band the cover sits on */
+.owner {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  padding: 0.42em 1rem 0.36em;
+  font-family: var(--font-comic);
+  font-size: clamp(1rem, 5.2cqw, 1.5rem);
+  font-weight: 400;
+  letter-spacing: 0.22em;
+  text-indent: 0.22em;
+  text-align: center;
+  color: var(--paper);
+  background: var(--punch);
+  border-top: 4px solid var(--ink);
+  text-shadow: 0.08em 0.08em 0 rgb(0 0 0 / 0.5);
+}
+
+/* a sticker — paper with an ink edge and a hard kick, like every label on the reference */
+.note {
+  position: absolute;
+  right: 4%;
+  bottom: 16%;
+  z-index: 3;
+  padding: 0.3rem 0.7rem;
+  color: var(--ink);
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  rotate: 3deg;
+  box-shadow: 0.25rem 0.25rem 0 rgb(0 0 0 / 0.6);
+}
+
+.hint {
+  position: absolute;
+  bottom: clamp(1.5rem, 5vh, 3rem);
+  color: var(--paper);
+  /* inverts against whichever half of the split desk it crosses */
+  mix-blend-mode: difference;
+  transition: opacity 0.4s linear;
+  animation: nudge 2.8s ease-in-out infinite;
+}
+
+@keyframes nudge {
+  0%, 100% { transform: translateY(0); opacity: 1; }
+  50%      { transform: translateY(4px); opacity: 0.45; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hint {
+    animation: none;
+  }
+}

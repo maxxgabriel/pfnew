@@ -1,0 +1,81 @@
+/*
+ * Design tokens — a sketchbook.
+ *
+ * Ink on paper, with three accents that behave like a small set of markers
+ * someone actually owns. The palette is deliberately tiny: a sketchbook is not
+ * art-directed, it is what was to hand.
+ */
+:root {
+  --paper: #f4f1e8;
+  --paper-shade: #e8e3d6;
+  --paper-deep: #dbd5c4;
+  --ink: #1a1a18;
+  --ink-soft: #4a4a45;
+  --pencil: #8d8d84;
+
+  --coral: #e8503c;
+  --marine: #2d4fa8;
+  --highlight: #f2d13c;
+
+  /* the comic red — hotter than --coral, saved for onomatopoeia and pops */
+  --punch: #e0262b;
+
+  /*
+   * TWO FAMILIES. Bodoni Moda for anything that carries the story, Space Grotesk for
+   * anything that labels it.
+   *
+   * The display and the "hand" are the SAME FACE — roman for headlines, italic for the
+   * cards. That is what replaced a condensed poster face and a marker script, and the
+   * gain is not only elegance: two registers cut from one family are related in a way
+   * two borrowed novelty faces never are, so the pages hold together.
+   *
+   * The fallbacks are real serifs, not the generic `serif`, because a Bodoni that
+   * falls back to Times is survivable and one that falls back to a sans is not — the
+   * whole design rests on thick/thin contrast.
+   */
+  --font-display: 'Bodoni Moda Variable', 'Didot', 'Times New Roman', serif;
+  --font-body: 'Space Grotesk Variable', system-ui, sans-serif;
+  --font-hand: 'Bodoni Moda Variable', 'Didot', 'Times New Roman', serif;
+  /* the cover's comic register — see the note in main.tsx; cover-only */
+  --font-comic: 'Bangers', 'Arial Black', sans-serif;
+  --font-impact: 'Luckiest Guy', cursive;
+
+  --step-display: clamp(3rem, 12vw, 12rem);
+  --step-h2: clamp(2rem, 7vw, 5.5rem);
+  --step-h3: clamp(1.35rem, 3vw, 2.4rem);
+  --step-body: clamp(1rem, 1.2vw, 1.2rem);
+  /*
+   * Trimmed from a 3rem ceiling. The old value was set for a compact marker script;
+   * Bodoni's italic has a far larger apparent size at the same em, so the cards were
+   * overpowering the headlines they sit under.
+   */
+  --step-hand: clamp(1.25rem, 2.9vw, 2.5rem);
+  --step-mark: clamp(0.7rem, 0.95vw, 0.82rem);
+
+  --gutter: clamp(1.25rem, 5vw, 4.5rem);
+  --measure: 34rem;
+  --stroke: 3px;
+
+  /* motion */
+  --settle: cubic-bezier(0.16, 1, 0.3, 1);
+  --snap: cubic-bezier(0.5, -0.4, 0.25, 1.4);
+  --hold: steps(1, end);
+
+  /*
+   * THE POINTER, defaulted to dead centre — see `usePointer`. Declared here rather
+   * than only set by the hook because every consumer needs a value before the
+   * reader has moved the mouse, and on a touch screen the hook never runs at all.
+   * `calc()` against an unset custom property yields nothing and silently kills
+   * the whole declaration it is in, so the fallback matters.
+   */
+  --px: 0.5;
+  --py: 0.5;
+  --pdx: 0;
+  --pdy: 0;
+  --plit: 0;
+
+  --z-page: 1;
+  --z-figure: 20;
+  --z-tooth: 40;
+  --z-above: 60;
+}

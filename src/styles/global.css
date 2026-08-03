@@ -1,0 +1,238 @@
+@import './tokens.css';
+
+/* ---------- reset ---------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+}
+
+html {
+  color-scheme: light only;
+  -webkit-text-size-adjust: 100%;
+  background: var(--paper);
+}
+
+body {
+  font-family: var(--font-body);
+  font-size: var(--step-body);
+  line-height: 1.55;
+  color: var(--ink);
+  background: var(--paper);
+  /* clip not hidden: hidden on <body> breaks position:sticky in Safari */
+  overflow-x: clip;
+  /* iOS: kill the rubber-band glow at the ends of the book */
+  overscroll-behavior-y: none;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ---------- type ---------- */
+/*
+ * The display face at its heaviest. Anton had one weight and was condensed by design;
+ * Bodoni is a variable family whose 400 is a book weight, so a headline set at the
+ * default lands as body copy blown up. 900 is where the hairlines get dramatic enough
+ * to hold at size.
+ *
+ * `letter-spacing` is now POSITIVE. A condensed sans wants tightening; a Bodoni at
+ * display size wants the opposite — its thin strokes need air or the caps collide and
+ * the hairlines merge into the stems.
+ */
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  font-weight: 900;
+  line-height: 0.94;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  text-wrap: balance;
+}
+
+/* pencil annotation in the margin — page numbers, notes to self */
+.mark {
+  font-family: var(--font-body);
+  font-size: var(--step-mark);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--pencil);
+}
+
+/*
+ * The narrating voice — the four cards and the asides. Italic rather than a script
+ * face: an italic serif is how a book sets an aside, and it reads as a considered
+ * remark where the marker script read as a doodle.
+ *
+ * Leading is looser than the old handwriting needed. Caveat is a compact face with
+ * short extenders, while Bodoni's italic descenders are long and its ascenders taller
+ * — at 1.15 the lines of the fall's four-line card touched.
+ */
+.hand {
+  font-family: var(--font-hand);
+  font-size: var(--step-hand);
+  font-style: italic;
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--ink);
+}
+
+/* ---------- a11y ---------- */
+:focus-visible {
+  outline: var(--stroke) solid var(--marine);
+  outline-offset: 4px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ---------- layout ---------- */
+.shell {
+  width: 100%;
+  max-width: 82rem;
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+/* Full-viewport page that behaves on iOS. */
+.page {
+  min-height: 100svh;
+  min-height: 100dvh;
+}
+
+/* ---------- ambient life ---------- */
+/*
+ * NOTHING IN THIS BOOK USED TO MOVE UNLESS YOU SCROLLED.
+ *
+ * Every drawing is a function of its spread's playhead, which is what makes the
+ * book scrub backwards — but it also meant the page froze solid the instant the
+ * reader stopped, and a frozen page reads as a screenshot. These are the loops that
+ * run regardless, so there is always something quietly alive on screen.
+ *
+ * All of them are TINY on purpose — a couple of pixels, a fraction of a degree.
+ * The eye reads the page as running without being able to point at what is moving;
+ * anything larger reads as a page full of gifs and fights the drawing.
+ *
+ * Utility classes rather than per-component keyframes, so the whole book shares one
+ * vocabulary of idles and any element can opt in.
+ */
+
+/*
+ * These animate `translate` and `rotate` — the individual properties — and NEVER
+ * `transform`. That is a hard requirement, not a style choice: most of the elements
+ * these land on already carry an inline `transform` from their spread's playhead
+ * (`translateY` on an arriving aside, the rotation on a falling figure), and a
+ * keyframe on `transform` beats an inline style and would throw that animation
+ * away. `translate`/`rotate` compose with `transform` instead of replacing it, so
+ * the idle rides on top of whatever the scroll is already doing.
+ *
+ * It also means a spread can keep using `rotate:` in CSS for a resting angle — but
+ * only if it does NOT also want an idle, since these overwrite it. Hence `.drift`,
+ * which only translates, for anything already sitting at an angle.
+ */
+
+/* handwriting that never sits perfectly still on the page */
+.breathe {
+  animation: breathe 6.5s ease-in-out infinite;
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    translate: 0 0;
+    rotate: 0deg;
+  }
+
+  33% {
+    translate: 0.4px -0.7px;
+    rotate: 0.11deg;
+  }
+
+  66% {
+    translate: -0.5px 0.4px;
+    rotate: -0.09deg;
+  }
+}
+
+/*
+ * A pencil note drifting the way a scanned page does. Translation only, so it is
+ * safe on anything already holding a resting `rotate` — most of the handwriting in
+ * this book sits at a slight angle, and `.breathe` would flatten it.
+ */
+.drift {
+  animation: drift 9s ease-in-out infinite;
+}
+
+@keyframes drift {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+
+  50% {
+    translate: -0.8px 0.6px;
+  }
+}
+
+/*
+ * Nudged off the shared clock, so a group of siblings does not pulse in unison.
+ * Negative delays start each one mid-cycle rather than making the later ones wait —
+ * a positive delay would have every element sitting perfectly still until its turn
+ * came, which is the exact problem this is here to fix.
+ */
+.breathe:nth-child(2n),
+.drift:nth-child(2n) {
+  animation-delay: -2.3s;
+}
+
+.breathe:nth-child(3n),
+.drift:nth-child(3n) {
+  animation-delay: -4.7s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /*
+   * The blanket rule above collapses these to a single 0.01ms cycle, which lands on
+   * whatever the first keyframe happens to be. Killing them outright instead leaves
+   * every element at its authored resting position.
+   */
+  .breathe,
+  .drift {
+    animation: none !important;
+  }
+}

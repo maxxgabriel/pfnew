@@ -1,0 +1,275 @@
+/*
+ * THE CAMERA PULLS OUT OF THE BOOK. Four stacked layers: the void the book turns out
+ * to be sitting in, the storm arriving in it, the sketchbook itself (torn sheet plus
+ * the cover that closes over it), and him — outside all of it.
+ *
+ * This spread carries `tone="storm"`, so `--ink` and `--paper` are inverted for
+ * everything inside it. Anything that must stay PAPER-coloured while it is still
+ * paper therefore names its colour literally; see `.left`/`.right`.
+ */
+.frame {
+  position: relative;
+  height: 100%;
+  overflow: clip;
+  /* the void shows through wherever the book is not, from the first frame */
+  background: #0c0e13;
+}
+
+/* ---------- the void ---------- */
+
+/*
+ * WHERE THE BOOK TURNS OUT TO BE. Not "behind the page" — it is the space he ends up
+ * standing in, and the whole scene by the end of the spread.
+ *
+ * Nearly black, with the faintest lift at the centre so it has a middle to stand in
+ * rather than being a flat rectangle. Deliberately almost empty: the void has to be
+ * void, and anything in it becomes a competing subject.
+ */
+.void {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(80% 60% at 50% 46%, #1b1f28, #0c0e13 70%);
+  transition: opacity 0.3s linear;
+}
+
+/* the storm, arriving in the void as the book leaves */
+.storm {
+  position: absolute;
+  inset: 0;
+  transition: opacity 0.5s linear;
+}
+
+/* ---------- the sketchbook ---------- */
+
+/*
+ * THE BOOK AS ONE OBJECT — the torn sheet and the cover that shuts over it, scaled
+ * and slid together.
+ *
+ * It starts as the full frame (`inset: 0`) because at the top of this spread we are
+ * still INSIDE the page, exactly where the cover spread left us. As `--shut` rises the
+ * whole group scales down, so the same element that was the world becomes a small
+ * object lying in the void. Grouping is what makes that work: animating the sheet and
+ * the cover separately let them drift apart under the same scale.
+ *
+ * `transform-origin` is below centre so the book settles toward the lower half of the
+ * frame as it shrinks, leaving sky above it for the storm.
+ */
+.book {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-page);
+  transform-origin: 50% 62%;
+  will-change: transform, opacity;
+}
+
+/*
+ * The board that closes over the torn page — the exact inverse of the cover spread,
+ * where it lifts away to reveal page one.
+ *
+ * Rotated about its TOP edge like a real board on a spine, and that choice hides the
+ * seam: the closing edge sweeps down over the tear rather than sliding across it. It
+ * also means the board is invisible at `--shut: 0` without needing opacity, because
+ * -90deg about the top edge folds it flat away from the viewer.
+ */
+.board {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(150deg, #2f2e2b, #1f1e1c 60%, #262523);
+  transform-origin: 50% 0;
+  transform: perspective(1400px) rotateX(calc((1 - var(--shut)) * -96deg));
+  /*
+   * FULLY OPAQUE, always. This used to fade in on `--shut` and the result was a
+   * translucent cover with the torn page showing straight through it — which reads as
+   * a grey wash over the tear rather than as a board closing over it. A cover is a
+   * solid object; the rotation alone is what reveals it, and `backface-visibility`
+   * keeps it invisible until it has swung past edge-on.
+   *
+   * Clipping to the book's own box is what stops it appearing before it should: at
+   * `--shut: 0` it is folded 96° away from the viewer and shows nothing.
+   */
+  backface-visibility: hidden;
+}
+
+.spine {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 6%;
+  background: linear-gradient(to right, rgb(0 0 0 / 55%), transparent);
+}
+
+.title {
+  font-size: clamp(1.2rem, 4vw, 2.6rem);
+  letter-spacing: 0.04em;
+  color: #e8e3d6;
+}
+
+/* ---------- the sheet being torn ---------- */
+
+.sheet {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-page);
+  will-change: transform;
+}
+
+/*
+ * The two halves of the torn sheet. Both are the full frame, each clipped along
+ * the SAME ragged seam from opposite sides, so the two edges are complementary
+ * and read as one tear rather than as two things that happen to be near each
+ * other. The polygon is irregular on purpose — an even zigzag reads as a
+ * perforation and a straight line reads as a cut, neither of which is a tear.
+ */
+/*
+ * The two halves. `#f4f1e8` LITERALLY rather than `var(--paper)`, because this spread
+ * runs the storm tone, which inverts `--paper` to near-black — the torn sheet has to
+ * stay paper-coloured right up to the moment the cover shuts over it.
+ */
+.left,
+.right {
+  position: absolute;
+  inset: 0;
+  background: #f4f1e8;
+  will-change: transform, clip-path;
+}
+
+/*
+ * The seam. Irregular in BOTH amplitude and spacing — the steps are 4–9% apart
+ * and wander between 44% and 54%, with the occasional near-vertical run. An
+ * evenly-pitched zigzag of constant depth (which this was at first) reads
+ * unmistakably as a machine-cut perforation; paper tears in runs that catch,
+ * jump, and change direction. The two halves quote the same vertex list in
+ * reverse so the edges stay exactly complementary.
+ */
+.left {
+  clip-path: polygon(
+    0 0,
+    51% 0, 47% 5%, 53% 11%, 50% 14%, 44% 22%, 49% 29%,
+    46% 33%, 54% 41%, 48% 47%, 51% 50%, 45% 58%, 52% 65%,
+    47% 69%, 50% 76%, 44% 83%, 49% 88%, 46% 94%, 51% 100%,
+    0 100%
+  );
+  /*
+   * Pulled left as the tear opens — but only to 30%, so both halves stay in
+   * frame as visible sheets of paper he has come out of. Pulling them the full
+   * ~52% slides them off the viewport entirely and the page ends up blank, which
+   * loses the entire point: he has to be standing in front of the torn book,
+   * not in front of nothing.
+   */
+  transform: translateX(calc(var(--open) * -30%));
+}
+
+.right {
+  clip-path: polygon(
+    51% 0, 100% 0, 100% 100%, 51% 100%,
+    46% 94%, 49% 88%, 44% 83%, 50% 76%, 47% 69%, 52% 65%,
+    45% 58%, 51% 50%, 48% 47%, 54% 41%, 46% 33%, 49% 29%,
+    44% 22%, 50% 14%, 53% 11%, 47% 5%
+  );
+  transform: translateX(calc(var(--open) * 30%));
+}
+
+/*
+ * A shadow along each torn edge, so the halves read as sheets with thickness
+ * lifting off what is behind them rather than as flat colour fields.
+ */
+.left::after,
+.right::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.left::after {
+  background: linear-gradient(to right, transparent 88%, rgb(26 26 24 / 14%));
+}
+
+.right::after {
+  background: linear-gradient(to left, transparent 88%, rgb(26 26 24 / 14%));
+}
+
+/* ---------- him ---------- */
+
+.note {
+  position: absolute;
+  top: clamp(2rem, 6vh, 4rem);
+  left: var(--gutter);
+  z-index: var(--z-above);
+  rotate: -0.8deg;
+  transition: opacity 0.3s linear;
+}
+
+/*
+ * HIM, and he is a sibling of `.book` rather than a child of it — which is the whole
+ * mechanism of the shot. A child would shrink and slide away with the book it is
+ * supposed to be escaping.
+ *
+ * Above the sheet, so as it parts he is revealed in the gap rather than clipped by it:
+ * he is the thing coming out, not part of the page. Transform origin at his feet so
+ * growing toward the reader keeps him planted instead of inflating from the middle.
+ *
+ * Sits at the same height the storm's horizon will appear at, so when the book has
+ * gone he is standing ON something rather than floating in the middle of the void.
+ */
+/*
+ * HIM, and he is a sibling of `.book` rather than a child of it — which is the whole
+ * mechanism of the shot. A child would shrink and slide away with the book it is
+ * supposed to be escaping.
+ *
+ * `left` is animated from 50% to 62% as the book shuts, so he steps CLEAR of it.
+ * Standing dead centre he was in front of the shrinking book like a figure pasted over
+ * a photograph of it; offset, with the book beside and behind him, he reads as someone
+ * who has walked out of it. That is the difference between the two frames and it is
+ * only 12% of the viewport.
+ */
+.him {
+  position: absolute;
+  bottom: 18%;
+  left: calc(50% + var(--aside, 0) * 12%);
+  z-index: var(--z-figure);
+  transform-origin: 50% 100%;
+  will-change: transform;
+}
+
+.figure {
+  margin-bottom: calc(var(--figure-w) * -0.12);
+  margin-left: calc(var(--figure-w) / -2);
+  will-change: transform;
+}
+
+/*
+ * The aside lands last, once he is alone in the void — so it is set in the STORM's
+ * pale ink, not the paper's. Centred under him rather than tucked in a corner: by the
+ * time it appears there is no page for it to be in the margin of.
+ */
+.aside {
+  position: absolute;
+  bottom: clamp(2rem, 7vh, 4rem);
+  left: 50%;
+  z-index: var(--z-above);
+  max-width: 24ch;
+  color: var(--ink-soft);
+  text-align: center;
+  translate: -50% 0;
+  transition: opacity 0.4s linear;
+  will-change: transform, opacity;
+}
+
+/*
+ * The headline is ON the paper, so it must be paper-legible while the paper exists —
+ * and this spread's inverted tone would otherwise draw it in pale storm ink on cream.
+ */
+.note {
+  color: #1a1a18;
+}
+
+@media (max-width: 60rem) {
+  .aside {
+    max-width: 18ch;
+  }
+}

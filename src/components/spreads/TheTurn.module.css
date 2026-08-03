@@ -1,0 +1,130 @@
+/*
+ * The quietest page in the book, and the most important. He is centred, the
+ * card is centred under him, and there is nothing else — this is the one page
+ * where the words and the drawing are saying exactly the same thing and they
+ * should be allowed to sit still and say it.
+ */
+.frame {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  justify-items: center;
+  align-content: center;
+  gap: clamp(1.5rem, 5vh, 3rem);
+  height: 100%;
+  padding: clamp(3rem, 9vh, 6rem) var(--gutter);
+}
+
+.note {
+  justify-self: start;
+  rotate: -0.8deg;
+  transition: opacity 0.3s linear;
+}
+
+.stage {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  min-height: 44vh;
+}
+
+.ground {
+  position: absolute;
+  bottom: 14%;
+  left: -4%;
+  width: 108%;
+  height: 2px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgb(141 141 132 / 60%) 10%,
+    rgb(141 141 132 / 60%) 90%,
+    transparent
+  );
+  rotate: 0.3deg;
+}
+
+/*
+ * Both sit on the same mark, so the redraw happens on top of the wreck rather
+ * than beside it. The negative bottom margin is the empty paper below his feet
+ * inside the SVG box (see Figure.module.css) — width × 1.6 × 0.075 — without
+ * which he stands in mid-air above the floor line.
+ */
+.ghost,
+.figure {
+  position: absolute;
+  bottom: 14%;
+  left: 50%;
+  margin-bottom: calc(var(--figure-w) * -0.12);
+  margin-left: calc(var(--figure-w) / -2);
+}
+
+.ghost {
+  transition: opacity 0.3s linear;
+}
+
+.figure {
+  z-index: var(--z-figure);
+  will-change: transform;
+}
+
+/*
+ * The pen is anchored to exactly the same point as the figure — his centre line
+ * on the floor — because the script positions its nib in HIS coordinates. Any
+ * other anchor (it used to hang off `right: 18%` of the stage) means the pen and
+ * the strokes it is drawing are measured from different origins, and it parks in
+ * the corner while the drawing happens elsewhere.
+ *
+ * `transform-origin` is the nib, at the bottom of the barrel, so rotating the
+ * pen pivots about the point touching the paper rather than swinging that point
+ * off the line.
+ *
+ * The nib is the bottom CENTRE of the box, so it is anchored by putting the
+ * box's bottom edge on the floor line and pulling it half its own width left.
+ * That half-width lives in the transform, not in a margin: a percentage margin
+ * resolves against the containing block, but a percentage inside `translate()`
+ * resolves against the element itself, which is the one that means "half a pen".
+ */
+.pen {
+  position: absolute;
+  bottom: 14%;
+  left: 50%;
+  /* above him: a pen drawing a line is in front of the line, not behind it */
+  z-index: var(--z-tooth);
+  width: clamp(18px, 2.4vw, 26px);
+  height: auto;
+  transform-origin: 50% 100%;
+  will-change: transform, opacity;
+}
+
+/*
+ * The line the book turns on. Large, hand-written, and given air. Not centred
+ * on the page's exact middle — a sentence written into a sketchbook lands where
+ * there is room for it, not on an axis.
+ */
+.card {
+  max-width: 26ch;
+  font-size: clamp(1.8rem, 5.5vw, 4.2rem);
+  line-height: 1.05;
+  text-align: center;
+  text-wrap: balance;
+  color: var(--ink);
+  rotate: -1.2deg;
+}
+
+.aside {
+  justify-self: end;
+  rotate: 1deg;
+  transition: opacity 0.4s linear;
+}
+
+@media (max-width: 60rem) {
+  .aside {
+    justify-self: center;
+  }
+
+  .pen {
+    right: 8%;
+  }
+}

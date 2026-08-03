@@ -1,0 +1,111 @@
+/*
+ * A comic sound-effect thrown onto a page. Size and position are the caller's;
+ * this owns the shape and the word.
+ */
+.burst {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: clamp(5rem, 11vw, 9rem);
+  aspect-ratio: 1;
+  pointer-events: none;
+  /*
+   * A hard offset under the whole burst, in the shade tone — the same "kick"
+   * the text gets, so the effect reads as printed rather than pasted.
+   */
+  filter: drop-shadow(0.14em 0.14em 0 rgb(0 0 0 / 0.25));
+}
+
+/* no star — the word becomes its own fat comic letter, filled with its colour
+   and wrapped in the ink outline, the way a background sound-effect sits behind
+   the hero without shouting for a panel of its own */
+.plain {
+  filter: none;
+  aspect-ratio: auto;
+  animation: burst-in 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes burst-in {
+  0% { transform: scale(0) rotate(-12deg); opacity: 0; }
+  60% { transform: scale(1.25) rotate(2deg); opacity: 1; }
+  80% { transform: scale(0.92) rotate(-1deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+.plain .word {
+  rotate: 0deg;
+  letter-spacing: 0.04em;
+  color: var(--burst-fill, var(--punch));
+  -webkit-text-stroke: 0.05em var(--ink);
+  -webkit-text-fill-color: var(--burst-fill, var(--punch));
+  text-shadow:
+    0 0 6px var(--burst-fill),
+    0 0 14px var(--burst-fill),
+    0 0 28px var(--burst-fill),
+    0 0 56px var(--burst-fill),
+    0.08em 0.08em 0 rgb(0 0 0 / 0.32);
+  /* velocity-driven glow: brighter when scrolling fast */
+  filter: brightness(calc(1 + var(--velocity, 0) * 0.3));
+  animation:
+    glow 2.5s ease-in-out infinite alternate,
+    shimmer 3s ease-in-out infinite;
+}
+
+@keyframes glow {
+  0% {
+    filter: brightness(1) drop-shadow(0 0 4px var(--burst-fill));
+    text-shadow:
+      0 0 6px var(--burst-fill),
+      0 0 14px var(--burst-fill),
+      0 0 28px var(--burst-fill),
+      0 0 56px var(--burst-fill),
+      0.08em 0.08em 0 rgb(0 0 0 / 0.32);
+  }
+  100% {
+    filter: brightness(1.3) drop-shadow(0 0 18px var(--burst-fill));
+    text-shadow:
+      0 0 10px var(--burst-fill),
+      0 0 24px var(--burst-fill),
+      0 0 48px var(--burst-fill),
+      0 0 80px var(--burst-fill),
+      0.08em 0.08em 0 rgb(0 0 0 / 0.32);
+  }
+}
+
+/* holographic shimmer — a subtle brightness sweep across the letter */
+@keyframes shimmer {
+  0%, 100% { filter: brightness(1); }
+  25% { filter: brightness(1.15); }
+  50% { filter: brightness(0.95); }
+  75% { filter: brightness(1.2); }
+}
+
+.shape {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.shape path {
+  /* recolourable per instance — a burst can be yellow ink-on-red, not always red */
+  fill: var(--burst-fill, var(--punch));
+}
+
+.word {
+  position: relative;
+  z-index: 1;
+  font-family: var(--font-impact);
+  font-weight: 400;
+  font-size: var(--burst-fs, clamp(0.85rem, 1.6vw, 1.3rem));
+  line-height: 1;
+  text-transform: uppercase;
+  text-align: center;
+  letter-spacing: 0.02em;
+  color: var(--burst-ink, var(--paper));
+  /* a comic word gets the white-highlight + black kick, like the reference */
+  text-shadow:
+    0.05em 0.05em 0 var(--paper),
+    0.1em 0.1em 0 rgb(0 0 0 / 0.4);
+  rotate: -9deg;
+}

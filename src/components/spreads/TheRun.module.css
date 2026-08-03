@@ -1,0 +1,144 @@
+/*
+ * A side-scroller. Everything is absolutely positioned against one full-bleed
+ * frame and moved on the X axis; nothing is in normal flow except the notes,
+ * because a tracking shot has no layout, only depths.
+ */
+.frame {
+  position: relative;
+  height: 100%;
+  overflow: clip;
+}
+
+.note {
+  position: absolute;
+  top: clamp(2rem, 6vh, 4rem);
+  left: var(--gutter);
+  z-index: var(--z-above);
+  rotate: -0.8deg;
+  transition: opacity 0.3s linear;
+}
+
+/*
+ * The three depths. Each is a wide track that slides; the width is generous so
+ * the page cannot run out of scenery before the reader runs out of scroll.
+ */
+.far,
+.near {
+  position: absolute;
+  left: 0;
+  width: 900%;
+  will-change: transform;
+}
+
+/*
+ * HILLS. The height is capped in viewport units rather than left to the SVG's
+ * aspect ratio — a 900%-wide box with `height: auto` is nine times as TALL as
+ * it should be, which turns a distant ridge into a band across the whole page.
+ * `preserveAspectRatio="none"` in the markup lets it stretch wide and stay low,
+ * which is what a horizon does.
+ */
+.far {
+  bottom: 24%;
+  height: clamp(2rem, 7vh, 5rem);
+  opacity: 0.85;
+}
+
+.far svg {
+  width: 100%;
+  height: 100%;
+}
+
+/*
+ * THE COMMIT LOG. Below the floor line, not on it.
+ *
+ * These used to sit at 20% — just above the ground, at exactly the height of his
+ * legs — which was survivable while every milestone was the single word "again"
+ * and could slip through the gaps in his stride. Real commit messages are three
+ * times as wide and they tangled in his shins: "fix again" landed squarely
+ * behind the running figure and read as part of the drawing.
+ *
+ * Under the floor is also where a log actually belongs. He runs along the line;
+ * what he did scrolls past underneath it, like a history.
+ */
+.near {
+  bottom: 7%;
+  height: 4rem;
+}
+
+.milestone {
+  position: absolute;
+  bottom: 0;
+  font-size: clamp(1rem, 1.8vw, 1.6rem);
+  color: var(--pencil);
+  white-space: nowrap;
+  opacity: 0.85;
+}
+
+/* each pencilled at its own angle, as annotations in a margin are */
+.milestone:nth-child(odd)  { rotate: -3deg; }
+.milestone:nth-child(even) { rotate: 2.5deg; }
+
+/*
+ * THE GROUND. Dashes, not a rule: a solid line translating sideways looks
+ * completely static, whereas dashes let the eye measure the speed.
+ *
+ * The dash pitch is set in PIXELS, not percent. A percentage repeating-gradient
+ * is a percentage of this element's own width, so on an over-wide track each
+ * "dash" becomes tens of viewports long and draws as a solid rule. Fixed px
+ * also means the dashes stay the same size on every screen, which is what a
+ * ruled pencil line does.
+ */
+.ground {
+  position: absolute;
+  bottom: 18%;
+  left: -10%;
+  width: 130%;
+  height: 2px;
+  background: repeating-linear-gradient(
+    to right,
+    var(--pencil) 0 22px,
+    transparent 22px 40px
+  );
+  opacity: 0.75;
+  will-change: transform;
+}
+
+/*
+ * HIM — pinned slightly left of centre, because a runner needs more space in
+ * front of him than behind. Bottom offset matches the ground, plus the empty
+ * paper below his feet inside the SVG box (see Figure.module.css).
+ */
+.runner {
+  position: absolute;
+  bottom: 18%;
+  left: 38%;
+  z-index: var(--z-figure);
+}
+
+.figure {
+  margin-bottom: calc(var(--figure-w) * -0.12);
+  margin-left: calc(var(--figure-w) / -2);
+  will-change: transform;
+}
+
+.card {
+  position: absolute;
+  right: var(--gutter);
+  bottom: clamp(2.5rem, 8vh, 5rem);
+  z-index: var(--z-above);
+  max-width: 18ch;
+  font-size: clamp(1.5rem, 3.6vw, 2.8rem);
+  line-height: 1.1;
+  text-align: right;
+  rotate: -1deg;
+}
+
+@media (max-width: 60rem) {
+  .runner {
+    left: 34%;
+  }
+
+  .card {
+    max-width: 14ch;
+  }
+}

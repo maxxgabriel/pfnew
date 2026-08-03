@@ -1,0 +1,250 @@
+/*
+ * Two columns: the contraption on one side, the projects on the other. This is
+ * the portfolio page, so the list is not squeezed to make room for the drawing —
+ * they get comparable weight, and on narrow screens the list wins.
+ */
+.frame {
+  position: relative;
+  display: grid;
+  align-content: center;
+  gap: clamp(1.5rem, 4vh, 3rem);
+  height: 100%;
+  padding: clamp(3rem, 8vh, 5rem) var(--gutter);
+}
+
+@media (min-width: 62rem) {
+  .frame {
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    grid-template-rows: auto 1fr auto;
+    align-items: center;
+    column-gap: clamp(2rem, 5vw, 4.5rem);
+  }
+
+  .note   { grid-column: 1 / -1; }
+  .stage  { grid-column: 1; grid-row: 2; }
+  .parts  { grid-column: 2; grid-row: 2; }
+  .card   { grid-column: 1 / -1; grid-row: 3; }
+}
+
+.note {
+  justify-self: start;
+  rotate: -0.7deg;
+  transition: opacity 0.3s linear;
+}
+
+/* ---------- the contraption ---------- */
+
+.stage {
+  position: relative;
+  display: grid;
+  place-items: end center;
+}
+
+.rig {
+  width: 100%;
+  max-width: 34rem;
+  height: auto;
+  overflow: visible;
+}
+
+.scaffold {
+  /* pencilled in first, as a frame to bolt things onto */
+  opacity: 0.8;
+}
+
+.part {
+  transition: opacity 0.3s linear;
+  will-change: transform;
+}
+
+.stamp {
+  font-family: var(--font-body);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+}
+
+/*
+ * He stands at the foot of the rig, on the same baseline as the scaffold. The
+ * negative margin is the empty paper below his feet inside the SVG box (see
+ * Figure.module.css).
+ */
+.builder {
+  position: absolute;
+  bottom: 0;
+  left: 2%;
+  margin-bottom: calc(var(--figure-w) * -0.12);
+}
+
+/* ---------- the projects ---------- */
+
+.parts {
+  display: grid;
+  gap: clamp(0.9rem, 2.2vh, 1.6rem);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/*
+ * Each project is a component: numeral in the margin, name, what it does, and
+ * what it was. Ruled off from the next one, the way a parts list in a manual is.
+ */
+.project {
+  display: grid;
+  grid-template-columns: 2.5rem minmax(0, 1fr);
+  align-items: baseline;
+  column-gap: 0.5rem;
+  padding-bottom: clamp(0.6rem, 1.6vh, 1rem);
+  border-bottom: 1px solid rgb(26 26 24 / 12%);
+  transition: opacity 0.4s var(--settle), transform 0.4s var(--settle);
+  will-change: transform, opacity;
+}
+
+.project:last-child {
+  border-bottom: 0;
+}
+
+/*
+ * HOVER. This is the portfolio page, so it is where a visitor's cursor actually
+ * goes — and until now nothing here answered it. The row slides in against the rule
+ * below it, its numeral goes from pencil to ink, and the name picks up the page's
+ * colour.
+ *
+ * The row moving RIGHT rather than lifting is deliberate: these are ruled off from
+ * each other like a parts list, and a vertical nudge fights the rules while a
+ * horizontal one uses them as a track.
+ *
+ * `:focus-within` as well as `:hover`, so tabbing through gets the same feedback a
+ * mouse does. `!important` on the transform is unavoidable here — the inline style
+ * from the assembly animation sets `transform` on the same element, and inline
+ * always wins a specificity contest.
+ */
+.project:hover,
+.project:focus-within {
+  transform: translateX(6px) !important;
+}
+
+.project:hover .numeral,
+.project:focus-within .numeral {
+  color: var(--ink);
+}
+
+.project:hover .name,
+.project:focus-within .name {
+  color: var(--marine);
+}
+
+.numeral,
+.name {
+  transition: color 0.2s linear;
+}
+
+.numeral {
+  grid-row: 1 / span 3;
+  padding-top: 0.35em;
+}
+
+.name {
+  font-size: clamp(1.15rem, 2.2vw, 1.75rem);
+  line-height: 1;
+}
+
+.does {
+  max-width: 34ch;
+  font-size: clamp(0.9rem, 1.1vw, 1.02rem);
+  line-height: 1.4;
+  color: var(--ink-soft);
+}
+
+.meta {
+  margin-top: 0.15rem;
+  font-size: 0.66rem;
+}
+
+.card {
+  justify-self: center;
+  max-width: 30ch;
+  font-size: clamp(1.4rem, 3.2vw, 2.6rem);
+  line-height: 1.1;
+  text-align: center;
+  text-wrap: balance;
+  rotate: -0.8deg;
+}
+
+/*
+ * NARROW SCREENS. This is a PINNED spread, so its content has to fit one
+ * viewport — anything taller is simply unreachable, because the page is held
+ * still while the playhead advances. The single-column stack of five projects
+ * plus the rig plus the card does not fit a phone at desktop sizes, so
+ * everything tightens and the drawing gives up most of its height.
+ *
+ * The list keeps its legibility and the rig shrinks, because on a phone the
+ * portfolio is the point and the contraption is the flourish.
+ */
+@media (max-width: 62rem) {
+  /*
+   * All rows intrinsic, and the base rule's `align-content: center` gathers the
+   * stack in the middle. A `1fr` row for the drawing would swallow every spare
+   * pixel and leave a dead band between the list and the rig.
+   */
+  .frame {
+    grid-template-rows: repeat(4, auto);
+    gap: clamp(0.6rem, 1.6vh, 1.2rem);
+    padding-block: clamp(1.5rem, 4vh, 3rem);
+  }
+
+  .note {
+    order: 1;
+  }
+
+  /* the drawing is the flourish; on a phone the list leads */
+  .stage {
+    order: 3;
+    min-height: 0;
+    place-items: center;
+  }
+
+  .parts {
+    order: 2;
+    gap: clamp(0.4rem, 1.1vh, 0.8rem);
+  }
+
+  .project {
+    grid-template-columns: 1.6rem minmax(0, 1fr);
+    padding-bottom: clamp(0.3rem, 0.9vh, 0.6rem);
+  }
+
+  .name {
+    font-size: clamp(1rem, 4.2vw, 1.3rem);
+  }
+
+  .does {
+    font-size: clamp(0.78rem, 3.2vw, 0.92rem);
+    line-height: 1.3;
+  }
+
+  .meta {
+    font-size: 0.58rem;
+  }
+
+  .rig {
+    max-width: 15rem;
+  }
+
+  /*
+   * His size is set in JS, so it cannot respond to the breakpoint on its own —
+   * scaled down here instead. At the narrow rig width an unscaled figure is
+   * taller than the machine he built, which inverts the whole point of the page.
+   * Origin at his feet so he shrinks onto the ground line rather than away from it.
+   */
+  .builder {
+    left: -1%;
+    scale: 0.62;
+    transform-origin: 50% 100%;
+  }
+
+  .card {
+    order: 4;
+    font-size: clamp(1.1rem, 5vw, 1.6rem);
+  }
+}

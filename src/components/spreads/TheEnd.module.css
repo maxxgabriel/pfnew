@@ -1,0 +1,321 @@
+/*
+ * The only page in the book laid out as a page rather than as a shot: it has
+ * real reading on it, and real links. Centred column, generous rhythm.
+ */
+/*
+ * The frame is the READING COLUMN and is capped at 62rem — but the storm has to be
+ * the whole viewport, or the rain renders as a visibly bounded rectangle with dry
+ * paper either side of it. So the weather is pulled out to full bleed with a viewport
+ * width and a negative margin rather than being allowed to inherit this measure.
+ *
+ * `position: relative` so the storm's `inset: 0` resolves against this page rather
+ * than escaping to the nearest positioned ancestor.
+ */
+.frame {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: clamp(1rem, 3vh, 2rem);
+  width: 100%;
+  max-width: 62rem;
+  margin-inline: auto;
+  padding: clamp(4rem, 14vh, 9rem) var(--gutter) clamp(3rem, 10vh, 6rem);
+  text-align: center;
+}
+
+/*
+ * FULL BLEED, out of the reading column. `100vw` rather than `100%`, and centred by
+ * shifting half the overflow back — the standard escape, and the only one that works
+ * without knowing the column's computed width.
+ */
+.frame > :first-child {
+  position: absolute;
+  inset: 0 auto 0 50%;
+  width: 100vw;
+  translate: -50% 0;
+}
+
+/* ---------- him, on real ground ---------- */
+
+/*
+ * Tall enough to hold him at full height plus the ground line. He is absolutely
+ * positioned against the ground at the BOTTOM of this box, so if the box is
+ * shorter than he is he simply overflows upward and gets clipped by the top of
+ * the page — which is exactly what happened when this was sized by eye.
+ */
+.stage {
+  position: relative;
+  z-index: var(--z-figure);
+  display: grid;
+  place-items: center;
+  width: 100%;
+  /* his box is 1.6× as tall as it is wide, plus air above his head */
+  min-height: calc(var(--figure-w) * 1.6 + 2rem);
+}
+
+.figure {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  margin-bottom: calc(var(--figure-w) * -0.12);
+  margin-left: calc(var(--figure-w) / -2);
+  transition: opacity 0.4s linear;
+  will-change: transform, opacity;
+}
+
+/* ---------- the last card ---------- */
+
+.lead,
+.through {
+  color: var(--ink-soft);
+  transition: opacity 0.4s linear;
+}
+
+.lead {
+  font-size: clamp(1.5rem, 3.4vw, 2.6rem);
+  rotate: -1deg;
+}
+
+.through {
+  font-size: clamp(1.1rem, 2vw, 1.5rem);
+  rotate: 0.8deg;
+}
+
+/*
+ * STORMS / FLOODS / OR GODS. The loudest thing in the book, and the only thing
+ * set at this size — which is what earns it. One word per line, tight leading,
+ * so it reads as three blows rather than a sentence.
+ */
+/*
+ * The leading is tight but not tighter than the glyphs. At 0.88 the rotated lines swept
+ * into each other — a rotation of a 9rem line throws its corners well past its own box,
+ * so anything under ~1 collides once `.word` is kicked off axis.
+ *
+ * 1.16 now, down from the 1.34 an earlier extruded version needed: with nothing thrown
+ * down-right into the line below, the only clearance required is the rule's.
+ * Tighter leading is also better here — three stacked words read as one block rather
+ * than as three separate lines.
+ */
+/*
+ * Above the rain. Without an explicit level the drops paint over the type — the
+ * weather layer is a sibling at z 0 and these are all static, so source order alone
+ * does not put them in front.
+ */
+.words,
+.lead,
+.through,
+.contact,
+.credits {
+  position: relative;
+  z-index: var(--z-above);
+}
+
+.words {
+  display: grid;
+  margin-block: clamp(0.5rem, 2vh, 1.5rem);
+  font-size: clamp(2.4rem, 12vw, 8.5rem);
+  line-height: 1.16;
+  letter-spacing: 0.02em;
+}
+
+/*
+ * Each word is a full-width block so `text-align: center` on the frame actually
+ * centres it. Without this the inline-block inside shrink-wraps and every line
+ * hangs off the left edge, which is what it did at first.
+ */
+.word {
+  display: block;
+  width: 100%;
+}
+
+/*
+ * Each line kicked a little off axis, as hand-lettering is. Kept under a degree:
+ * the vertical throw of a rotation grows with the width of the line, and these
+ * lines are the widest thing in the book, so what reads as a gentle tilt on a
+ * caption reads as a collision here.
+ */
+.word:nth-child(1) { rotate: -0.8deg; }
+.word:nth-child(2) { rotate: 0.5deg; }
+.word:nth-child(3) { rotate: -0.35deg; }
+
+/*
+ * One of the three big words, and the rule under it.
+ *
+ * `inline-block` so the rule spans the WORD and not the full centred line — a rule at
+ * `width: 100%` of the line box would run the width of the page under a six-letter
+ * word. The pseudo-element measures its parent, so the parent has to shrink-wrap.
+ */
+.slab {
+  position: relative;
+  display: inline-block;
+  will-change: transform, opacity;
+}
+
+/*
+ * The rule, in the word's own colour, drawn left to right as each word finishes. Same
+ * device as the headlines (see Headline.module.css) — which is the point: the ending is
+ * the book's own grammar at full volume, not a separate treatment.
+ */
+.slab::after {
+  content: '';
+  position: absolute;
+  bottom: -0.04em;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: var(--tint, var(--marine));
+  transform: scaleX(var(--drawn, 0));
+  transform-origin: left center;
+}
+
+/*
+ * `or even`, between FLOODS and GODS.
+ *
+ * Set left of centre rather than centred, so it reads as tucked under the corner of the
+ * line above rather than as a caption for it — and the offsets are in `rem` rather than
+ * `em` so they mean the same distance here as they do beside 8rem type.
+ */
+.hinge {
+  display: block;
+  width: 100%;
+  margin-block: clamp(0.35rem, 1.4vh, 1rem) clamp(0.15rem, 0.7vh, 0.6rem);
+  padding-left: 7%;
+  /*
+   * LOWERCASE, explicitly. It lives inside the `<h2>`, which sets
+   * `text-transform: uppercase` for the three big words — so without this the hinge
+   * rendered as "OR EVEN" in letterspaced caps and read as a section label rather than
+   * as someone's aside. Its whole job is to be the one quiet thing on the page.
+   *
+   * The letterspacing needs resetting for the same reason: it inherits the display
+   * tracking, which is set for 8rem caps and is far too loose at this size.
+   */
+  font-size: clamp(1.05rem, 2.4vw, 1.9rem);
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  line-height: 1;
+  color: var(--pencil);
+  text-align: left;
+  text-transform: lowercase;
+  transition: opacity 0.4s linear;
+}
+
+/* ---------- the invitation ---------- */
+
+.contact {
+  display: grid;
+  justify-items: center;
+  gap: clamp(0.5rem, 1.5vh, 1rem);
+  margin-top: clamp(1.5rem, 5vh, 3.5rem);
+  transition: opacity 0.5s var(--settle), transform 0.5s var(--settle);
+  will-change: transform, opacity;
+}
+
+.reach {
+  color: var(--pencil);
+}
+
+/*
+ * The one thing on the page that is asking to be clicked, so it is the biggest
+ * interactive target in the book and underlined by hand rather than by the
+ * browser — the offset and thickness are set so it reads as pen, not as a link.
+ */
+.email {
+  font-family: var(--font-hand);
+  font-size: clamp(1.8rem, 5.5vw, 3.6rem);
+  line-height: 1.1;
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: var(--coral);
+  text-decoration-thickness: 3px;
+  text-underline-offset: 0.14em;
+  transition: text-decoration-color 0.25s linear, translate 0.25s var(--settle);
+}
+
+/*
+ * The kick. Straightens up and lifts slightly — `translate` rather than `transform`
+ * so it composes with the contact block's own arrival transform above it.
+ *
+ * No `.drift` on this one: it already owns `rotate` for its resting angle AND for
+ * this hover, and the idle keyframes animate the same property, so the loop would
+ * cancel both.
+ */
+.email:hover,
+.email:focus-visible {
+  text-decoration-color: var(--ink);
+  translate: 0 -2px;
+}
+
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(0.8rem, 3vw, 2rem);
+  justify-content: center;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.link {
+  font-size: var(--step-mark);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  border-bottom: 1px solid rgb(26 26 24 / 25%);
+  padding-bottom: 2px;
+  transition: color 0.2s linear, border-color 0.2s linear;
+}
+
+.link:hover,
+.link:focus-visible {
+  color: var(--ink);
+  border-color: var(--coral);
+}
+
+/* ---------- the signature ---------- */
+
+/*
+ * The signature. A single handwritten sign-off flowing at the foot of the
+ * reading column, after the links — the way you close a sketchbook. Exactly one
+ * thing, no stamps or numbers: the owner's name, nothing else.
+ *
+ * Pointer events off so it can never block a touch or a scroll.
+ */
+.close {
+  display: grid;
+  justify-items: center;
+  margin-top: clamp(1.25rem, 4vh, 2.5rem);
+  pointer-events: none;
+  will-change: transform, opacity;
+  transition: opacity 0.5s var(--settle), transform 0.5s var(--settle);
+}
+
+/* the owner signs it the way you close a sketchbook. */
+.sig {
+  font-size: clamp(1.2rem, 3.4vw, 1.9rem);
+  line-height: 1.1;
+  color: var(--ink-soft);
+  transform: rotate(2.2deg);
+  /* neon signature — subtle glow that breathes */
+  text-shadow:
+    0 0 6px var(--coral),
+    0 0 14px var(--coral),
+    0 0 28px var(--coral);
+  animation: sig-glow 3s ease-in-out infinite alternate;
+}
+
+@keyframes sig-glow {
+  0% {
+    text-shadow:
+      0 0 4px var(--coral),
+      0 0 10px var(--coral),
+      0 0 20px var(--coral);
+    filter: brightness(1);
+  }
+  100% {
+    text-shadow:
+      0 0 8px var(--coral),
+      0 0 18px var(--coral),
+      0 0 36px var(--coral);
+    filter: brightness(1.15);
+  }
+}

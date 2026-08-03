@@ -1,0 +1,37 @@
+/*
+ * Almost empty on purpose. The reader has to notice one stroke, so there is
+ * nothing else on the page competing for the look.
+ */
+.frame {
+  position: relative;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: clamp(2rem, 8vh, 5rem);
+  height: 100%;
+  padding-block: clamp(4rem, 12vh, 8rem);
+}
+
+.note {
+  transition: opacity 0.3s linear;
+}
+
+.stage {
+  display: grid;
+  place-items: center;
+  /* holds its height so the aside below does not shift as the stroke draws */
+  min-height: 42vh;
+}
+
+.line {
+  /* the stroke is off-square, as a first mark on a fresh page would be */
+  rotate: -1.5deg;
+}
+
+.aside {
+  max-width: 24ch;
+  text-align: center;
+  color: var(--ink-soft);
+  rotate: -1deg;
+  transition: opacity 0.4s var(--settle), transform 0.4s var(--settle);
+}

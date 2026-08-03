@@ -1,0 +1,85 @@
+/*
+ * Fixed, pointer-transparent, and never repainted by scrolling. Sits above the
+ * page content because paper fibre is on top of ink, not under it.
+ */
+.paper {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-tooth);
+  pointer-events: none;
+  /*
+   * OFF over the storm. This layer is paper fibre and a binding shadow — correct for
+   * eight spreads and wrong for the ninth, where he has torn his way out of the book:
+   * a multiply-blended tooth over a night sky reads as dirt on the screen, and the
+   * spine shadow puts a book gutter through the weather.
+   *
+   * Driven by a flag on <html> set from scroll (see `useCamera`), because this element
+   * is `position: fixed` and global — it has no way of knowing which spread is in
+   * front of it, and moving it inside each spread would mean nine copies of a
+   * full-screen composited layer.
+   */
+  opacity: 1;
+  transition: opacity 0.5s linear;
+}
+
+:root[data-out] .paper {
+  opacity: 0;
+}
+
+.paper > * {
+  position: absolute;
+  inset: 0;
+}
+
+/*
+ * TOOTH — the fibre of the sheet. Multiply so it darkens the ink slightly
+ * where it crosses, which is what stops strokes looking like vector art
+ * floating over a flat colour.
+ */
+.tooth {
+  opacity: 0.5;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='t'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23t)' opacity='0.42'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+}
+
+/*
+ * SPINE — the binding shadow. Off-centre on purpose: a sketchbook is held
+ * open, so the gutter is never exactly in the middle of what you are looking at.
+ */
+.spine {
+  left: 0;
+  width: 5rem;
+  background: linear-gradient(
+    to right,
+    rgb(26 26 24 / 14%),
+    rgb(26 26 24 / 4%) 45%,
+    transparent
+  );
+  mix-blend-mode: multiply;
+}
+
+/* EDGES — the sheet curls away at top and bottom, catching a little shadow. */
+.edges {
+  background:
+    linear-gradient(to bottom, rgb(26 26 24 / 8%), transparent 12%),
+    linear-gradient(to top, rgb(26 26 24 / 10%), transparent 14%),
+    linear-gradient(to left, rgb(26 26 24 / 6%), transparent 8%);
+  mix-blend-mode: multiply;
+}
+
+/*
+ * Safari on iOS composites full-screen blend modes poorly at scale. Keep the
+ * tooth, which does most of the work, and drop the rest rather than shipping
+ * something that judders while scrolling.
+ */
+@supports (-webkit-touch-callout: none) {
+  .tooth {
+    opacity: 0.34;
+  }
+
+  .spine,
+  .edges {
+    display: none;
+  }
+}

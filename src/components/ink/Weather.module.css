@@ -1,0 +1,136 @@
+/*
+ * The storm layer. Sits behind everything on the last spread — the type and the
+ * figure are IN the weather, not on top of a picture of it.
+ */
+.sky {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  /*
+   * The whole layer fades up on `--arrived` rather than appearing. He tears through
+   * the page on the spread before, so the storm should be building as he arrives
+   * rather than switching on the instant the section scrolls into view.
+   */
+  opacity: var(--arrived, 0);
+}
+
+/*
+ * The lit sky. A radial rather than a flat fill: real weather has a bright patch
+ * where the light is coming from, and putting it high and slightly off-centre gives
+ * the page a direction that a uniform dark rectangle cannot.
+ */
+.sky::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(120% 80% at 62% 8%, rgb(120 138 170 / 22%), transparent 55%),
+    radial-gradient(90% 60% at 20% 100%, rgb(90 104 132 / 16%), transparent 60%);
+}
+
+/* ---------- lightning ---------- */
+
+/*
+ * A full-bleed wash, not a drawn bolt. Being inside a storm is a sheet of light
+ * across everything, and this way the flash lights the figure and the type rather
+ * than sitting behind them as an illustration.
+ *
+ * `mix-blend-mode: screen` so it only ever adds light. A plain white overlay at
+ * this opacity greys the darks and flattens the whole page instead of lifting it.
+ */
+.flash {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(100% 70% at 50% 0%, #dfe6f5, #93a5c8 45%, transparent 75%);
+  mix-blend-mode: screen;
+  will-change: opacity;
+}
+
+/* ---------- rain ---------- */
+
+.rain {
+  position: absolute;
+  inset: -12% -6% -6%;
+}
+
+/*
+ * ONE DROP. A hairline gradient rather than a solid rule, so it fades at both ends
+ * and reads as motion blur — a solid line reads as a scratch on the lens.
+ *
+ * Falls on a fixed diagonal via `rotate` on the element and a straight `translateY`
+ * in the keyframes. That order matters: rotating the element and translating along
+ * its own axis keeps every drop parallel, whereas animating x and y separately lets
+ * the angle drift with the timing function and the field stops looking like weather.
+ */
+.drop {
+  position: absolute;
+  top: 0;
+  width: 1px;
+  height: var(--len, 50px);
+  background: linear-gradient(to bottom, transparent, rgb(210 222 245 / 90%), transparent);
+  opacity: var(--dim, 0.3);
+  rotate: 14deg;
+  animation: fall var(--fall, 1s) linear infinite;
+  /*
+   * Negative delay, always. A positive one leaves the top of the screen empty until
+   * each drop's turn arrives, so the storm visibly starts; a negative one begins
+   * every drop mid-flight and the field is already full on the first frame.
+   */
+  animation-delay: var(--delay, 0s);
+  will-change: transform;
+}
+
+@keyframes fall {
+  from {
+    transform: translateY(-20vh);
+  }
+
+  to {
+    transform: translateY(120vh);
+  }
+}
+
+/* ---------- the horizon ---------- */
+
+/*
+ * Solid and lit, unlike the ruled pencil lines he stood on for seven spreads. It
+ * sits low so there is more sky than ground — the page is about the size of what he
+ * is standing in, not about the ground being reassuring.
+ *
+ * Kept low enough to stay clear of the reading column: at 16% the line fell level
+ * with the invocation and drew straight through it, so it now hugs the foot of the
+ * scene as the ground it reads as, below the text.
+ */
+.horizon {
+  position: absolute;
+  bottom: 4%;
+  left: -2%;
+  width: 104%;
+  height: 2px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgb(190 204 230 / 40%) 18%,
+    rgb(190 204 230 / 40%) 82%,
+    transparent
+  );
+  transition: opacity 0.6s linear;
+}
+
+/*
+ * REDUCED MOTION. The storm stays — it is the setting, and removing it would put the
+ * last card back on a blank page — but nothing falls and nothing flashes. The rain
+ * is not rendered at all in that case (see Weather.tsx), so this is the sky and the
+ * horizon holding still.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .drop {
+    animation: none;
+  }
+
+  .flash {
+    display: none;
+  }
+}
