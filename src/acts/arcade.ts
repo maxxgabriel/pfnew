@@ -4,6 +4,7 @@ import { type Pt, TAU, bell, clamp, ease, hash, lerp, rng, seg } from '../core/m
 import { canvas } from '../core/sprites';
 import { C } from '../core/style';
 import { drawBall } from './machine';
+import { GOLD, drawBolt, drawCrackle } from '../core/bolt';
 
 /*
  * ACT III — THE ARCADE.
@@ -21,8 +22,9 @@ import { drawBall } from './machine';
  */
 
 const A = {
-  curtain: [12.32, 12.52] as const,
-  tvIn: 12.52,
+  // the cannon ball turns into a bolt that tears up the screen; hard cut to the TV
+  bolt: [12.3, 12.4] as const,
+  tvIn: 12.4,
   hit: 12.82,
   on: [12.84, 13.02] as const,
   dive: [13.0, 13.42] as const,
@@ -193,11 +195,9 @@ export function drawArcade(f: Frame) {
   const { P, W, H } = ensureBuf(f);
   const g = buf!.ctx;
 
-  // the speed-line curtain that cuts away from the machine
-  const cur = seg(B, A.curtain[0], A.curtain[1]);
-  const curOut = seg(B, A.curtain[1], A.curtain[1] + 0.12);
+  // the cut away from the machine: the ball becomes lightning
   if (B < A.tvIn) {
-    drawCurtain(ctx, w, h, cur, 0, t);
+    drawCutBolt(f, seg(B, A.bolt[0], A.bolt[1]), 1);
     return;
   }
 
@@ -285,34 +285,63 @@ export function drawArcade(f: Frame) {
     const e = ease.in2(q);
     const bx = lerp(w * 0.38, scx + sw * 0.12, e);
     const by = lerp(h * 1.1, scy - sh * 0.1, e);
-    drawBall(ctx, bx, by, lerp(S * 0.09, S * 0.03, e), q * 9, t, 1);
+    // still carrying the charge: a trail of lightning and sparks
+    const tail: Pt[] = [];
+    for (let k = 0; k < 6; k++) {
+      const qq = Math.max(0, q - k * 0.05), ee = ease.in2(qq);
+      tail.push([lerp(w * 0.38, scx + sw * 0.12, ee), lerp(h * 1.1, scy - sh * 0.1, ee)]);
+    }
+    drawBolt(ctx, tail, t, { width: S * 0.005, amp: S * 0.02, seed: 21, alpha: 0.9, branches: 3 });
+    const r = lerp(S * 0.09, S * 0.03, e);
+    drawCrackle(ctx, bx, by, r * 1.6, t, 1, 8);
+    drawBall(ctx, bx, by, r, q * 9, t, 1);
   }
   if (f.crossedFwd(A.hit)) {
     f.shake(S * 0.04);
-    f.flash(0.6, '#ffffff');
+    f.flash(0.7, GOLD.hot);
+  }
+  // the screen glows where the charge went in
+  const zap = seg(B, A.hit, A.hit + 0.08);
+  if (zap > 0 && zap < 1 && dive < 1) {
+    drawCrackle(ctx, scx + sw * 0.12, scy - sh * 0.1, S * 0.14 * (1 - zap * 0.5), t, 1 - zap, 9);
   }
 
   // the warp out: pixels become stars
   const warp = seg(B, A.warp[0], A.warp[1]);
   if (warp > 0) drawWarp(ctx, w, h, warp, S);
 
-  // the curtain lifting off the TV
-  if (curOut < 1) drawCurtain(ctx, w, h, 1, curOut, t);
+  // the bolt's afterimage burned on the eye across the cut
+  const after = seg(B, A.tvIn, A.tvIn + 0.1);
+  if (after < 1) drawCutBolt(f, 1, 1 - after);
 }
 
-function drawCurtain(ctx: CanvasRenderingContext2D, w: number, h: number, inn: number, out: number, t: number) {
-  const n = 14;
+function drawCutBolt(f: Frame, q: number, alpha: number) {
+  const { ctx, w, h, t } = f;
   const S = Math.min(w, h);
-  for (let i = 0; i < n; i++) {
-    const x0 = (i / n) * w, bw = w / n + 1;
-    const d = hash(i * 3.1) * 0.35;
-    const k = ease.inOut3(clamp((inn - d) / (1 - 0.35)));
-    const o = ease.inOut3(clamp((out - d) / (1 - 0.35)));
-    const y0 = lerp(-h, 0, k) + o * h * 1.1;
-    ctx.fillStyle = i % 3 === 0 ? C.red : i % 3 === 1 ? C.ink : C.blue;
-    ctx.fillRect(x0, y0, bw, h);
-    ctx.fillStyle = 'rgba(236,230,214,0.6)';
-    ctx.fillRect(x0 + bw * 0.45, y0 + h * 0.98 - ((t * 400 + i * 70) % (h * 0.3)), S * 0.004, h * 0.06);
+  if (q <= 0 || alpha <= 0) return;
+  // a jagged column from the bottom of the screen to the top
+  const path: Pt[] = [[w * 0.55, h * 1.05], [w * 0.38, h * 0.75], [w * 0.62, h * 0.5], [w * 0.4, h * 0.28], [w * 0.58, -h * 0.05]];
+  const head = ease.out3(seg(q, 0, 0.7));
+  const shown: Pt[] = [];
+  const n = path.length - 1;
+  for (let i = 0; i <= n; i++) {
+    if (i / n <= head) shown.push(path[i]);
+    else {
+      const k = (head - (i - 1) / n) * n;
+      shown.push([lerp(path[i - 1][0], path[i][0], k), lerp(path[i - 1][1], path[i][1], k)]);
+      break;
+    }
+  }
+  if (q > 0.5 && alpha === 1) {
+    // the whole frame bleaches as it connects
+    const k = seg(q, 0.5, 1);
+    ctx.fillStyle = `rgba(255,246,214,${k * 0.85})`;
+    ctx.fillRect(0, 0, w, h);
+  }
+  drawBolt(ctx, shown, t, { width: S * 0.012 * alpha, amp: S * 0.05, seed: 17, alpha, branches: 12 });
+  if (f.crossedFwd(A.bolt[0] + 0.05)) {
+    f.shake(S * 0.05);
+    f.flash(0.5, GOLD.hot);
   }
 }
 

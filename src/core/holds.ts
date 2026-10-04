@@ -1,0 +1,36 @@
+import { ACT } from './frame';
+
+/**
+ * HOLDS.
+ *
+ * The thunder moments need time the film doesn't have, so the film holds:
+ * while the reader scrolls through a hold, film time stays at `at` and the
+ * hold's own progress runs 0→1. Everything authored in film beats keeps its
+ * timing; the scroll track just gets longer.
+ */
+export type HoldKind = 'thunder' | 'dash';
+export interface Hold { at: number; len: number; kind: HoldKind }
+
+export const HOLDS: Hold[] = [
+  { at: 4.86, len: 1.25, kind: 'thunder' },
+  { at: 19.0, len: 0.95, kind: 'dash' },
+];
+
+export const RAW_END = ACT.END + HOLDS.reduce((a, h) => a + h.len, 0);
+
+export function toFilm(raw: number): { film: number; hold: { kind: HoldKind; p: number } | null } {
+  let shift = 0;
+  for (const h of HOLDS) {
+    const start = h.at + shift;
+    if (raw < start) return { film: raw - shift, hold: null };
+    if (raw < start + h.len) return { film: h.at, hold: { kind: h.kind, p: (raw - start) / h.len } };
+    shift += h.len;
+  }
+  return { film: raw - shift, hold: null };
+}
+
+export function toRaw(film: number): number {
+  let shift = 0;
+  for (const h of HOLDS) if (h.at < film) shift += h.len;
+  return film + shift;
+}

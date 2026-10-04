@@ -1,12 +1,13 @@
 import { brush, ensoPath } from '../core/brush';
 import type { Frame } from '../core/frame';
 import { layoutWord, wordWidth } from '../core/glyphs';
-import { type Pt, TAU, bell, clamp, ease, fbm1, lerp, noise1, rng, seg } from '../core/math';
+import { type Pt, TAU, bell, clamp, ease, fbm1, hash, lerp, noise1, rng, seg } from '../core/math';
 import { Particles, DOT, SPARK } from '../core/particles';
 import { blot, canvas, drawSprite, glow, paperTile, withAlpha } from '../core/sprites';
 import { C, F, font } from '../core/style';
 import { drawBlot } from '../core/blot';
 import { drawWarrior } from './warrior';
+import { GOLD, drawBolt, drawCrackle } from '../core/bolt';
 
 /*
  * ACT I — INK.
@@ -328,8 +329,15 @@ interface Petal { x: number; y: number; vx: number; vy: number; r: number; ph: n
 const petals: Petal[] = [];
 
 /** Blossom drifting across the duel; every clash blows it outward. */
-function drawPetals(f: Frame, dt: number, X: (n: number) => number, Y: (n: number) => number) {
-  const { ctx, w, h, B, t } = f;
+function drawPetals(f: Frame, dtIn: number, X: (n: number) => number, Y: (n: number) => number) {
+  const { ctx, w, h, B } = f;
+  // during the thunder stance every petal hangs where it is, until the cut
+  // passes through and splits them all in two
+  const th = f.hold?.kind === 'thunder' ? f.hold.p : -1;
+  const frozen = th >= 0 && th < 0.72;
+  const split = th >= 0.72 ? ease.out3(seg(th, 0.72, 0.9)) : 0;
+  const dt = frozen ? 0 : dtIn;
+  const t = frozen ? frozenT : f.t;
   const S = Math.min(w, h);
   const vis = seg(B, 2.35, 2.8) * (1 - seg(B, 6.0, 6.4));
   if (vis <= 0) return;
@@ -367,9 +375,23 @@ function drawPetals(f: Frame, dt: number, X: (n: number) => number, Y: (n: numbe
     ctx.scale(1, 0.35 + 0.65 * Math.abs(Math.cos(t * 3 + p.ph)));
     ctx.globalAlpha = vis * 0.85;
     ctx.fillStyle = p.ph > 3 ? '#f3c9cf' : '#f8e2df';
-    ctx.beginPath();
-    ctx.ellipse(0, 0, p.r * 1.3, p.r * 0.8, 0, 0, TAU);
-    ctx.fill();
+    if (split > 0) {
+      // two halves drifting apart along the cut
+      for (const sd of [-1, 1]) {
+        ctx.save();
+        ctx.translate(0, sd * split * p.r * 1.6);
+        ctx.rotate(sd * split * 0.5);
+        ctx.beginPath();
+        ctx.ellipse(0, 0, p.r * 1.3, p.r * 0.8, 0, sd < 0 ? Math.PI : 0, sd < 0 ? TAU : Math.PI);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+      }
+    } else {
+      ctx.beginPath();
+      ctx.ellipse(0, 0, p.r * 1.3, p.r * 0.8, 0, 0, TAU);
+      ctx.fill();
+    }
     ctx.restore();
   }
   ctx.restore();
@@ -409,6 +431,10 @@ class Cord {
   }
 }
 const cords = [new Cord(), new Cord()];
+/** the world's clock, stopped at the moment the thunder stance begins */
+let frozenT = -1;
+let sigFired = false;
+let lastHoldP = -1;
 const vel = [{ px: 0, py: 0, vx: 0, vy: 0 }, { px: 0, py: 0, vx: 0, vy: 0 }];
 
 /* -------------------------------------------------------------- drawing */
@@ -429,6 +455,10 @@ export function drawInk(f: Frame) {
   const Y = (sy: number) => sy * h;
   const dt = Math.min(0.05, t - lastT || 0.016);
   lastT = t;
+
+  if (f.hold?.kind === 'thunder') {
+    if (frozenT < 0) frozenT = t;
+  } else frozenT = -1;
 
   // intro clock: the opening title paints itself on load
   const I = f.intro;
@@ -709,6 +739,48 @@ function drawTitle(f: Frame, pull: number, I: number) {
     const off = 1 - ease.inOut2(seg(B, 0.02 + i * 0.012, 0.22 + i * 0.012));
     brush(ctx, s.pts, { width: gabSize * 0.13, color: C.ink, progress: Math.min(on, off), dry: 0.4, seed: 80 + i, press: 1.3, tail: 0.3 });
   });
+  // the signature: a bolt tears through the name and leaves it gilded
+  const sig = seg(I, 3.7, 3.76);
+  const sigOut = seg(I, 3.85, 4.5);
+  if (sig > 0 && sigOut < 1 && !f.reduced) {
+    const first = max.strokes[0].pts[0], last = max.strokes[max.strokes.length - 1].pts;
+    const x0 = first[0] - maxSize * 0.3, x1 = last[last.length - 1][0] + maxSize * 0.3;
+    // M's first stroke starts at its foot; the word's middle is half a letter up
+    const yc = first[1] - maxSize * 0.47;
+    const path: Pt[] = [[x0, yc + maxSize * 0.1], [lerp(x0, x1, 0.3), yc - maxSize * 0.35], [lerp(x0, x1, 0.55), yc + maxSize * 0.3], [lerp(x0, x1, 0.8), yc - maxSize * 0.25], [x1, yc]];
+    const head = ease.out3(sig);
+    const shown: Pt[] = [];
+    const n = path.length - 1;
+    for (let i = 0; i <= n; i++) {
+      if (i / n <= head) shown.push(path[i]);
+      else {
+        const k = (head - (i - 1) / n) * n;
+        shown.push([lerp(path[i - 1][0], path[i][0], k), lerp(path[i - 1][1], path[i][1], k)]);
+        break;
+      }
+    }
+    // the letters it touched glow gold, then cool back to ink
+    const gild = (1 - ease.out2(sigOut)) * sig;
+    max.strokes.forEach((st, i) => {
+      brush(ctx, st.pts, { width: maxSize * 0.14, color: GOLD.c, dry: 0.45, seed: 40 + i, press: 1.35, tail: 0.25, alpha: gild * 0.85, halo: 0 });
+    });
+    drawBolt(ctx, shown, t, { width: S * 0.006, amp: maxSize * 0.08, seed: 13, alpha: 1 - ease.in2(sigOut), paper: true });
+    // scorch flecks where it passed
+    for (let k = 0; k < 14; k++) {
+      const q = hash(k * 3.3);
+      const pt = shown[Math.min(shown.length - 1, Math.floor(q * shown.length))];
+      ctx.fillStyle = withAlpha(C.ink, 0.35 * (1 - sigOut));
+      ctx.beginPath();
+      ctx.arc(pt[0] + (hash(k) - 0.5) * maxSize * 0.3, pt[1] + (hash(k * 7) - 0.5) * maxSize * 0.3, maxSize * 0.012, 0, TAU);
+      ctx.fill();
+    }
+  }
+  if (I >= 3.7 && I < 3.8 && !sigFired) {
+    sigFired = true;
+    f.shake(S * 0.02);
+    f.flash(0.4, GOLD.hot);
+  }
+
   // the seal stamps down last
   const st = seg(I, 3.25, 3.6);
   if (st > 0) {
@@ -798,6 +870,16 @@ function drawDuel(
 
   const blades = bladesAt(B, SW, h);
   const lock = bell(B, 3.5, 3.86);
+
+  // ---- THUNDER: blue sheathes, crouches, and cuts through in one flash
+  const inHold = f.hold?.kind === 'thunder';
+  const th = inHold ? f.hold!.p : B > 4.86 ? 1 : 0;
+  const sheath = inHold ? ease.inOut2(seg(th, 0.04, 0.14)) * (1 - ease.out3(seg(th, 0.86, 0.97))) : 0;
+  const crouch = inHold ? ease.inOut2(seg(th, 0.05, 0.2)) * (1 - ease.inOut2(seg(th, 0.84, 1))) : 0;
+  const gone = inHold && th > 0.4 && th < 0.47;
+  const broken = B > 4.86 || (inHold && th >= 0.72);
+  // the world stops for the stance; only the striker's lightning keeps time
+  const tt = inHold && th < 0.72 ? frozenT : t;
   const colors = [
     { c: C.blue, hot: C.blueHot },
     { c: C.green, hot: C.greenHot },
@@ -808,17 +890,30 @@ function drawDuel(
   blades.forEach((bl, i) => {
     const side = i === 0 ? -1 : 1;
     // the hands are never quite still
-    const bob = Math.sin(t * 1.6 + i * 2) * S * 0.008;
-    const tremble = lock * Math.sin(t * 47 + i) * S * 0.004;
-    const hx = X(bl.x) + bob * 0.5 + tremble - camX * 0.9;
-    const hy = Y(bl.y) + bob + tremble * side;
-    const a = bl.a + Math.sin(t * 1.3 + i * 4) * 0.035 * (1 - lock);
+    const bob = Math.sin(tt * 1.6 + i * 2) * S * 0.008;
+    const tremble = lock * Math.sin(tt * 47 + i) * S * 0.004;
+    let hx = X(bl.x) + bob * 0.5 + tremble - camX * 0.9;
+    let hy = Y(bl.y) + bob + tremble * side;
+    let a = bl.a + Math.sin(tt * 1.3 + i * 4) * 0.035 * (1 - lock);
+    if (i === 0 && crouch > 0) {
+      // hand drops to the hip, blade angled down and back, knees bent low
+      hx -= crouch * S * 0.035;
+      hy += crouch * S * 0.08;
+      a = lerpAngle(a, Math.PI * 0.8, crouch);
+    }
+    if (i === 0) bl.len *= 1 - sheath;
+    if (i === 1 && broken) {
+      bl.len *= 0.55;
+      if (inHold) hx += S * 0.035 * bell(th, 0.72, 0.92);
+    }
     hilts.push([hx, hy]);
     tips.push([hx + Math.cos(a) * L * bl.len, hy + Math.sin(a) * L * bl.len]);
     bl.a = a;
   });
 
   // the fighters, painted around the blades they hold
+  const skel: ReturnType<typeof drawWarrior>[] = [];
+  const wIn: Parameters<typeof drawWarrior>[1][] = [];
   const appear = ease.out2(seg(B, 2.3, 2.75));
   const s = L * 1.3;
   blades.forEach((bl, i) => {
@@ -830,10 +925,14 @@ function drawDuel(
     }
     v.px = hx;
     v.py = hy;
-    drawWarrior(ctx, {
-      hilt: [hx, hy], a: bl.a, foeX: hilts[1 - i][0], s, groundY: h * 0.83,
-      color: i ? C.green : C.blue, t, vx: v.vx, vy: v.vy, seed: i + 1, alpha: appear,
-    });
+    const wi = {
+      hilt: [hx, hy] as Pt, a: bl.a, foeX: hilts[1 - i][0], s, groundY: h * 0.83,
+      color: i ? C.green : C.blue, t: i === 0 ? t : tt, vx: inHold ? 0 : v.vx, vy: v.vy, seed: i + 1,
+      alpha: appear * (gone && i === 0 ? 0 : 1),
+    };
+    const k = drawWarrior(ctx, wi);
+    skel[i] = k;
+    wIn[i] = wi;
   });
 
   // swing trails: where the blades were a moment of scroll ago
@@ -863,6 +962,7 @@ function drawDuel(
   // the blades
   const beams = seg(B, BEAMS, BEAMS + 0.3);
   blades.forEach((bl, i) => {
+    if (gone && i === 0) return;
     const [hx, hy] = hilts[i];
     const [tx, ty] = tips[i];
     if (bl.len > 0.01) {
@@ -900,6 +1000,27 @@ function drawDuel(
     ctx.ellipse(end.x, end.y + S * 0.008, S * 0.006, S * 0.014, 0, 0, TAU);
     ctx.fill();
   });
+
+  // green's broken half, spinning away after the cut
+  if (inHold && th >= 0.72 && th < 0.99) {
+    const q = seg(th, 0.72, 0.99);
+    const [hx, hy] = hilts[1];
+    const a = blades[1].a;
+    const full = L * (blades[1].len / 0.55);
+    const m0 = full * 0.55, m1 = full;
+    const cx = hx + Math.cos(a) * (m0 + m1) / 2 + q * S * 0.12, cy = hy + Math.sin(a) * (m0 + m1) / 2 + q * q * h * 0.5;
+    const ra = a + q * 5;
+    const half = (m1 - m0) / 2;
+    ctx.save();
+    ctx.globalAlpha = 1 - q;
+    drawLightLine(ctx, cx - Math.cos(ra) * half, cy - Math.sin(ra) * half, cx + Math.cos(ra) * half, cy + Math.sin(ra) * half, colors[1].c, colors[1].hot, thick, 1);
+    ctx.restore();
+  }
+  if (broken && blades[1].len > 0.01) {
+    // the jagged end of the broken blade fizzes
+    drawCrackle(ctx, tips[1][0], tips[1][1], S * 0.035, t, 0.5, 3);
+  }
+  if (inHold) drawThunder(f, th, hilts, skel, wIn, X, Y, S, tt, colors);
 
   // clashes: a burst, a ring, a jolt
   CLASHES.forEach((cb, ci) => {
@@ -1010,8 +1131,9 @@ function drawDuel(
     ctx.stroke();
   }
 
-  sparks.update(dt);
-  embers.update(dt);
+  const pdt = inHold && th < 0.72 ? 0 : dt;
+  sparks.update(pdt);
+  embers.update(pdt);
   ctx.save();
   ctx.globalCompositeOperation = 'lighter';
   sparks.draw(ctx);
@@ -1110,4 +1232,208 @@ function tearEdge(w: number, y: number, S: number, seed: number) {
   }
   edges.set(key, pts);
   return pts;
+}
+
+/* ------------------------------------------------------------ THUNDER */
+
+const KANJI_FONT = '800 {px}px "Shippori Mincho", "Hiragino Mincho ProN", "Yu Mincho", serif';
+
+/**
+ * The stance, the charge, the flash, the impact frame, the delay, the cut.
+ * Drawn over the duel while the thunder hold plays (p = 0..1).
+ */
+function drawThunder(
+  f: Frame, p: number, hilts: Pt[], skel: ReturnType<typeof drawWarrior>[], wIn: Parameters<typeof drawWarrior>[1][],
+  X: (n: number) => number, Y: (n: number) => number, S: number, tt: number,
+  colors: { c: string; hot: string }[],
+) {
+  const { ctx, w, h, t } = f;
+  const prev = lastHoldP;
+  lastHoldP = p;
+  const hit = (q: number) => prev < q && p >= q && prev >= 0 && p - prev < 0.2;
+  const me = skel[0], foe = skel[1];
+  if (!me || !foe) return;
+  const gy = h * 0.83;
+  const feet: Pt = [me.pelvis[0], gy];
+
+  // 1. stillness: the colour drains out of everything but the striker's light
+  const drain = ease.inOut2(seg(p, 0.03, 0.15)) * (1 - ease.inOut2(seg(p, 0.72, 0.85)));
+  if (drain > 0) {
+    ctx.save();
+    ctx.fillStyle = `rgba(8,8,10,${0.55 * drain})`;
+    ctx.fillRect(0, 0, w, h);
+    // a pale ring of light around the stance
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.globalAlpha = 0.25 * drain;
+    drawSprite(ctx, glow(GOLD.c, 128), me.chest[0], me.chest[1] + S * 0.06, S * 0.9);
+    ctx.restore();
+  }
+
+  // 2. the charge: sparks at the feet, cracks spreading through the rock,
+  // a kanji brushed in the dark, eyes lighting up
+  const charge = seg(p, 0.15, 0.4) * (p < 0.4 ? 1 : 0);
+  if (charge > 0) {
+    if (Math.random() < charge) f.shake(S * 0.006 * charge);
+    drawCrackle(ctx, feet[0], feet[1] - S * 0.02, S * (0.08 + charge * 0.08), t, charge, 1);
+    drawCrackle(ctx, me.hand1[0], me.hand1[1], S * 0.05, t, charge * 0.8, 2);
+    // cracks running out along the ground
+    const crack = (dir: number, seed: number): Pt[] => {
+      const pts: Pt[] = [feet];
+      let x = feet[0], y = gy;
+      for (let i = 1; i <= 6; i++) {
+        x += dir * S * 0.05 * charge;
+        y += (hash(i * 3 + seed) - 0.4) * S * 0.012;
+        pts.push([x, y]);
+      }
+      return pts;
+    };
+    drawBolt(ctx, crack(-1, 1), t, { width: S * 0.004, amp: S * 0.006, seed: 4, alpha: charge, branches: 1 });
+    drawBolt(ctx, crack(1, 2), t, { width: S * 0.004, amp: S * 0.006, seed: 5, alpha: charge, branches: 1 });
+    // gold eyes
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    for (const ex of [-1, 1]) {
+      const x = me.head[0] + ex * S * 0.012, y = me.head[1];
+      ctx.globalAlpha = charge;
+      drawSprite(ctx, glow(GOLD.c, 64), x, y, S * 0.05);
+      ctx.fillStyle = GOLD.core;
+      ctx.fillRect(x - S * 0.006, y - S * 0.0015, S * 0.012, S * 0.003);
+    }
+    ctx.restore();
+  }
+  // the kanji for thunder, brushed huge behind the stance
+  const kj = seg(p, 0.12, 0.22) * (1 - seg(p, 0.38, 0.41));
+  if (kj > 0) {
+    ctx.save();
+    ctx.font = KANJI_FONT.replace('{px}', String(Math.round(S * 0.42)));
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.globalAlpha = kj * 0.85;
+    const kx = Math.min(w * 0.72, X(0.72)), ky = h * 0.36;
+    ctx.fillStyle = GOLD.c;
+    ctx.fillText('雷', kx + S * 0.01, ky + S * 0.01);
+    ctx.fillStyle = '#0d0c0b';
+    ctx.fillText('雷', kx, ky);
+    ctx.font = font(Math.max(11, S * 0.032), F.serif, 600);
+    ctx.fillStyle = withAlpha(GOLD.hot, kj);
+    ctx.fillText('one flash', kx, ky + S * 0.26);
+    ctx.restore();
+  }
+
+  // 3. the flash: a six-fold zig-zag, bouncing crag to crag, through the
+  // opponent and home again
+  // bounces kept low and flat, the way a body would actually travel
+  const path: Pt[] = [
+    me.chest,
+    [X(0.22), Y(0.6)],
+    [X(0.55), Y(0.7)],
+    foe.chest,
+    [X(1.04), Y(0.62)],
+    [X(0.72), Y(0.5)],
+    [X(0.36), Y(0.64)],
+    me.chest,
+  ];
+  const head = ease.out3(seg(p, 0.4, 0.44));
+  const after = 1 - ease.in2(seg(p, 0.47, 0.6));
+  if (hit(0.4)) {
+    f.flash(0.9, GOLD.hot);
+    f.shake(S * 0.05);
+  }
+  if (p >= 0.4 && after > 0) {
+    const shown = p < 0.44 ? slicePath(path, head) : path;
+    drawBolt(ctx, shown, t, { width: S * 0.0055, amp: S * 0.014, seed: 7, alpha: after, branches: 10 });
+    // afterimages of the striker at every bounce, fading in the order it passed
+    for (let i = 1; i < path.length - 1; i++) {
+      const at = i / (path.length - 1);
+      if (head < at) break;
+      const a = after * (0.25 + 0.25 * (1 - at));
+      ctx.save();
+      ctx.globalAlpha = a;
+      ctx.globalCompositeOperation = 'lighter';
+      drawSprite(ctx, glow(GOLD.c, 64), path[i][0], path[i][1], S * 0.18, S * 0.32);
+      ctx.restore();
+    }
+    // residual sparks along the line as it cools
+    if (p > 0.47) {
+      const k = Math.floor(t * 12);
+      for (let i = 0; i < 10; i++) {
+        const q = hash(i * 3 + k);
+        const pt = slicePath(path, q);
+        const e = pt[pt.length - 1];
+        drawCrackle(ctx, e[0], e[1], S * 0.025, t, after * 0.8, i);
+      }
+    }
+    if (p < 0.47) {
+      ctx.save();
+      ctx.globalCompositeOperation = 'lighter';
+      const tip = shown[shown.length - 1];
+      drawSprite(ctx, glow(GOLD.core, 128), tip[0], tip[1], S * 0.5);
+      ctx.restore();
+    }
+  }
+
+  // the impact frame: one instant of pure black on white
+  if (p >= 0.435 && p < 0.47) {
+    ctx.save();
+    ctx.fillStyle = '#fbfaf5';
+    ctx.fillRect(0, 0, w, h);
+    // speed lines bursting from the centre of the cut
+    const cx = foe.chest[0], cy = foe.chest[1];
+    ctx.strokeStyle = '#000';
+    for (let i = 0; i < 60; i++) {
+      const a = (i / 60) * TAU + hash(i) * 0.1;
+      const r0 = S * (0.25 + hash(i * 3) * 0.2);
+      ctx.lineWidth = 1 + hash(i * 7) * 3;
+      ctx.beginPath();
+      ctx.moveTo(cx + Math.cos(a) * r0, cy + Math.sin(a) * r0);
+      ctx.lineTo(cx + Math.cos(a) * S * 2, cy + Math.sin(a) * S * 2);
+      ctx.stroke();
+    }
+    // the opponent as a pure black cut-out, mid-stance, the line through them
+    if (wIn[1]) drawWarrior(ctx, { ...wIn[1], alpha: 1 });
+    drawBolt(ctx, path, t, { width: S * 0.008, amp: S * 0.014, seed: 7, ink: true });
+    ctx.restore();
+  }
+
+  // 4. the striker is home, crouched, blade still sheathed; nothing happens.
+  // 5. then the cut lands
+  if (hit(0.72)) {
+    f.shake(S * 0.04);
+    f.flash(0.45, '#ffffff');
+    // a slash of light across the opponent, along the bolt's line
+    for (const col of [colors[1].hot, GOLD.hot, '#ffffff']) {
+      sparks.burst(foe.chest[0], foe.chest[1], 30, S * 2.6, { color: col, kind: SPARK, size: S * 0.005, max: 0.8 });
+    }
+  }
+  const slash = seg(p, 0.72, 0.8);
+  if (slash > 0 && slash < 1) {
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.globalAlpha = 1 - slash;
+    const a = -0.5;
+    const L = S * 0.6 * ease.out3(slash);
+    drawBolt(ctx, [[foe.chest[0] - Math.cos(a) * L, foe.chest[1] - Math.sin(a) * L], [foe.chest[0] + Math.cos(a) * L, foe.chest[1] + Math.sin(a) * L]], t, {
+      width: S * 0.006, amp: S * 0.004, seed: 2, branches: 0,
+    });
+    ctx.restore();
+  }
+  void tt;
+  void hilts;
+}
+
+function slicePath(path: Pt[], f: number): Pt[] {
+  if (f >= 1) return path;
+  const L: number[] = [0];
+  for (let i = 1; i < path.length; i++) L.push(L[i - 1] + Math.hypot(path[i][0] - path[i - 1][0], path[i][1] - path[i - 1][1]));
+  const to = L[L.length - 1] * f;
+  const out: Pt[] = [path[0]];
+  for (let i = 1; i < path.length; i++) {
+    if (L[i] <= to) out.push(path[i]);
+    else {
+      const s = (to - L[i - 1]) / (L[i] - L[i - 1]);
+      out.push([lerp(path[i - 1][0], path[i][0], s), lerp(path[i - 1][1], path[i][1], s)]);
+      break;
+    }
+  }
+  return out;
 }

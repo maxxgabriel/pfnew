@@ -23,6 +23,13 @@ of ink, with eyes and a red scarf), watches every act.
 5. **Hello.** Through the net and back onto paper. Contact.
 6. **Credits**, and a post-credits scene.
 
+**Thunder** (gold, the one colour used nowhere else) strikes four times: a
+bolt signs the name on the title; a one-flash finisher in the duel (stance,
+charge, a six-fold zig-zag, a black-on-white impact frame, and the cut landing
+a beat late); the cannon ball tearing up the screen into the arcade; and #10's
+dash through two defenders. The two long ones are holds (`src/core/holds.ts`):
+the film pauses at a beat while the scroll plays the moment.
+
 ## Develop
 
 ```sh

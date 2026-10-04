@@ -21,6 +21,7 @@ await page.goto(BASE, { waitUntil: 'load' });
 await page.waitForFunction(() => window.__film);
 await page.waitForTimeout(1500);
 for (const b of beats) {
+  await page.waitForFunction(() => window.__film);
   await page.evaluate(([b, i]) => { window.__film.intro(i); window.__film.seek(b); }, [b, intro]);
   await page.waitForTimeout(wait);
   await page.screenshot({ path: `${OUT}/${kind[0]}-${b.toFixed(2)}.png` });

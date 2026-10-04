@@ -4,6 +4,7 @@ import { CONFETTI, Particles } from '../core/particles';
 import { halftone } from '../core/sprites';
 import { C, F, font } from '../core/style';
 import { drawBlot } from '../core/blot';
+import { drawCrackle } from '../core/bolt';
 
 /*
  * ACT II — THE MACHINE.
@@ -301,6 +302,9 @@ function drawWorld(f: Frame, withBall: boolean) {
     const fly = seg(B, 12.05, 12.2);
     drawBall(ctx, bx, by, R, bx / R + by * 0.08 + fly * 20, t, 1 + fly * 0.25);
     if (fly > 0) speedLines(ctx, bx, by, t);
+    // as it climbs it charges up, crackling gold, about to become lightning
+    const charge = seg(B, 12.12, 12.3);
+    if (charge > 0) drawCrackle(ctx, bx, by, R * (2 + charge * 2), t, charge, 6);
   }
   ctx.restore();
   void U;

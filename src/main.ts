@@ -8,6 +8,7 @@ import { drawFinale } from './acts/finale';
 import { ACT, CHAPTERS, type Frame } from './core/frame';
 import { clamp, damp, seg } from './core/math';
 import { canvas, grainTiles } from './core/sprites';
+import { RAW_END, toFilm, toRaw } from './core/holds';
 
 /*
  * THE FILM.
@@ -40,7 +41,7 @@ function resize() {
   if (w !== lastW) {
     lastW = w;
     beatPx = Math.max(420, h * 0.72);
-    track.style.height = `${Math.round(ACT.END * beatPx + h)}px`;
+    track.style.height = `${Math.round(RAW_END * beatPx + h)}px`;
   }
   const v = canvas(w, h);
   const g = v.ctx.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.35, w / 2, h / 2, Math.hypot(w, h) * 0.62);
@@ -59,15 +60,16 @@ window.scrollTo(0, 0);
 
 /* ------------------------------------------------------------ playhead */
 
-let B = 0, prevB = 0, vB = 0;
+// R is the raw scroll playhead; B is film time (R with the holds taken out)
+let R = 0, B = 0, prevB = 0, vB = 0;
 let target = 0;
-const readScroll = () => (target = clamp(window.scrollY / beatPx, 0, ACT.END));
+const readScroll = () => (target = clamp(window.scrollY / beatPx, 0, RAW_END));
 window.addEventListener('scroll', readScroll, { passive: true });
 
 let shakeAmt = 0, flashAmt = 0, flashColor = '#ffffff';
 
 const frame: Frame = {
-  ctx, w, h, u: 1, portrait: true, B, vB, t: 0, dt: 0, intro: 0, reduced,
+  ctx, w, h, u: 1, portrait: true, B, vB, t: 0, dt: 0, intro: 0, hold: null, reduced,
   crossed: (b) => (prevB < b) !== (B < b),
   crossedFwd: (b) => prevB < b && B >= b,
   shake: (a) => { if (!reduced) shakeAmt = Math.max(shakeAmt, a); },
@@ -82,14 +84,14 @@ const chapterEl = chName.parentElement!;
 const fill = document.getElementById('reel-fill')!;
 const marks = document.getElementById('reel-marks')!;
 const hello = document.getElementById('hello')!;
-const seek = (b: number) => window.scrollTo({ top: b * beatPx, behavior: reduced ? 'auto' : 'smooth' });
+const seek = (b: number) => window.scrollTo({ top: toRaw(b) * beatPx, behavior: reduced ? 'auto' : 'smooth' });
 
 CHAPTERS.forEach((c, i) => {
   const b = document.createElement('button');
   b.type = 'button';
   b.textContent = c.n;
   b.setAttribute('aria-label', `Chapter ${c.n}: ${c.name}`);
-  b.style.left = `${(c.at / ACT.END) * 100}%`;
+  b.style.left = `${(toRaw(c.at) / RAW_END) * 100}%`;
   b.addEventListener('click', () => seek(i === 0 ? 0 : c.at + 0.35));
   marks.appendChild(b);
 });
@@ -120,7 +122,7 @@ function hud() {
     chapterEl.classList.add('swap');
     [...marks.children].forEach((m, i) => m.classList.toggle('on', i <= c));
   }
-  fill.style.width = `${(B / ACT.END) * 100}%`;
+  fill.style.width = `${(R / RAW_END) * 100}%`;
   // dark type over paper, light type over everything else
   const onPaper = B < 1.75 || (B > 6.7 && B < 7.55) || (B > 23.65 && B < 30.8);
   document.documentElement.classList.toggle('on-paper', onPaper);
@@ -140,9 +142,13 @@ function loop(now: number) {
   last = now;
   const t = (now - t0) / 1000;
 
+  const prevR = R;
+  R = Math.abs(target - R) < 0.0005 ? target : damp(R, target, reduced ? 14 : 6.5, dt);
+  vB = dt > 0 ? (R - prevR) / dt : 0;
   prevB = B;
-  B = Math.abs(target - B) < 0.0005 ? target : damp(B, target, reduced ? 14 : 6.5, dt);
-  vB = dt > 0 ? (B - prevB) / dt : 0;
+  const m = toFilm(R);
+  B = m.film;
+  frame.hold = m.hold;
 
   frame.w = w; frame.h = h;
   frame.portrait = h > w;
@@ -264,11 +270,19 @@ requestAnimationFrame(loop);
 
 // dev hook: jump the playhead (used by the screenshot scripts)
 (window as unknown as { __film: unknown }).__film = {
+  /** jump to a raw (scroll) beat */
   seek(b: number) {
     window.scrollTo(0, b * beatPx);
     target = b;
-    B = b;
-    prevB = b;
+    R = b;
+    B = prevB = toFilm(b).film;
+  },
+  /** jump to a film beat (just past any hold that sits there) */
+  seekFilm(b: number) {
+    const raw = toRaw(b) + 1e-4;
+    window.scrollTo(0, raw * beatPx);
+    target = R = raw;
+    B = prevB = toFilm(raw).film;
   },
   intro(s: number | null) { introOverride = s; },
   cost: () => cost,

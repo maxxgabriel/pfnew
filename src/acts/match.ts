@@ -5,6 +5,7 @@ import { drawSprite, glow, withAlpha } from '../core/sprites';
 import { C, F, extruded, font } from '../core/style';
 import { drawBall } from './machine';
 import { drawBlot } from '../core/blot';
+import { GOLD, drawBolt, drawCrackle } from '../core/bolt';
 import { brush, ensoPath } from '../core/brush';
 
 const MOON_ENSO = ensoPath(0, 0, 100, 3, 0.93, -2.3);
@@ -221,7 +222,8 @@ const PLAYERS: Player[] = [
   { team: 1, n: 9, keys: [[13, 0, 51], [13.9, 0, 51], [14.4, 2, 66], [15.0, 6, 86], [16, 7, 95]] },
   { team: 1, n: 8, keys: [[13, -8, 44], [14.18, -8, 45], [14.6, -9, 58], [15.5, -8, 74]] },
   { team: 1, n: 7, keys: [[13, -22, 52], [14.2, -24, 62], [14.58, -25, 72], [14.9, -24, 85], [15.5, -20, 88]] },
-  { team: 1, n: 10, keys: [[13, -5, 48], [14.2, -6, 58], [14.9, -4, 80], [15.25, -2, 88], [15.5, -0.5, 89], [16.6, 1, 92]] },
+  // #10 arrives at the ball by thunder-dash: the dash happens in a hold at 15.0
+  { team: 1, n: 10, keys: [[13, -5, 48], [14.2, -6, 58], [14.9, -4, 80], [15.0, -3.6, 82], [15.004, -2, 88], [15.25, -2, 88], [15.5, -0.5, 89], [16.6, 1, 92]] },
   { team: 1, n: 11, keys: [[13, 20, 52], [14.4, 22, 66], [15.2, 16, 86], [16.2, 12, 94]] },
   { team: 0, n: 4, keys: [[13, -6, 72], [14.6, -12, 80], [15.2, -6, 88], [15.6, -3, 92], [16.4, -1, 95]] },
   { team: 0, n: 5, keys: [[13, 6, 72], [14.6, 2, 80], [15.4, 3, 92], [16.4, 4, 97]] },
@@ -229,8 +231,56 @@ const PLAYERS: Player[] = [
   { team: 0, n: 3, keys: [[13, 18, 76], [14.6, 14, 82], [15.6, 10, 92]] },
   { team: 0, n: 1, keys: [[13, 0, 103.5], [15.2, 0.6, 103.2], [16.1, 0.4, 103], [16.45, -2.6, 103.3], [17.2, -3.1, 103.5]] },
 ];
+/*
+ * THE DASH. Mid-pass the match holds; #10 drops into a crouch, crackles,
+ * and flashes through two defenders to the ball. They spin away a beat late.
+ */
+let dashP = -1;
+let frozenMT = -1;
+let lastDashP = -1;
+const DASH_AT = 15.0;
+const DASHED = [5, 6]; // indices in PLAYERS of the two defenders it goes through
+
+function dashPath(): V3[] {
+  const start = keyedPos(PLAYERS[3], DASH_AT);
+  const d4 = keyedPos(PLAYERS[5], DASH_AT), d5 = keyedPos(PLAYERS[6], DASH_AT);
+  return [
+    [start[0], 1, start[2]],
+    [d4[0] + 0.8, 1, d4[2] - 0.6],
+    [d5[0] - 0.6, 1, d5[2] + 0.3],
+    [-5, 1, 89.6],
+    [-2, 1, 88],
+  ];
+}
+function keyedPos(p: Player, B: number): V3 {
+  const [x, z] = keyed<number[]>(p.keys, B);
+  return [x, 0, z];
+}
+function knockOf(i: number, B: number) {
+  if (!DASHED.includes(i)) return 0;
+  if (dashP >= 0) return ease.out3(seg(dashP, 0.64, 0.86));
+  return B > DASH_AT ? 1 - ease.inOut2(seg(B, 15.2, 15.6)) : 0;
+}
+
 function playerAt(p: Player, B: number, t: number): V3 {
+  if (dashP >= 0 && p.team === 1 && p.n === 10) {
+    const path = dashPath();
+    const q = ease.out3(seg(dashP, 0.4, 0.44));
+    const n = path.length - 1;
+    const fpos = q * n;
+    const i = Math.min(n - 1, Math.floor(fpos));
+    const k = fpos - i;
+    return [lerp(path[i][0], path[i + 1][0], k), 0, lerp(path[i][2], path[i + 1][2], k)];
+  }
+  const ix = PLAYERS.indexOf(p);
+  const kn = knockOf(ix, B);
+  // everyone but the striker is frozen while the dash charges
+  if (dashP >= 0 && frozenMT >= 0) t = frozenMT;
   const [x, z] = keyed<number[]>(p.keys.length > 1 ? p.keys : [p.keys[0], p.keys[0]], B);
+  if (kn > 0) {
+    const side = ix === 5 ? -1 : 1;
+    return [x + side * 2.2 * kn, Math.sin(kn * Math.PI) * 0.6, z + 0.8 * kn];
+  }
   // idle jog so the shape never freezes
   const jog = Math.sin(t * 1.3 + p.n * 1.7) * 0.6;
   const jz = Math.cos(t * 1.1 + p.n) * 0.5;
@@ -503,6 +553,13 @@ export function drawMatch(fg: Frame) {
   }
   const S = Math.min(w, h);
   const bt = seg(fg.B - D, FREEZE, FREEZE + FZ);
+  if (fg.hold?.kind === 'dash') {
+    dashP = fg.hold.p;
+    if (frozenMT < 0) frozenMT = t;
+  } else {
+    dashP = -1;
+    frozenMT = -1;
+  }
 
   shakeAmt = Math.max(0, shakeAmt - dt * 40);
   shake = [(Math.random() - 0.5) * shakeAmt, (Math.random() - 0.5) * shakeAmt];
@@ -519,10 +576,20 @@ export function drawMatch(fg: Frame) {
   }
 
   const frozen = bt > 0 && bt < 1 ? Math.min(1, Math.sin(bt * Math.PI) * 4) : 0;
-  const cam = frozen > 0 ? orbitCam(f, bt, shake) : camera(f, shake);
+  let cam = frozen > 0 ? orbitCam(f, bt, shake) : camera(f, shake);
+  if (dashP >= 0) {
+    // the dash gets its own camera: low, wide, everything the bolt crosses in frame
+    const [x, y, z, lx, ly, lz] = keyed<number[]>(CAM_KEYS, DASH_AT);
+    const k = ease.inOut3(seg(dashP, 0, 0.14)) * (1 - ease.inOut3(seg(dashP, 0.86, 1)));
+    const push = ease.inOut2(seg(dashP, 0.14, 0.4)) * 0.25;
+    const pos: V3 = [lerp(x, -12 + push * 4, k), lerp(y, 3.2 - push * 1.2, k), lerp(z, 76 + push * 4, k)];
+    const look: V3 = [lerp(lx, -2.5, k), lerp(ly, 0.9, k), lerp(lz, 86.5, k)];
+    cam = makeCam(f, shake, pos, look);
+  }
   ctx.save();
   scene(f, cam, S, frozen);
   ctx.restore();
+  if (dashP >= 0) drawDash(f, cam, S);
   drawPanels(f, S, shake);
   if (frozen > 0) drawBulletHud(f, S, bt, frozen);
 
@@ -694,7 +761,9 @@ function drawPlayer(ctx: CanvasRenderingContext2D, cam: Cam, p: Player, pos: V3,
   ctx.restore();
 
   const foot = P(cam, [pos[0], 0.02, pos[2]]);
-  const head = P(cam, [pos[0], pos[1] + 1.85, pos[2]]);
+  const kn = knockOf(PLAYERS.indexOf(p), B);
+  const spin = kn > 0 ? t * 9 + PLAYERS.indexOf(p) : 0;
+  const head = P(cam, [pos[0] + Math.cos(spin) * 1.3 * kn, pos[1] + 1.85 - 0.7 * kn, pos[2] + Math.sin(spin) * 1.3 * kn]);
   if (!foot || !head) return;
   const r = (cam.f * 0.75) / foot[2];
   // shadow disc
@@ -938,7 +1007,7 @@ function drawLowerThird(f: Frame, S: number) {
 
 function drawPlayerCard(f: Frame, S: number) {
   const { ctx, w, h, B, t } = f;
-  const inn = seg(B, 14.75, 15.0);
+  const inn = seg(B, 15.01, 15.16);
   const out = seg(B, 15.45, 15.6);
   if (inn <= 0 || out >= 1) return;
   const cw = Math.min(w * 0.62, S * 0.62, 300), ch = cw * 1.38;
@@ -1148,4 +1217,72 @@ function drawBulletHud(f: Frame, S: number, bt: number, frozen: number) {
   ctx.fillText(`89:14:${String(7 + Math.floor(bt * 2)).padStart(2, '0')}:${String(frames).padStart(2, '0')}`, w - m, h * 0.82 - l * 0.3);
   ctx.restore();
   void t;
+}
+
+function drawDash(f: Frame, cam: Cam, S: number) {
+  const { ctx, w, h, t } = f;
+  const p = dashP;
+  const prev = lastDashP;
+  lastDashP = p;
+  const hit = (q: number) => prev >= 0 && prev < q && p >= q && p - prev < 0.25;
+  const drain = ease.inOut2(seg(p, 0.03, 0.15)) * (1 - ease.inOut2(seg(p, 0.7, 0.85)));
+  if (drain > 0) {
+    ctx.fillStyle = `rgba(3,5,14,${0.55 * drain})`;
+    ctx.fillRect(0, 0, w, h);
+  }
+  const me = playerAt(PLAYERS[3], DASH_AT, t);
+  const feet = P(cam, [me[0], 0.05, me[2]]);
+  const chest = P(cam, [me[0], 1.2, me[2]]);
+  const charge = seg(p, 0.12, 0.4) * (p < 0.4 ? 1 : 0);
+  if (charge > 0 && feet && chest) {
+    const r = Math.min(S * 0.12, (cam.f * 1.4) / feet[2]);
+    drawCrackle(ctx, feet[0], feet[1], r, t, charge, 3);
+    drawCrackle(ctx, chest[0], chest[1], r * 0.7, t, charge * 0.7, 4);
+    if (Math.random() < charge) f.shake(S * 0.005 * charge);
+  }
+  if (hit(0.4)) {
+    f.flash(0.8, GOLD.hot);
+    f.shake(S * 0.045);
+  }
+  const path = dashPath().map((q) => P(cam, q)).filter((q): q is [number, number, number] => !!q).map((q) => [q[0], q[1]] as Pt);
+  const head = ease.out3(seg(p, 0.4, 0.44));
+  const after = 1 - ease.in2(seg(p, 0.46, 0.66));
+  if (p >= 0.4 && after > 0 && path.length > 1) {
+    const n = path.length - 1;
+    const shown: Pt[] = [];
+    for (let i = 0; i <= n; i++) {
+      const at = i / n;
+      if (at <= head) shown.push(path[i]);
+      else {
+        const k = (head - (i - 1) / n) * n;
+        shown.push([lerp(path[i - 1][0], path[i][0], k), lerp(path[i - 1][1], path[i][1], k)]);
+        break;
+      }
+    }
+    drawBolt(ctx, shown, t, { width: S * 0.006, amp: S * 0.012, seed: 11, alpha: after, branches: 8 });
+  }
+  // the defenders feel it a beat late
+  if (hit(0.64)) {
+    f.shake(S * 0.03);
+    f.flash(0.3, '#ffffff');
+  }
+  // broadcast caption, because of course they measured it
+  const cap = seg(p, 0.5, 0.6) * (1 - seg(p, 0.9, 1));
+  if (cap > 0) {
+    ctx.save();
+    ctx.globalAlpha = cap;
+    ctx.font = font(Math.max(11, S * 0.032), F.display);
+    const txt = '#10 · TOP SPEED · 0.2 SEC';
+    const tw = ctx.measureText(txt).width;
+    const x = 16, y = h * 0.8;
+    ctx.fillStyle = C.ink;
+    ctx.fillRect(x + 3, y + 3, tw + S * 0.05, S * 0.06);
+    ctx.fillStyle = GOLD.c;
+    ctx.fillRect(x, y, tw + S * 0.05, S * 0.06);
+    ctx.fillStyle = C.ink;
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(txt, x + S * 0.025, y + S * 0.032);
+    ctx.restore();
+  }
 }
