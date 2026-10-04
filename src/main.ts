@@ -5,10 +5,11 @@ import { drawMatch } from './acts/match';
 import { drawCredits } from './acts/credits';
 import { drawFinale } from './acts/finale';
 import { alterShotP, drawAlter } from './acts/alter';
+import { drawPowers } from './acts/powers';
 import { ACT, CHAPTERS, type Frame } from './core/frame';
 import { clamp, damp, seg } from './core/math';
 import { canvas, grainTiles } from './core/sprites';
-import { ALTER_AT, HOLDS, RAW_END, toFilm, toRaw } from './core/holds';
+import { ALTER_AT, HOLDS, POWERS_AT, RAW_END, toFilm, toRaw } from './core/holds';
 
 /*
  * THE FILM.
@@ -117,6 +118,7 @@ function hud() {
   let c = 0;
   CHAPTERS.forEach((ch, i) => { if (B >= ch.at - 0.05) c = i; });
   if (frame.hold?.kind === 'alter') c = CHAPTERS.findIndex((ch) => ch.name === 'Alter');
+  if (frame.hold?.kind === 'powers') c = CHAPTERS.findIndex((ch) => ch.name === 'Hello');
   if (c !== chapter) {
     chapter = c;
     chN.textContent = CHAPTERS[c].n;
@@ -128,9 +130,9 @@ function hud() {
   }
   fill.style.width = `${(R / RAW_END) * 100}%`;
   // dark type over paper, light type over everything else
-  const onPaper = B < 1.75 || (B > 6.7 && B < 7.55) || (B > 19.65 && B < 26.8);
+  const onPaper = B < 1.75 || (B > 6.7 && B < 7.55) || (B > POWERS_AT && B < 26.8) || (frame.hold?.kind === 'powers' && frame.hold.p > 0.68);
   document.documentElement.classList.toggle('on-paper', onPaper);
-  hello.classList.toggle('on', (B > 21.25 && B < 22.6) || B > 29.45);
+  hello.classList.toggle('on', (B > 20.7 && B < 22.6) || B > 29.45);
 }
 
 /* ---------------------------------------------------------------- loop */
@@ -174,13 +176,15 @@ function loop(now: number) {
     drawPaperOver(frame);
     drawMachineBall(frame);
   }
-  if (B >= ACT.matchStart && B < ACT.matchEnd) drawMatch(frame);
+  // after the pull-back the film is on paper: the match is over
+  if (B >= ACT.matchStart && B < ACT.matchEnd && !(B > POWERS_AT || frame.hold?.kind === 'powers')) drawMatch(frame);
   // the gold bolt out of the machine, and its afterimage over the night sky
   if (B >= ACT.cut[0] && B < ACT.cut[1] + 0.1) drawMachineCut(frame);
   if (B >= ACT.finaleStart && B < ACT.creditsStart + 0.4) drawFinale(frame);
   if (B >= ACT.creditsStart) drawCredits(frame);
 
   if (frame.hold?.kind === 'alter') drawAlter(frame, frame.hold.p);
+  if (frame.hold?.kind === 'powers') drawPowers(frame, frame.hold.p);
 
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   post(t, dt);
@@ -294,6 +298,11 @@ function jumpRaw(b: number) {
     B = prevB = toFilm(raw).film;
   },
   intro(s: number | null) { introOverride = s; },
+  /** jump into a hold (thunder, alter, dash, powers…) at its progress p */
+  hold(kind: string, p = 0.5) {
+    const h = HOLDS.find((k) => k.kind === kind)!;
+    jumpRaw(toRaw(h.at) + h.len * Math.min(0.9999, p));
+  },
   /** jump to ALTER's shot `name` at its own progress q */
   alter(name: string, q = 0.5) {
     const h = HOLDS.find((k) => k.kind === 'alter')!;

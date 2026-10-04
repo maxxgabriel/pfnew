@@ -17,7 +17,7 @@ export interface Frame {
   /** seconds since the film was ready; drives the opening title */
   intro: number;
   /** set while a hold is playing: the film is paused at B and `p` runs 0→1 */
-  hold: { kind: 'thunder' | 'dash' | 'alter'; p: number } | null;
+  hold: { kind: 'thunder' | 'dash' | 'alter' | 'powers'; p: number } | null;
   reduced: boolean;
   /** true on the frame the playhead passes beat `b`, in either direction */
   crossed(b: number): boolean;
@@ -34,7 +34,7 @@ export const ACT = {
   machineEnd: 12.4,
   matchStart: 12.4,
   matchEnd: 20.0,
-  finaleStart: 19.0,
+  finaleStart: 18.7,
   creditsStart: 22.55,
   END: 30.0,
 };
@@ -45,6 +45,7 @@ export const CHAPTERS = [
   // Alter plays inside a hold at 12.63; its chapter starts as the bolt cuts to the night sky
   { at: 12.45, n: 'III', name: 'Alter' },
   { at: 12.66, n: 'IV', name: 'Match' },
-  { at: 19.6, n: 'V', name: 'Hello' },
+  // the pull-back plays inside a hold at 18.7, and the page follows it
+  { at: 18.69, n: 'V', name: 'Hello' },
   { at: 22.7, n: 'VI', name: 'Credits' },
 ];

@@ -210,6 +210,13 @@ export function drawMachineBall(f: Frame) {
   ctx.restore();
 }
 
+/** where the ball is on screen at beat B: [x, y, radius] */
+export function machineBall(f: Frame, B: number): [number, number, number] {
+  const { ox, camY } = view({ ...f, B });
+  const [bx, by] = ballRaw(B);
+  return [ox + bx * f.u, (by - camY) * f.u, R * f.u];
+}
+
 function view(f: Frame) {
   const { w, h, u, B } = f;
   const ox = (w - 100 * u) / 2;
