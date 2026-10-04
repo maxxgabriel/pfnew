@@ -7,6 +7,8 @@ import { blot, canvas, drawSprite, glow, paperTile, withAlpha } from '../core/sp
 import { C, F, font } from '../core/style';
 import { drawBlot } from '../core/blot';
 import { drawWarrior } from './warrior';
+import { drawCoil, drawDragonRise, drawPearl, drawSwallow, pearlHome, risePearl } from './dragon';
+import { DRAGON_AT, SWALLOW_AT } from '../core/holds';
 import { GOLD, drawBolt, drawCrackle } from '../core/bolt';
 
 /*
@@ -560,6 +562,19 @@ export function drawInk(f: Frame) {
       const r0 = S * 0.012;
       ctx.ellipse(st[0], st[1] + dy, r0, r0 * (1 + fall * 1.6), 0, 0, TAU);
       ctx.fill();
+      // for a blink, inside the drop, the red eye of the knight it will become: a foreshadow
+      const eye = bell(I, 0.36, 0.45);
+      if (eye > 0) {
+        ctx.save();
+        ctx.globalCompositeOperation = 'lighter';
+        ctx.globalAlpha = eye;
+        drawSprite(ctx, glow('#ff1f3d', 64), st[0], st[1] + dy, S * 0.06);
+        ctx.restore();
+        ctx.fillStyle = `rgba(255,60,80,${eye})`;
+        ctx.beginPath();
+        ctx.ellipse(st[0], st[1] + dy, r0 * 0.75, r0 * 0.22, -0.15, 0, TAU);
+        ctx.fill();
+      }
     }
   }
   if (f.crossedFwd(0) && I > 0.5 && I < 0.7) {
@@ -614,6 +629,8 @@ export function drawInk(f: Frame) {
     ctx.globalAlpha = 1;
     // drifting mist between layers
     if (i < 3) drawMist(ctx, w, py + (L.ridge[0] ?? 0) + h * 0.05, t, i, night, S, seg(B, 1.3, 1.75));
+    // the dragon comes up out of the flood from behind the near range
+    if (i === 1 && f.hold?.kind === 'dragon') drawDragonRise(f, f.hold.p);
     if (i === 3) {
       // the pine on the near crag, swaying
       const cragX = px + L.day.width * 0.15;
@@ -636,9 +653,30 @@ export function drawInk(f: Frame) {
   // on a tall screen the fight closes in so the fighters stay in frame
   const squeeze = f.portrait ? 0.8 : 1;
   const XD = (sx: number) => ox + (0.5 + (sx - 0.5) * squeeze) * SW;
-  if (B > 2.2 && B < 7) {
+  // (not while the dragon rises: the warriors come in after it)
+  if (B > 2.2 && B < 7 && f.hold?.kind !== 'dragon') {
     drawPetals(f, dt, XD, Y);
     drawDuel(f, XD, Y, SW, dt, camX, jx, jy);
+  }
+
+  // ---- the pearl and its guardian
+  if (f.hold?.kind === 'dragon') {
+    const pe = risePearl(f, f.hold.p);
+    if (pe) drawPearl(ctx, pe.at[0], pe.at[1], S * 0.014, t, pe.a);
+  } else if (f.hold?.kind === 'swallow') {
+    // pulled down into the meeting of the beams; then the dragon takes it
+    const p = f.hold.p;
+    const home = pearlHome(f, t);
+    const k = ease.in2(seg(p, 0, 0.3));
+    if (p < 0.45) drawPearl(ctx, lerp(home[0], jx, k), lerp(home[1], jy, k), S * 0.014 * (1 + k * 0.5), t, 1);
+    if (f.crossed(SWALLOW_AT) || (p >= 0.45 && p < 0.47)) f.flash(0.35, '#ffffff');
+    drawSwallow(f, p, [jx, jy]);
+  } else if (B > DRAGON_AT && B <= SWALLOW_AT) {
+    const home = pearlHome(f, t);
+    drawPearl(ctx, home[0], home[1], S * 0.014, t, seg(B, DRAGON_AT, DRAGON_AT + 0.05));
+  } else if (B > SWALLOW_AT && B < 6.8) {
+    // curled into a circle round the place it was; the camera dives through it
+    drawCoil(f, [jx, jy]);
   }
 
   ctx.restore();
@@ -1053,8 +1091,9 @@ function drawDuel(
     ctx.restore();
   }
 
-  // ---- beams: the blades give up their light and throw it
-  if (beams > 0) {
+  // ---- beams: the blades give up their light and throw it (until the dragon swallows the pearl)
+  const swallowed = f.hold?.kind === 'swallow' ? f.hold.p >= 0.45 : B > SWALLOW_AT;
+  if (beams > 0 && !swallowed) {
     const grow = ease.out3(beams);
     const orb = ease.in2(seg(B, 5.7, 6.4));
     ctx.save();
@@ -1214,6 +1253,18 @@ export function drawPaperOver(f: Frame) {
   };
   pass(true);
   pass(false);
+  // Blue, still reaching for the pearl, falls through the tear after it
+  const fall = seg(B, 7.3, 7.75);
+  if (fall > 0 && fall < 1) {
+    const s = S * 0.2;
+    const x = w * 0.42 + fall * S * 0.12, y = lerp(-h * 0.1, tearY + gap * 0.3 + h * 0.2, ease.in2(fall));
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(fall * 2.4 - 0.5);
+    ctx.translate(-x, -y);
+    drawWarrior(ctx, { hilt: [x + s * 0.1, y - s * 0.3], a: -Math.PI / 2 - 0.6, foeX: x + s, s, groundY: y + s * 3, color: C.blue, t: f.t, vx: 0, vy: 0, seed: 1 });
+    ctx.restore();
+  }
 }
 
 const edges = new Map<string, Pt[]>();

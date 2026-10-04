@@ -8,8 +8,13 @@ import { ACT } from './frame';
  * hold's own progress runs 0→1. Everything authored in film beats keeps its
  * timing; the scroll track just gets longer.
  */
-export type HoldKind = 'thunder' | 'dash' | 'alter' | 'ride' | 'powers';
+export type HoldKind = 'dragon' | 'thunder' | 'swallow' | 'dash' | 'alter' | 'ride' | 'powers';
 export interface Hold { at: number; len: number; kind: HoldKind }
+
+/** film beat where the ink dragon rises (the flood has just taken the sky) */
+export const DRAGON_AT = 2.25;
+/** film beat where the dragon swallows the pearl at the meeting of the beams */
+export const SWALLOW_AT = 5.95;
 
 /** film beat where the Alter act plays */
 export const ALTER_AT = 12.63;
@@ -21,7 +26,10 @@ export const RIDE_AT = 12.64;
 export const POWERS_AT = 18.7;
 
 export const HOLDS: Hold[] = [
+  // the dragon comes up out of the flood, rounds the moon and brings the pearl down
+  { at: DRAGON_AT, len: 3.0, kind: 'dragon' },
   { at: 4.86, len: 1.25, kind: 'thunder' },
+  { at: SWALLOW_AT, len: 2.0, kind: 'swallow' },
   // the Alter act plays in the night sky between the machine and the match
   { at: ALTER_AT, len: 14.7, kind: 'alter' },
   // Blot chases the falling star through the city to the stadium

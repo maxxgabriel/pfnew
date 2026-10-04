@@ -326,7 +326,7 @@ function bike(g: G, x: number, y: number, s: number, o: { spin: number; lean?: n
   ctx.lineWidth = Math.max(1, s * 0.016);
   ctx.beginPath();
   ctx.moveTo(-s * 0.28, -s * 0.48);
-  ctx.lineTo(s * 0.0, -s * 0.47);
+  ctx.lineTo(0, -s * 0.47);
   ctx.quadraticCurveTo(s * 0.12, -s * 0.6, s * 0.3, -s * 0.56);
   ctx.stroke();
   // fork and bars
@@ -342,7 +342,7 @@ function bike(g: G, x: number, y: number, s: number, o: { spin: number; lean?: n
   ctx.strokeStyle = '#3a3646';
   ctx.lineWidth = s * 0.025;
   ctx.beginPath();
-  ctx.moveTo(s * 0.0, -s * 0.24);
+  ctx.moveTo(0, -s * 0.24);
   ctx.lineTo(-s * 0.36, -s * 0.3);
   ctx.stroke();
   // lights
