@@ -1225,6 +1225,87 @@ function drawBulletHud(f: Frame, S: number, bt: number, frozen: number) {
   void t;
 }
 
+function drawZone(f: Frame, cam: Cam, S: number, k: number) {
+  const { ctx, w, h, B, t } = f;
+  ctx.save();
+  ctx.fillStyle = `rgba(13,28,21,${0.95 * k})`;
+  ctx.fillRect(0, 0, w, h);
+  const chalk = (a: number) => `rgba(236,242,230,${a * k})`;
+  // the stands become hatching
+  const hatch = (pts: V3[], seed: number) => {
+    ctx.save();
+    if (!poly(ctx, cam, pts)) {
+      ctx.restore();
+      return;
+    }
+    ctx.clip();
+    ctx.strokeStyle = chalk(0.28);
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    const sp = S * 0.018;
+    for (let x = -h; x < w + h; x += sp) {
+      const j = (hash(x * 0.37 + seed) - 0.5) * sp * 0.6;
+      ctx.moveTo(x + j, h);
+      ctx.lineTo(x + h * 0.7 + j, 0);
+    }
+    ctx.stroke();
+    ctx.restore();
+    ctx.strokeStyle = chalk(0.6);
+    ctx.lineWidth = Math.max(1, S * 0.003);
+    if (poly(ctx, cam, pts)) ctx.stroke();
+  };
+  for (const side of [-1, 1]) hatch([[side * 38, 0, -6], [side * 38, 0, 111], [side * 58, 18, 111], [side * 58, 18, -6]], side);
+  hatch([[-40, 0, 112], [40, 0, 112], [40, 16, 130], [-40, 16, 130]], 3);
+  // the pitch markings, in chalk, slightly wobbly
+  ctx.strokeStyle = chalk(0.85);
+  ctx.lineWidth = Math.max(1.2, S * 0.004);
+  ctx.beginPath();
+  line(ctx, cam, [[-34, 0, 0], [34, 0, 0], [34, 0, 105], [-34, 0, 105]], true);
+  line(ctx, cam, [[-34, 0, 52.5], [34, 0, 52.5]]);
+  line(ctx, cam, circle3(0, 52.5, 9.15), true);
+  for (const [z0, dir] of [[0, 1], [105, -1]] as const) {
+    line(ctx, cam, [[-20.16, 0, z0], [-20.16, 0, z0 + dir * 16.5], [20.16, 0, z0 + dir * 16.5], [20.16, 0, z0]]);
+    line(ctx, cam, [[-9.16, 0, z0], [-9.16, 0, z0 + dir * 5.5], [9.16, 0, z0 + dir * 5.5], [9.16, 0, z0]]);
+  }
+  // the goal frame
+  line(ctx, cam, [[-3.66, 0, 105], [-3.66, 2.44, 105], [3.66, 2.44, 105], [3.66, 0, 105]]);
+  ctx.stroke();
+  // everyone else is a chalk mark where they stand
+  PLAYERS.forEach((pl, i) => {
+    if (i === 3 || DASHED.includes(i)) return;
+    const pos = playerAt(pl, B, t);
+    const a = P(cam, [pos[0], 0, pos[2]]), b = P(cam, [pos[0], 1.8, pos[2]]);
+    if (!a || !b) return;
+    const r = Math.max(2, (cam.f * 0.45) / a[2]);
+    ctx.strokeStyle = chalk(0.75);
+    ctx.lineWidth = Math.max(1, r * 0.25);
+    ctx.beginPath();
+    ctx.ellipse(a[0], a[1], r * 1.2, r * 0.45, 0, 0, TAU);
+    ctx.moveTo(a[0], a[1]);
+    ctx.lineTo(b[0], b[1]);
+    ctx.arc(b[0], b[1] - r * 0.6, r * 0.6, Math.PI / 2, Math.PI / 2 + TAU);
+    ctx.stroke();
+  });
+  ctx.restore();
+  // and the ones who matter, in colour, on top
+  const keep: { z: number; draw: () => void }[] = [];
+  [3, ...DASHED].forEach((i) => {
+    const pl = PLAYERS[i];
+    const pos = playerAt(pl, B, t);
+    const q = toCam(cam, pos);
+    if (q[2] < NEAR) return;
+    keep.push({ z: q[2], draw: () => drawPlayer(ctx, cam, pl, pos, B, t, S) });
+  });
+  const ball = ballAt(B);
+  const bq = toCam(cam, ball);
+  if (bq[2] > NEAR) keep.push({ z: bq[2], draw: () => draw3DBall(ctx, cam, ball, B, t) });
+  keep.sort((a, b) => b.z - a.z);
+  ctx.save();
+  ctx.globalAlpha = 1;
+  for (const it of keep) it.draw();
+  ctx.restore();
+}
+
 function drawDash(f: Frame, cam: Cam, S: number) {
   const { ctx, w, h, t } = f;
   const p = dashP;
@@ -1236,6 +1317,10 @@ function drawDash(f: Frame, cam: Cam, S: number) {
     ctx.fillStyle = `rgba(3,5,14,${0.55 * drain})`;
     ctx.fillRect(0, 0, w, h);
   }
+  // THE ZONE: for a heartbeat before the dash the stadium drains to chalk on a
+  // dark board; only #10, the two defenders and the ball keep their colour
+  const zone = ease.inOut2(seg(p, 0.05, 0.14)) * (1 - ease.out3(seg(p, 0.38, 0.41)));
+  if (zone > 0) drawZone(f, cam, S, zone);
   const me = playerAt(PLAYERS[3], DASH_AT, t);
   const feet = P(cam, [me[0], 0.05, me[2]]);
   const chest = P(cam, [me[0], 1.2, me[2]]);
