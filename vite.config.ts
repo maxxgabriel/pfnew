@@ -1,7 +1,13 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import { defineConfig } from 'vite';
 
-// https://vite.dev/config/
+// One bundle, no code-splitting: the build is also inlined into a single
+// self-contained HTML file by scripts/inline.mjs.
 export default defineConfig({
-  plugins: [react()],
-})
+  build: {
+    target: 'es2022',
+    assetsInlineLimit: 100_000_000,
+    cssCodeSplit: false,
+    modulePreload: false,
+    rollupOptions: { output: { inlineDynamicImports: true } },
+  },
+});

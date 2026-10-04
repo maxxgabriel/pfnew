@@ -1,0 +1,121 @@
+/* One world, committed: the film decides the colours, not the viewer's theme. */
+:root {
+  --paper: #ece6d6;
+  --ink: #14120f;
+  --red: #ff4021;
+  --blue: #2f5bff;
+  --green: #a6f03a;
+  --display: "Dela Gothic One", "Arial Black", Impact, sans-serif;
+  --serif: "Shippori Mincho", "Hiragino Mincho ProN", "Yu Mincho", Georgia, serif;
+  color-scheme: light;
+}
+
+html, body { margin: 0; background: var(--ink); color: var(--ink); }
+body {
+  font-family: var(--serif);
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior-y: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#film {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100lvh;
+  display: block;
+  touch-action: pan-y;
+}
+#track { width: 1px; }
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap;
+}
+
+/* ---- heads-up: seal, chapter, reel */
+.hud {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  padding: calc(env(safe-area-inset-top, 0px) + 14px) 16px 0;
+  display: flex; justify-content: space-between; align-items: flex-start;
+  pointer-events: none;
+  z-index: 3;
+}
+.seal {
+  pointer-events: auto;
+  width: 38px; height: 38px;
+  border: 0; border-radius: 4px;
+  background: var(--red); color: var(--paper);
+  font: 13px/1 var(--display);
+  display: grid; place-items: center;
+  cursor: pointer;
+  transform: rotate(-4deg);
+  transition: transform .3s cubic-bezier(.3,1.6,.5,1);
+}
+.seal:active { transform: rotate(4deg) scale(.92); }
+.chapter {
+  display: flex; align-items: baseline; gap: 10px;
+  font: 600 12px/1 var(--serif);
+  letter-spacing: .16em; text-transform: uppercase;
+  color: #e9e3d3;
+  transition: color .4s;
+}
+.on-paper .chapter, .on-paper .reel-marks button { color: var(--ink); }
+.on-paper .reel-line { background: rgba(20,18,15,.2); }
+.on-paper .reel-line i { background: var(--ink); }
+.chapter span { font: 15px/1 var(--display); letter-spacing: 0; }
+.chapter b { font-weight: 600; display: inline-block; min-width: 5.5em; }
+.chapter.swap b { animation: swap .6s cubic-bezier(.2,.9,.2,1); }
+@keyframes swap { from { clip-path: inset(0 100% 0 0); transform: translateY(6px); } to { clip-path: inset(0 0 0 0); transform: none; } }
+
+.reel {
+  position: fixed; left: 16px; right: 16px;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 14px);
+  z-index: 3;
+}
+.reel-line { height: 2px; background: rgba(233,227,211,.25); position: relative; }
+.reel-line i { position: absolute; inset: 0 auto 0 0; width: 0; background: #e9e3d3; }
+.reel-marks { position: relative; height: 26px; }
+.reel-marks button {
+  position: absolute; top: 0; transform: translateX(-50%);
+  background: none; border: 0; padding: 8px 6px 4px; margin: 0;
+  color: #e9e3d3; font: 11px/1 var(--display); cursor: pointer; transition: color .4s;
+  opacity: .55;
+}
+.reel-marks button.on { opacity: 1; }
+.reel-marks button:first-child { transform: none; padding-left: 0; }
+.reel-marks button::before {
+  content: ""; position: absolute; top: -5px; left: 50%; width: 1px; height: 8px; background: currentColor;
+}
+.reel-marks button:first-child::before { left: 0; }
+
+button:focus-visible, a:focus-visible { outline: 2px solid var(--red); outline-offset: 3px; }
+
+/* ---- the last frame: contact, over the paper */
+.hello {
+  position: fixed;
+  left: 50%; bottom: calc(env(safe-area-inset-bottom, 0px) + 64px);
+  width: min(560px, calc(100vw - 32px));
+  transform: translate(-50%, 24px);
+  z-index: 2;
+  opacity: 0; visibility: hidden;
+  transition: opacity .5s ease, transform .7s cubic-bezier(.2,.9,.2,1), visibility .5s;
+  display: flex; flex-direction: column; align-items: center; gap: 14px;
+  text-align: center;
+}
+.hello.on { opacity: 1; visibility: visible; transform: translate(-50%, 0); }
+.hello-kicker { margin: 0; font: 600 12px/1.4 var(--serif); letter-spacing: .14em; text-transform: uppercase; color: #5b5449; }
+.hello-title { margin: 0; font: 400 clamp(24px, 6.4vw, 40px)/1.12 var(--display); color: var(--ink); text-wrap: balance; letter-spacing: -.01em; }
+.hello-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: center; }
+.hello-mail { font: 800 17px/1 var(--serif); user-select: all; -webkit-user-select: all; color: var(--ink); border-bottom: 2px solid var(--red); padding-bottom: 3px; }
+.hello-copy, .hello-again {
+  font: 13px/1 var(--display); border: 2px solid var(--ink); background: var(--paper); color: var(--ink);
+  padding: 9px 14px; border-radius: 999px; cursor: pointer; box-shadow: 3px 3px 0 var(--ink);
+  transition: transform .15s, box-shadow .15s;
+}
+.hello-copy:active, .hello-again:active { transform: translate(3px, 3px); box-shadow: 0 0 0 var(--ink); }
+.hello-again { background: var(--ink); color: var(--paper); box-shadow: 3px 3px 0 var(--red); }
+.hello-links { list-style: none; margin: 0; padding: 0; display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
+.hello-links a { font: 800 15px/1 var(--serif); color: var(--ink); text-decoration: none; padding: 6px 0; border-bottom: 1px solid currentColor; }

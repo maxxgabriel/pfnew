@@ -1,32 +1,34 @@
-# React + TypeScript + Vite
+# Max Gabriel — a film you scroll
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+The portfolio is one continuous animated film on a single canvas. Scrolling
+moves the playhead (forward and back); ambient motion runs on the clock, so
+the frame keeps moving when you stop.
 
-Currently, two official plugins are available:
+One object carries the whole film: a circle.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+1. **Ink.** An ensō is painted and the name is written in brush. Pulling back
+   turns the circle into a moon over sumi-e mountains; ink floods the sky; two
+   blades of light duel, lock, then fire beams at each other. The camera dives
+   into the point where they meet.
+2. **Machine.** What comes out is a ball. The paper tears and it drops into a
+   poster-coloured chain reaction that spells MAKE / THINGS / THAT / MOVE.
+3. **Match.** The cannon fires it into the night sky; it falls like a star
+   into a stadium where blue and green are still at it. Broadcast camera,
+   chalk tactics, the shot, a cloth-sim net.
+4. **Hello.** Through the net and back onto paper. Contact.
 
-## React Compiler
+## Develop
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```sh
+npm install
+npm run dev          # http://localhost:5173
+npm run build        # dist/
+npm run artifact     # dist/ inlined into artifact/maxgabriel.html (single file)
+node scripts/shoot.mjs 0,3.6,9.3 phone 8   # screenshots at given beats
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+Code map: `src/main.ts` (playhead, loop, HUD) · `src/acts/*` (one file per act)
+· `src/core/brush.ts` (sumi brush renderer) · `src/core/*` (math, sprites,
+particles, type). Act timings are in beats; see `src/core/frame.ts`.
+
+The contact email in `index.html` is a placeholder.

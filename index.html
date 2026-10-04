@@ -2,15 +2,50 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <!-- viewport-fit=cover lets the masthead use env(safe-area-inset-*) on iOS -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="description" content="Max Gabriel — a portfolio in eight panels." />
-    <meta name="theme-color" content="#0d0d0d" />
+    <meta name="description" content="Max Gabriel designs and builds things that move." />
+    <meta name="theme-color" content="#14120f" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>Max Gabriel</title>
+    <!--FONTS-->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Shippori+Mincho:wght@600;800&display=swap" rel="stylesheet" />
+    <!--/FONTS-->
   </head>
   <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+    <!--BODY-->
+    <canvas id="film" aria-hidden="true"></canvas>
+    <div id="track" aria-hidden="true"></div>
+
+    <header class="hud">
+      <button class="seal" id="home" type="button" aria-label="Back to the start">M<br />G</button>
+      <div class="chapter" aria-live="polite"><span id="ch-n">I</span><b id="ch-name">Ink</b></div>
+    </header>
+
+    <nav class="reel" aria-label="Chapters">
+      <div class="reel-line"><i id="reel-fill"></i></div>
+      <div class="reel-marks" id="reel-marks"></div>
+    </nav>
+
+    <section class="hello" id="hello" aria-label="Contact">
+      <p class="hello-kicker">Max Gabriel · motion, interfaces, code</p>
+      <h2 class="hello-title">Let’s make something that moves.</h2>
+      <div class="hello-row">
+        <span class="hello-mail" id="mail">hello@example.com</span>
+        <button type="button" class="hello-copy" id="copy">Copy</button>
+      </div>
+      <ul class="hello-links">
+        <li><a href="https://github.com/maxxgabriel" target="_blank" rel="noopener">GitHub</a></li>
+      </ul>
+      <button type="button" class="hello-again" id="again">Watch it again ↑</button>
+    </section>
+
+    <div class="sr-only">
+      <h1>Max Gabriel</h1>
+      <p>Max Gabriel designs and builds things that move: motion, interfaces and the code behind them. This page is a short animated film you play by scrolling: an ink duel, a cartoon machine and a night match.</p>
+    </div>
+    <!--/BODY-->
+    <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
