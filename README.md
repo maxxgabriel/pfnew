@@ -36,18 +36,24 @@ a beat late); the cannon ball tearing up the screen into the arcade; and #10's
 dash through two defenders. The two long ones are holds (`src/core/holds.ts`):
 the film pauses at a beat while the scroll plays the moment.
 
+## For agents and contributors
+
+Start with `CLAUDE.md`, then `docs/BRIEF.md` (creative brief and decision log)
+and `docs/HANDOFF.md` (architecture, timeline, workflow, open items).
+
 ## Develop
 
 ```sh
 npm install
-npm run dev          # http://localhost:5173
-npm run build        # dist/
-npm run artifact     # dist/ inlined into artifact/maxgabriel.html (single file)
-node scripts/shoot.mjs 0,3.6,9.3 phone 8   # screenshots at given beats
+npx vite --port 5199 --strictPort         # dev server (the scripts expect :5199)
+npm run build                             # dist/
+npm run artifact                          # dist/ inlined into artifact/maxgabriel.html
+node scripts/shoot.mjs 0,3.6,18.5 phone 8 # screenshots at raw scroll beats
 ```
 
 Code map: `src/main.ts` (playhead, loop, HUD) · `src/acts/*` (one file per act)
-· `src/core/brush.ts` (sumi brush renderer) · `src/core/*` (math, sprites,
-particles, type). Act timings are in beats; see `src/core/frame.ts`.
+· `src/core/brush.ts` (sumi brush) · `src/core/bolt.ts` (lightning) ·
+`src/core/holds.ts` (holds) · `src/core/*` (math, sprites, particles, type).
+Act timings are in film beats; see `src/core/frame.ts`.
 
 The contact email in `index.html` is a placeholder.
