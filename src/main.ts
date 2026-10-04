@@ -12,7 +12,7 @@ import { drawXray } from './acts/xray';
 import { ACT, CHAPTERS, type Frame } from './core/frame';
 import { clamp, damp, seg } from './core/math';
 import { canvas, grainTiles } from './core/sprites';
-import { ALTER_AT, HOLDS, POWERS_AT, RAW_END, TITAN_AT, toFilm, toRaw } from './core/holds';
+import { HOLDS, POWERS_AT, RAW_END, TITAN_AT, toFilm, toRaw } from './core/holds';
 
 /*
  * THE FILM.
@@ -98,8 +98,9 @@ CHAPTERS.forEach((c, i) => {
   b.setAttribute('aria-label', `Chapter ${c.n}: ${c.name}`);
   b.style.left = `${(toRaw(c.at) / RAW_END) * 100}%`;
   if (c.name === 'Alter') b.classList.add('feature');
-  // Alter lives inside its hold: jump to the start of the hold, not past it
-  b.addEventListener('click', () => (c.name === 'Alter' ? seekRaw(toRaw(ALTER_AT)) : seek(i === 0 ? 0 : c.at + 0.35)));
+  // chapters that live inside a hold jump to the start of the hold, not past it
+  const inHold = HOLDS.find((hd) => hd.kind === ({ Alter: 'alter', Ride: 'ride', Hello: 'powers' } as Record<string, string>)[c.name]);
+  b.addEventListener('click', () => (inHold ? seekRaw(toRaw(inHold.at)) : seek(i === 0 ? 0 : c.at + 0.35)));
   marks.appendChild(b);
 });
 document.getElementById('home')!.addEventListener('click', () => seek(0));
@@ -234,6 +235,12 @@ function post(t: number, dt: number) {
   }
 }
 
+/** the story, one line per chapter card */
+const BOOK: Record<string, string> = {
+  Machine: 'the pearl fell through the page',
+  Match: 'the same two, one more time',
+};
+
 /**
  * Act title cards: a black band slams across the lower third, the act's
  * number and name stagger in, and the band tears away again.
@@ -247,7 +254,8 @@ function titleCards(t: number) {
     const inn = seg(B, a, a + 0.12), out = seg(B, a + 0.42, a + 0.55);
     if (inn <= 0 || out >= 1) continue;
     const y = h * 0.72;
-    const bh = S * 0.15;
+    const line = BOOK[c.name];
+    const bh = S * (line ? 0.2 : 0.15);
     const slide = (1 - easeOut(inn)) * -w + easeIn(out) * w;
     ctx.save();
     ctx.translate(slide, 0);
@@ -266,9 +274,17 @@ function titleCards(t: number) {
       const k = seg(inn, 0.2 + i * 0.05, 0.5 + i * 0.05);
       ctx.fillStyle = i < c.n.length ? '#ff4021' : '#ece6d6';
       ctx.globalAlpha = k;
-      ctx.fillText(ch, x, y + (1 - easeOut(k)) * bh * 0.4 + Math.sin(t * 6 + i) * S * 0.002);
+      ctx.fillText(ch, x, y - (line ? bh * 0.12 : 0) + (1 - easeOut(k)) * bh * 0.4 + Math.sin(t * 6 + i) * S * 0.002);
       x += widths[i];
     });
+    // one line of the story, as a book would print it under a chapter title
+    if (line) {
+      ctx.globalAlpha = seg(inn, 0.55, 0.95);
+      ctx.font = `600 ${Math.round(Math.max(12, S * 0.034))}px "Shippori Mincho", Georgia, serif`;
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#ece6d6';
+      ctx.fillText(line, w / 2, y + bh * 0.24);
+    }
     ctx.restore();
   }
 }

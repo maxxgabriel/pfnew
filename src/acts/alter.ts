@@ -839,7 +839,7 @@ function shotTitle(g: G, q: number) {
   ctx.font = font(Math.max(11, S * 0.035), F.serif, 600);
   ctx.textAlign = 'center';
   ctx.fillStyle = withAlpha(RED.hot, seg(q, 0.3, 0.5) * (1 - seg(q, 0.6, 0.72)));
-  ctx.fillText('III  ·  the other one', w / 2, h * 0.5 + px * 0.62);
+  ctx.fillText('III  ·  the back of the page', w / 2, h * 0.5 + px * 0.62);
   ctx.restore();
   // a burst of horizontal glitch bars
   if (glitch === 1) {

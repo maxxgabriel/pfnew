@@ -30,14 +30,23 @@ a playhead and redraws the whole frame every animation frame.
   the act that owns the hold animates on `p`. Use this to give a moment more
   time without re-timing anything. Current holds:
 
-  | kind | film `at` | raw range | what plays |
-  |---|---|---|---|
-  | `thunder` | 4.86 | 4.86 → 6.11 | duel finisher (ink.ts `drawThunder`) |
-  | `alter` | 12.63 | 13.88 → 28.58 | the whole ALTER act (alter.ts) |
-  | `dash` | 15.0 | 30.95 → 31.90 | #10's thunder dash (match.ts `drawDash`) |
+  | kind | film `at` | raw range | what plays | file |
+  |---|---|---|---|---|
+  | `dragon` | 2.25 | 2.25 → 5.25 | the Dragon rises, rounds the moon, brings the pearl down | dragon.ts via ink.ts |
+  | `thunder` | 4.86 | 7.86 → 9.11 | Blue's thunder finisher | ink.ts `drawThunder` |
+  | `swallow` | 5.95 | 10.20 → 12.20 | the Dragon swallows the pearl and coils into the ensō | dragon.ts via ink.ts |
+  | `titan` | 11.98 | 18.23 → 23.03 | the letters become TITAN; the punch; the bolt splits the page | titan.ts |
+  | `alter` | 12.63 | 23.68 → 39.13 | the whole ALTER act (32 shots) | alter.ts |
+  | `ride` | 12.64 | 39.14 → 44.34 | Night Ride | ride.ts |
+  | `dash` | 15.0 | 46.70 → 47.65 | The Zone, then #10's thunder dash | match.ts `drawZone`, `drawDash` |
+  | `powers` | 18.7 | 51.35 → 57.75 | Powers of Ten: the pull-back to the page | powers.ts |
+  | `xray` | 26.99 | 66.04 → 69.54 | the X-Ray pencil test after "wait —" | xray.ts |
 
-  `RAW_END = ACT.END (30) + 16.9 = 46.9`. Convert with `toFilm(raw)` /
-  `toRaw(film)`: raw = film + sum of `len` for holds whose `at` < film.
+  `RAW_END = ACT.END (30) + 42.55 = 72.55`. Convert with `toFilm(raw)` /
+  `toRaw(film)`: raw = film + sum of `len` for holds whose `at` < film. Holds
+  must stay sorted by `at` in `HOLDS`. A set piece that plays in a hold is
+  drawn on top of everything from `main.ts` (`if (frame.hold?.kind === …)`),
+  except the dragon, which the ink act draws between its mountain layers.
 - **Clock (t):** wall time in seconds. Ambient motion (mist, embers, blinking,
   bobbing) runs on `t`, so the frame keeps moving when the reader stops.
   Story motion runs on B (or the hold's `p`), so scrolling back plays it in
@@ -47,49 +56,54 @@ a playhead and redraws the whole frame every animation frame.
   frame the playhead passes a beat; use these for one-shot events like
   shakes, flashes and particle bursts), `shake(px)` and `flash(alpha, colour)`.
 - **Post** (main.ts `post`): letterbox bars (duel, the shot, post-credits, all
-  of ALTER), flash, act title cards (II Machine, IV Match), the
-  vignette, and film grain.
+  of ALTER), flash, act title cards (Machine and Match, each with one
+  storybook line from `BOOK`), the vignette, and film grain.
 - **HUD (DOM):** the MG seal (back to start), the chapter label, the chapter
   reel with tappable marks (ALTER's mark is red), and the contact card at the
   end. `html.on-paper` switches the HUD to dark text over paper scenes.
+  Chapters that live inside a hold (Alter, Ride, Hello) are forced while the
+  hold plays, and their marks jump to the hold's start.
 
 ## 2. The timeline (film beats)
 
+The story these acts tell is in `docs/STORY.md`. Chapters: I Ink, II Machine,
+III Alter, IV Ride, V Match, VI Hello, VII Credits.
+
 | beats | act | file | notes |
 |---|---|---|---|
-| intro (clock) | title | ink.ts `drawTitle` | ink drop → ensō → brush-written MAX/GABRIEL → seal → gold bolt signs MAX (intro 3.7–4.5 s) |
+| intro (clock) | title | ink.ts `drawTitle` | the first drop falls (the knight's red eye opens in it for a blink, intro 0.36–0.45 s) → ensō → Blot climbs out of the splash → MAX/GABRIEL → seal → gold bolt signs MAX |
 | 0 → 1.4 | Ink: pull-back | ink.ts | ensō becomes the moon; sumi-e karst layers rise |
-| 1.25 → 2.35 | Ink: flood | ink.ts | ink blooms up behind the range; night |
-| 2.35 → 6.8 | Ink: duel | ink.ts + warrior.ts | warriors (IK from blade keys `KEYS`), clashes at 3.55/4.12/4.45/4.75, petals, vertigo on the lock, **thunder hold at 4.86**, then green's snapped blade, beams 5.3, orb zoom 6.0–6.75 |
-| 6.75 → 7.85 | paper + tear | ink.ts `drawPaperOver` | white cools to paper, ball pops, paper tears open |
-| 7.0 → 12.4 | Machine | machine.ts | MAKE / THINGS / THAT / MOVE chain reaction; cannon fires at 12.0; the ball charges gold 12.12–12.3 |
-| 12.3 → 12.5 | the cut | machine.ts `drawMachineCut` | the ball becomes a gold bolt that tears up the screen (`ACT.cut`), hard cut to the match's night sky, afterimage fades by 12.5 |
-| 12.63 (hold) | **ALTER** | alter.ts | 31 shots, see §3; opens by ink bleeding in over the night sky, exits by drawing back and landing its ring on the falling star |
-| 12.4 → 20.0 | Match | match.ts | stadium, lights clunk on, lower third, chalk tactics, comic panels, **dash hold at 15.0**, bullet time, goal, net push |
-| 19.0 → 22.6 | Hello | finale.ts | ensō iris through the net, name repainted, contact card at 21.25–22.6 |
-| 22.55 → 30 | Credits + post-credits | credits.ts | roll, then Blot finds the hilts, "MAX GABRIEL WILL RETURN", contact card again |
+| 1.25 → 2.35 | Ink: flood | ink.ts | ink blooms up behind the range; night; **dragon hold at 2.25** |
+| 2.35 → 6.8 | Ink: duel | ink.ts + warrior.ts | the pearl hovers over the fight (`pearlHome`); clashes at 3.55/4.12/4.45/4.75, vertigo lock, **thunder hold at 4.86**, Green's snapped blade, beams 5.3, **swallow hold at 5.95**, then the camera dives through the dragon's coil (6.0–6.75) |
+| 6.75 → 7.85 | paper + tear | ink.ts `drawPaperOver` | the pearl pops out as a ball; the paper tears; Blue tumbles through after it (7.3–7.75) |
+| 7.0 → 11.98 | Machine | machine.ts | MAKE / THINGS / THAT / MOVE chain reaction; card "II · MACHINE — the pearl fell through the page"; **titan hold at 11.98** |
+| 11.98 → 12.4 | the night behind the page | main.ts | after TITAN the machine is gone (`torn`) and the match's night sky shows |
+| 12.63 / 12.64 (holds) | **ALTER**, then **Night Ride** | alter.ts, ride.ts | see §3 and §4 |
+| 12.4 → 20.0 | Match | match.ts | the star falls onto the centre spot; card "V · MATCH — the same two, one more time"; lights, lower third, chalk tactics, panels, **dash hold at 15.0** (The Zone, then the dash), bullet time, goal; **powers hold at 18.7** |
+| 18.7 → 22.6 | Hello | finale.ts | the page: the ensō, Blot, and the Hand signing MAX (18.85) and GABRIEL (19.62), seal 20.32; the rivals' lights circle; contact card 20.7–22.6 |
+| 22.55 → 30 | Credits + post-credits | credits.ts | roll; "wait —"; **xray hold at 26.99**; Blot finds the hilts; "MAX GABRIEL WILL RETURN" |
 
-Match and finale have internal remaps: `matchLocal()` (the bullet-time
-freeze) and `FINALE_SHIFT = 1.1`. Read the remap before editing their
-internal constants.
+The match is skipped after the pull-back (`B > POWERS_AT`), and the machine
+after TITAN (`B > TITAN_AT`); the old machine cut (`drawMachineCut`) no
+longer plays.
 
-The Arcade act (MG·TV, Pong, Breakout) sat between the machine and ALTER
-until the owner had it removed; it's in git history before the commit that
-removed it if it's ever wanted back.
+Match has an internal remap: `matchLocal()` (the bullet-time freeze). Read it
+before editing the match's internal constants.
 
 ## 3. ALTER (`src/acts/alter.ts`), the centrepiece
 
 Shots are a list `SHOTS: {name, dur, draw(g, q)}`. `p` (0..1) maps onto the
-summed durations (20.58 units across 14.7 raw beats) and each shot gets its own
+summed durations (21.68 units across 15.45 raw beats) and each shot gets its own
 `q` (0..1). Cuts are hard; each new shot gets a small jolt and a red
 overexposed frame. `hitQ(x)` fires once as the shot's q crosses x (use it
 for shakes and flashes).
 
 Order: corrupt → title → wide → feet → sword → eyes → ring → impact → reveal
 → standoff → dash → clash → slashes → volley → **dead calm** (still → calm
-→ drop → release) → **the void** (sign → expand → void → shatter) → charge
-(orbit) → **beam clash** (fire → driven → strain → push → snap → column) →
-after → exit.
+→ drop → **beneath** → release) → **the void** (sign → expand → void →
+shatter) → charge (orbit) → **beam clash** (fire → driven → strain → push →
+snap → column) → after → exit. The exit is the knight driving the blade into
+the black water; its ripple is the first thing in Night Ride.
 
 **The enemy is the rival** (round 8): Green from the ink duel, reborn on the
 back of the page — the same brush body as the knight (`drawWarrior`), a
@@ -127,6 +141,13 @@ blade). The owner rejected the ink-blob monster and its tentacles as
   overexposure colour, `null` for no flash or jolt). No on-screen text in the
   new set pieces, by the owner's choice.
 
+- Beneath the surface: the camera follows the drop under the mirror: caustics,
+  ink blooming (`blot()` sprites), two `koi()` circling the knight's
+  upside-down blue reflection, the first world faint below, a red thread
+  sinking past, and the shock coming down.
+- Blue and Green read through colour: the knight keeps Blue's sash and
+  headband (`sash` in `WarriorIn`), the rival has Green's.
+
 Shared renderers in the same file:
 - `world(g, cam)`: parallax sky, blood ensō moon, clouds, the spire
   silhouette (cached), mist, black water floor.
@@ -141,7 +162,52 @@ To jump to a shot, use the dev hook `__film.alter(name, q)`, or in screenshots
 `node scripts/shoot.mjs alter:slashes:0.3,alter:calm:0.5`. `node scripts/perf.mjs 1 alter`
 measures every shot.
 
-## 4. Other building blocks
+## 4. The other set pieces
+
+All of them follow ALTER's pattern: a list of shots `{name, dur, draw(g, q)}`
+over the hold's `p`, hard cuts, `hitQ(x)` for one-shot shakes and flashes, and
+a dev hook to jump to a shot.
+
+- **The Dragon** (`src/acts/dragon.ts`). `drawDragon(ctx, spine, s, t, o)`
+  paints a pale dry-brush dragon along a spine (head first): legs with claws,
+  one body stroke, back shading, belly line and plates, fins on the back
+  (`ridge` picks the side), a flame of a tail, and a head with antlers, mane,
+  whiskers, teeth and a gold eye. The spine is sampled from a Catmull-Rom path
+  by running length (`makePath`, `at`, `spine`), so the body follows the head
+  like one stroke. `drawDragonRise` (the rise), `risePearl`, `drawSwallow` and
+  `drawCoil` (a circle whose circumference is the body, so head meets tail)
+  are called from ink.ts. Jump: `hold:dragon:0.5`, `hold:swallow:0.5`.
+- **TITAN** (`src/acts/titan.ts`). Shots: wake → assemble → ignite → hero →
+  punch → split. The robot is a rig of letter blocks (`PARTS`, `rig`,
+  `block`), arms driven by two angles each; `chest()` puts the O of MOVE in as
+  the reactor, `visor()` puts Green behind the glass. The split renders the
+  last frame to a buffer and slides the two halves apart along the bolt.
+  Jump: `__film.titan(name, q)` / `titan:punch:0.4`.
+- **Night Ride** (`src/acts/ride.ts`). Shots: puddle → launch → tunnel →
+  chase → skid. `city()` draws tileable building rows with neon signs (shapes
+  only, no text) and their reflections in the wet street; `bike()` is Blot's
+  café racer, side on; `ribbon()` is a long-exposure tail-light; `star()` the
+  falling Spark. Jump: `__film.ride(name, q)` / `ride:skid:0.5`.
+- **The Zone** (match.ts `drawZone`): the first part of the dash hold; chalk
+  board, hatched stands, chalk markings, chalk marks for everyone but #10,
+  the two defenders and the ball.
+- **Powers of Ten** (`src/acts/powers.ts`). `LEVELS` lists the worlds inside
+  out: the net (match), the Night Ride city (the stadium is the portal),
+  ALTER, the machine, the ink duel, the page. Each world
+  is drawn live by its own act under a camera transform (sharp at any zoom),
+  with the next world inside its `portal` circle. While a step's iris closes
+  the outer world is drawn to a buffer so it can fade in; after that it's
+  drawn straight to the frame (the buffer was the expensive part). The page
+  level has the ensō (`PAGE_ENSO`, `pageEnso`), Blot (`blotSpot`) and the
+  Hand (`drawHand`, `handRest`). Jump: `hold:powers:0.5`.
+- **Finale** (`src/acts/finale.ts`): the page after the pull-back; the Hand
+  follows the stroke being written (`handAlong`) and lifts between strokes.
+- **X-Ray** (`src/acts/xray.ts`): eight blueprint segments (bones from
+  `solve()`, the dragon spline, TITAN boxes, RGB beams, orbits, the bike, the
+  stadium wireframe and camera path, the ensō's handles) and an easing curve
+  along the bottom. Jump: `hold:xray:0.5`.
+
+## 5. Other building blocks
 
 - `core/brush.ts`: the sumi brush (press blob, wet body, dry bristles,
   "flying white"). `brush(ctx, points, {width, progress, dry, …})`. Points
@@ -153,26 +219,32 @@ measures every shot.
   look, …})`) and its 8-bit sprite.
 - `acts/warrior.ts`: procedural brush fighters solved from a hilt position
   and blade angle (IK arms and legs, leaps when the ground is out of reach).
+  The hakama is two trouser legs that follow hip → knee → ankle, so a leg
+  never floats loose; `sash` overrides the sash and headband colour.
 - `core/glyphs.ts`: hand-built brush capitals for the name.
 - `core/sprites.ts`: cached glow sprites (never use shadowBlur), paper tile,
   grain, blots.
 - `core/style.ts`: palette `C`, fonts `F`, `font()` (whole-pixel sizes only:
   every distinct size is a fresh glyph cache), `extruded()` block type.
 
-## 5. Working on it
+## 6. Working on it
 
 ```sh
 npm install
 npx vite --port 5199 --strictPort     # keep this running; scripts expect :5199
 ```
 
-**Screenshots are the main QA tool.** `scripts/shoot.mjs <raw beats> [phone|desktop]
-[intro seconds] [wait ms]` loads the page in Chromium, seeks via the dev hook
-`window.__film.seek(raw)`, and writes `scripts/shots/p-<beat>.png`. Pass
-`intro 8` to skip the title animation. `scripts/sheet.sh out.png files…`
-tiles them into one image. Always check phone size (390×844 @2x); check
+**Screenshots are the main QA tool.** `scripts/shoot.mjs <beats> [phone|desktop]
+[intro seconds] [wait ms]` loads the page in Chromium, seeks, and writes
+`scripts/shots/p-<beat>.png`. A beat can be a raw beat (`18.5`), a film beat
+(`f:12.2`), a point in a hold (`hold:powers:0.4`), or a shot
+(`alter:slashes:0.3`, `ride:skid:0.5`, `titan:punch:0.4`). Pass `intro 8` to
+skip the title animation. `scripts/qa.sh out.png <beats> [phone|desktop]`
+shoots and tiles them in the order given (use this one);
+`scripts/sheet.sh out.png files…` tiles files. Always check phone size (390×844 @2x); check
 desktop (1440×900) for big changes. The dev hooks also include
-`__film.seekFilm(film)`, `__film.intro(s)` and `__film.cost()`.
+`__film.seekFilm(film)`, `__film.hold(kind, p)`, `__film.alter/ride/titan(name, q)`,
+`__film.intro(s)` and `__film.cost()`.
 
 Gotchas:
 - After editing files, Vite hot-reloads. A shot taken during the reload can
@@ -189,7 +261,7 @@ Gotchas:
 **Checks before committing:** `npx tsc -p tsconfig.app.json --noEmit`, `npx
 oxlint`, and screenshots of what you touched.
 
-## 6. Shipping
+## 7. Shipping
 
 - `npm run artifact` builds `dist/` and inlines it into
   `artifact/maxgabriel.html` (about 140 KB; gitignored). The artifact host
@@ -199,7 +271,7 @@ oxlint`, and screenshots of what you touched.
   artifact first.
 - Plain static hosting also works: `npm run build` and serve `dist/`.
 
-## 7. Known issues and open items
+## 8. Known issues and open items
 
 - **Not tested on a real iPhone.** Frame rate, scroll feel and hold pacing
   are unverified on a device. Ask the owner how it feels.
@@ -207,15 +279,19 @@ oxlint`, and screenshots of what you touched.
   the owner for the real one.
 - Kanji drawn on canvas (雷 in the thunder stance) may use a system fallback
   font, because the Shippori Mincho kanji subset isn't preloaded.
-- Credits don't mention the ALTER cast yet (the knight and the beast).
 - `ctx.roundRect` needs Safari 16+.
+- The scroll is long now (72.55 raw beats, roughly 60 phone screens). The
+  holds are where the content is; if the owner finds it long, shorten hold
+  lengths rather than cutting beats.
+- Sound (STORY item 34) is still optional and not built: ask the owner.
+- `scripts/perf.mjs` (no argument) still samples the old raw beats; use
+  `node scripts/perf.mjs 1 alter` for ALTER, and `__film.cost()` elsewhere.
 - `prefers-reduced-motion` only softens shakes and flashes; there's no
   reduced cut.
 
-## 8. Ideas the owner hasn't seen yet (ask before building)
+## 9. Ideas the owner hasn't seen yet (ask before building)
 
-- Sound (declined once, may be worth re-offering for ALTER only, behind a tap).
-- Make ALTER even more of a selling point: tease it on the title screen,
-  more shots (sword-lock close-up with sparks, a sky-wide wide shot before
-  the beam), anime "smear frames" in the slash barrage.
-- Credit lines for the ALTER cast; Blot reacting to ALTER in the credits.
+- Sound, behind a tap, for ALTER and Night Ride only (declined once).
+- A real Blot turnaround for the bike shots (a back view in the tunnel).
+- More worlds inside Powers of Ten (the dragon's coil, TITAN's reactor): add
+  a `LEVELS` entry with a portal and lengthen the `powers` hold.

@@ -44,7 +44,7 @@ export const HOLDS: Hold[] = [
   { at: RIDE_AT, len: 5.2, kind: 'ride' },
   { at: 15.0, len: 0.95, kind: 'dash' },
   // out of the net and out of every world, back to the page
-  { at: POWERS_AT, len: 5.5, kind: 'powers' },
+  { at: POWERS_AT, len: 6.4, kind: 'powers' },
   // after "wait —": the whole film again as its construction drawings
   { at: XRAY_AT, len: 3.5, kind: 'xray' },
 ];
