@@ -5,6 +5,7 @@ import { drawSprite, glow, withAlpha } from '../core/sprites';
 import { C, F, extruded, font } from '../core/style';
 import { drawBall } from './machine';
 import { drawBlot } from '../core/blot';
+import { lose, win } from '../core/side';
 import { brush, ensoPath } from '../core/brush';
 
 const MOON_ENSO = ensoPath(0, 0, 100, 3, 0.93, -2.3);
@@ -512,7 +513,7 @@ export function drawMatch(fg: Frame) {
     hitNet(IMPACT, 1.4);
     shakeAmt = S * 0.03;
     f.flash(0.5, '#ffffff');
-    const cols = [C.green, C.paper, C.greenHot, C.blue, C.red];
+    const cols = [win().c, C.paper, win().hot, win().c, C.red];
     for (let k = 0; k < cols.length; k++) {
       confetti.burst(w * (0.2 + k * 0.15), h * 0.15, 30, S * 1.4, { color: cols[k], kind: CONFETTI, size: S * 0.012, max: 3.5, dir: Math.PI / 2, spread: 2.4 });
     }
@@ -676,8 +677,8 @@ function drawChalk(ctx: CanvasRenderingContext2D, cam: Cam, B: number, t: number
 }
 
 function drawPlayer(ctx: CanvasRenderingContext2D, cam: Cam, p: Player, pos: V3, B: number, t: number, S: number) {
-  const col = p.team ? C.green : C.blue;
-  const hot = p.team ? C.greenHot : C.blueHot;
+  const col = p.team ? win().c : lose().c;
+  const hot = p.team ? win().hot : lose().hot;
   // the trail: where they were, chalked on the grass
   ctx.save();
   ctx.lineCap = 'round';
@@ -858,11 +859,11 @@ function drawScorebug(f: Frame, S: number) {
   ctx.font = font(px, F.display);
   ctx.textBaseline = 'middle';
   const segs: [string, string, string][] = [
-    ['GRN', C.green, C.ink],
+    [win().short, win().c, win().fg],
     [`${goals}`, C.paper, C.ink],
     ['–', C.paper, C.ink],
     ['0', C.paper, C.ink],
-    ['BLU', C.blue, C.white],
+    [lose().short, lose().c, lose().fg],
     [`${minute}:${String(sec).padStart(2, '0')}`, C.ink, C.paper],
   ];
   let cx = x;
@@ -900,12 +901,12 @@ function drawLowerThird(f: Frame, S: number) {
   // two slabs crossing in from opposite sides
   const gx = lerp(-w, 0, inn) - out * w;
   const bx = lerp(w, 0, inn) + out * w;
-  ctx.fillStyle = C.green;
+  ctx.fillStyle = win().c;
   ctx.fillRect(gx, y - px * 0.95, w * 0.62, px * 1.25);
-  ctx.fillStyle = C.blue;
+  ctx.fillStyle = lose().c;
   ctx.fillRect(bx + w * 0.38, y + px * 0.45, w * 0.62, px * 1.25);
-  extruded(ctx, 'GREEN', gx + 16, y - px * 0.32, px, { face: C.ink, side: C.paper, depth: px * 0.08, align: 'left', outline: C.ink, line: 0.1 });
-  extruded(ctx, 'BLUE', bx + w - 16, y + px * 1.08, px, { face: C.white, side: C.ink, depth: px * 0.08, align: 'right', outline: C.ink, line: 0.1 });
+  extruded(ctx, win().name, gx + 16, y - px * 0.32, px, { face: win().fg === C.ink ? C.ink : C.white, side: win().fg === C.ink ? C.paper : C.ink, depth: px * 0.08, align: 'left', outline: C.ink, line: 0.1 });
+  extruded(ctx, lose().name, bx + w - 16, y + px * 1.08, px, { face: lose().fg === C.ink ? C.ink : C.white, side: lose().fg === C.ink ? C.paper : C.ink, depth: px * 0.08, align: 'right', outline: C.ink, line: 0.1 });
   // the VS seal stamps between them
   const vs = ease.outBack(seg(B, 13.6, 13.72), 2.5) * (1 - out);
   if (vs > 0) {
@@ -952,7 +953,7 @@ function drawPlayerCard(f: Frame, S: number) {
   ctx.translate(-cw / 2, -ch / 2);
   ctx.fillStyle = C.ink;
   ctx.fillRect(6, 6, cw, ch);
-  ctx.fillStyle = C.green;
+  ctx.fillStyle = win().c;
   ctx.fillRect(0, 0, cw, ch);
   ctx.strokeStyle = C.ink;
   ctx.lineWidth = 3;
@@ -995,7 +996,8 @@ function drawGoalType(f: Frame, S: number) {
   const extra = Math.floor(seg(B, 16.75, 17.4) * 4);
   const word = 'G' + 'O'.repeat(1 + extra) + 'AL';
   const px = Math.min((w * 0.92) / (word.length * 0.82), S * 0.3);
-  const cols = [C.green, C.paper, C.green, C.paper, C.green, C.paper, C.green, C.paper];
+  const wc = win().c;
+  const cols = [wc, C.paper, wc, C.paper, wc, C.paper, wc, C.paper];
   ctx.save();
   ctx.font = font(px, F.display);
   const widths = [...word].map((ch) => ctx.measureText(ch).width * 0.92);
@@ -1074,7 +1076,7 @@ function drawPanels(f: Frame, S: number, shake: Pt) {
     const tw = ctx.measureText(sh.label).width;
     ctx.fillStyle = C.ink;
     ctx.fillRect(lx + 3, ly - S * 0.03 + 3, tw + S * 0.04, S * 0.05);
-    ctx.fillStyle = i === 1 ? C.paper : C.green;
+    ctx.fillStyle = i === 1 ? C.paper : win().c;
     ctx.fillRect(lx, ly - S * 0.03, tw + S * 0.04, S * 0.05);
     ctx.fillStyle = C.ink;
     ctx.textAlign = 'left';

@@ -8,6 +8,11 @@ import { drawFinale } from './acts/finale';
 import { ACT, CHAPTERS, type Frame } from './core/frame';
 import { clamp, damp, seg } from './core/math';
 import { canvas, grainTiles } from './core/sprites';
+import { SIDE, TEAM, type Side } from './core/side';
+import { RAW_END, toFilm, toRaw, type Mapped } from './core/timeline';
+import { drawManifesto } from './acts/manifesto';
+import { drawMuralClose, drawScrollInterlude } from './acts/scroll';
+import { drawGlass } from './acts/overlay';
 
 /*
  * THE FILM.
@@ -26,6 +31,10 @@ const coarse = matchMedia('(pointer: coarse)').matches;
 
 let w = 0, h = 0, dpr = 1, beatPx = 600, lastW = 0;
 let vignette: HTMLCanvasElement | null = null;
+// the film renders here while an interlude holds it, so it can be framed as a painting
+let stage: HTMLCanvasElement | null = null;
+let stageCtx: CanvasRenderingContext2D | null = null;
+let snaps: HTMLCanvasElement[] = [];
 const grain = grainTiles(4, 180);
 let grainPat: CanvasPattern[] = [];
 
@@ -39,8 +48,8 @@ function resize() {
   // collapsing does not yank the playhead
   if (w !== lastW) {
     lastW = w;
-    beatPx = Math.max(420, h * 0.72);
-    track.style.height = `${Math.round(ACT.END * beatPx + h)}px`;
+    beatPx = Math.max(400, h * 0.66);
+    track.style.height = `${Math.round(RAW_END * beatPx + h)}px`;
   }
   const v = canvas(w, h);
   const g = v.ctx.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.35, w / 2, h / 2, Math.hypot(w, h) * 0.62);
@@ -49,6 +58,10 @@ function resize() {
   v.ctx.fillStyle = g;
   v.ctx.fillRect(0, 0, w, h);
   vignette = v.c;
+  const st = canvas(w * dpr, h * dpr);
+  stage = st.c;
+  stageCtx = st.ctx;
+  snaps = [];
   grainPat = grain.map((c) => ctx.createPattern(c, 'repeat')!);
 }
 window.addEventListener('resize', resize);
@@ -59,15 +72,21 @@ window.scrollTo(0, 0);
 
 /* ------------------------------------------------------------ playhead */
 
-let B = 0, prevB = 0, vB = 0;
+// R is the raw scroll playhead; B is film time (R with the interludes taken out)
+let R = 0, B = 0, prevB = 0, vB = 0;
+let mapped: Mapped = { film: 0, ins: null, p: 0 };
 let target = 0;
-const readScroll = () => (target = clamp(window.scrollY / beatPx, 0, ACT.END));
+let lastScrollAt = 0;
+const readScroll = () => {
+  target = clamp(window.scrollY / beatPx, 0, RAW_END);
+  lastScrollAt = performance.now() / 1000;
+};
 window.addEventListener('scroll', readScroll, { passive: true });
 
 let shakeAmt = 0, flashAmt = 0, flashColor = '#ffffff';
 
 const frame: Frame = {
-  ctx, w, h, u: 1, portrait: true, B, vB, t: 0, dt: 0, intro: 0, reduced,
+  ctx, w, h, u: 1, portrait: true, B, vB, t: 0, dt: 0, intro: 0, idle: 0, reduced,
   crossed: (b) => (prevB < b) !== (B < b),
   crossedFwd: (b) => prevB < b && B >= b,
   shake: (a) => { if (!reduced) shakeAmt = Math.max(shakeAmt, a); },
@@ -82,14 +101,14 @@ const chapterEl = chName.parentElement!;
 const fill = document.getElementById('reel-fill')!;
 const marks = document.getElementById('reel-marks')!;
 const hello = document.getElementById('hello')!;
-const seek = (b: number) => window.scrollTo({ top: b * beatPx, behavior: reduced ? 'auto' : 'smooth' });
+const seek = (filmBeat: number) => window.scrollTo({ top: toRaw(filmBeat) * beatPx, behavior: reduced ? 'auto' : 'smooth' });
 
 CHAPTERS.forEach((c, i) => {
   const b = document.createElement('button');
   b.type = 'button';
   b.textContent = c.n;
   b.setAttribute('aria-label', `Chapter ${c.n}: ${c.name}`);
-  b.style.left = `${(c.at / ACT.END) * 100}%`;
+  b.style.left = `${(toRaw(c.at) / RAW_END) * 100}%`;
   b.addEventListener('click', () => seek(i === 0 ? 0 : c.at + 0.35));
   marks.appendChild(b);
 });
@@ -107,6 +126,33 @@ document.getElementById('copy')!.addEventListener('click', (e) => {
   });
 });
 
+/* ---- pick a side */
+const pick = document.getElementById('pick')!;
+const chip = document.getElementById('side-chip')!;
+function setSide(sd: Side, chosen = true) {
+  SIDE.pick = sd;
+  SIDE.chosen = SIDE.chosen || chosen;
+  SIDE.changedAt = performance.now() / 1000;
+  snaps = [];
+  chip.style.setProperty('--c', TEAM[sd].c);
+  chip.querySelector('span')!.textContent = TEAM[sd].name;
+  chip.setAttribute('aria-label', `Your side: ${TEAM[sd].word}. Tap to switch.`);
+  pick.querySelectorAll<HTMLElement>('.hilt').forEach((b) => b.classList.toggle('lit', b.dataset.side === sd));
+}
+pick.querySelectorAll<HTMLElement>('.hilt').forEach((b) =>
+  b.addEventListener('click', () => {
+    setSide(b.dataset.side as Side);
+    pick.classList.add('done');
+    frame.flash(0.25, TEAM[b.dataset.side as Side].c);
+  }),
+);
+chip.addEventListener('click', () => {
+  const next: Side = SIDE.pick === 'blue' ? 'green' : 'blue';
+  setSide(next);
+  frame.flash(0.3, TEAM[next].c);
+});
+setSide(SIDE.pick, false);
+
 let chapter = -1;
 function hud() {
   let c = 0;
@@ -120,17 +166,25 @@ function hud() {
     chapterEl.classList.add('swap');
     [...marks.children].forEach((m, i) => m.classList.toggle('on', i <= c));
   }
-  fill.style.width = `${(B / ACT.END) * 100}%`;
+  fill.style.width = `${(R / RAW_END) * 100}%`;
   // dark type over paper, light type over everything else
-  const onPaper = B < 1.75 || (B > 6.7 && B < 7.55) || (B > 23.65 && B < 30.8);
+  const ink = mapped.ins;
+  const onPaper = ink ? ink.kind === 'manifesto' : B < 1.75 || (B > 6.7 && B < 7.55) || (B > 23.65 && B < 30.8);
   document.documentElement.classList.toggle('on-paper', onPaper);
-  hello.classList.toggle('on', (B > 25.25 && B < 26.6) || B > 33.45);
+  hello.classList.toggle('on', !mapped.ins && ((B > 25.25 && B < 26.6) || B > 33.45));
+  // the choice is offered once the title has painted itself, and stays offered
+  // (dimmed to the pick) until the viewer scrolls away from the title
+  pick.classList.toggle('on', frame.intro > 4.6 && B < 0.22);
+  chip.classList.toggle('on', B > 0.22 && B < 33.4);
 }
 
 /* ---------------------------------------------------------------- loop */
 
 let ready = false, readyAt = 0, last = performance.now(), t0 = last;
 let introOverride: number | null = null;
+/** dev: 0 = live idle timer, otherwise a fixed idle of (value - 1) seconds */
+let idleOff = 0;
+let forceV: number | null = null;
 
 let cost = 0;
 function loop(now: number) {
@@ -140,15 +194,19 @@ function loop(now: number) {
   last = now;
   const t = (now - t0) / 1000;
 
+  const prevR = R;
+  R = Math.abs(target - R) < 0.0005 ? target : damp(R, target, reduced ? 14 : 6.5, dt);
+  vB = dt > 0 ? (R - prevR) / dt : 0;
   prevB = B;
-  B = Math.abs(target - B) < 0.0005 ? target : damp(B, target, reduced ? 14 : 6.5, dt);
-  vB = dt > 0 ? (B - prevB) / dt : 0;
+  mapped = toFilm(R);
+  B = mapped.film;
 
   frame.w = w; frame.h = h;
   frame.portrait = h > w;
   frame.u = Math.min(w, h * 0.62) / 100;
   frame.B = B; frame.vB = vB; frame.t = t; frame.dt = dt;
   frame.intro = introOverride ?? (ready ? (now - readyAt) / 1000 : 0);
+  frame.idle = idleOff ? idleOff - 1 : Math.abs(target - R) < 0.01 ? now / 1000 - Math.max(lastScrollAt, readyAt / 1000) : 0;
   // landing mid-film skips the title sequence
   if (B > 1.2 && frame.intro < 6) frame.intro = 6;
 
@@ -158,22 +216,68 @@ function loop(now: number) {
     ctx.translate((Math.random() - 0.5) * shakeAmt, (Math.random() - 0.5) * shakeAmt);
   }
 
-  if (B < 6.8) drawInk(frame);
-  if (B >= 6.85 && B < ACT.machineEnd) drawMachine(frame);
-  if (B >= 6.75 && B < 7.9) {
-    drawPaperOver(frame);
-    drawMachineBall(frame);
+  const ins = mapped.ins;
+  if (ins && ins.kind === 'scroll' && stageCtx) {
+    // render the held frame offstage, then hang it on the scroll
+    stageCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    frame.ctx = stageCtx;
+    drawFilm(frame);
+    frame.ctx = ctx;
+    drawScrollInterlude(frame, mapped.p, ins.act, stage, snapshot, dpr);
+  } else if (ins && ins.kind === 'mural') {
+    drawMuralClose(frame, mapped.p, snapshot);
+  } else {
+    drawFilm(frame);
+    if (ins && ins.kind === 'manifesto') drawManifesto(frame, mapped.p);
   }
-  // the match starts underneath the arcade's warp-out, so it is drawn first
-  if (B >= ACT.matchStart && B < ACT.matchEnd) drawMatch(frame);
-  if (B >= ACT.arcadeStart && B < ACT.arcadeEnd) drawArcade(frame);
-  if (B >= ACT.finaleStart && B < ACT.creditsStart + 0.4) drawFinale(frame);
-  if (B >= ACT.creditsStart) drawCredits(frame);
 
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  drawGlass(frame, { vR: forceV ?? vB, inInterlude: !!mapped.ins });
+  sliceReel();
   post(t, dt);
   hud();
   cost = cost * 0.9 + (performance.now() - c0) * 0.1;
+}
+
+function drawFilm(fr: Frame) {
+  const b = fr.B;
+  if (b < 6.8) drawInk(fr);
+  if (b >= 6.85 && b < ACT.machineEnd) drawMachine(fr);
+  if (b >= 6.75 && b < 7.9) {
+    drawPaperOver(fr);
+    drawMachineBall(fr);
+  }
+  // the match starts underneath the arcade's warp-out, so it is drawn first
+  if (b >= ACT.matchStart && b < ACT.matchEnd) drawMatch(fr);
+  if (b >= ACT.arcadeStart && b < ACT.arcadeEnd) drawArcade(fr);
+  if (b >= ACT.finaleStart && b < ACT.creditsStart + 0.4) drawFinale(fr);
+  if (b >= ACT.creditsStart) drawCredits(fr);
+}
+
+/** a still of each act, rendered once, for the scroll's finished panels */
+const REP = [3.62, 9.4, 13.95, 20.2, 25.58];
+function snapshot(i: number): HTMLCanvasElement | null {
+  if (snaps[i]) return snaps[i];
+  const c = canvas(w, h);
+  const fr: Frame = {
+    ...frame, ctx: c.ctx, B: REP[i], intro: 10,
+    crossed: () => false, crossedFwd: () => false, shake: () => {}, flash: () => {},
+  };
+  drawFilm(fr);
+  snaps[i] = c.c;
+  return c.c;
+}
+
+/** each blade clash cuts the chapter reel in two */
+const reel = document.querySelector('.reel')!;
+function sliceReel() {
+  for (const c of [3.55, 4.12, 4.45, 4.75]) {
+    if (frame.crossedFwd(c)) {
+      reel.classList.remove('sliced');
+      void (reel as HTMLElement).offsetWidth;
+      reel.classList.add('sliced');
+    }
+  }
 }
 
 function post(t: number, dt: number) {
@@ -192,8 +296,7 @@ function post(t: number, dt: number) {
     ctx.globalAlpha = 1;
     flashAmt = damp(flashAmt, 0, 10, dt);
   }
-  titleCards(t);
-  if (vignette) ctx.drawImage(vignette, 0, 0, w, h);
+  if (vignette && mapped.ins?.kind !== 'manifesto') ctx.drawImage(vignette, 0, 0, w, h);
   // grain
   const pat = grainPat[Math.floor(t * 24) % grainPat.length];
   if (pat) {
@@ -207,45 +310,6 @@ function post(t: number, dt: number) {
     ctx.restore();
   }
 }
-
-/**
- * Act title cards: a black band slams across the lower third, the act's
- * number and name stagger in, and the band tears away again.
- */
-function titleCards(t: number) {
-  const S = Math.min(w, h);
-  for (const c of CHAPTERS.slice(1, 4)) {
-    const a = c.at - 0.05;
-    const inn = seg(B, a, a + 0.12), out = seg(B, a + 0.42, a + 0.55);
-    if (inn <= 0 || out >= 1) continue;
-    const y = h * 0.72;
-    const bh = S * 0.15;
-    const slide = (1 - easeOut(inn)) * -w + easeIn(out) * w;
-    ctx.save();
-    ctx.translate(slide, 0);
-    ctx.rotate(-0.04);
-    ctx.fillStyle = '#14120f';
-    ctx.fillRect(-w * 0.1, y - bh / 2, w * 1.2, bh);
-    ctx.fillStyle = '#ff4021';
-    ctx.fillRect(-w * 0.1, y + bh / 2 - S * 0.012, w * 1.2, S * 0.012);
-    const word = `${c.n} · ${c.name.toUpperCase()}`;
-    ctx.font = `${Math.round(Math.min(w * 0.085, S * 0.085))}px "Dela Gothic One", "Arial Black", sans-serif`;
-    ctx.textBaseline = 'middle';
-    ctx.textAlign = 'left';
-    const widths = [...word].map((ch) => ctx.measureText(ch).width);
-    let x = w / 2 - widths.reduce((p, q) => p + q, 0) / 2;
-    [...word].forEach((ch, i) => {
-      const k = seg(inn, 0.2 + i * 0.05, 0.5 + i * 0.05);
-      ctx.fillStyle = i < c.n.length ? '#ff4021' : '#ece6d6';
-      ctx.globalAlpha = k;
-      ctx.fillText(ch, x, y + (1 - easeOut(k)) * bh * 0.4 + Math.sin(t * 6 + i) * S * 0.002);
-      x += widths[i];
-    });
-    ctx.restore();
-  }
-}
-const easeOut = (x: number) => 1 - (1 - x) ** 3;
-const easeIn = (x: number) => x * x * x;
 
 /* ------------------------------------------------------------- startup */
 
@@ -264,12 +328,22 @@ requestAnimationFrame(loop);
 
 // dev hook: jump the playhead (used by the screenshot scripts)
 (window as unknown as { __film: unknown }).__film = {
+  /** jump to a raw (scroll) beat */
   seek(b: number) {
     window.scrollTo(0, b * beatPx);
     target = b;
-    B = b;
-    prevB = b;
+    R = b;
+    mapped = toFilm(b);
+    B = prevB = mapped.film;
   },
+  /** jump to a film beat */
+  seekFilm(b: number) {
+    (window as unknown as { __film: { seek(x: number): void } }).__film.seek(toRaw(b) + 1e-4);
+  },
+  raw: (b: number) => toRaw(b),
   intro(s: number | null) { introOverride = s; },
   cost: () => cost,
+  idle: () => frame.idle,
+  setV(v: number | null) { forceV = v; },
+  setIdle(v: number | null) { idleOff = v === null ? 0 : v + 1; },
 };

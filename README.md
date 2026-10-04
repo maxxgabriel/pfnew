@@ -23,6 +23,22 @@ of ink, with eyes and a red scarf), watches every act.
 5. **Hello.** Through the net and back onto paper. Contact.
 6. **Credits**, and a post-credits scene.
 
+Woven through it:
+
+- **Pick a side.** Two hilts after the title; your colour wins the beam lock,
+  Pong and the match (switch any time from the chip by the seal).
+- **The manifesto.** ONE STROKE. / NO UNDO. / SO MAKE IT MOVE., spliced into
+  the white-out after the duel.
+- **The hand-scroll.** At each act change the frame becomes one panel of a
+  painted scroll between wooden rollers; it rolls shut after the credits.
+- **The glass.** Stop scrolling and Blot knocks on the inside of the screen;
+  scroll back and it rewinds like tape; fling it and the film overheats and
+  burns. The cannon ball cracks the screen, a blade clash cuts the chapter
+  reel in two, and the goal confetti piles up on the bottom edge.
+
+Interludes are spliced in by `src/core/timeline.ts`: the film holds its frame
+while they play, so the acts keep their own timing.
+
 ## Develop
 
 ```sh
