@@ -4,7 +4,6 @@ import { type Pt, TAU, bell, clamp, ease, hash, lerp, rng, seg } from '../core/m
 import { canvas } from '../core/sprites';
 import { C } from '../core/style';
 import { drawBall } from './machine';
-import { lose as loser, win } from '../core/side';
 
 /*
  * ACT III — THE ARCADE.
@@ -542,10 +541,9 @@ function renderPixels(g: CanvasRenderingContext2D, W: number, H: number, f: Fram
     const lp = clamp(ball.k % 2 === 1 ? lerp(H / 2, ball.y, ease.out2(ball.s)) : ball.y + Math.sin(t * 3) * 3, top, bot - ph);
     const rp = clamp(ball.k % 2 === 0 ? lerp(H / 2, ball.y, ease.out2(ball.s)) : ball.y + Math.sin(t * 2.6) * 3, top, bot - ph);
     const lose = ball.k >= PONG_T.length - 2;
-    // your side always plays on the right, and the right side never misses
-    g.fillStyle = loser().c;
+    g.fillStyle = PAL.blue;
     g.fillRect(4, Math.round(lose ? lp + 12 : lp - ph / 2), 2, ph);
-    g.fillStyle = win().c;
+    g.fillStyle = PAL.green;
     g.fillRect(W - 6, Math.round(rp - ph / 2), 2, ph);
     // ball with a short trail
     for (let k = 3; k >= 0; k--) {
@@ -555,8 +553,8 @@ function renderPixels(g: CanvasRenderingContext2D, W: number, H: number, f: Fram
     }
     // score and rally counter
     const scored = lose && ball.s > 0.5;
-    text(g, '0', W / 2 - 10, padT, loser().c, 2);
-    text(g, scored ? '1' : '0', W / 2 + 10, padT, win().c, 2);
+    text(g, '0', W / 2 - 10, padT, PAL.blue, 2);
+    text(g, scored ? '1' : '0', W / 2 + 10, padT, PAL.green, 2);
     const rally = Math.min(ball.k + 1, 7);
     if (!lose) {
       const pop = 1 + (ball.s < 0.15 ? 1 : 0);
@@ -565,12 +563,12 @@ function renderPixels(g: CanvasRenderingContext2D, W: number, H: number, f: Fram
       if (ball.s < 0.12 && ball.k > 0) {
         const hx = ball.k % 2 === 1 ? W - 7 : 6;
         const rr = Math.round(2 + ball.s * 40);
-        g.fillStyle = ball.k % 2 === 1 ? win().c : loser().c;
+        g.fillStyle = ball.k % 2 === 1 ? PAL.green : PAL.blue;
         g.fillRect(hx - rr, Math.round(ball.y), rr * 2, 1);
         g.fillRect(hx, Math.round(ball.y) - rr, 1, rr * 2);
       }
     } else {
-      text(g, `${win().name} SCORES`, W / 2, H * 0.45, win().c, 1);
+      text(g, 'GREEN SCORES', W / 2, H * 0.45, PAL.green, 1);
     }
     sprite(g, 3, bot + 2, blink, 1);
     return;
@@ -600,7 +598,7 @@ function renderPixels(g: CanvasRenderingContext2D, W: number, H: number, f: Fram
     const padY = H - padB - 3;
     const [bx, by] = q > 0 ? alongPath(q) : [W / 2, padY - 3];
     const padX = clamp(q > 0 ? lerp(W / 2, bx, 0.6) : W / 2, 8, W - 8);
-    g.fillStyle = win().c;
+    g.fillStyle = PAL.green;
     g.fillRect(Math.round(padX - 8), padY, 16, 2);
     g.fillStyle = '#ffffff';
     g.fillRect(Math.round(bx) - 1, Math.round(by) - 1, 3, 3);

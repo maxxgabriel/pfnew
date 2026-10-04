@@ -5,7 +5,6 @@ import { type Pt, TAU, ease, lerp, rng, seg } from '../core/math';
 import { drawSprite, glow, paperTile, withAlpha } from '../core/sprites';
 import { C, F, font } from '../core/style';
 import { drawLightLine, drawSeal } from './ink';
-import { lose, win } from '../core/side';
 
 /*
  * END CREDITS, and the scene after them.
@@ -22,7 +21,7 @@ import { lose, win } from '../core/side';
 export const CRED = { start: 26.55, roll: [26.85, 30.6] as const, post: 30.75, end: 34.0 };
 
 type Line = { kind: 'head' | 'pair' | 'big' | 'note' | 'gap'; a?: string; b?: string; color?: string };
-const lines = (): Line[] => [
+const LINES: Line[] = [
   { kind: 'head', a: 'a film by' },
   { kind: 'big', a: 'MAX GABRIEL' },
   { kind: 'gap' },
@@ -30,7 +29,6 @@ const lines = (): Line[] => [
   { kind: 'pair', a: 'ink', b: 'one brush, no undo' },
   { kind: 'pair', a: 'the blue one', b: 'Blue', color: C.blue },
   { kind: 'pair', a: 'the green one', b: 'Green', color: C.green },
-  { kind: 'pair', a: 'the winner', b: `${win().word} (your pick)`, color: win().c },
   { kind: 'pair', a: 'the ball', b: 'itself' },
   { kind: 'pair', a: 'blot', b: 'Blot', color: C.red },
   { kind: 'pair', a: 'machine operator', b: 'a see-saw' },
@@ -69,7 +67,6 @@ function drawRoll(f: Frame, S: number) {
   const lh = Math.max(34, S * 0.095) * (stacked ? 1.45 : 1);
   const p = seg(B, CRED.roll[0], CRED.roll[1]);
   // the roll comes to rest with its last line in the middle of the frame
-  const LINES = lines();
   const top = lerp(h * 1.02, h * 0.5 - (LINES.length - 1) * lh, ease.out2(p));
   const mid = w / 2;
   ctx.textBaseline = 'middle';
@@ -207,14 +204,14 @@ function drawPost(f: Frame, S: number) {
     if (greenLit > 0) {
       const len = S * 0.42 * ease.out3(greenLit);
       const hum = 0.85 + 0.15 * Math.sin(t * 50);
-      drawLightLine(ctx, gH[0], gH[1], gH[0] + Math.cos(gA) * len, gH[1] + Math.sin(gA) * len, lose().c, lose().hot, S * 0.014, hum);
+      drawLightLine(ctx, gH[0], gH[1], gH[0] + Math.cos(gA) * len, gH[1] + Math.sin(gA) * len, C.green, C.greenHot, S * 0.014, hum);
     }
     // the blue one: in the grass, then in Blot's hands
     const bH: Pt = [lerp(cx - S * 0.05, blotX + blotS * 0.32, pick), lerp(cy, blotY - blotS * 0.42, pick)];
     const bA = lerp(0.35, -1.2 - startled * 0.6 + Math.sin(t * 9) * 0.06 * blueLit, pick);
     if (blueLit > 0) {
       const len = S * 0.38 * ease.out3(blueLit);
-      drawLightLine(ctx, bH[0], bH[1], bH[0] + Math.cos(bA) * len, bH[1] + Math.sin(bA) * len, win().c, win().hot, S * 0.014, 0.9 + 0.1 * Math.sin(t * 60));
+      drawLightLine(ctx, bH[0], bH[1], bH[0] + Math.cos(bA) * len, bH[1] + Math.sin(bA) * len, C.blue, C.blueHot, S * 0.014, 0.9 + 0.1 * Math.sin(t * 60));
     }
     drawHilt(ctx, bH, bA, hl, S);
     if (walk > 0) {
@@ -229,8 +226,8 @@ function drawPost(f: Frame, S: number) {
     if (blueLit > 0 || greenLit > 0) {
       ctx.globalCompositeOperation = 'lighter';
       ctx.globalAlpha = 0.25 * Math.max(blueLit, greenLit) * up;
-      if (blueLit > 0) drawSprite(ctx, glow(win().c, 128), bH[0], gy, S * 0.8, S * 0.2);
-      if (greenLit > 0) drawSprite(ctx, glow(lose().c, 128), gH[0] + S * 0.2, gy, S * 0.8, S * 0.2);
+      if (blueLit > 0) drawSprite(ctx, glow(C.blue, 128), bH[0], gy, S * 0.8, S * 0.2);
+      if (greenLit > 0) drawSprite(ctx, glow(C.green, 128), gH[0] + S * 0.2, gy, S * 0.8, S * 0.2);
     }
     ctx.restore();
   }

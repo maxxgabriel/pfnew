@@ -192,11 +192,11 @@ export function drawMachine(f: Frame) {
 
 /** During the tear the ball is drawn above the paper, so it can fall through it. */
 export function drawMachineBall(f: Frame) {
-  if (f.B < 6.79) return;
+  if (f.B < 6.85) return;
   const { ctx } = f;
   const v = view(f);
-  // the manifesto hands the ball over already formed
-  const pop = 1;
+  // condenses out of the white-out with an overshoot, then hangs, then drops
+  const pop = ease.outBack(seg(f.B, 6.85, 7.1), 2.6);
   ctx.save();
   ctx.translate(v.ox, -v.camY * f.u);
   ctx.scale(f.u, f.u);
@@ -283,7 +283,7 @@ function drawWorld(f: Frame, withBall: boolean) {
   if (vis(150, 205)) drawChute(ctx, t);
   if (vis(150, 260)) drawCannon(ctx, B, t);
   drawGears(ctx, t, camY, screenH);
-  drawBlobs(ctx, B, t, camY, screenH, f.idle);
+  drawBlobs(ctx, B, t, camY, screenH);
 
   // launch: the MOVE countdown fires confetti
   if (f.crossedFwd(12.0)) {
@@ -296,8 +296,7 @@ function drawWorld(f: Frame, withBall: boolean) {
   confetti.update(dt);
   confetti.draw(ctx);
 
-  // past the launch the ball leaves the world and hits the glass (see overlay)
-  if (withBall && B >= 7.9 && B < 12.08) {
+  if (withBall && B >= 7.9) {
     const [bx, by] = ballRaw(B);
     const fly = seg(B, 12.05, 12.2);
     drawBall(ctx, bx, by, R, bx / R + by * 0.08 + fly * 20, t, 1 + fly * 0.25);
@@ -637,9 +636,8 @@ const BLOBS: Blob[] = [
 ];
 const LEDGES: [number, number, number][] = [[91, 44, 8], [8, 101, 8]];
 
-function drawBlobs(ctx: CanvasRenderingContext2D, B: number, t: number, camY: number, screenH: number, idle: number) {
+function drawBlobs(ctx: CanvasRenderingContext2D, B: number, t: number, camY: number, screenH: number) {
   const [bx, by] = ballRaw(B);
-  const stare = seg(idle, 3, 3.6);
   for (const [lx, ly, lw] of LEDGES) {
     if (ly < camY - 5 || ly > camY + screenH + 5) continue;
     shape(ctx, [[lx - lw / 2, ly], [lx + lw / 2, ly], [lx + lw / 2, ly + 2.4], [lx - lw / 2, ly + 2.4]], C.ink, 1, t, lx, false);
@@ -671,17 +669,17 @@ function drawBlobs(ctx: CanvasRenderingContext2D, B: number, t: number, camY: nu
       const landed = B >= 11.15;
       drawBlot(ctx, x, y + b.r * 1.15 - (rot ? 0 : hop * 0.6), b.r * 2.7, {
         t, pose: flying ? 'fall' : landed ? 'cheer' : near > 0.4 ? 'shock' : 'idle',
-        look: stare > 0.5 ? undefined : [bx, by], rot, seed: 2, squash: sq < 1 ? (1 - sq) * 1.2 : 0, wind: flying ? -1 : 0.5,
+        look: [bx, by], rot, seed: 2, squash: sq < 1 ? (1 - sq) * 1.2 : 0, wind: flying ? -1 : 0.5,
       });
       return;
     }
-    drawBlob(ctx, x, y - (rot ? 0 : hop), b.r, b.col, rot, sq * breathe, bx, by, t, b.seed, near, stare);
+    drawBlob(ctx, x, y - (rot ? 0 : hop), b.r, b.col, rot, sq * breathe, bx, by, t, b.seed, near);
   });
 }
 
 function drawBlob(
   ctx: CanvasRenderingContext2D, x: number, y: number, r: number, col: string, rot: number, sq: number,
-  lx: number, ly: number, t: number, seed: number, near: number, stare = 0,
+  lx: number, ly: number, t: number, seed: number, near: number,
 ) {
   ctx.save();
   ctx.translate(x, y);
@@ -707,8 +705,7 @@ function drawBlob(
     if (!blink) {
       ctx.fillStyle = C.ink;
       ctx.beginPath();
-      // staring straight out of the screen means pupils dead centre, and bigger
-      ctx.arc(cx + Math.cos(a) * r * 0.12 * (1 - stare), cy + Math.sin(a) * r * 0.15 * (1 - stare), r * (0.14 + stare * 0.05), 0, TAU);
+      ctx.arc(cx + Math.cos(a) * r * 0.12, cy + Math.sin(a) * r * 0.15, r * 0.14, 0, TAU);
       ctx.fill();
     }
   }

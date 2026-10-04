@@ -16,8 +16,6 @@ export interface Frame {
   dt: number;
   /** seconds since the film was ready; drives the opening title */
   intro: number;
-  /** seconds since the reader last scrolled */
-  idle: number;
   reduced: boolean;
   /** true on the frame the playhead passes beat `b`, in either direction */
   crossed(b: number): boolean;

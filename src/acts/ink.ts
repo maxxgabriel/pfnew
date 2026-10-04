@@ -7,7 +7,6 @@ import { blot, canvas, drawSprite, glow, paperTile, withAlpha } from '../core/sp
 import { C, F, font } from '../core/style';
 import { drawBlot } from '../core/blot';
 import { drawWarrior } from './warrior';
-import { SIDE, winDir } from '../core/side';
 
 /*
  * ACT I — INK.
@@ -441,9 +440,7 @@ export function drawInk(f: Frame) {
   const zoom = Math.exp(Math.log(16) * zoomT);
 
   // where the beams meet; the camera dives into it
-  // your side's beam overpowers the other and drives the meeting point back
-  const over = ease.inOut2(seg(B, 5.55, 6.1));
-  const jx = X(0.5 + (0.07 * Math.sin(t * 1.15) + 0.03 * Math.sin(t * 2.9)) * (1 - over * 0.6) - winDir() * 0.14 * over);
+  const jx = X(0.5 + 0.07 * Math.sin(t * 1.15) + 0.03 * Math.sin(t * 2.9));
   const jy = Y(0.555 + 0.008 * Math.sin(t * 1.7));
 
   ctx.save();
@@ -553,9 +550,9 @@ export function drawInk(f: Frame) {
     const bs = Math.max(S * 0.045, enR * 0.3) * pop;
     const near = (b: number, r = 0.12) => Math.abs(B - b) < r;
     const pose = CLASHES.some((c) => near(c)) ? 'cover' : B > 5.2 && B < 6.2 ? 'shock' : I < 3.6 && B < 0.2 ? 'idle' : 'idle';
-    const lookAt: [number, number] | undefined = f.idle > 3 ? undefined : B > 2.4 ? [jx, jy] : I < 3.4 ? [w * 0.5, h * 0.4] : [w * 0.5, h];
+    const lookAt: [number, number] = B > 2.4 ? [jx, jy] : I < 3.4 ? [w * 0.5, h * 0.4] : [w * 0.5, h];
     drawBlot(ctx, st[0] + enR * 0.04, st[1] - enR * 0.02, bs, {
-      t, pose: f.idle > 6 && B < 0.35 ? 'wave' : pose, look: lookAt, seed: 1, rot: -0.35 * (1 - pull) - 0.2 * pull, eye: C.white, wind: 0.5 + Math.sin(t) * 0.3,
+      t, pose, look: lookAt, seed: 1, rot: -0.35 * (1 - pull) - 0.2 * pull, eye: C.white, wind: 0.5 + Math.sin(t) * 0.3,
     });
   }
 
@@ -813,10 +810,7 @@ function drawDuel(
     // the hands are never quite still
     const bob = Math.sin(t * 1.6 + i * 2) * S * 0.008;
     const tremble = lock * Math.sin(t * 47 + i) * S * 0.004;
-    // the losing fighter is driven back by the beam
-    const loserIx = SIDE.pick === 'green' ? 0 : 1;
-    const push = i === loserIx ? (i === 0 ? -1 : 1) * S * 0.07 * ease.inOut2(seg(B, 5.6, 6.1)) + Math.sin(t * 40) * S * 0.003 * seg(B, 5.6, 5.8) : 0;
-    const hx = X(bl.x) + bob * 0.5 + tremble - camX * 0.9 + push;
+    const hx = X(bl.x) + bob * 0.5 + tremble - camX * 0.9;
     const hy = Y(bl.y) + bob + tremble * side;
     const a = bl.a + Math.sin(t * 1.3 + i * 4) * 0.035 * (1 - lock);
     hilts.push([hx, hy]);
@@ -836,27 +830,10 @@ function drawDuel(
     }
     v.px = hx;
     v.py = hy;
-    const k = drawWarrior(ctx, {
+    drawWarrior(ctx, {
       hilt: [hx, hy], a: bl.a, foeX: hilts[1 - i][0], s, groundY: h * 0.83,
       color: i ? C.green : C.blue, t, vx: v.vx, vy: v.vy, seed: i + 1, alpha: appear,
     });
-    // left alone long enough, both fighters turn their eyes on the viewer
-    const stare = seg(f.idle, 3, 3.8) * appear;
-    if (stare > 0) {
-      ctx.save();
-      ctx.globalCompositeOperation = 'lighter';
-      for (const ex of [-1, 1]) {
-        const x = k.head[0] + ex * s * 0.022, y = k.head[1] - s * 0.004;
-        ctx.globalAlpha = stare * 0.6;
-        drawSprite(ctx, glow(i ? C.green : C.blue, 64), x, y, s * 0.07);
-        ctx.globalAlpha = stare;
-        ctx.fillStyle = '#ffffff';
-        ctx.beginPath();
-        ctx.ellipse(x, y, s * 0.011, s * 0.006 * (Math.sin(t * 0.8 + i) > 0.97 ? 0.2 : 1), 0, 0, TAU);
-        ctx.fill();
-      }
-      ctx.restore();
-    }
   });
 
   // swing trails: where the blades were a moment of scroll ago
@@ -979,10 +956,8 @@ function drawDuel(
     if (grow > 0.95) {
       // the meeting point
       const R = S * (0.07 + 0.03 * Math.sin(t * 9) + orb * 0.25);
-      const ov = ease.inOut2(seg(B, 5.55, 6.1));
-      const gb = SIDE.pick === 'blue' ? 1 + ov : 1 - ov * 0.5, gg = SIDE.pick === 'green' ? 1 + ov : 1 - ov * 0.5;
-      drawSprite(ctx, glow(C.blue, 128), jx - R * 0.3, jy, R * 4 * gb);
-      drawSprite(ctx, glow(C.green, 128), jx + R * 0.3, jy, R * 4 * gg);
+      drawSprite(ctx, glow(C.blue, 128), jx - R * 0.3, jy, R * 4);
+      drawSprite(ctx, glow(C.green, 128), jx + R * 0.3, jy, R * 4);
       drawSprite(ctx, glow('#ffffff', 128, 0.2), jx, jy, R * 2.4);
       // crackle
       if (Math.floor(t * 20) !== crackleSeed) crackleSeed = Math.floor(t * 20);
