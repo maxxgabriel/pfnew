@@ -4,6 +4,7 @@ import { CONFETTI, Particles } from '../core/particles';
 import { drawSprite, glow, withAlpha } from '../core/sprites';
 import { C, F, extruded, font } from '../core/style';
 import { drawBall } from './machine';
+import { drawBlot } from '../core/blot';
 import { brush, ensoPath } from '../core/brush';
 
 const MOON_ENSO = ensoPath(0, 0, 100, 3, 0.93, -2.3);
@@ -126,16 +127,48 @@ function camera(f: Frame, shake: Pt): Cam {
   const [x, y, z, lx, ly, lz] = keyed<number[]>(CAM_KEYS, f.B);
   // a broadcast camera is never perfectly still
   const hx = Math.sin(f.t * 0.7) * 0.15, hy = Math.sin(f.t * 0.9 + 1) * 0.1;
-  const dx = lx - x, dy = ly - y, dz = lz - z;
+  return makeCam(f, shake, [x + hx, y + hy, z], [lx, ly, lz]);
+}
+
+function makeCam(f: { w: number; h: number }, shake: Pt, pos: V3, look: V3, rect?: { x: number; y: number; w: number; h: number }): Cam {
+  const dx = look[0] - pos[0], dy = look[1] - pos[1], dz = look[2] - pos[2];
   const yaw = Math.atan2(dx, dz);
   const pitch = Math.atan2(-dy, Math.hypot(dx, dz));
   const fl = Math.min(f.w * 1.15, f.h * 1.05);
   return {
-    x: x + hx, y: y + hy, z,
+    x: pos[0], y: pos[1], z: pos[2],
     cyaw: Math.cos(yaw), syaw: Math.sin(yaw),
     cp: Math.cos(pitch), sp: Math.sin(pitch),
-    f: fl, cx: f.w / 2 + shake[0], cy: f.h / 2 + shake[1],
+    f: fl, cx: (rect ? rect.x + rect.w / 2 : f.w / 2) + shake[0], cy: (rect ? rect.y + rect.h / 2 : f.h / 2) + shake[1],
   };
+}
+
+/*
+ * BULLET TIME. At the instant of the strike the film freezes and the camera
+ * walks a full circle around the ball and the striker, debris hanging in the
+ * air, before the shot is let go. Implemented as a remap of the playhead:
+ * the act lives in its own "match time", which stops for FZ beats.
+ */
+const D = 4.0, FREEZE = 15.6, FZ = 1.1;
+export const MATCH_SHIFT = D;
+export function matchLocal(B: number) {
+  const b = B - D;
+  return b < FREEZE ? b : b < FREEZE + FZ ? FREEZE : b - FZ;
+}
+
+function orbitCam(f: Frame, bt: number, shake: Pt): Cam {
+  const ball = ballAt(FREEZE);
+  const [x, y, z, lx, ly, lz] = keyed<number[]>(CAM_KEYS, FREEZE);
+  const th = ease.inOutSine(bt) * TAU;
+  const rx = x - ball[0], rz = z - ball[2];
+  const r0 = Math.hypot(rx, rz);
+  const a0 = Math.atan2(rx, rz);
+  const swell = Math.sin(bt * Math.PI);
+  const r = r0 * (1 - 0.55 * swell);
+  const pos: V3 = [ball[0] + Math.sin(a0 + th) * r, y + swell * 0.9, ball[2] + Math.cos(a0 + th) * r];
+  const k = Math.min(1, swell * 3);
+  const look: V3 = [lerp(lx, ball[0], k), lerp(ly, ball[1] + 0.3, k), lerp(lz, ball[2], k)];
+  return makeCam(f, shake, pos, look);
 }
 
 /* ------------------------------------------------------------- the play */
@@ -311,36 +344,10 @@ let stars: [number, number, number][] = [];
 const TOWERS: V3[] = [[-33, 0, 116], [33, 0, 116], [-52, 0, -8], [52, 0, -8]];
 const LIGHT_ON = [12.95, 13.07, 13.19, 13.31];
 
-export function drawMatch(f: Frame) {
+let prevLocal = 0, lastCall = -1;
+
+function scene(f: Frame, cam: Cam, S: number, frozen: number) {
   const { ctx, w, h, B, t } = f;
-  const dt = Math.min(0.05, t - lastT || 0.016);
-  lastT = t;
-  if (!built) {
-    built = true;
-    buildNet();
-    buildCrowd();
-    const r = rng(8);
-    stars = Array.from({ length: 140 }, () => [r(), r() * 0.7, r()]);
-  }
-  const S = Math.min(w, h);
-
-  // the wipe in from the machine: a diagonal panel edge sweeping down
-  const wipe = ease.inOut3(seg(B, 12.3, 12.85));
-  ctx.save();
-  if (wipe < 1) {
-    ctx.beginPath();
-    const yA = lerp(-h * 0.4, h * 1.3, wipe), yB = yA - w * 0.35;
-    ctx.moveTo(0, -10);
-    ctx.lineTo(w, -10);
-    ctx.lineTo(w, yB);
-    ctx.lineTo(0, yA);
-    ctx.closePath();
-    ctx.clip();
-  }
-
-  shakeAmt = Math.max(0, shakeAmt - dt * 40);
-  shake = [(Math.random() - 0.5) * shakeAmt, (Math.random() - 0.5) * shakeAmt];
-  const cam = camera(f, shake);
   const lit = LIGHT_ON.filter((b) => B >= b).length;
   const L = lit / 4;
 
@@ -450,21 +457,10 @@ export function drawMatch(f: Frame) {
 
   drawChalk(ctx, cam, B, t, S);
 
-  // ---- goal + net
-  stepNet(dt);
-  if (f.crossedFwd(16.5)) {
-    hitNet(IMPACT, 1.4);
-    shakeAmt = S * 0.03;
-    f.flash(0.5, '#ffffff');
-    const cols = [C.green, C.paper, C.greenHot, C.blue, C.red];
-    for (let k = 0; k < cols.length; k++) {
-      confetti.burst(w * (0.2 + k * 0.15), h * 0.15, 30, S * 1.4, { color: cols[k], kind: CONFETTI, size: S * 0.012, max: 3.5, dir: Math.PI / 2, spread: 2.4 });
-    }
-  }
   // sort players/ball/goal back-to-front
   const items: { z: number; draw: () => void }[] = [];
   const goalZ = toCam(cam, [0, 1, 105])[2];
-  items.push({ z: goalZ, draw: () => drawGoal(ctx, cam, S) });
+  items.push({ z: goalZ, draw: () => drawGoal(ctx, cam, S, B, t) });
   PLAYERS.forEach((p) => {
     const pos = playerAt(p, B, t);
     const q = toCam(cam, pos);
@@ -480,23 +476,55 @@ export function drawMatch(f: Frame) {
   // ---- the towers, drawn last: they stand in front of the stands
   drawTowers(ctx, cam, B, t, S);
 
-  ctx.restore(); // wipe clip
+  drawFrozenDebris(ctx, cam, frozen, S);
+}
 
-  // the wipe's panel edge
-  if (wipe > 0 && wipe < 1) {
-    const yA = lerp(-h * 0.4, h * 1.3, wipe), yB = yA - w * 0.35;
-    ctx.save();
-    ctx.lineWidth = S * 0.035;
-    ctx.strokeStyle = C.paper;
-    ctx.beginPath();
-    ctx.moveTo(-10, yA + 4);
-    ctx.lineTo(w + 10, yB - 4);
-    ctx.stroke();
-    ctx.lineWidth = S * 0.008;
-    ctx.strokeStyle = C.ink;
-    ctx.stroke();
-    ctx.restore();
+export function drawMatch(fg: Frame) {
+  const lb = matchLocal(fg.B);
+  // a fresh entry (a jump) shouldn't fire every event it skipped over
+  const plb = fg.t - lastCall > 0.25 ? lb : prevLocal;
+  prevLocal = lb;
+  lastCall = fg.t;
+  const f: Frame = {
+    ...fg,
+    B: lb,
+    crossed: (b: number) => (plb < b) !== (lb < b),
+    crossedFwd: (b: number) => plb < b && lb >= b,
+  };
+  const { ctx, w, h, t } = f;
+  const dt = Math.min(0.05, t - lastT || 0.016);
+  lastT = t;
+  if (!built) {
+    built = true;
+    buildNet();
+    buildCrowd();
+    const r = rng(8);
+    stars = Array.from({ length: 140 }, () => [r(), r() * 0.7, r()]);
   }
+  const S = Math.min(w, h);
+  const bt = seg(fg.B - D, FREEZE, FREEZE + FZ);
+
+  shakeAmt = Math.max(0, shakeAmt - dt * 40);
+  shake = [(Math.random() - 0.5) * shakeAmt, (Math.random() - 0.5) * shakeAmt];
+  // ---- goal + net
+  stepNet(dt);
+  if (f.crossedFwd(16.5)) {
+    hitNet(IMPACT, 1.4);
+    shakeAmt = S * 0.03;
+    f.flash(0.5, '#ffffff');
+    const cols = [C.green, C.paper, C.greenHot, C.blue, C.red];
+    for (let k = 0; k < cols.length; k++) {
+      confetti.burst(w * (0.2 + k * 0.15), h * 0.15, 30, S * 1.4, { color: cols[k], kind: CONFETTI, size: S * 0.012, max: 3.5, dir: Math.PI / 2, spread: 2.4 });
+    }
+  }
+
+  const frozen = bt > 0 && bt < 1 ? Math.min(1, Math.sin(bt * Math.PI) * 4) : 0;
+  const cam = frozen > 0 ? orbitCam(f, bt, shake) : camera(f, shake);
+  ctx.save();
+  scene(f, cam, S, frozen);
+  ctx.restore();
+  drawPanels(f, S, shake);
+  if (frozen > 0) drawBulletHud(f, S, bt, frozen);
 
   // ---- broadcast graphics
   drawScorebug(f, S);
@@ -759,7 +787,7 @@ function draw3DBall(ctx: CanvasRenderingContext2D, cam: Cam, b: V3, B: number, t
   drawBall(ctx, p[0], p[1], r, b[2] * 0.9 + b[0] * 0.4, t, 1);
 }
 
-function drawGoal(ctx: CanvasRenderingContext2D, cam: Cam, S: number) {
+function drawGoal(ctx: CanvasRenderingContext2D, cam: Cam, S: number, B: number, t: number) {
   // net mesh
   ctx.strokeStyle = 'rgba(240,244,255,0.55)';
   ctx.lineWidth = Math.max(0.8, S * 0.0018);
@@ -786,6 +814,32 @@ function drawGoal(ctx: CanvasRenderingContext2D, cam: Cam, S: number) {
   ctx.beginPath();
   line(ctx, cam, [[-3.66, 0, 105], [-3.66, 2.44, 105], [3.66, 2.44, 105], [3.66, 0, 105]]);
   ctx.stroke();
+  // Blot has the best seat in the house: on the crossbar, until the ball arrives
+  const fall = seg(B, 16.5, 16.72);
+  const bp: V3 = fall <= 0 ? [-1.5, 2.47, 105] : [lerp(-1.5, -0.6, fall), lerp(2.47, 0.05, ease.in2(fall)), lerp(105, 106.6, fall)];
+  const bs = P(cam, bp);
+  if (bs) {
+    const size = (cam.f * 0.75) / bs[2];
+    if (size > 2) {
+      const ballS = P(cam, ballAt(B));
+      const pose = fall > 0 && fall < 1 ? 'fall' : fall >= 1 ? 'cheer' : B > 16.2 ? 'shock' : 'idle';
+      ctx.globalAlpha = 0.35;
+      drawSprite(ctx, glow(C.paper, 64), bs[0], bs[1] - size * 0.45, size * 1.8);
+      ctx.globalAlpha = 1;
+      // legs dangling off the bar
+      if (fall <= 0) {
+        ctx.strokeStyle = C.ink;
+        ctx.lineWidth = Math.max(1, size * 0.07);
+        for (const k of [-1, 1]) {
+          ctx.beginPath();
+          ctx.moveTo(bs[0] + k * size * 0.15, bs[1]);
+          ctx.lineTo(bs[0] + k * size * 0.16 + Math.sin(t * 4 + k) * size * 0.08, bs[1] + size * 0.22);
+          ctx.stroke();
+        }
+      }
+      drawBlot(ctx, bs[0], bs[1], size, { t, pose, look: ballS ? [ballS[0], ballS[1]] : undefined, seed: 4, eye: C.white, rot: fall > 0 && fall < 1 ? fall * 3 : 0 });
+    }
+  }
 }
 
 /* ------------------------------------------------- broadcast graphics */
@@ -962,4 +1016,136 @@ function drawGoalType(f: Frame, S: number) {
     x += widths[i];
   });
   ctx.restore();
+}
+
+/* -------------------------------------------- comic panels, bullet time */
+
+function drawPanels(f: Frame, S: number, shake: Pt) {
+  const { ctx, w, h, B, t } = f;
+  const inn = seg(B, 14.16, 14.3), out = seg(B, 14.5, 14.64);
+  if (inn <= 0 || out >= 1) return;
+  const ball = ballAt(B);
+  const p8 = playerAt(PLAYERS[1], B, t), p7 = playerAt(PLAYERS[2], B, t);
+  const shots: { pos: V3; look: V3; label: string }[] = [
+    { pos: [p8[0] + 3.2, 1.5, p8[2] - 3.8], look: [p8[0], 1.1, p8[2] + 1], label: '#8 · THE LONG BALL' },
+    { pos: [ball[0] - 2.2, Math.max(0.25, ball[1] - 1.4), ball[2] - 3.2], look: ball, label: 'IN THE AIR' },
+    { pos: [p7[0] - 3.6, 1.7, p7[2] + 4.2], look: [p7[0], 1.0, p7[2] - 2], label: '#7 · ON THE WING' },
+  ];
+  const portrait = h > w;
+  const gut = S * 0.018;
+  shots.forEach((sh, i) => {
+    const k = ease.out3(clamp(inn * 1.7 - i * 0.3)) * (1 - ease.in3(clamp(out * 1.7 - i * 0.3)));
+    if (k <= 0) return;
+    const slant = S * 0.06 * (i % 2 ? 1 : -1);
+    // panel polygon: stripes on a phone, columns on a wide screen
+    let poly: Pt[];
+    let rect: { x: number; y: number; w: number; h: number };
+    if (portrait) {
+      const y0 = (h * i) / 3, y1 = (h * (i + 1)) / 3;
+      const off = (1 - k) * w * (i % 2 ? 1 : -1);
+      poly = [[off, y0 + (i ? slant : 0)], [w + off, y0 - (i ? slant : 0)], [w + off, y1 - (i < 2 ? -slant : 0)], [off, y1 + (i < 2 ? -slant : 0)]];
+      rect = { x: off, y: y0, w, h: y1 - y0 };
+    } else {
+      const x0 = (w * i) / 3, x1 = (w * (i + 1)) / 3;
+      const off = (1 - k) * h * (i % 2 ? 1 : -1);
+      poly = [[x0 + (i ? slant : 0), off], [x1 + (i < 2 ? slant : 0), off], [x1 - (i < 2 ? slant : 0), h + off], [x0 - (i ? slant : 0), h + off]];
+      rect = { x: x0, y: off, w: x1 - x0, h };
+    }
+    ctx.save();
+    ctx.beginPath();
+    poly.forEach((p, j) => (j ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])));
+    ctx.closePath();
+    ctx.save();
+    ctx.clip();
+    const cam = makeCam(f, shake, sh.pos, sh.look, rect);
+    scene(f, cam, S, 0);
+    ctx.restore();
+    // gutter: paper then an ink keyline, like a comic page
+    ctx.lineJoin = 'round';
+    ctx.strokeStyle = C.paper;
+    ctx.lineWidth = gut * 2;
+    ctx.stroke();
+    ctx.strokeStyle = C.ink;
+    ctx.lineWidth = gut * 0.4;
+    ctx.stroke();
+    // caption box
+    const lx = Math.max(poly[0][0], poly[3][0]) + S * 0.05, ly = poly[0][1] + S * 0.07 + (i === 0 || !portrait ? 96 : 0);
+    ctx.font = font(Math.max(10, S * 0.03), F.display);
+    const tw = ctx.measureText(sh.label).width;
+    ctx.fillStyle = C.ink;
+    ctx.fillRect(lx + 3, ly - S * 0.03 + 3, tw + S * 0.04, S * 0.05);
+    ctx.fillStyle = i === 1 ? C.paper : C.green;
+    ctx.fillRect(lx, ly - S * 0.03, tw + S * 0.04, S * 0.05);
+    ctx.fillStyle = C.ink;
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(sh.label, lx + S * 0.02, ly - S * 0.005);
+    ctx.restore();
+  });
+}
+
+function drawFrozenDebris(ctx: CanvasRenderingContext2D, cam: Cam, frozen: number, S: number) {
+  if (frozen <= 0) return;
+  const ball = ballAt(FREEZE);
+  const r = rng(91);
+  ctx.save();
+  ctx.globalAlpha = frozen;
+  // turf and dust kicked up by the strike, hanging in the air
+  for (let i = 0; i < 70; i++) {
+    const a = r() * TAU, el = (r() - 0.3) * 1.2, d = 0.3 + r() * 1.6;
+    const p: V3 = [ball[0] + Math.cos(a) * d * 0.8, Math.max(0.05, ball[1] - 0.2 + el * d * 0.5), ball[2] - 0.5 - Math.abs(Math.sin(a)) * d];
+    const q = P(cam, p);
+    if (!q) continue;
+    const size = Math.min(S * 0.03, (cam.f * (0.03 + r() * 0.05)) / q[2]);
+    ctx.fillStyle = r() > 0.4 ? '#2b7a3f' : '#4a3b28';
+    ctx.save();
+    ctx.translate(q[0], q[1]);
+    ctx.rotate(r() * TAU);
+    ctx.fillRect(-size / 2, -size * 0.15, size, size * 0.3);
+    ctx.restore();
+  }
+  // shock rings frozen around the ball, perpendicular to its flight
+  ctx.strokeStyle = 'rgba(255,255,255,0.55)';
+  ctx.lineWidth = Math.max(1, S * 0.003);
+  for (const rr of [0.55, 0.9, 1.3]) {
+    const ring: V3[] = [];
+    for (let k = 0; k < 32; k++) {
+      const a = (k / 32) * TAU;
+      ring.push([ball[0] + Math.cos(a) * rr, ball[1] + Math.sin(a) * rr, ball[2] - rr * 0.8]);
+    }
+    ctx.beginPath();
+    line(ctx, cam, ring, true);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function drawBulletHud(f: Frame, S: number, bt: number, frozen: number) {
+  const { ctx, w, h, t } = f;
+  ctx.save();
+  ctx.globalAlpha = frozen;
+  // viewfinder corners
+  const m = S * 0.07, l = S * 0.07;
+  ctx.strokeStyle = C.white;
+  ctx.lineWidth = Math.max(1.5, S * 0.004);
+  ctx.beginPath();
+  for (const [x, y, dx, dy] of [[m, h * 0.18, 1, 1], [w - m, h * 0.18, -1, 1], [m, h * 0.82, 1, -1], [w - m, h * 0.82, -1, -1]]) {
+    ctx.moveTo(x, y + dy * l);
+    ctx.lineTo(x, y);
+    ctx.lineTo(x + dx * l, y);
+  }
+  ctx.stroke();
+  ctx.font = font(Math.max(11, S * 0.032), F.display);
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'top';
+  ctx.fillStyle = C.red;
+  ctx.fillRect(m, h * 0.18 + l * 0.4, S * 0.025, S * 0.025);
+  ctx.fillStyle = C.white;
+  ctx.fillText('×1000 SLOW', m + S * 0.04, h * 0.18 + l * 0.32);
+  const frames = Math.floor(bt * 24);
+  ctx.textAlign = 'right';
+  ctx.textBaseline = 'bottom';
+  ctx.fillText(`89:14:${String(7 + Math.floor(bt * 2)).padStart(2, '0')}:${String(frames).padStart(2, '0')}`, w - m, h * 0.82 - l * 0.3);
+  ctx.restore();
+  void t;
 }

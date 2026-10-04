@@ -3,6 +3,7 @@ import { type Pt, TAU, bell, clamp, ease, hash, lerp, seg, spline } from '../cor
 import { CONFETTI, Particles } from '../core/particles';
 import { halftone } from '../core/sprites';
 import { C, F, font } from '../core/style';
+import { drawBlot } from '../core/blot';
 
 /*
  * ACT II — THE MACHINE.
@@ -662,6 +663,16 @@ function drawBlobs(ctx: CanvasRenderingContext2D, B: number, t: number, camY: nu
     const near = Math.max(0, 1 - Math.hypot(bx - x, by - y) / 40);
     const hop = Math.abs(Math.sin(t * (4 + near * 6) + b.seed)) * (0.8 + near * 4);
     const breathe = 1 + Math.sin(t * 2.4 + b.seed) * 0.04;
+    if (i === 2) {
+      // the see-saw passenger is Blot
+      const flying = B > 10.75 && B < 11.15;
+      const landed = B >= 11.15;
+      drawBlot(ctx, x, y + b.r * 1.15 - (rot ? 0 : hop * 0.6), b.r * 2.7, {
+        t, pose: flying ? 'fall' : landed ? 'cheer' : near > 0.4 ? 'shock' : 'idle',
+        look: [bx, by], rot, seed: 2, squash: sq < 1 ? (1 - sq) * 1.2 : 0, wind: flying ? -1 : 0.5,
+      });
+      return;
+    }
     drawBlob(ctx, x, y - (rot ? 0 : hop), b.r, b.col, rot, sq * breathe, bx, by, t, b.seed, near);
   });
 }

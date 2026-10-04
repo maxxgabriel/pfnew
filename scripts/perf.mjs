@@ -9,7 +9,7 @@ await page.goto(process.env.URL ?? 'http://localhost:5199');
 await page.waitForFunction(() => window.__film);
 await page.waitForTimeout(1500);
 const out = [];
-for (const b of [0.2, 1.8, 3.6, 5.8, 7.5, 9.5, 11.6, 13.2, 14.5, 16.0, 16.7, 19, 20.6]) {
+for (const b of [0.2, 3.6, 4.45, 9.5, 12.9, 13.9, 15.2, 15.7, 18.3, 20.1, 21.7, 24.5, 28, 32.3]) {
   await page.evaluate((b) => { window.__film.intro(8); window.__film.seek(b); }, b);
   await page.waitForTimeout(1200);
   out.push(`${b}:${(await page.evaluate(() => window.__film.cost())).toFixed(1)}`);

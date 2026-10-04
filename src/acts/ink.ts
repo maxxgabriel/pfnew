@@ -5,6 +5,8 @@ import { type Pt, TAU, bell, clamp, ease, fbm1, lerp, noise1, rng, seg } from '.
 import { Particles, DOT, SPARK } from '../core/particles';
 import { blot, canvas, drawSprite, glow, paperTile, withAlpha } from '../core/sprites';
 import { C, F, font } from '../core/style';
+import { drawBlot } from '../core/blot';
+import { drawWarrior } from './warrior';
 
 /*
  * ACT I — INK.
@@ -290,7 +292,7 @@ function beamTint(color: string) {
   return c;
 }
 
-function drawLightLine(
+export function drawLightLine(
   ctx: CanvasRenderingContext2D,
   x0: number, y0: number, x1: number, y1: number,
   color: string, hot: string, thick: number, flick: number,
@@ -317,6 +319,59 @@ function drawLightLine(
   ctx.strokeStyle = '#ffffff';
   ctx.lineWidth = thick * 0.45;
   ctx.stroke();
+  ctx.restore();
+}
+
+/* -------------------------------------------------------------- petals */
+
+interface Petal { x: number; y: number; vx: number; vy: number; r: number; ph: number }
+const petals: Petal[] = [];
+
+/** Blossom drifting across the duel; every clash blows it outward. */
+function drawPetals(f: Frame, dt: number, X: (n: number) => number, Y: (n: number) => number) {
+  const { ctx, w, h, B, t } = f;
+  const S = Math.min(w, h);
+  const vis = seg(B, 2.35, 2.8) * (1 - seg(B, 6.0, 6.4));
+  if (vis <= 0) return;
+  if (petals.length === 0) {
+    for (let i = 0; i < 46; i++) {
+      petals.push({ x: Math.random() * w, y: Math.random() * h, vx: 0, vy: 0, r: S * (0.006 + Math.random() * 0.006), ph: Math.random() * TAU });
+    }
+  }
+  const P = [P1, P2, P3, P4];
+  CLASHES.forEach((cb, ci) => {
+    if (!f.crossedFwd(cb)) return;
+    const cx = X(P[ci][0]), cy = Y(P[ci][1]);
+    for (const p of petals) {
+      const dx = p.x - cx, dy = p.y - cy;
+      const d = Math.hypot(dx, dy) || 1;
+      const k = Math.max(0, 1 - d / (S * 0.9)) * S * 3.2;
+      p.vx += (dx / d) * k;
+      p.vy += (dy / d) * k;
+    }
+  });
+  ctx.save();
+  for (const p of petals) {
+    // wind from the right, a slow fall, a flutter
+    p.vx += (-S * 0.12 - p.vx) * Math.min(1, dt * 1.5);
+    p.vy += (S * 0.05 - p.vy) * Math.min(1, dt * 1.5);
+    p.x += (p.vx + Math.sin(t * 2 + p.ph) * S * 0.04) * dt;
+    p.y += (p.vy + Math.cos(t * 1.7 + p.ph) * S * 0.03) * dt;
+    if (p.x < -20) { p.x = w + 20; p.y = Math.random() * h * 0.8; }
+    if (p.x > w + 40) p.x = -10;
+    if (p.y > h + 20) { p.y = -10; p.x = Math.random() * w; }
+    if (p.y < -40) p.y = h;
+    ctx.save();
+    ctx.translate(p.x, p.y);
+    ctx.rotate(t * 1.5 + p.ph);
+    ctx.scale(1, 0.35 + 0.65 * Math.abs(Math.cos(t * 3 + p.ph)));
+    ctx.globalAlpha = vis * 0.85;
+    ctx.fillStyle = p.ph > 3 ? '#f3c9cf' : '#f8e2df';
+    ctx.beginPath();
+    ctx.ellipse(0, 0, p.r * 1.3, p.r * 0.8, 0, 0, TAU);
+    ctx.fill();
+    ctx.restore();
+  }
   ctx.restore();
 }
 
@@ -354,6 +409,7 @@ class Cord {
   }
 }
 const cords = [new Cord(), new Cord()];
+const vel = [{ px: 0, py: 0, vx: 0, vy: 0 }, { px: 0, py: 0, vx: 0, vy: 0 }];
 
 /* -------------------------------------------------------------- drawing */
 
@@ -487,11 +543,33 @@ export function drawInk(f: Frame) {
     ctx.globalAlpha = 1;
   }
 
+  // ---- Blot: the first drop climbs out of its own splash and sits on the circle
+  const pop = ease.outBack(seg(I, 1.05, 1.45), 2.2);
+  if (pop > 0) {
+    const st = ENSO_START(mx, my, enR);
+    const bs = Math.max(S * 0.045, enR * 0.3) * pop;
+    const near = (b: number, r = 0.12) => Math.abs(B - b) < r;
+    const pose = CLASHES.some((c) => near(c)) ? 'cover' : B > 5.2 && B < 6.2 ? 'shock' : I < 3.6 && B < 0.2 ? 'idle' : 'idle';
+    const lookAt: [number, number] = B > 2.4 ? [jx, jy] : I < 3.4 ? [w * 0.5, h * 0.4] : [w * 0.5, h];
+    drawBlot(ctx, st[0] + enR * 0.04, st[1] - enR * 0.02, bs, {
+      t, pose, look: lookAt, seed: 1, rot: -0.35 * (1 - pull) - 0.2 * pull, eye: C.white, wind: 0.5 + Math.sin(t) * 0.3,
+    });
+  }
+
   // ---- birds over the range
   drawBirds(f, night, camX);
 
   // ---- mountains rise into place
+  // vertigo: while the blades are locked the range swells behind them
+  const vert = bell(B, 3.42, 3.98);
   layers.forEach((L, i) => {
+    ctx.save();
+    if (vert > 0) {
+      const k = 1 + vert * (0.32 - i * 0.06);
+      ctx.translate(w / 2, h * 0.5);
+      ctx.scale(k, k);
+      ctx.translate(-w / 2, -h * 0.5);
+    }
     const rise = (1 - pull) * h * (0.48 + i * 0.2);
     const px = L.x - camX * L.depth;
     const py = L.top + rise - camY * L.depth;
@@ -518,13 +596,20 @@ export function drawInk(f: Frame) {
       ctx.drawImage(pine, -ps * 0.1, -ps * 0.99, ps, ps);
       ctx.restore();
     }
+    ctx.restore();
   });
 
   // ---- title
   drawTitle(f, pull, I);
 
   // ---- the duel
-  if (B > 2.2 && B < 7) drawDuel(f, X, Y, SW, dt, camX, jx, jy);
+  // on a tall screen the fight closes in so the fighters stay in frame
+  const squeeze = f.portrait ? 0.8 : 1;
+  const XD = (sx: number) => ox + (0.5 + (sx - 0.5) * squeeze) * SW;
+  if (B > 2.2 && B < 7) {
+    drawPetals(f, dt, XD, Y);
+    drawDuel(f, XD, Y, SW, dt, camX, jx, jy);
+  }
 
   ctx.restore();
 
@@ -731,6 +816,24 @@ function drawDuel(
     hilts.push([hx, hy]);
     tips.push([hx + Math.cos(a) * L * bl.len, hy + Math.sin(a) * L * bl.len]);
     bl.a = a;
+  });
+
+  // the fighters, painted around the blades they hold
+  const appear = ease.out2(seg(B, 2.3, 2.75));
+  const s = L * 1.3;
+  blades.forEach((bl, i) => {
+    const v = vel[i];
+    const [hx, hy] = hilts[i];
+    if (v.px !== 0 && dt > 0) {
+      v.vx = lerp(v.vx, (hx - v.px) / dt, 0.15);
+      v.vy = lerp(v.vy, (hy - v.py) / dt, 0.15);
+    }
+    v.px = hx;
+    v.py = hy;
+    drawWarrior(ctx, {
+      hilt: [hx, hy], a: bl.a, foeX: hilts[1 - i][0], s, groundY: h * 0.83,
+      color: i ? C.green : C.blue, t, vx: v.vx, vy: v.vy, seed: i + 1, alpha: appear,
+    });
   });
 
   // swing trails: where the blades were a moment of scroll ago

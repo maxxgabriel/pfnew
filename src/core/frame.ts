@@ -27,18 +27,21 @@ export interface Frame {
 
 /** Act boundaries in beats. One beat is ~0.7 of a screen of scrolling. */
 export const ACT = {
-  inkEnd: 7.9,
-  machineStart: 7.0,
-  machineEnd: 13.3,
-  matchStart: 12.3,
-  matchEnd: 18.9,
-  finaleStart: 17.9,
-  END: 21.6,
+  machineEnd: 12.6,
+  arcadeStart: 12.3,
+  arcadeEnd: 16.62,
+  matchStart: 16.3,
+  matchEnd: 24.0,
+  finaleStart: 23.0,
+  creditsStart: 26.55,
+  END: 34.0,
 };
 
 export const CHAPTERS = [
   { at: 0, n: 'I', name: 'Ink' },
   { at: 7.4, n: 'II', name: 'Machine' },
-  { at: 12.9, n: 'III', name: 'Match' },
-  { at: 18.6, n: 'IV', name: 'Hello' },
+  { at: 12.55, n: 'III', name: 'Arcade' },
+  { at: 16.5, n: 'IV', name: 'Match' },
+  { at: 23.6, n: 'V', name: 'Hello' },
+  { at: 26.7, n: 'VI', name: 'Credits' },
 ];

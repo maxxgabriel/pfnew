@@ -2,6 +2,8 @@ import './style.css';
 import { drawInk, drawPaperOver } from './acts/ink';
 import { drawMachine, drawMachineBall } from './acts/machine';
 import { drawMatch } from './acts/match';
+import { drawArcade } from './acts/arcade';
+import { drawCredits } from './acts/credits';
 import { drawFinale } from './acts/finale';
 import { ACT, CHAPTERS, type Frame } from './core/frame';
 import { clamp, damp, seg } from './core/math';
@@ -120,9 +122,9 @@ function hud() {
   }
   fill.style.width = `${(B / ACT.END) * 100}%`;
   // dark type over paper, light type over everything else
-  const onPaper = B < 1.75 || (B > 6.7 && B < 7.55) || B > 18.55;
+  const onPaper = B < 1.75 || (B > 6.7 && B < 7.55) || (B > 23.65 && B < 30.8);
   document.documentElement.classList.toggle('on-paper', onPaper);
-  hello.classList.toggle('on', B > 20.15);
+  hello.classList.toggle('on', (B > 25.25 && B < 26.6) || B > 33.45);
 }
 
 /* ---------------------------------------------------------------- loop */
@@ -162,8 +164,11 @@ function loop(now: number) {
     drawPaperOver(frame);
     drawMachineBall(frame);
   }
+  // the match starts underneath the arcade's warp-out, so it is drawn first
   if (B >= ACT.matchStart && B < ACT.matchEnd) drawMatch(frame);
-  if (B >= ACT.finaleStart) drawFinale(frame);
+  if (B >= ACT.arcadeStart && B < ACT.arcadeEnd) drawArcade(frame);
+  if (B >= ACT.finaleStart && B < ACT.creditsStart + 0.4) drawFinale(frame);
+  if (B >= ACT.creditsStart) drawCredits(frame);
 
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   post(t, dt);
@@ -173,7 +178,7 @@ function loop(now: number) {
 
 function post(t: number, dt: number) {
   // letterbox: the film tightens to scope for the fights
-  const lb = Math.max(seg(B, 2.5, 3.0) * (1 - seg(B, 6.0, 6.5)), seg(B, 15.3, 15.7) * (1 - seg(B, 16.9, 17.3)));
+  const lb = Math.max(seg(B, 2.5, 3.0) * (1 - seg(B, 6.0, 6.5)), seg(B, 19.3, 19.7) * (1 - seg(B, 21.9, 22.3)), seg(B, 31.0, 31.3) * (1 - seg(B, 32.8, 33.1)));
   if (lb > 0) {
     const bar = h * 0.085 * lb;
     ctx.fillStyle = '#000';
@@ -187,6 +192,7 @@ function post(t: number, dt: number) {
     ctx.globalAlpha = 1;
     flashAmt = damp(flashAmt, 0, 10, dt);
   }
+  titleCards(t);
   if (vignette) ctx.drawImage(vignette, 0, 0, w, h);
   // grain
   const pat = grainPat[Math.floor(t * 24) % grainPat.length];
@@ -201,6 +207,45 @@ function post(t: number, dt: number) {
     ctx.restore();
   }
 }
+
+/**
+ * Act title cards: a black band slams across the lower third, the act's
+ * number and name stagger in, and the band tears away again.
+ */
+function titleCards(t: number) {
+  const S = Math.min(w, h);
+  for (const c of CHAPTERS.slice(1, 4)) {
+    const a = c.at - 0.05;
+    const inn = seg(B, a, a + 0.12), out = seg(B, a + 0.42, a + 0.55);
+    if (inn <= 0 || out >= 1) continue;
+    const y = h * 0.72;
+    const bh = S * 0.15;
+    const slide = (1 - easeOut(inn)) * -w + easeIn(out) * w;
+    ctx.save();
+    ctx.translate(slide, 0);
+    ctx.rotate(-0.04);
+    ctx.fillStyle = '#14120f';
+    ctx.fillRect(-w * 0.1, y - bh / 2, w * 1.2, bh);
+    ctx.fillStyle = '#ff4021';
+    ctx.fillRect(-w * 0.1, y + bh / 2 - S * 0.012, w * 1.2, S * 0.012);
+    const word = `${c.n} · ${c.name.toUpperCase()}`;
+    ctx.font = `${Math.round(Math.min(w * 0.085, S * 0.085))}px "Dela Gothic One", "Arial Black", sans-serif`;
+    ctx.textBaseline = 'middle';
+    ctx.textAlign = 'left';
+    const widths = [...word].map((ch) => ctx.measureText(ch).width);
+    let x = w / 2 - widths.reduce((p, q) => p + q, 0) / 2;
+    [...word].forEach((ch, i) => {
+      const k = seg(inn, 0.2 + i * 0.05, 0.5 + i * 0.05);
+      ctx.fillStyle = i < c.n.length ? '#ff4021' : '#ece6d6';
+      ctx.globalAlpha = k;
+      ctx.fillText(ch, x, y + (1 - easeOut(k)) * bh * 0.4 + Math.sin(t * 6 + i) * S * 0.002);
+      x += widths[i];
+    });
+    ctx.restore();
+  }
+}
+const easeOut = (x: number) => 1 - (1 - x) ** 3;
+const easeIn = (x: number) => x * x * x;
 
 /* ------------------------------------------------------------- startup */
 

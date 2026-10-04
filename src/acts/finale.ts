@@ -29,7 +29,11 @@ let maxSize = 0, gabSize = 0;
 interface Trail { pts: Pt[] }
 const trails: Trail[] = [{ pts: [] }, { pts: [] }];
 
-export function drawFinale(f: Frame) {
+/** the finale's beats were authored before the arcade and bullet time were cut in */
+export const FINALE_SHIFT = 5.1;
+
+export function drawFinale(fg: Frame) {
+  const f: Frame = { ...fg, B: fg.B - FINALE_SHIFT };
   const { ctx, w, h, B, t } = f;
   if (!pattern) pattern = ctx.createPattern(paperTile(512, C.paper), 'repeat');
   const S = Math.min(w, h);

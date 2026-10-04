@@ -119,3 +119,8 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--red); outline-o
 .hello-again { background: var(--ink); color: var(--paper); box-shadow: 3px 3px 0 var(--red); }
 .hello-links { list-style: none; margin: 0; padding: 0; display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
 .hello-links a { font: 800 15px/1 var(--serif); color: var(--ink); text-decoration: none; padding: 6px 0; border-bottom: 1px solid currentColor; }
+
+/* after the credits the contact card sits on black */
+html:not(.on-paper) .hello-title, html:not(.on-paper) .hello-mail, html:not(.on-paper) .hello-links a { color: var(--paper); }
+html:not(.on-paper) .hello-kicker { color: #b9b2a3; }
+html:not(.on-paper) .hello-again { background: var(--paper); color: var(--ink); }
