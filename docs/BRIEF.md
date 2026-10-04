@@ -152,6 +152,22 @@ violet swordsman, blade against blade. The ink-blob beast and its tendrils are
 gone and must not come back. Built with STORY step 1 (smears, orbit charge,
 beam clash, match cuts, Blot in Dead Calm and the void).
 
+**Round 9: the whole story, built overnight.** Owner: *"fix some bad edits…
+the light saber fighter, their knee… just float… go over and over till you
+fix… make it clean"*; *"all acts on their own make sense, but it doesn't make
+any sense as a book… stitch up everything so the light saber, the anime
+fight and the football make sense together… I'm down if you add another act…
+think out of the box"*. Built every remaining STORY item: the Ink Dragon and
+the swallow, the red-eye drop, TITAN and the screen split, Beneath the
+Surface, Night Ride (a new act, IV), the Zone, Powers of Ten (with the Hand
+signing the name), X-Ray and the new credit lines. Fixes: the warriors' legs
+are real trousers that follow hip, knee and ankle (no more floating knees);
+ALTER's beams are soft, tapered light; the duel is framed so nothing is
+cropped. The book is stitched by continuity (Blue falls through the tear and
+becomes the knight; Green builds TITAN, is reborn in ALTER, wins the match;
+the Spark changes shape every act; Blot is in every world) and by one line
+under the Machine and Match cards. Sound is still not built.
+
 **What the owner responds to.** Big, cinematic, anime-like set pieces;
 continuity jokes (Blot); hard cuts, impact frames, speed lines. Proposals
 with clear options before a build.

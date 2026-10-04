@@ -5,10 +5,10 @@ idea the owner approved in round 7. It turns "ink duel, cartoon machine,
 anime fight, football" into one tale with one object, one witness and one
 rule.
 
-**Status:** approved by the owner as a direction ("I loved them, stitch them
-together, make a crazy story"). Nothing in the "To build" column exists yet.
-Build it in the order at the end, one piece at a time, with a new preview
-link after each.
+**Status: built (round 9).** Every item below except sound (34) is in the
+film. Section 0 is the story as it now plays, with the places where the build
+differs from the plan; the rest of the document is the original plan, kept
+for its reasoning, with **[new]** items now done.
 
 **Working rules from the owner (round 7):**
 
@@ -21,6 +21,56 @@ link after each.
   shortcuts.
 
 ---
+
+## 0. As built — the book, page by page
+
+The film reads as one book about one page. The chapter cards carry a single
+line each so the turns between genres are motivated without on-screen text in
+the set pieces themselves (II: *the pearl fell through the page*; V: *the
+same two, one more time*; III's title: *the back of the page*).
+
+1. **The first drop.** A drop falls off the brush. For a heartbeat it shows
+   the red eye from ALTER (bell I, 0.36–0.45), then it lands and becomes
+   **Blot**. The brush paints the ensō (the Spark) and the name.
+2. **I · Ink.** The ensō becomes the moon. The **Dragon** rises between the
+   mountain layers carrying the glowing pearl (dragon hold). Blue and Green
+   duel for it; Blue's thunder snaps Green's blade (thunder hold). Both fire
+   beams; the Dragon dives through their meeting point, **swallows the
+   pearl** and coils into a perfect ensō (swallow hold). The camera dives
+   through the coil to paper; the pearl drops out as a ball and **Blue falls
+   through the tear** after it.
+3. **II · Machine.** The ball runs the poster chain reaction (MAKE THINGS
+   THAT MOVE). The letters unbolt and assemble into **TITAN**, Green's robot,
+   Green at the visor and Blot riding on its head (titan hold). TITAN punches
+   the ball; the gold bolt **splits the frame in half** and the halves slide
+   apart over the back of the page.
+4. **III · Alter.** The back of the page, where the ink bleeds through
+   reversed. Blue arrives as the black knight (blue sash), and Green comes
+   back too: **Green, reborn**, a violet swordsman on a pillar (the owner
+   rejected the Beast and its tendrils in round 8). Dead Calm, **Beneath the
+   Surface** (koi, the knight's blue reflection), the Void, the orbit charge,
+   the **beam clash** (blue against violet, the ground tearing), Green
+   dissolves and the **Spark is released as a star**. The knight plants the
+   blade; the ripple match-cuts to a puddle.
+5. **IV · Night Ride.** Blot on a motorbike chases the falling star through a
+   neon city in the rain: tunnels, ribbons, the long skid at the stadium.
+6. **V · Match.** The same two, one more time: blue defends, green attacks.
+   **The Zone** drains the pitch to chalk before #10's thunder dash. Green
+   finally wins.
+7. **VI · Hello.** **Powers of Ten**: the net → the Night Ride city (the
+   stadium is a glow among the towers) → ALTER's sky (the star) → the
+   machine (the ball) → the ink duel (the pearl) → the page, where the Hand
+   rests beside Blot and the ensō. The Hand signs MAX / GABRIEL and stamps
+   the seal; the rivals' lights glow back on the page.
+8. **VII · Credits.** The cast in the same story (the Dragon, TITAN built by
+   Green, Blue again, Green reborn, the rider, the spark, the hand), then the
+   **X-Ray** pencil test, then Blot finds the two hilts crossed in the grass.
+
+What changed from the plan below: the Beast is gone (read every "Beast" as
+**Green, reborn**, and every "tendril" as a flying slash); the Dragon's coil,
+not its jaws, makes the hole; the Night Ride city is also a level inside
+Powers of Ten; the Hand appears in the finale and signs the name itself.
+Sound (34) is not built and stays optional.
 
 ## 1. The logline
 
@@ -44,7 +94,7 @@ reincarnated in that style:
 |---|---|---|---|---|
 | Ink | sumi-e scroll | a swordsman with a blade of blue light | his rival, green light | the moon, then the pearl the Dragon chases |
 | Machine | screen-printed cartoon poster | (off-page: fell through) | the engineer behind TITAN | a football-sized ball |
-| Alter | the **back of the page**, where ink bleeds through reversed: red, violet, black | the black knight, corrupted by holding the Spark too long | — | the target ring, then a star |
+| Alter | the **back of the page**, where ink bleeds through reversed: red, violet, black | the black knight, corrupted by holding the Spark too long | reborn as a violet swordsman | the target ring, then a star |
 | Night Ride | neon on wet asphalt | — | — | a falling star; Blot chases it |
 | Match | live broadcast | the blue team (defending) | the green team, #10 | the match ball |
 | Hello | back to paper | — | — | the first ensō again |
@@ -72,9 +122,9 @@ two colours, the same circle, the same little witness in every world.
   TITAN, and finally wins as #10 in the Match. Green's arc is the
   underdog's.
 - **The Dragon.** Guardian of the Spark, made of living brush strokes. It
-  swallows the pearl to keep it from the rivals. On the back of the page its
-  bleed-through is **the Beast**: the same ink, reversed, every discarded
-  stroke given a body.
+  swallows the pearl to keep it from the rivals and coils into the ensō that
+  tears the page. (The planned bleed-through Beast was built and rejected;
+  on the back of the page the enemy is Green, reborn.)
 
 ## 4. The film, beat by beat
 
@@ -300,7 +350,7 @@ ruins is **the black knight**, Blue, corrupted.
 | 16 | X-Ray pencil test | Post-credits | 32 |
 | 17 | Sound for Alter, behind a tap | III · Alter (optional) | 34 |
 
-## 6. Build order
+## 6. Build order (all done except 9)
 
 Do these one at a time. After each, screenshot at phone size, measure
 `scripts/perf.mjs`, push, republish the preview, and report to the owner.
@@ -313,17 +363,17 @@ Do these one at a time. After each, screenshot at phone size, measure
    **Green, reborn** (a violet swordsman), and the tendrils are flying
    slashes. Read "the Beast" below as the rival; the Dragon in Act I is
    still planned, but keep it a clean brush-stroke dragon, not a monster.
-2. **Powers of Ten (29).** The ending that ties the film together; it also
+2. **Powers of Ten (29) — DONE.** The ending that ties the film together; it also
    proves the "it was one page" idea everything else hangs on.
-3. **The Ink Dragon (6, 8)** with the prologue changes (2, 3). This makes
+3. **DONE: The Ink Dragon (6, 8)** with the prologue changes (2, 3). This makes
    the opening as strong as Alter and sets up the Beast.
-4. **TITAN and the screen split (10, 11).**
-5. **Beneath the Surface (16).**
-6. **Night Ride with its match cuts (23–25).** This is a new act: add it as a
+4. **TITAN and the screen split (10, 11) — DONE.**
+5. **Beneath the Surface (16) — DONE.**
+6. **Night Ride with its match cuts (23–25) — DONE.** This is a new act: add it as a
    hold so Match timing doesn't move, and add its chapter mark.
-7. **The Zone (27).**
-8. **X-Ray (32)** and the credit lines (31).
-9. Ask about **sound (34)**.
+7. **The Zone (27) — DONE.**
+8. **X-Ray (32)** and the credit lines (31) — DONE.
+9. Ask about **sound (34)** — not built, not yet asked again.
 
 ### Technical notes for whoever builds it
 

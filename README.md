@@ -4,35 +4,35 @@ The portfolio is one continuous animated film on a single canvas. Scrolling
 moves the playhead (forward and back); ambient motion runs on the clock, so
 the frame keeps moving when you stop.
 
-One object carries the whole film: a circle. A mascot, Blot (the first drop
-of ink, with eyes and a red scarf), watches every act.
+It tells one story about one page. A drop of ink falls off the brush by
+mistake and becomes **Blot** (eyes, a red scarf), the witness in every act.
+The brush paints a circle, the **Spark**, and two strokes from the same
+brush, **Blue** and **Green**, fight over it. Every time one of them grabs it,
+the page can't hold it and redraws itself in a new style.
 
-1. **Ink.** An ensō is painted and the name is written in brush. Pulling back
-   turns the circle into a moon over sumi-e mountains; ink floods the sky; two
-   brush-painted warriors duel with blades of light through falling blossom,
-   lock (with a vertigo zoom), then fire beams at each other. The camera dives
-   into the point where they meet.
-2. **Machine.** What comes out is a ball. The paper tears and it drops into a
-   poster-coloured chain reaction that spells MAKE / THINGS / THAT / MOVE.
-3. **Alter.** The cannon's shot turns to lightning and tears up the screen
-   into the night sky, where ink bleeds in from every edge. The set piece, cut like an anime episode: eighteen shots of a
-   corrupted black knight (red-veined, a black blade whose runes ignite) against
-   a beast of living ink that falls out of a target ring in a bruised purple
-   sky. Close-ups, impact frames, a slash barrage, tendrils at the camera, and a
-   beam of darkness. It plays in a hold, so it has its own clock
-   (`src/acts/alter.ts`).
-4. **Match.** It falls like a star into a floodlit stadium. Broadcast camera,
-   chalk tactics, comic split-screen panels, a bullet-time orbit at the
-   strike, a cloth-sim net.
-5. **Hello.** Through the net and back onto paper. Contact.
-6. **Credits**, and a post-credits scene.
+1. **Ink.** The ensō becomes a moon over sumi-e mountains. An ink Dragon rises
+   with the pearl; Blue and Green duel for it with blades of light; Blue's
+   thunder snaps Green's blade; the Dragon swallows the pearl and coils into
+   an ensō that tears the paper. Blue falls through.
+2. **Machine.** The pearl drops out as a ball into a poster-coloured chain
+   reaction (MAKE / THINGS / THAT / MOVE). The letters assemble into TITAN,
+   Green's robot, which punches the ball; the gold bolt splits the frame.
+3. **Alter.** The back of the page, cut like an anime episode: Blue as a
+   corrupted black knight against Green reborn as a violet swordsman. Dead
+   Calm, Beneath the Surface, the Void, a beam clash. The Spark is released as
+   a star.
+4. **Night Ride.** Blot on a motorbike chases the star through a neon city in
+   the rain, and skids to a stop at the stadium.
+5. **Match.** The same two, one more time. The Zone drains the pitch to chalk
+   before #10's thunder dash. Green wins.
+6. **Hello.** Powers of Ten: the camera pulls out through every world, circle
+   inside circle, back to the page, where the Hand signs the name.
+7. **Credits**, an X-Ray pencil test of how it was made, and a post-credits
+   scene.
 
-**Thunder** (gold, the one colour used nowhere else) strikes four times: a
-bolt signs the name on the title; a one-flash finisher in the duel (stance,
-charge, a six-fold zig-zag, a black-on-white impact frame, and the cut landing
-a beat late); the cannon ball tearing up the screen out of the machine; and #10's
-dash through two defenders. The two long ones are holds (`src/core/holds.ts`):
-the film pauses at a beat while the scroll plays the moment.
+The big moments play in **holds** (`src/core/holds.ts`): the film pauses at a
+beat while the scroll plays the set piece, so scrolling back plays it in
+reverse.
 
 ## For agents and contributors
 
