@@ -2,11 +2,9 @@ import { drawBlot } from '../core/blot';
 import { drawBolt } from '../core/bolt';
 import { brush, ensoPath } from '../core/brush';
 import type { Frame } from '../core/frame';
-import { ALTER_AT } from '../core/holds';
 import { type Pt, TAU, bell, clamp, ease, hash, lerp, rng, seg } from '../core/math';
 import { canvas, drawSprite, glow, withAlpha } from '../core/sprites';
 import { F, font } from '../core/style';
-import { starOnScreen } from './match';
 import { drawLightLine } from './ink';
 import { drawWarrior, solve } from './warrior';
 
@@ -3273,8 +3271,7 @@ function shotSnap(g: G, q: number) {
  * The Spark: the thing everyone is fighting over, here a point of white
  * light with a ring around it. It shrinks into a star.
  */
-function spark(g: G, x: number, y: number, r: number, a: number) {
-  const { ctx, t } = g;
+export function drawSpark(ctx: CanvasRenderingContext2D, x: number, y: number, r: number, a: number, t: number) {
   if (a <= 0 || r <= 0) return;
   ctx.save();
   ctx.globalCompositeOperation = 'lighter';
@@ -3303,6 +3300,10 @@ function spark(g: G, x: number, y: number, r: number, a: number) {
   ctx.arc(0, 0, r * 1.7, 0, TAU);
   ctx.stroke();
   ctx.restore();
+}
+
+function spark(g: G, x: number, y: number, r: number, a: number) {
+  drawSpark(g.ctx, x, y, r, a, g.t);
 }
 
 /* extreme wide: one column of dark light across the sky; where the rival stood, the Spark rises */
@@ -3465,14 +3466,38 @@ function shotAfter(g: G, q: number) {
   ctx.stroke();
 }
 
-/* 18. exit: the ink draws back, the old night opens up again, and the ring
- * shrinks onto the falling star that the match is already showing */
+/* 18. exit: the blade goes into the black water, and the ripple runs out to
+ * become the ripple of a tyre through a neon puddle (Night Ride's first shot) */
 function shotExit(g: G, q: number) {
-  const { w, h, S, t } = g;
-  const open = ease.inOut2(seg(q, 0.1, 0.85));
-  const diag = Math.hypot(w, h);
-  outsideHole(g, w / 2, h * 0.42, lerp(-S * 0.05, diag * 0.78, open), 5, () => world(g, { x: 0, y: -0.1 * q, z: 1 }));
-  const star = starOnScreen(g, ALTER_AT) ?? [w * 0.48, h * 0.12];
-  const fly = ease.inOut3(seg(q, 0, 0.9));
-  targetRing(g, lerp(w * 0.5, star[0], fly), lerp(h * 0.35, star[1], fly), lerp(S * 0.08, S * 0.01, fly), 1 - seg(q, 0.75, 1), t);
+  const { ctx, w, h, S, t } = g;
+  const wy = h * 0.62;
+  world(g, { x: 0, y: 0.05, z: 1.15 }, { horizon: 0.62 });
+  // the blade, straight down into the water
+  const drive = ease.in3(seg(q, 0, 0.18));
+  const L = h * 0.9;
+  const hy = lerp(wy - L * 0.92, wy - L * 0.86, drive);
+  blade(g, w / 2, hy, Math.PI / 2, L, 1 - seg(q, 0.3, 0.8), 1);
+  if (hitQ(0.18)) g.f.shake(S * 0.025);
+  // the frame goes dark around the water; only the rings are left
+  const dark = ease.inOut2(seg(q, 0.25, 0.85));
+  ctx.fillStyle = `rgba(4,3,10,${dark})`;
+  ctx.fillRect(0, 0, w, h);
+  // the ripple: the same rings, at the same size, that open Night Ride
+  const prx = w * 0.62, pry = h * 0.14;
+  const grow = seg(q, 0.18, 1);
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  for (let k = 0; k < 4; k++) {
+    const qq = clamp(grow * (0.35 - k * 0.15));
+    if (qq <= 0 || qq >= 1) continue;
+    const col = mixHex(RED.c, k ? '#22e6ff' : '#ff2bd6', seg(q, 0.5, 1));
+    ctx.strokeStyle = col;
+    ctx.globalAlpha = (1 - qq) * 0.8;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.ellipse(w / 2, wy, prx * ease.out2(qq), pry * ease.out2(qq), 0, 0, TAU);
+    ctx.stroke();
+  }
+  ctx.restore();
+  void t;
 }

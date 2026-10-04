@@ -6,6 +6,7 @@ import { drawCredits } from './acts/credits';
 import { drawFinale } from './acts/finale';
 import { alterShotP, drawAlter } from './acts/alter';
 import { drawPowers } from './acts/powers';
+import { drawRide, rideShotP } from './acts/ride';
 import { ACT, CHAPTERS, type Frame } from './core/frame';
 import { clamp, damp, seg } from './core/math';
 import { canvas, grainTiles } from './core/sprites';
@@ -119,6 +120,7 @@ function hud() {
   CHAPTERS.forEach((ch, i) => { if (B >= ch.at - 0.05) c = i; });
   if (frame.hold?.kind === 'alter') c = CHAPTERS.findIndex((ch) => ch.name === 'Alter');
   if (frame.hold?.kind === 'powers') c = CHAPTERS.findIndex((ch) => ch.name === 'Hello');
+  if (frame.hold?.kind === 'ride') c = CHAPTERS.findIndex((ch) => ch.name === 'Ride');
   if (c !== chapter) {
     chapter = c;
     chN.textContent = CHAPTERS[c].n;
@@ -184,6 +186,7 @@ function loop(now: number) {
   if (B >= ACT.creditsStart) drawCredits(frame);
 
   if (frame.hold?.kind === 'alter') drawAlter(frame, frame.hold.p);
+  if (frame.hold?.kind === 'ride') drawRide(frame, frame.hold.p);
   if (frame.hold?.kind === 'powers') drawPowers(frame, frame.hold.p);
 
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -231,8 +234,8 @@ function post(t: number, dt: number) {
 function titleCards(t: number) {
   const S = Math.min(w, h);
   if (frame.hold) return;
-  for (const c of CHAPTERS.slice(1, 4)) {
-    if (c.name === 'Alter') continue;
+  // the acts that play on the film's own time get a card; the ones inside holds open their own way
+  for (const c of CHAPTERS.filter((ch) => ch.name === 'Machine' || ch.name === 'Match')) {
     const a = c.at - 0.05;
     const inn = seg(B, a, a + 0.12), out = seg(B, a + 0.42, a + 0.55);
     if (inn <= 0 || out >= 1) continue;
@@ -302,6 +305,11 @@ function jumpRaw(b: number) {
   hold(kind: string, p = 0.5) {
     const h = HOLDS.find((k) => k.kind === kind)!;
     jumpRaw(toRaw(h.at) + h.len * Math.min(0.9999, p));
+  },
+  /** jump to the night ride's shot `name` at its own progress q */
+  ride(name: string, q = 0.5) {
+    const h = HOLDS.find((k) => k.kind === 'ride')!;
+    jumpRaw(toRaw(h.at) + h.len * rideShotP(name, q));
   },
   /** jump to ALTER's shot `name` at its own progress q */
   alter(name: string, q = 0.5) {
