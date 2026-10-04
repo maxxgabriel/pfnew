@@ -84,11 +84,12 @@ export function drawFinale(f: Frame) {
     const sc = st < 1 ? lerp(2.2, 1, ease.outBack(st, 2.2)) : 1;
     drawSeal(ctx, sealAt[0], sealAt[1], gabSize * 1.05 * sc, -0.06 + (1 - st) * 0.4, Math.min(1, st * 3));
   }
-  keys.push([SEAL_AT + 0.25, rest]);
+  // then it lifts away up out of the frame, so the card has the page to itself
+  keys.push([SEAL_AT + 0.22, rest], [SEAL_AT + 0.62, [rest[0] + S * 0.45, -S * 0.12]]);
   const tip = handAlong(keys, B, max.strokes, gab.strokes);
   // the hand lifts a little whenever it isn't touching the page
   const writing = [...max.strokes.map((_, i) => strokeSpan('max', i)), ...gab.strokes.map((_, i) => strokeSpan('gab', i))].some(([a, b]) => B >= a && B <= b);
-  drawHand(ctx, tip, S, t, 1, writing ? 0 : 0.012);
+  if (tip[1] > -S * 0.1) drawHand(ctx, tip, S, t, 1, writing ? 0 : 0.012);
 
   // ---- Blot, beside the circle, watching it be signed
   drawBlot(ctx, ...blotSpot(f), S * 0.09, { t, pose: B > SEAL_AT + 0.1 ? 'cheer' : 'idle', look: tip, seed: 4, eye: C.white, rot: -0.06 });

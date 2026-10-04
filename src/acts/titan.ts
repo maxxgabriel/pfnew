@@ -382,9 +382,9 @@ function shotAssemble(g: G, q: number) {
   const { w, h, S, f } = g;
   poster(g, { ground: h * 0.88 });
   const H = S * (g.portrait ? 1.0 : 0.8);
-  titan(g, w / 2, h * 0.88, H, { ...REST, steam: seg(q, 0.6, 1) }, ease.inOut2(seg(q, 0, 0.95)), 3);
+  titan(g, w / 2, h * 0.88, H, { ...REST, steam: seg(q, 0.6, 1) }, seg(q, -0.1, 0.92), 3);
   speedLines(g, w / 2, h * 0.5, 0.35 * (1 - seg(q, 0.85, 1)));
-  for (let i = 0; i < 15; i++) if (hitQ((i / 15) * 0.85 * 0.95 + 0.17)) f.shake(S * 0.008);
+  for (let i = 0; i < 15; i++) if (hitQ(((i / 15) * 0.85 + 0.18) * 1.02 - 0.1)) f.shake(S * 0.008);
 }
 
 /* close on the head: the visor, Green inside, the eyes lighting up; the core spins up */

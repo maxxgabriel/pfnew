@@ -358,13 +358,17 @@ function rise(f: { w: number; h: number }) {
   return risePath;
 }
 
+/** the hold starts with the dragon already a shadow under the mist (the climb from off-screen was dead air) */
+const riseP = (hp: number) => 0.27 + 0.73 * hp;
+
 /**
  * The rise, at progress p (0..1): out of the flood, round the moon, after the
  * pearl. Drawn between the mountain layers by the ink act, so it comes up
  * from behind the near range.
  */
-export function drawDragonRise(f: Frame, p: number) {
+export function drawDragonRise(f: Frame, hp: number) {
   const { ctx, t } = f;
+  const p = riseP(hp);
   const { S } = inkSpace(f);
   const R = rise(f);
   const head = lerp(-R.body * 0.1, R.P.total + R.body * 0.15, ease.inOut2(p));
@@ -373,7 +377,8 @@ export function drawDragonRise(f: Frame, p: number) {
 }
 
 /** the pearl during the rise: it leaves the moon as the dragon rounds it, and settles over the duel */
-export function risePearl(f: Frame, p: number): { at: Pt; a: number } | null {
+export function risePearl(f: Frame, hp: number): { at: Pt; a: number } | null {
+  const p = riseP(hp);
   const M = moonAt(f);
   const home = pearlHome(f, f.t);
   const go = ease.inOut2(seg(p, 0.42, 0.8));

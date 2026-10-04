@@ -77,8 +77,9 @@ function drawRoll(f: Frame, S: number) {
   LINES.forEach((ln, i) => {
     const y = top + i * lh + (ln.kind === 'big' ? lh * 0.2 : 0);
     if (y < -lh || y > h + lh) return;
-    // lines brighten as they pass the centre and fade at the edges
-    const edge = Math.min(1, Math.min(y, h - y) / (h * 0.18));
+    // lines brighten as they pass the centre and fade at the edges (clear of the HUD at the top,
+    // and of Blot's lane at the bottom)
+    const edge = Math.min(1, Math.min(y - h * 0.08, h * 0.81 - y) / (h * 0.15));
     ctx.globalAlpha = Math.max(0, edge);
     const crossed = 1 - Math.min(1, Math.max(0, (y - h * 0.5) / (h * 0.25)));
     if (ln.kind === 'head') {
@@ -93,7 +94,7 @@ function drawRoll(f: Frame, S: number) {
       ctx.fillText(ln.a!, mid, y);
       const tw = ctx.measureText(ln.a!).width;
       brush(ctx, [[mid - tw / 2, y + lh * 0.45], [mid, y + lh * 0.5], [mid + tw / 2, y + lh * 0.44]], {
-        width: S * 0.012, color: C.red, progress: ease.inOut2(crossed), dry: 0.6, seed: 77,
+        width: S * 0.012, color: C.red, progress: ease.inOut2(crossed), dry: 0.6, seed: 77, alpha: ctx.globalAlpha,
       });
     } else if (ln.kind === 'pair') {
       const gap = S * 0.025;
@@ -111,7 +112,7 @@ function drawRoll(f: Frame, S: number) {
         const tw = ctx.measureText(ln.b!).width;
         const x0 = stacked ? nx - tw / 2 : nx;
         brush(ctx, [[x0, ny + lh * 0.2], [x0 + tw * 0.5, ny + lh * 0.23], [x0 + tw, ny + lh * 0.19]], {
-          width: S * 0.008, color: ln.color, progress: ease.inOut2(crossed), dry: 0.5, seed: 30 + i,
+          width: S * 0.008, color: ln.color, progress: ease.inOut2(crossed), dry: 0.5, seed: 30 + i, alpha: ctx.globalAlpha,
         });
       }
     } else if (ln.kind === 'note') {
@@ -126,7 +127,7 @@ function drawRoll(f: Frame, S: number) {
   // Blot strolls the bottom of the page, waving at the names going by
   const loop = (t * 0.07) % 1.3;
   const bx = lerp(-S * 0.1, w + S * 0.1, loop / 1.3);
-  const by = h * 0.86 + Math.abs(Math.sin(t * 6)) * -S * 0.008;
+  const by = h * 0.875 + Math.abs(Math.sin(t * 6)) * -S * 0.008;
   drawBlot(ctx, bx, by, S * 0.07, { t, pose: Math.floor(t / 2) % 3 === 0 ? 'wave' : 'idle', look: [bx + 40, by - 100], seed: 9, wind: -0.5 });
   // its footprints, small ink dots fading behind it
   for (let k = 1; k < 8; k++) {

@@ -727,7 +727,8 @@ function shotChase(g: G, q: number) {
   ctx.restore();
   stadium(g, w * 0.74, hz + h * 0.05, S * 0.3, 0.4 + seg(q, 0.5, 1) * 0.6);
   // the trail: everything the bike has ridden so far, still glowing
-  const u = ease.inOut2(seg(q, 0, 1)) * 0.98;
+  // (it starts already in frame: the first part of the path is off the left edge)
+  const u = lerp(0.12, 0.98, 0.4 * q + 0.6 * ease.inOut2(q));
   const trail: Pt[] = [];
   for (let k = 0; k <= 60; k++) {
     const p = smoothAlong(CHASE_PATH, (u * k) / 60);

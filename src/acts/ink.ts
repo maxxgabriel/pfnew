@@ -412,6 +412,13 @@ class Cord {
     if (this.pts.length === 0) {
       for (let i = 0; i < this.n; i++) this.pts.push({ x: ax, y: ay + i * seg, px: ax, py: ay + i * seg });
     }
+    // a teleport (a seek, or the world drawn again at another size inside Powers of Ten): carry the
+    // cord along instead of letting it stretch across the frame
+    const jx = ax - this.pts[0].x, jy = ay - this.pts[0].y;
+    if (Math.hypot(jx, jy) > seg * 3) this.pts.forEach((p) => { p.x += jx; p.px += jx; p.y += jy; p.py += jy; });
+    if (this.pts.some((p) => !(Math.hypot(p.x - ax, p.y - ay) < seg * this.n * 1.5))) {
+      this.pts.forEach((p, i) => { p.x = p.px = ax; p.y = p.py = ay + i * seg; });
+    }
     const g = 1400 * dt * dt;
     for (let i = 1; i < this.n; i++) {
       const p = this.pts[i];
@@ -653,8 +660,8 @@ export function drawInk(f: Frame) {
   // on a tall screen the fight closes in so the fighters stay in frame
   const squeeze = f.portrait ? 0.8 : 1;
   const XD = (sx: number) => ox + (0.5 + (sx - 0.5) * squeeze) * SW;
-  // (not while the dragon rises: the warriors come in after it)
-  if (B > 2.2 && B < 7 && f.hold?.kind !== 'dragon') {
+  // (the warriors wait at the bottom of the frame while the dragon rises over them)
+  if (B > 2.2 && B < 7) {
     drawPetals(f, dt, XD, Y);
     drawDuel(f, XD, Y, SW, dt, camX, jx, jy);
   }
