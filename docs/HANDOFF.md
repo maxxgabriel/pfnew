@@ -3,7 +3,7 @@
 Everything a new agent needs to pick this up. Read `docs/BRIEF.md` first for
 the owner's taste and decisions; this file is the technical side.
 
-- **Live preview:** https://claude.ai/artifact/PcwGzT9y7tqBXqoo9EXsgD
+- **Live preview:** https://claude.ai/artifact/2e3qybKHWFwd824v6ZoD2u
   (a private claude.ai artifact owned by the user; only Claude sessions with
   the Artifact tool can republish it. See "Shipping" below.)
 - **Branch:** `claude/confident-dijkstra-4t2ifl`
