@@ -317,6 +317,8 @@ const fontsReady = Promise.race([
   Promise.all([
     document.fonts.load('40px "Dela Gothic One"'),
     document.fonts.load('600 20px "Shippori Mincho"'),
+    // the scroll's kanji live in their own font subset; ask for it by name
+    document.fonts.load('800 40px "Shippori Mincho"', '墨機遊試合縁終'),
   ]),
   new Promise((r) => setTimeout(r, 2500)),
 ]);
