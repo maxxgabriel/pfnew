@@ -6,6 +6,8 @@ product; projects are deliberately absent.
 
 Before changing anything, read:
 
+0. `docs/STORY.md` — the story the whole film is being rebuilt around, every
+   approved idea mapped onto it, and the build order. Start here.
 1. `docs/BRIEF.md` — the owner's creative brief and every decision they've
    made since (what they asked for, what they approved, **what they rejected**).
 2. `docs/HANDOFF.md` — architecture, the beat timeline, how holds work, every

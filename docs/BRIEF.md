@@ -132,6 +132,19 @@ the beam aimed on a diagonal with a close-up where it actually hits, and a
 flash on every sub-cut. Next requested: Dead Calm (Giyu, Water Breathing
 11th form) and a Domain Expansion (Gojo) somewhere in the film.
 
+**Round 6b: Dead Calm and the Void (approved, "looks real good").** Built
+inside ALTER with no on-screen text, by the owner's choice.
+
+**Round 7: the story (approved direction, not built yet).** Owner: the film
+*"doesn't make sense from outside: light saber, football, anime battle"*;
+*"make a story… a crazy story"*. They loved every suggestion from the last
+round and asked for all of them, stitched into one story: see
+`docs/STORY.md`. Standing guidance from the owner: no text in the new set
+pieces; *"you don't have to follow any docs… if you feel something will feel
+better just do it and report to me"*; *"dedication and passion… clean
+transitions, crazy animation, crazy motion graphics"*; suggest new ideas
+before building them.
+
 **What the owner responds to.** Big, cinematic, anime-like set pieces;
 continuity jokes (Blot); hard cuts, impact frames, speed lines. Proposals
 with clear options before a build.
