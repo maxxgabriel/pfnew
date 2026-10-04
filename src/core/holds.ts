@@ -36,7 +36,7 @@ export const HOLDS: Hold[] = [
   // the letters assemble into Green's robot, which punches the ball out of the page
   { at: TITAN_AT, len: 4.8, kind: 'titan' },
   // the Alter act plays in the night sky between the machine and the match
-  { at: ALTER_AT, len: 14.7, kind: 'alter' },
+  { at: ALTER_AT, len: 15.45, kind: 'alter' },
   // Blot chases the falling star through the city to the stadium
   { at: RIDE_AT, len: 5.2, kind: 'ride' },
   { at: 15.0, len: 0.95, kind: 'dash' },

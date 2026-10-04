@@ -11,7 +11,7 @@ await page.waitForTimeout(1500);
 const out = [];
 // `node scripts/perf.mjs 1 alter` measures every ALTER shot instead
 if (process.argv[3] === 'alter') {
-  const names = ['corrupt', 'title', 'wide', 'feet', 'sword', 'eyes', 'ring', 'impact', 'reveal', 'standoff', 'dash', 'clash', 'slashes', 'volley', 'still', 'calm', 'drop', 'release', 'sign', 'expand', 'void', 'shatter', 'charge', 'fire', 'driven', 'strain', 'push', 'snap', 'column', 'after', 'exit'];
+  const names = ['corrupt', 'title', 'wide', 'feet', 'sword', 'eyes', 'ring', 'impact', 'reveal', 'standoff', 'dash', 'clash', 'slashes', 'volley', 'still', 'calm', 'drop', 'beneath', 'release', 'sign', 'expand', 'void', 'shatter', 'charge', 'fire', 'driven', 'strain', 'push', 'snap', 'column', 'after', 'exit'];
   for (const n of names) {
     await page.evaluate((n) => { window.__film.intro(8); window.__film.alter(n, 0.6); }, n);
     await page.waitForTimeout(1000);

@@ -3,7 +3,7 @@ import { drawBolt } from '../core/bolt';
 import { brush, ensoPath } from '../core/brush';
 import type { Frame } from '../core/frame';
 import { type Pt, TAU, bell, clamp, ease, hash, lerp, rng, seg } from '../core/math';
-import { canvas, drawSprite, glow, withAlpha } from '../core/sprites';
+import { blot, canvas, drawSprite, glow, withAlpha } from '../core/sprites';
 import { F, font } from '../core/style';
 import { drawLightLine } from './ink';
 import { drawWarrior, solve } from './warrior';
@@ -75,6 +75,8 @@ const SHOTS: Shot[] = [
   { name: 'still', dur: 0.6, draw: shotStill, embers: 'frozen', flash: null },
   { name: 'calm', dur: 1.25, draw: shotCalm, embers: 'frozen', flash: null },
   { name: 'drop', dur: 0.5, draw: shotDrop, embers: 'frozen', flash: null },
+  // the drop goes under, and so do we
+  { name: 'beneath', dur: 1.1, draw: shotBeneath, embers: 'none', flash: null },
   { name: 'release', dur: 0.7, draw: shotRelease },
   // the domain: the world is swallowed by an endless void, and broken open again
   { name: 'sign', dur: 0.55, draw: shotSign, embers: 'none' },
@@ -2104,6 +2106,216 @@ function shotDrop(g: G, q: number) {
     ctx.restore();
   }
   void t;
+}
+
+/* ===================================================== BENEATH THE SURFACE */
+
+/*
+ * The drop goes into the mirror and the camera follows it down. Underwater
+ * everything moves slowly: ink blooms like ink dropped into a glass, two koi
+ * made of brush strokes circle the knight's reflection — upside down, and
+ * still blue — and behind the reflection, very faint, is the front of the
+ * page: the moon and the mountains of the first world, seen from behind.
+ * A red thread of corruption sinks past. Then the shock comes down from
+ * above and time comes back.
+ */
+
+let inkBlots: HTMLCanvasElement[] = [];
+
+/** a koi made of strokes: (x, y) its middle, `a` the way it swims, `L` its length */
+function koi(ctx: CanvasRenderingContext2D, x: number, y: number, a: number, L: number, t: number, seed: number) {
+  const n = 12;
+  const pts: Pt[] = [];
+  for (let i = 0; i <= n; i++) {
+    const u = i / n - 0.5;
+    const sway = Math.sin(t * 3 + seed - u * 5) * L * 0.08 * (u + 0.5);
+    pts.push([x - Math.cos(a) * u * L - Math.sin(a) * sway, y - Math.sin(a) * u * L + Math.cos(a) * sway]);
+  }
+  const wd = (i: number) => L * 0.13 * Math.sin(Math.min(1, (i / n) * 1.25) * Math.PI * 0.95 + 0.15);
+  const left: Pt[] = [], right: Pt[] = [];
+  for (let i = 0; i <= n; i++) {
+    const p0 = pts[Math.max(0, i - 1)], p1 = pts[Math.min(n, i + 1)];
+    const dx = p1[0] - p0[0], dy = p1[1] - p0[1], l = Math.hypot(dx, dy) || 1;
+    left.push([pts[i][0] - (dy / l) * wd(i), pts[i][1] + (dx / l) * wd(i)]);
+    right.push([pts[i][0] + (dy / l) * wd(i), pts[i][1] - (dx / l) * wd(i)]);
+  }
+  ctx.save();
+  // the tail fin: two loose strokes fanning from the tail
+  const tail = pts[n - 1];
+  for (const k of [-1, 1]) {
+    const ta = a + Math.PI + k * 0.4 + Math.sin(t * 3 + seed) * 0.3;
+    brush(ctx, [tail, [tail[0] + Math.cos(ta) * L * 0.14, tail[1] + Math.sin(ta) * L * 0.14], [tail[0] + Math.cos(ta) * L * 0.26, tail[1] + Math.sin(ta) * L * 0.26]], { width: L * 0.09, color: '#e8eef8', dry: 0.4, seed: seed + k, tail: 0.15, halo: 0, alpha: 0.9 });
+  }
+  ctx.fillStyle = '#eef3fb';
+  ctx.beginPath();
+  left.forEach((p, i) => (i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])));
+  for (let i = n; i >= 0; i--) ctx.lineTo(right[i][0], right[i][1]);
+  ctx.closePath();
+  ctx.fill();
+  // the red patches
+  ctx.save();
+  ctx.clip();
+  ctx.fillStyle = '#ff4b2e';
+  for (const [u, r] of [[0.15, 0.12], [0.45, 0.1], [0.62, 0.07]] as const) {
+    const p = pts[Math.round(u * n)];
+    ctx.beginPath();
+    ctx.ellipse(p[0] + Math.sin(seed + u * 9) * L * 0.04, p[1], L * r, L * r * 0.7, a, 0, TAU);
+    ctx.fill();
+  }
+  ctx.restore();
+  // side fins and an eye
+  for (const k of [-1, 1]) {
+    const p = pts[3];
+    const fa = a + Math.PI * 0.75 * k + Math.sin(t * 4 + seed) * 0.2;
+    brush(ctx, [p, [p[0] + Math.cos(fa) * L * 0.14, p[1] + Math.sin(fa) * L * 0.14]], { width: L * 0.05, color: '#e8eef8', dry: 0.5, seed: seed + 5 + k, tail: 0.2, halo: 0, alpha: 0.8 });
+  }
+  ctx.fillStyle = '#14120f';
+  const e = pts[1];
+  ctx.beginPath();
+  ctx.arc(e[0] - Math.sin(a) * L * 0.04, e[1] + Math.cos(a) * L * 0.04, L * 0.015, 0, TAU);
+  ctx.fill();
+  ctx.restore();
+}
+
+function shotBeneath(g: G, q: number) {
+  const { ctx, w, h, S, t } = g;
+  if (!inkBlots.length) inkBlots = [1, 2, 3, 4].map((k) => blot(k * 23 + 5, 256, '#020818'));
+  // sinking: the surface rises out of the top of the frame as we go down
+  const sink = ease.inOut2(seg(q, 0, 0.9));
+  const sy = lerp(h * 0.3, -h * 0.35, sink);
+  const water = ctx.createLinearGradient(0, sy, 0, h);
+  water.addColorStop(0, '#1c3f7a');
+  water.addColorStop(0.35, '#0a1a3c');
+  water.addColorStop(1, '#01040c');
+  ctx.fillStyle = water;
+  ctx.fillRect(0, 0, w, h);
+  // above the surface: the stillness, seen through the water, pale and wobbling
+  if (sy > 0) {
+    ctx.fillStyle = '#04081a';
+    ctx.fillRect(0, 0, w, sy);
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.globalAlpha = 0.6;
+    drawSprite(ctx, glow('#8fc2ff', 128), w * 0.5, sy, w * 1.6, S * 0.12);
+    ctx.restore();
+  }
+  // caustics: bright bands just under the surface, moving slowly
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  for (let i = 0; i < 9; i++) {
+    const y = sy + S * (0.04 + i * 0.05);
+    if (y < -20 || y > h) continue;
+    ctx.strokeStyle = `rgba(143,194,255,${0.22 * (1 - i / 9)})`;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    for (let x = -10; x <= w + 10; x += 12) {
+      const yy = y + Math.sin(x * 0.02 + t * 0.8 + i * 1.7) * S * 0.012 + Math.sin(x * 0.051 - t * 0.5 + i) * S * 0.006;
+      if (x < 0) ctx.moveTo(x, yy);
+      else ctx.lineTo(x, yy);
+    }
+    ctx.stroke();
+  }
+  ctx.restore();
+  // far below and behind: the first world, seen from the back of its page
+  const ghost = seg(q, 0.25, 0.7) * (1 - seg(q, 0.9, 1) * 0.5);
+  if (ghost > 0) {
+    ctx.save();
+    ctx.globalAlpha = 0.18 * ghost;
+    ctx.translate(w, 0);
+    ctx.scale(-1, 1);
+    ctx.fillStyle = '#9fb8e0';
+    ctx.beginPath();
+    ctx.arc(w * 0.3, h * 0.72, S * 0.11, 0, TAU);
+    ctx.fill();
+    ctx.fillStyle = '#6d86b5';
+    ctx.beginPath();
+    ctx.moveTo(-10, h);
+    for (let x = 0; x <= w; x += w / 10) ctx.lineTo(x, h * (0.82 - Math.abs(Math.sin(x * 0.012 + 1)) * 0.12));
+    ctx.lineTo(w + 10, h);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  }
+  // ink, blooming slowly through the water
+  for (let i = 0; i < 6; i++) {
+    const k = ease.out2(seg(q, i * 0.08, 0.6 + i * 0.06));
+    if (k <= 0) continue;
+    const bx = w * (0.2 + hash(i) * 0.6), by = sy + S * 0.25 + hash(i * 3) * h * 0.5 + k * S * 0.2;
+    ctx.save();
+    ctx.globalAlpha = 0.55 * (1 - k * 0.5);
+    drawSprite(ctx, inkBlots[i % inkBlots.length], bx, by, S * (0.15 + k * 0.9), undefined, hash(i * 7) * TAU + k * 0.6);
+    ctx.restore();
+  }
+  // the knight's reflection, upside down and still blue
+  const L = calmLayout(g);
+  const ry = sy + (h * 0.62 - sy) * 0.4 + S * 0.55;
+  ctx.save();
+  ctx.translate(0, ry);
+  ctx.scale(1, -1);
+  ctx.translate(0, -L.gy);
+  ctx.globalAlpha = 0.85;
+  knight({ ...g, t: CALM_T }, L.kx, L.hy, 0.12, L.s, w * 1.5, L.gy, { lit: 1, veins: 0, pal: BLUE, back: BLUE.c, alpha: 0.85 });
+  ctx.restore();
+  // the koi, circling it
+  for (let k = 0; k < 2; k++) {
+    const a = t * 0.35 + q * 2 + k * Math.PI;
+    const cx = L.kx + Math.cos(a) * S * 0.36, cy = ry - L.s * 0.45 + Math.sin(a) * S * 0.12;
+    koi(ctx, cx, cy, a + Math.PI / 2, S * 0.28, t, k * 13 + 1);
+  }
+  // the drop, still sinking, trailing a thread of ink
+  const dy = lerp(sy + S * 0.05, ry - L.s * 1.0, ease.out2(seg(q, 0, 0.8)));
+  ctx.strokeStyle = 'rgba(11,24,56,0.8)';
+  ctx.lineWidth = Math.max(1, S * 0.004);
+  ctx.beginPath();
+  for (let i = 0; i <= 20; i++) {
+    const yy = lerp(Math.max(sy, 0), dy, i / 20);
+    const xx = w * 0.5 + Math.sin(i * 0.6 + t) * S * 0.01 * (i / 20);
+    if (i) ctx.lineTo(xx, yy);
+    else ctx.moveTo(xx, yy);
+  }
+  ctx.stroke();
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  drawSprite(ctx, glow(BLUE.hot, 64), w * 0.5, dy, S * 0.12);
+  ctx.restore();
+  ctx.fillStyle = BLUE.core;
+  ctx.beginPath();
+  ctx.arc(w * 0.5, dy, S * 0.012, 0, TAU);
+  ctx.fill();
+  // a red thread of corruption sinking past
+  const red = seg(q, 0.35, 0.95);
+  if (red > 0 && red < 1) {
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.strokeStyle = withAlpha(RED.c, 0.8);
+    ctx.lineWidth = Math.max(1.5, S * 0.005);
+    ctx.beginPath();
+    for (let i = 0; i <= 24; i++) {
+      const u = i / 24;
+      const yy = lerp(-h * 0.2, h * 1.2, red) - u * S * 0.5;
+      const xx = w * 0.78 + Math.sin(u * 7 + t * 1.5) * S * 0.04 * u;
+      if (i) ctx.lineTo(xx, yy);
+      else ctx.moveTo(xx, yy);
+    }
+    ctx.stroke();
+    ctx.restore();
+  }
+  // the shock coming down from above: a red ring through the water, then it all comes back
+  const shock = seg(q, 0.82, 1);
+  if (shock > 0) {
+    const y = lerp(-h * 0.1, h * 1.1, ease.in2(shock));
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    for (const [wd, col, al] of [[S * 0.08, RED.c, 0.35], [S * 0.012, RED.hot, 0.9], [S * 0.003, '#ffffff', 1]] as const) {
+      ctx.strokeStyle = withAlpha(col, al);
+      ctx.lineWidth = wd;
+      ctx.beginPath();
+      ctx.ellipse(w / 2, y, w * 0.9, S * 0.08, 0, 0, TAU);
+      ctx.stroke();
+    }
+    ctx.restore();
+    if (hitQ(0.85)) g.f.shake(S * 0.02);
+  }
 }
 
 /* time comes back: a ring runs out from the knight and the red floods in behind it */
