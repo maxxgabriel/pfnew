@@ -17,7 +17,7 @@ export interface Frame {
   /** seconds since the film was ready; drives the opening title */
   intro: number;
   /** set while a hold is playing: the film is paused at B and `p` runs 0→1 */
-  hold: { kind: 'thunder' | 'dash'; p: number } | null;
+  hold: { kind: 'thunder' | 'dash' | 'alter'; p: number } | null;
   reduced: boolean;
   /** true on the frame the playhead passes beat `b`, in either direction */
   crossed(b: number): boolean;
@@ -43,7 +43,9 @@ export const CHAPTERS = [
   { at: 0, n: 'I', name: 'Ink' },
   { at: 7.4, n: 'II', name: 'Machine' },
   { at: 12.55, n: 'III', name: 'Arcade' },
-  { at: 16.5, n: 'IV', name: 'Match' },
-  { at: 23.6, n: 'V', name: 'Hello' },
-  { at: 26.7, n: 'VI', name: 'Credits' },
+  // Alter plays inside a hold at 16.63, so its chapter starts just before
+  { at: 16.62, n: 'IV', name: 'Alter' },
+  { at: 16.66, n: 'V', name: 'Match' },
+  { at: 23.6, n: 'VI', name: 'Hello' },
+  { at: 26.7, n: 'VII', name: 'Credits' },
 ];

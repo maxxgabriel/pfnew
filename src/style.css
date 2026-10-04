@@ -124,3 +124,6 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--red); outline-o
 html:not(.on-paper) .hello-title, html:not(.on-paper) .hello-mail, html:not(.on-paper) .hello-links a { color: var(--paper); }
 html:not(.on-paper) .hello-kicker { color: #b9b2a3; }
 html:not(.on-paper) .hello-again { background: var(--paper); color: var(--ink); }
+
+/* the feature chapter wears red on the reel */
+.reel-marks button.feature { color: #ff1f3d; opacity: 1; text-shadow: 0 0 8px rgba(255,31,61,.8); }

@@ -8,11 +8,13 @@ import { ACT } from './frame';
  * hold's own progress runs 0→1. Everything authored in film beats keeps its
  * timing; the scroll track just gets longer.
  */
-export type HoldKind = 'thunder' | 'dash';
+export type HoldKind = 'thunder' | 'dash' | 'alter';
 export interface Hold { at: number; len: number; kind: HoldKind }
 
 export const HOLDS: Hold[] = [
   { at: 4.86, len: 1.25, kind: 'thunder' },
+  // the Alter act plays in the night sky between the arcade and the match
+  { at: 16.63, len: 9.0, kind: 'alter' },
   { at: 19.0, len: 0.95, kind: 'dash' },
 ];
 

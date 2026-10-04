@@ -78,7 +78,7 @@ function stroke(ctx: CanvasRenderingContext2D, pts: Pt[], w: number, color: stri
  */
 export function drawBolt(
   ctx: CanvasRenderingContext2D, path: Pt[], t: number,
-  o: { width: number; amp?: number; seed?: number; alpha?: number; branches?: number; ink?: boolean; paper?: boolean },
+  o: { width: number; amp?: number; seed?: number; alpha?: number; branches?: number; ink?: boolean; paper?: boolean; pal?: typeof GOLD },
 ) {
   const alpha = o.alpha ?? 1;
   if (alpha <= 0 || path.length < 2) return;
@@ -101,11 +101,12 @@ export function drawBolt(
     ctx.restore();
     return;
   }
+  const P = o.pal ?? GOLD;
   ctx.globalCompositeOperation = 'lighter';
-  stroke(ctx, pts, o.width * 9, GOLD.deep, alpha * 0.12);
-  stroke(ctx, pts, o.width * 4.5, GOLD.c, alpha * 0.35);
-  stroke(ctx, pts, o.width * 2, GOLD.hot, alpha * 0.9);
-  stroke(ctx, pts, o.width * 0.8, GOLD.core, alpha);
+  stroke(ctx, pts, o.width * 9, P.deep, alpha * 0.12);
+  stroke(ctx, pts, o.width * 4.5, P.c, alpha * 0.35);
+  stroke(ctx, pts, o.width * 2, P.hot, alpha * 0.9);
+  stroke(ctx, pts, o.width * 0.8, P.core, alpha);
   // forks
   const n = o.branches ?? 6;
   const k = Math.floor(t * 18);
@@ -115,8 +116,8 @@ export function drawBolt(
     const ang = hash(b * 5.7 + k) * TAU;
     const len = amp * (1.5 + hash(b * 9.1 + k) * 3);
     const fork = jag([p0, [p0[0] + Math.cos(ang) * len, p0[1] + Math.sin(ang) * len]], t, len * 0.25, b + 9, 30, 2);
-    stroke(ctx, fork, o.width * 2.4, GOLD.c, alpha * 0.3);
-    stroke(ctx, fork, o.width * 0.6, GOLD.core, alpha * 0.8);
+    stroke(ctx, fork, o.width * 2.4, P.c, alpha * 0.3);
+    stroke(ctx, fork, o.width * 0.6, P.core, alpha * 0.8);
   }
   ctx.restore();
 }

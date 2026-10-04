@@ -201,6 +201,18 @@ export function drawArcade(f: Frame) {
     return;
   }
 
+  // once the signal is gone only the warp is left, and it fades into the sky
+  // that the next act is already drawing underneath
+  if (B >= A.glitch[1]) {
+    // the match only starts drawing its sky at 16.3; until then, hold the dark
+    if (B < 16.3) {
+      ctx.fillStyle = '#04060f';
+      ctx.fillRect(0, 0, w, h);
+    }
+    drawWarp(ctx, w, h, seg(B, A.warp[0], A.warp[1]), S);
+    return;
+  }
+
   renderPixels(g, W, H, f, P);
 
   // ---- the television

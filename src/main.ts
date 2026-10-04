@@ -5,6 +5,7 @@ import { drawMatch } from './acts/match';
 import { drawArcade } from './acts/arcade';
 import { drawCredits } from './acts/credits';
 import { drawFinale } from './acts/finale';
+import { drawAlter } from './acts/alter';
 import { ACT, CHAPTERS, type Frame } from './core/frame';
 import { clamp, damp, seg } from './core/math';
 import { canvas, grainTiles } from './core/sprites';
@@ -85,6 +86,7 @@ const fill = document.getElementById('reel-fill')!;
 const marks = document.getElementById('reel-marks')!;
 const hello = document.getElementById('hello')!;
 const seek = (b: number) => window.scrollTo({ top: toRaw(b) * beatPx, behavior: reduced ? 'auto' : 'smooth' });
+const seekRaw = (r: number) => window.scrollTo({ top: r * beatPx, behavior: reduced ? 'auto' : 'smooth' });
 
 CHAPTERS.forEach((c, i) => {
   const b = document.createElement('button');
@@ -92,7 +94,9 @@ CHAPTERS.forEach((c, i) => {
   b.textContent = c.n;
   b.setAttribute('aria-label', `Chapter ${c.n}: ${c.name}`);
   b.style.left = `${(toRaw(c.at) / RAW_END) * 100}%`;
-  b.addEventListener('click', () => seek(i === 0 ? 0 : c.at + 0.35));
+  if (c.name === 'Alter') b.classList.add('feature');
+  // Alter lives inside its hold: jump to the start of the hold, not past it
+  b.addEventListener('click', () => (c.name === 'Alter' ? seekRaw(toRaw(16.63)) : seek(i === 0 ? 0 : c.at + 0.35)));
   marks.appendChild(b);
 });
 document.getElementById('home')!.addEventListener('click', () => seek(0));
@@ -113,6 +117,7 @@ let chapter = -1;
 function hud() {
   let c = 0;
   CHAPTERS.forEach((ch, i) => { if (B >= ch.at - 0.05) c = i; });
+  if (frame.hold?.kind === 'alter') c = CHAPTERS.findIndex((ch) => ch.name === 'Alter');
   if (c !== chapter) {
     chapter = c;
     chN.textContent = CHAPTERS[c].n;
@@ -176,6 +181,8 @@ function loop(now: number) {
   if (B >= ACT.finaleStart && B < ACT.creditsStart + 0.4) drawFinale(frame);
   if (B >= ACT.creditsStart) drawCredits(frame);
 
+  if (frame.hold?.kind === 'alter') drawAlter(frame, frame.hold.p);
+
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   post(t, dt);
   hud();
@@ -184,7 +191,7 @@ function loop(now: number) {
 
 function post(t: number, dt: number) {
   // letterbox: the film tightens to scope for the fights
-  const lb = Math.max(seg(B, 2.5, 3.0) * (1 - seg(B, 6.0, 6.5)), seg(B, 19.3, 19.7) * (1 - seg(B, 21.9, 22.3)), seg(B, 31.0, 31.3) * (1 - seg(B, 32.8, 33.1)));
+  const lb = frame.hold?.kind === 'alter' ? 1 : Math.max(seg(B, 2.5, 3.0) * (1 - seg(B, 6.0, 6.5)), seg(B, 19.3, 19.7) * (1 - seg(B, 21.9, 22.3)), seg(B, 31.0, 31.3) * (1 - seg(B, 32.8, 33.1)));
   if (lb > 0) {
     const bar = h * 0.085 * lb;
     ctx.fillStyle = '#000';
@@ -220,7 +227,9 @@ function post(t: number, dt: number) {
  */
 function titleCards(t: number) {
   const S = Math.min(w, h);
-  for (const c of CHAPTERS.slice(1, 4)) {
+  if (frame.hold) return;
+  for (const c of CHAPTERS.slice(1, 5)) {
+    if (c.name === 'Alter') continue;
     const a = c.at - 0.05;
     const inn = seg(B, a, a + 0.12), out = seg(B, a + 0.42, a + 0.55);
     if (inn <= 0 || out >= 1) continue;
