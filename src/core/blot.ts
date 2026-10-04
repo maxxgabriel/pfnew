@@ -164,17 +164,3 @@ export function drawBlot(ctx: CanvasRenderingContext2D, x: number, y: number, s:
   }
   ctx.restore();
 }
-
-/** Blot as a 9×10 sprite for the arcade. 0 empty, 1 body, 2 eye, 3 scarf, 4 pupil. */
-export const BLOT_SPRITE = [
-  '....1....',
-  '...111...',
-  '..11111..',
-  '.1221221.',
-  '.1241241.',
-  '111111111',
-  '133333331',
-  '.1111113.',
-  '..11.11.3',
-  '.11...11.',
-];

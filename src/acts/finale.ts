@@ -29,8 +29,8 @@ let maxSize = 0, gabSize = 0;
 interface Trail { pts: Pt[] }
 const trails: Trail[] = [{ pts: [] }, { pts: [] }];
 
-/** the finale's beats were authored before the arcade and bullet time were cut in */
-export const FINALE_SHIFT = 5.1;
+/** the finale's beats were authored before bullet time was cut in */
+export const FINALE_SHIFT = 1.1;
 
 export function drawFinale(fg: Frame) {
   const f: Frame = { ...fg, B: fg.B - FINALE_SHIFT };

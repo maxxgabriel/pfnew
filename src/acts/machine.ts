@@ -1,10 +1,10 @@
-import type { Frame } from '../core/frame';
+import { ACT, type Frame } from '../core/frame';
 import { type Pt, TAU, bell, clamp, ease, hash, lerp, seg, spline } from '../core/math';
 import { CONFETTI, Particles } from '../core/particles';
 import { halftone } from '../core/sprites';
 import { C, F, font } from '../core/style';
 import { drawBlot } from '../core/blot';
-import { drawCrackle } from '../core/bolt';
+import { GOLD, drawBolt, drawCrackle } from '../core/bolt';
 
 /*
  * ACT II — THE MACHINE.
@@ -13,7 +13,8 @@ import { drawCrackle } from '../core/bolt';
  * spells one sentence as the ball runs through it: MAKE (jelly letters it
  * rolls across), THINGS (letters that fall like dominoes), THAT (a seesaw
  * that throws a little character into the air) and MOVE (a countdown on a
- * spring cannon that fires the ball out of the act).
+ * spring cannon that fires the ball out of the act). Charged gold on the way
+ * up, the ball becomes lightning and tears up the screen: the cut to Alter.
  *
  * Every line "boils" — redrawn with fresh jitter twelve times a second — the
  * way hand-drawn animation does, so the frame is never still.
@@ -762,4 +763,48 @@ function drawFloaters(ctx: CanvasRenderingContext2D, w: number, h: number, u: nu
     ctx.restore();
   }
   void bell;
+}
+
+/* ------------------------------------------------------------- the cut */
+
+/**
+ * The cut out of the machine: the charged ball becomes a gold bolt that
+ * tears up the screen and bleaches the frame, then its afterimage stays
+ * burned on the eye over the night sky for a moment.
+ */
+export function drawMachineCut(f: Frame) {
+  const { B } = f;
+  const [b0, b1] = ACT.cut;
+  if (B < b1) cutBolt(f, seg(B, b0, b1), 1);
+  else cutBolt(f, 1, 1 - seg(B, b1, b1 + 0.1));
+}
+
+function cutBolt(f: Frame, q: number, alpha: number) {
+  const { ctx, w, h, t } = f;
+  const S = Math.min(w, h);
+  if (q <= 0 || alpha <= 0) return;
+  // a jagged column from the bottom of the screen to the top
+  const path: Pt[] = [[w * 0.55, h * 1.05], [w * 0.38, h * 0.75], [w * 0.62, h * 0.5], [w * 0.4, h * 0.28], [w * 0.58, -h * 0.05]];
+  const head = ease.out3(seg(q, 0, 0.7));
+  const shown: Pt[] = [];
+  const n = path.length - 1;
+  for (let i = 0; i <= n; i++) {
+    if (i / n <= head) shown.push(path[i]);
+    else {
+      const k = (head - (i - 1) / n) * n;
+      shown.push([lerp(path[i - 1][0], path[i][0], k), lerp(path[i - 1][1], path[i][1], k)]);
+      break;
+    }
+  }
+  if (q > 0.5 && alpha === 1) {
+    // the whole frame bleaches as it connects
+    const k = seg(q, 0.5, 1);
+    ctx.fillStyle = `rgba(255,246,214,${k * 0.85})`;
+    ctx.fillRect(0, 0, w, h);
+  }
+  drawBolt(ctx, shown, t, { width: S * 0.012 * alpha, amp: S * 0.05, seed: 17, alpha, branches: 12 });
+  if (f.crossedFwd(ACT.cut[0] + 0.05)) {
+    f.shake(S * 0.05);
+    f.flash(0.5, GOLD.hot);
+  }
 }

@@ -11,11 +11,14 @@ import { ACT } from './frame';
 export type HoldKind = 'thunder' | 'dash' | 'alter';
 export interface Hold { at: number; len: number; kind: HoldKind }
 
+/** film beat where the Alter act plays */
+export const ALTER_AT = 12.63;
+
 export const HOLDS: Hold[] = [
   { at: 4.86, len: 1.25, kind: 'thunder' },
-  // the Alter act plays in the night sky between the arcade and the match
-  { at: 16.63, len: 9.0, kind: 'alter' },
-  { at: 19.0, len: 0.95, kind: 'dash' },
+  // the Alter act plays in the night sky between the machine and the match
+  { at: ALTER_AT, len: 9.0, kind: 'alter' },
+  { at: 15.0, len: 0.95, kind: 'dash' },
 ];
 
 export const RAW_END = ACT.END + HOLDS.reduce((a, h) => a + h.len, 0);

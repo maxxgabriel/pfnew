@@ -11,7 +11,7 @@ import { brush, ensoPath } from '../core/brush';
 const MOON_ENSO = ensoPath(0, 0, 100, 3, 0.93, -2.3);
 
 /*
- * ACT III — THE NIGHT MATCH.
+ * ACT IV — THE NIGHT MATCH.
  *
  * The ball comes down out of the sky like a falling star into a dark
  * stadium; the floodlights clunk on one tower at a time. The rivalry from the
@@ -150,11 +150,9 @@ function makeCam(f: { w: number; h: number }, shake: Pt, pos: V3, look: V3, rect
  * air, before the shot is let go. Implemented as a remap of the playhead:
  * the act lives in its own "match time", which stops for FZ beats.
  */
-const D = 4.0, FREEZE = 15.6, FZ = 1.1;
-export const MATCH_SHIFT = D;
+const FREEZE = 15.6, FZ = 1.1;
 export function matchLocal(B: number) {
-  const b = B - D;
-  return b < FREEZE ? b : b < FREEZE + FZ ? FREEZE : b - FZ;
+  return B < FREEZE ? B : B < FREEZE + FZ ? FREEZE : B - FZ;
 }
 
 function orbitCam(f: Frame, bt: number, shake: Pt): Cam {
@@ -170,6 +168,14 @@ function orbitCam(f: Frame, bt: number, shake: Pt): Cam {
   const k = Math.min(1, swell * 3);
   const look: V3 = [lerp(lx, ball[0], k), lerp(ly, ball[1] + 0.3, k), lerp(lz, ball[2], k)];
   return makeCam(f, shake, pos, look);
+}
+
+/** where the falling star sits on screen at film beat B: Alter's exit lands its ring there */
+export function starOnScreen(f: { w: number; h: number }, B: number): Pt | null {
+  const b = matchLocal(B);
+  const [x, y, z, lx, ly, lz] = keyed<number[]>(CAM_KEYS, b);
+  const p = P(makeCam(f, [0, 0], [x, y, z], [lx, ly, lz]), ballAt(b));
+  return p ? [p[0], p[1]] : null;
 }
 
 /* ------------------------------------------------------------- the play */
@@ -552,7 +558,7 @@ export function drawMatch(fg: Frame) {
     stars = Array.from({ length: 140 }, () => [r(), r() * 0.7, r()]);
   }
   const S = Math.min(w, h);
-  const bt = seg(fg.B - D, FREEZE, FREEZE + FZ);
+  const bt = seg(fg.B, FREEZE, FREEZE + FZ);
   if (fg.hold?.kind === 'dash') {
     dashP = fg.hold.p;
     if (frozenMT < 0) frozenMT = t;

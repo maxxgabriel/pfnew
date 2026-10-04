@@ -14,25 +14,23 @@ of ink, with eyes and a red scarf), watches every act.
    into the point where they meet.
 2. **Machine.** What comes out is a ball. The paper tears and it drops into a
    poster-coloured chain reaction that spells MAKE / THINGS / THAT / MOVE.
-3. **Arcade.** The cannon fires it through the glass of a cartoon TV. Pong
-   (blue v green), a Breakout wall that spells PLAY, a glitch storm, and the
-   pixels blow outward into stars.
-4. **Alter.** The set piece, cut like an anime episode: eighteen shots of a
+3. **Alter.** The cannon's shot turns to lightning and tears up the screen
+   into the night sky, where ink bleeds in from every edge. The set piece, cut like an anime episode: eighteen shots of a
    corrupted black knight (red-veined, a black blade whose runes ignite) against
    a beast of living ink that falls out of a target ring in a bruised purple
    sky. Close-ups, impact frames, a slash barrage, tendrils at the camera, and a
    beam of darkness. It plays in a hold, so it has its own clock
    (`src/acts/alter.ts`).
-5. **Match.** It falls like a star into a floodlit stadium. Broadcast camera,
+4. **Match.** It falls like a star into a floodlit stadium. Broadcast camera,
    chalk tactics, comic split-screen panels, a bullet-time orbit at the
    strike, a cloth-sim net.
-6. **Hello.** Through the net and back onto paper. Contact.
-7. **Credits**, and a post-credits scene.
+5. **Hello.** Through the net and back onto paper. Contact.
+6. **Credits**, and a post-credits scene.
 
 **Thunder** (gold, the one colour used nowhere else) strikes four times: a
 bolt signs the name on the title; a one-flash finisher in the duel (stance,
 charge, a six-fold zig-zag, a black-on-white impact frame, and the cut landing
-a beat late); the cannon ball tearing up the screen into the arcade; and #10's
+a beat late); the cannon ball tearing up the screen out of the machine; and #10's
 dash through two defenders. The two long ones are holds (`src/core/holds.ts`):
 the film pauses at a beat while the scroll plays the moment.
 

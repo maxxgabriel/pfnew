@@ -1,15 +1,14 @@
 import './style.css';
 import { drawInk, drawPaperOver } from './acts/ink';
-import { drawMachine, drawMachineBall } from './acts/machine';
+import { drawMachine, drawMachineBall, drawMachineCut } from './acts/machine';
 import { drawMatch } from './acts/match';
-import { drawArcade } from './acts/arcade';
 import { drawCredits } from './acts/credits';
 import { drawFinale } from './acts/finale';
 import { drawAlter } from './acts/alter';
 import { ACT, CHAPTERS, type Frame } from './core/frame';
 import { clamp, damp, seg } from './core/math';
 import { canvas, grainTiles } from './core/sprites';
-import { RAW_END, toFilm, toRaw } from './core/holds';
+import { ALTER_AT, RAW_END, toFilm, toRaw } from './core/holds';
 
 /*
  * THE FILM.
@@ -96,7 +95,7 @@ CHAPTERS.forEach((c, i) => {
   b.style.left = `${(toRaw(c.at) / RAW_END) * 100}%`;
   if (c.name === 'Alter') b.classList.add('feature');
   // Alter lives inside its hold: jump to the start of the hold, not past it
-  b.addEventListener('click', () => (c.name === 'Alter' ? seekRaw(toRaw(16.63)) : seek(i === 0 ? 0 : c.at + 0.35)));
+  b.addEventListener('click', () => (c.name === 'Alter' ? seekRaw(toRaw(ALTER_AT)) : seek(i === 0 ? 0 : c.at + 0.35)));
   marks.appendChild(b);
 });
 document.getElementById('home')!.addEventListener('click', () => seek(0));
@@ -129,9 +128,9 @@ function hud() {
   }
   fill.style.width = `${(R / RAW_END) * 100}%`;
   // dark type over paper, light type over everything else
-  const onPaper = B < 1.75 || (B > 6.7 && B < 7.55) || (B > 23.65 && B < 30.8);
+  const onPaper = B < 1.75 || (B > 6.7 && B < 7.55) || (B > 19.65 && B < 26.8);
   document.documentElement.classList.toggle('on-paper', onPaper);
-  hello.classList.toggle('on', (B > 25.25 && B < 26.6) || B > 33.45);
+  hello.classList.toggle('on', (B > 21.25 && B < 22.6) || B > 29.45);
 }
 
 /* ---------------------------------------------------------------- loop */
@@ -175,9 +174,9 @@ function loop(now: number) {
     drawPaperOver(frame);
     drawMachineBall(frame);
   }
-  // the match starts underneath the arcade's warp-out, so it is drawn first
   if (B >= ACT.matchStart && B < ACT.matchEnd) drawMatch(frame);
-  if (B >= ACT.arcadeStart && B < ACT.arcadeEnd) drawArcade(frame);
+  // the gold bolt out of the machine, and its afterimage over the night sky
+  if (B >= ACT.cut[0] && B < ACT.cut[1] + 0.1) drawMachineCut(frame);
   if (B >= ACT.finaleStart && B < ACT.creditsStart + 0.4) drawFinale(frame);
   if (B >= ACT.creditsStart) drawCredits(frame);
 
@@ -191,7 +190,7 @@ function loop(now: number) {
 
 function post(t: number, dt: number) {
   // letterbox: the film tightens to scope for the fights
-  const lb = frame.hold?.kind === 'alter' ? 1 : Math.max(seg(B, 2.5, 3.0) * (1 - seg(B, 6.0, 6.5)), seg(B, 19.3, 19.7) * (1 - seg(B, 21.9, 22.3)), seg(B, 31.0, 31.3) * (1 - seg(B, 32.8, 33.1)));
+  const lb = frame.hold?.kind === 'alter' ? 1 : Math.max(seg(B, 2.5, 3.0) * (1 - seg(B, 6.0, 6.5)), seg(B, 15.3, 15.7) * (1 - seg(B, 17.9, 18.3)), seg(B, 27.0, 27.3) * (1 - seg(B, 28.8, 29.1)));
   if (lb > 0) {
     const bar = h * 0.085 * lb;
     ctx.fillStyle = '#000';
@@ -228,7 +227,7 @@ function post(t: number, dt: number) {
 function titleCards(t: number) {
   const S = Math.min(w, h);
   if (frame.hold) return;
-  for (const c of CHAPTERS.slice(1, 5)) {
+  for (const c of CHAPTERS.slice(1, 4)) {
     if (c.name === 'Alter') continue;
     const a = c.at - 0.05;
     const inn = seg(B, a, a + 0.12), out = seg(B, a + 0.42, a + 0.55);

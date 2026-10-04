@@ -18,7 +18,7 @@ import { drawLightLine, drawSeal } from './ink';
  * in its hands — and across the field the other one lights by itself.
  */
 
-export const CRED = { start: 26.55, roll: [26.85, 30.6] as const, post: 30.75, end: 34.0 };
+export const CRED = { start: 22.55, roll: [22.85, 26.6] as const, post: 26.75, end: 30.0 };
 
 type Line = { kind: 'head' | 'pair' | 'big' | 'note' | 'gap'; a?: string; b?: string; color?: string };
 const LINES: Line[] = [

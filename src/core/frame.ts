@@ -29,23 +29,22 @@ export interface Frame {
 
 /** Act boundaries in beats. One beat is ~0.7 of a screen of scrolling. */
 export const ACT = {
-  machineEnd: 12.6,
-  arcadeStart: 12.3,
-  arcadeEnd: 16.62,
-  matchStart: 16.3,
-  matchEnd: 24.0,
-  finaleStart: 23.0,
-  creditsStart: 26.55,
-  END: 34.0,
+  /** the ball turns into a gold bolt and tears up the screen: the cut out of the machine */
+  cut: [12.3, 12.4] as const,
+  machineEnd: 12.4,
+  matchStart: 12.4,
+  matchEnd: 20.0,
+  finaleStart: 19.0,
+  creditsStart: 22.55,
+  END: 30.0,
 };
 
 export const CHAPTERS = [
   { at: 0, n: 'I', name: 'Ink' },
   { at: 7.4, n: 'II', name: 'Machine' },
-  { at: 12.55, n: 'III', name: 'Arcade' },
-  // Alter plays inside a hold at 16.63, so its chapter starts just before
-  { at: 16.62, n: 'IV', name: 'Alter' },
-  { at: 16.66, n: 'V', name: 'Match' },
-  { at: 23.6, n: 'VI', name: 'Hello' },
-  { at: 26.7, n: 'VII', name: 'Credits' },
+  // Alter plays inside a hold at 12.63; its chapter starts as the bolt cuts to the night sky
+  { at: 12.45, n: 'III', name: 'Alter' },
+  { at: 12.66, n: 'IV', name: 'Match' },
+  { at: 19.6, n: 'V', name: 'Hello' },
+  { at: 22.7, n: 'VI', name: 'Credits' },
 ];

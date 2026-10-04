@@ -32,10 +32,10 @@ a playhead and redraws the whole frame every animation frame.
   | kind | film `at` | raw range | what plays |
   |---|---|---|---|
   | `thunder` | 4.86 | 4.86 → 6.11 | duel finisher (ink.ts `drawThunder`) |
-  | `alter` | 16.63 | 17.88 → 26.88 | the whole ALTER act (alter.ts) |
-  | `dash` | 19.0 | 29.25 → 30.20 | #10's thunder dash (match.ts `drawDash`) |
+  | `alter` | 12.63 | 13.88 → 22.88 | the whole ALTER act (alter.ts) |
+  | `dash` | 15.0 | 25.25 → 26.20 | #10's thunder dash (match.ts `drawDash`) |
 
-  `RAW_END = ACT.END (34) + 11.2 = 45.2`. Convert with `toFilm(raw)` /
+  `RAW_END = ACT.END (30) + 11.2 = 41.2`. Convert with `toFilm(raw)` /
   `toRaw(film)`: raw = film + sum of `len` for holds whose `at` < film.
 - **Clock (t):** wall time in seconds. Ambient motion (mist, embers, blinking,
   bobbing) runs on `t`, so the frame keeps moving when the reader stops.
@@ -46,7 +46,7 @@ a playhead and redraws the whole frame every animation frame.
   frame the playhead passes a beat; use these for one-shot events like
   shakes, flashes and particle bursts), `shake(px)` and `flash(alpha, colour)`.
 - **Post** (main.ts `post`): letterbox bars (duel, the shot, post-credits, all
-  of ALTER), flash, act title cards (II Machine, III Arcade, V Match), the
+  of ALTER), flash, act title cards (II Machine, IV Match), the
   vignette, and film grain.
 - **HUD (DOM):** the MG seal (back to start), the chapter label, the chapter
   reel with tappable marks (ALTER's mark is red), and the contact card at the
@@ -61,16 +61,20 @@ a playhead and redraws the whole frame every animation frame.
 | 1.25 → 2.35 | Ink: flood | ink.ts | ink blooms up behind the range; night |
 | 2.35 → 6.8 | Ink: duel | ink.ts + warrior.ts | warriors (IK from blade keys `KEYS`), clashes at 3.55/4.12/4.45/4.75, petals, vertigo on the lock, **thunder hold at 4.86**, then green's snapped blade, beams 5.3, orb zoom 6.0–6.75 |
 | 6.75 → 7.85 | paper + tear | ink.ts `drawPaperOver` | white cools to paper, ball pops, paper tears open |
-| 7.0 → 12.7 | Machine | machine.ts | MAKE / THINGS / THAT / MOVE chain reaction; cannon fires at 12.0; the ball charges gold 12.12–12.3 |
-| 12.3 → 16.62 | Arcade | arcade.ts | gold bolt cut 12.3–12.4 → MG·TV → glass crack at 12.82 → dive → Pong → Breakout "PLAY" → glitch → pixel warp to stars |
-| 16.63 (hold) | **ALTER** | alter.ts | 18 shots, see §3 |
-| 16.3 → 24.0 | Match | match.ts | stadium, lights clunk on, lower third, chalk tactics, comic panels, **dash hold at 19.0**, bullet time, goal, net push |
-| 23.0 → 26.6 | Hello | finale.ts | ensō iris through the net, name repainted, contact card at 25.25–26.6 |
-| 26.55 → 34 | Credits + post-credits | credits.ts | roll, then Blot finds the hilts, "MAX GABRIEL WILL RETURN", contact card again |
+| 7.0 → 12.4 | Machine | machine.ts | MAKE / THINGS / THAT / MOVE chain reaction; cannon fires at 12.0; the ball charges gold 12.12–12.3 |
+| 12.3 → 12.5 | the cut | machine.ts `drawMachineCut` | the ball becomes a gold bolt that tears up the screen (`ACT.cut`), hard cut to the match's night sky, afterimage fades by 12.5 |
+| 12.63 (hold) | **ALTER** | alter.ts | 18 shots, see §3; opens by ink bleeding in over the night sky, exits by drawing back and landing its ring on the falling star |
+| 12.4 → 20.0 | Match | match.ts | stadium, lights clunk on, lower third, chalk tactics, comic panels, **dash hold at 15.0**, bullet time, goal, net push |
+| 19.0 → 22.6 | Hello | finale.ts | ensō iris through the net, name repainted, contact card at 21.25–22.6 |
+| 22.55 → 30 | Credits + post-credits | credits.ts | roll, then Blot finds the hilts, "MAX GABRIEL WILL RETURN", contact card again |
 
-Match and finale have internal remaps: `matchLocal()` (shift D = 4 plus the
-bullet-time freeze) and `FINALE_SHIFT = 5.1`. Their internal constants are
-in "original" beats; read the remap before editing them.
+Match and finale have internal remaps: `matchLocal()` (the bullet-time
+freeze) and `FINALE_SHIFT = 1.1`. Read the remap before editing their
+internal constants.
+
+The Arcade act (MG·TV, Pong, Breakout) sat between the machine and ALTER
+until the owner had it removed; it's in git history before the commit that
+removed it if it's ever wanted back.
 
 ## 3. ALTER (`src/acts/alter.ts`), the centrepiece
 
@@ -96,7 +100,7 @@ Shared renderers in the same file:
 - Effects: `debris` (q-deterministic), `speedLines`, `hLines`, `shockRing`,
   `cracks`, `impactFrame`, `beam`, `targetRing`, `drawEmbers`.
 
-To jump to a shot: raw = 17.88 + 9 × (sum of earlier shot durs + dur × q) /
+To jump to a shot: raw = 13.88 + 9 × (sum of earlier shot durs + dur × q) /
 12.85.
 
 ## 4. Other building blocks

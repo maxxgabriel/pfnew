@@ -120,6 +120,18 @@ watching anime. make this the main selling point of the whole website. make
 this fucking crazy."* Built as an 18-shot, hard-cut act (`src/acts/alter.ts`)
 between the arcade and the match, with its own red chapter mark (IV).
 
+**Round 6: Arcade removed, ALTER cleaned up.** Owner: *"remove the arcade
+act"*, and fix ALTER's animations that *"look weird… broken pieces and the
+ones that don't have clean transitions"* (they like most of it). The machine
+now cuts straight to ALTER on the gold bolt; chapters renumbered (III Alter,
+IV Match, V Hello, VI Credits). ALTER fixes: ink-bleed open/close instead of
+a crossfade (no more double moon), a standing wide, a real leg stepping
+into the water, the roar framed on the head, a dash with afterimages instead
+of a flat wedge, an ink-on-white impact frame, wounds and tendrils redrawn,
+the beam aimed on a diagonal with a close-up where it actually hits, and a
+flash on every sub-cut. Next requested: Dead Calm (Giyu, Water Breathing
+11th form) and a Domain Expansion (Gojo) somewhere in the film.
+
 **What the owner responds to.** Big, cinematic, anime-like set pieces;
 continuity jokes (Blot); hard cuts, impact frames, speed lines. Proposals
 with clear options before a build.
