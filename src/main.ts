@@ -7,10 +7,11 @@ import { drawFinale } from './acts/finale';
 import { alterShotP, drawAlter } from './acts/alter';
 import { drawPowers } from './acts/powers';
 import { drawRide, rideShotP } from './acts/ride';
+import { drawTitan, titanShotP } from './acts/titan';
 import { ACT, CHAPTERS, type Frame } from './core/frame';
 import { clamp, damp, seg } from './core/math';
 import { canvas, grainTiles } from './core/sprites';
-import { ALTER_AT, HOLDS, POWERS_AT, RAW_END, toFilm, toRaw } from './core/holds';
+import { ALTER_AT, HOLDS, POWERS_AT, RAW_END, TITAN_AT, toFilm, toRaw } from './core/holds';
 
 /*
  * THE FILM.
@@ -173,7 +174,10 @@ function loop(now: number) {
   }
 
   if (B < 6.8) drawInk(frame);
-  if (B >= 6.85 && B < ACT.machineEnd) drawMachine(frame);
+  // after TITAN the poster is torn open: the machine is gone and the night behind the page shows
+  const torn = B > TITAN_AT;
+  if (B >= 6.85 && B < ACT.machineEnd && !torn) drawMachine(frame);
+  if (torn && B < ACT.matchStart) drawMatch({ ...frame, B: ACT.matchStart });
   if (B >= 6.75 && B < 7.9) {
     drawPaperOver(frame);
     drawMachineBall(frame);
@@ -181,11 +185,12 @@ function loop(now: number) {
   // after the pull-back the film is on paper: the match is over
   if (B >= ACT.matchStart && B < ACT.matchEnd && !(B > POWERS_AT || frame.hold?.kind === 'powers')) drawMatch(frame);
   // the gold bolt out of the machine, and its afterimage over the night sky
-  if (B >= ACT.cut[0] && B < ACT.cut[1] + 0.1) drawMachineCut(frame);
+  if (B >= ACT.cut[0] && B < ACT.cut[1] + 0.1 && !torn) drawMachineCut(frame);
   if (B >= ACT.finaleStart && B < ACT.creditsStart + 0.4) drawFinale(frame);
   if (B >= ACT.creditsStart) drawCredits(frame);
 
   if (frame.hold?.kind === 'alter') drawAlter(frame, frame.hold.p);
+  if (frame.hold?.kind === 'titan') drawTitan(frame, frame.hold.p);
   if (frame.hold?.kind === 'ride') drawRide(frame, frame.hold.p);
   if (frame.hold?.kind === 'powers') drawPowers(frame, frame.hold.p);
 
@@ -305,6 +310,11 @@ function jumpRaw(b: number) {
   hold(kind: string, p = 0.5) {
     const h = HOLDS.find((k) => k.kind === kind)!;
     jumpRaw(toRaw(h.at) + h.len * Math.min(0.9999, p));
+  },
+  /** jump to TITAN's shot `name` at its own progress q */
+  titan(name: string, q = 0.5) {
+    const h = HOLDS.find((k) => k.kind === 'titan')!;
+    jumpRaw(toRaw(h.at) + h.len * titanShotP(name, q));
   },
   /** jump to the night ride's shot `name` at its own progress q */
   ride(name: string, q = 0.5) {
