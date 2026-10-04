@@ -8,7 +8,7 @@ import { ACT } from './frame';
  * hold's own progress runs 0→1. Everything authored in film beats keeps its
  * timing; the scroll track just gets longer.
  */
-export type HoldKind = 'dragon' | 'thunder' | 'swallow' | 'titan' | 'dash' | 'alter' | 'ride' | 'powers';
+export type HoldKind = 'dragon' | 'thunder' | 'swallow' | 'titan' | 'dash' | 'alter' | 'ride' | 'powers' | 'xray';
 export interface Hold { at: number; len: number; kind: HoldKind }
 
 /** film beat where the ink dragon rises (the flood has just taken the sky) */
@@ -24,6 +24,9 @@ export const ALTER_AT = 12.63;
 
 /** film beat where the night ride plays: straight after ALTER, as the star falls */
 export const RIDE_AT = 12.64;
+
+/** film beat of the post-credits pencil test, just after "wait —" */
+export const XRAY_AT = 26.99;
 
 /** film beat where the pull-back (Powers of Ten) starts: the ball is in the net */
 export const POWERS_AT = 18.7;
@@ -42,6 +45,8 @@ export const HOLDS: Hold[] = [
   { at: 15.0, len: 0.95, kind: 'dash' },
   // out of the net and out of every world, back to the page
   { at: POWERS_AT, len: 5.5, kind: 'powers' },
+  // after "wait —": the whole film again as its construction drawings
+  { at: XRAY_AT, len: 3.5, kind: 'xray' },
 ];
 
 export const RAW_END = ACT.END + HOLDS.reduce((a, h) => a + h.len, 0);
