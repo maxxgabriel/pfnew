@@ -32,10 +32,10 @@ a playhead and redraws the whole frame every animation frame.
   | kind | film `at` | raw range | what plays |
   |---|---|---|---|
   | `thunder` | 4.86 | 4.86 → 6.11 | duel finisher (ink.ts `drawThunder`) |
-  | `alter` | 12.63 | 13.88 → 22.88 | the whole ALTER act (alter.ts) |
+  | `alter` | 12.63 | 13.88 → 27.03 | the whole ALTER act (alter.ts) |
   | `dash` | 15.0 | 25.25 → 26.20 | #10's thunder dash (match.ts `drawDash`) |
 
-  `RAW_END = ACT.END (30) + 11.2 = 41.2`. Convert with `toFilm(raw)` /
+  `RAW_END = ACT.END (30) + 15.35 = 45.35`. Convert with `toFilm(raw)` /
   `toRaw(film)`: raw = film + sum of `len` for holds whose `at` < film.
 - **Clock (t):** wall time in seconds. Ambient motion (mist, embers, blinking,
   bobbing) runs on `t`, so the frame keeps moving when the reader stops.
@@ -63,7 +63,7 @@ a playhead and redraws the whole frame every animation frame.
 | 6.75 → 7.85 | paper + tear | ink.ts `drawPaperOver` | white cools to paper, ball pops, paper tears open |
 | 7.0 → 12.4 | Machine | machine.ts | MAKE / THINGS / THAT / MOVE chain reaction; cannon fires at 12.0; the ball charges gold 12.12–12.3 |
 | 12.3 → 12.5 | the cut | machine.ts `drawMachineCut` | the ball becomes a gold bolt that tears up the screen (`ACT.cut`), hard cut to the match's night sky, afterimage fades by 12.5 |
-| 12.63 (hold) | **ALTER** | alter.ts | 18 shots, see §3; opens by ink bleeding in over the night sky, exits by drawing back and landing its ring on the falling star |
+| 12.63 (hold) | **ALTER** | alter.ts | 26 shots, see §3; opens by ink bleeding in over the night sky, exits by drawing back and landing its ring on the falling star |
 | 12.4 → 20.0 | Match | match.ts | stadium, lights clunk on, lower third, chalk tactics, comic panels, **dash hold at 15.0**, bullet time, goal, net push |
 | 19.0 → 22.6 | Hello | finale.ts | ensō iris through the net, name repainted, contact card at 21.25–22.6 |
 | 22.55 → 30 | Credits + post-credits | credits.ts | roll, then Blot finds the hilts, "MAX GABRIEL WILL RETURN", contact card again |
@@ -79,14 +79,27 @@ removed it if it's ever wanted back.
 ## 3. ALTER (`src/acts/alter.ts`), the centrepiece
 
 Shots are a list `SHOTS: {name, dur, draw(g, q)}`. `p` (0..1) maps onto the
-summed durations (12.85 units across 9 raw beats) and each shot gets its own
+summed durations (18.43 units across 13.15 raw beats) and each shot gets its own
 `q` (0..1). Cuts are hard; each new shot gets a small jolt and a red
 overexposed frame. `hitQ(x)` fires once as the shot's q crosses x (use it
 for shakes and flashes).
 
 Order: corrupt → title → wide → feet → sword → eyes → ring → impact → roar
-→ standoff → dash → clash → slashes → tendrils → charge → beam → after →
-exit.
+→ standoff → dash → clash → slashes → tendrils → **dead calm** (still → calm
+→ drop → release) → **the void** (sign → expand → void → shatter) → charge →
+beam → after → exit.
+
+- Dead calm: time stops in a sphere around the knight (`CALM_T` freezes the
+  clock, embers freeze, palette `BLUE`); tendrils are cut as they enter it
+  while the knight only snaps between poses (`CALM_POSES`); a droplet lands
+  and a red ring brings time back (`calmScene` is shared by calm/release).
+- The void: a hand seal, a sphere of void swallowing the world from the
+  knight's chest, the beast caged and overloaded (`voidSpace`, `voidBeast`,
+  palette `VOID`), then the void is rendered to a buffer and breaks into
+  glass shards (`shards`, `shotShatter`).
+- Shots can set `embers: 'live' | 'frozen' | 'none'` and `flash` (the cut's
+  overexposure colour, `null` for no flash or jolt). No on-screen text in
+  either set piece, by the owner's choice.
 
 Shared renderers in the same file:
 - `world(g, cam)`: parallax sky, blood ensō moon, clouds, the spire
@@ -100,8 +113,7 @@ Shared renderers in the same file:
 - Effects: `debris` (q-deterministic), `speedLines`, `hLines`, `shockRing`,
   `cracks`, `impactFrame`, `beam`, `targetRing`, `drawEmbers`.
 
-To jump to a shot: raw = 13.88 + 9 × (sum of earlier shot durs + dur × q) /
-12.85.
+To jump to a shot: raw = 13.88 + 13.15 × (sum of earlier shot durs + dur × q) / 18.43.
 
 ## 4. Other building blocks
 

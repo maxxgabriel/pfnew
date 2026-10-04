@@ -12,7 +12,7 @@ import { drawWarrior } from './warrior';
 /*
  * III · ALTER.
  *
- * The film's set piece, cut like an episode of anime: eighteen shots, hard
+ * The film's set piece, cut like an episode of anime: twenty-six shots, hard
  * cuts between them, close-ups, impact frames, speed lines. The blue warrior
  * comes back corrupted, a black knight with red light running through
  * them, against a beast made of living ink that drops out of a target ring
@@ -25,6 +25,11 @@ import { drawWarrior } from './warrior';
 
 export const RED = { deep: '#7a0014', c: '#ff1f3d', hot: '#ff7486', core: '#fff1f3' };
 export const VIOLET = { deep: '#2a0a66', c: '#7b3cff', hot: '#b892ff', core: '#f1e9ff' };
+/** the knight's old colour, surfacing in the stillness */
+const BLUE = { deep: '#06184a', c: '#2f6bff', hot: '#8fc2ff', core: '#eef6ff' };
+/** the void: cold white light */
+const VOID = { deep: '#1a2a6a', c: '#7fb2ff', hot: '#d4e6ff', core: '#ffffff' };
+type Pal = typeof RED;
 const K = {
   sky0: '#06030c', sky1: '#1a0e2c', sky2: '#2e1a48', ink: '#050307', floor: '#07040b',
   moon: '#6a0f22', ash: '#3a3346',
@@ -32,7 +37,15 @@ const K = {
 
 /* ---------------------------------------------------------------- shots */
 
-type Shot = { name: string; dur: number; draw: (g: G, q: number) => void };
+type Shot = {
+  name: string;
+  dur: number;
+  draw: (g: G, q: number) => void;
+  /** embers: rising (default), frozen in the air, or none */
+  embers?: 'live' | 'frozen' | 'none';
+  /** the colour of the cut's overexposed frame; null for no flash and no jolt */
+  flash?: string | null;
+};
 
 interface G {
   f: Frame;
@@ -58,7 +71,17 @@ const SHOTS: Shot[] = [
   { name: 'dash', dur: 0.38, draw: shotDash },
   { name: 'clash', dur: 0.6, draw: shotClash },
   { name: 'slashes', dur: 0.7, draw: shotSlashes },
-  { name: 'tendrils', dur: 0.75, draw: shotTendrils },
+  { name: 'tendrils', dur: 0.55, draw: shotTendrils },
+  // dead calm: time stops in a circle around the knight
+  { name: 'still', dur: 0.6, draw: shotStill, embers: 'frozen', flash: null },
+  { name: 'calm', dur: 1.25, draw: shotCalm, embers: 'frozen', flash: null },
+  { name: 'drop', dur: 0.5, draw: shotDrop, embers: 'frozen', flash: null },
+  { name: 'release', dur: 0.7, draw: shotRelease },
+  // the domain: the world is swallowed by an endless void, and broken open again
+  { name: 'sign', dur: 0.55, draw: shotSign, embers: 'none' },
+  { name: 'expand', dur: 0.85, draw: shotExpand, embers: 'none', flash: '255,255,255' },
+  { name: 'void', dur: 1.1, draw: shotVoid, embers: 'none', flash: '200,225,255' },
+  { name: 'shatter', dur: 0.75, draw: shotShatter, embers: 'none', flash: null },
   { name: 'charge', dur: 1.0, draw: shotCharge },
   { name: 'beam', dur: 1.2, draw: shotBeam },
   { name: 'after', dur: 0.75, draw: shotAfter },
@@ -77,19 +100,21 @@ export function drawAlter(f: Frame, p: number) {
   const at = clamp(p) * TOTAL;
   while (i < SHOTS.length - 1 && acc + SHOTS[i].dur <= at) acc += SHOTS[i++].dur;
   const q = clamp((at - acc) / SHOTS[i].dur);
-  // a hard cut lands with a jolt
-  if (i !== lastShot && lastShot >= 0 && Math.abs(i - lastShot) === 1 && !f.reduced) f.shake(g.S * 0.008);
+  const shot = SHOTS[i];
+  // a hard cut lands with a jolt (not into the stillness)
+  if (i !== lastShot && lastShot >= 0 && Math.abs(i - lastShot) === 1 && !f.reduced && shot.flash !== null) f.shake(g.S * 0.008);
   const prevQ = i === lastShot ? lastQ : -1;
   lastShot = i;
   lastQ = q;
   hitQ = (x: number) => prevQ >= 0 && prevQ < x && q >= x;
   ctx.save();
-  SHOTS[i].draw(g, q);
+  shot.draw(g, q);
   ctx.restore();
   // embers and ash in front of every shot but the black title
-  if (SHOTS[i].name !== 'title') drawEmbers(g, i === 0 ? ease.inOut2(seg(q, 0.3, 1)) : SHOTS[i].name === 'exit' ? 1 - q : 1);
-  // the cut itself: a frame of red-tinted overexposure on every new shot
-  if (i > 0 && SHOTS[i].name !== 'exit') cutFlash(g, q / 0.06);
+  const em = shot.embers ?? 'live';
+  if (shot.name !== 'title' && em !== 'none') drawEmbers(g, i === 0 ? ease.inOut2(seg(q, 0.3, 1)) : shot.name === 'exit' ? 1 - q : 1, em === 'frozen');
+  // the cut itself: a frame of overexposure on every new shot
+  if (i > 0 && shot.name !== 'exit' && shot.flash !== null) cutFlash(g, q / 0.06, shot.flash);
   void t;
 }
 
@@ -236,7 +261,7 @@ function world(g: G, cam: Cam, o: { horizon?: number; moon?: boolean; tint?: num
 /* ---------------------------------------------------- shared: the knight */
 
 /** the black blade with red runes; `lit` ignites the rings from the hilt out */
-function blade(g: G, hx: number, hy: number, a: number, L: number, lit: number, glowK = 1) {
+function blade(g: G, hx: number, hy: number, a: number, L: number, lit: number, glowK = 1, pal: Pal = RED) {
   const { ctx, S, t } = g;
   const dx = Math.cos(a), dy = Math.sin(a), nx = -dy, ny = dx;
   const wb = L * 0.055;
@@ -249,7 +274,7 @@ function blade(g: G, hx: number, hy: number, a: number, L: number, lit: number, 
     const mid = pt(0.5, 0);
     ctx.translate(mid[0], mid[1]);
     ctx.rotate(a);
-    drawSprite(ctx, glow(RED.c, 128), 0, 0, L * 1.3, wb * 6);
+    drawSprite(ctx, glow(pal.c, 128), 0, 0, L * 1.3, wb * 6);
     ctx.restore();
   }
   // the blade: long, heavy, tapering to a point
@@ -275,14 +300,14 @@ function blade(g: G, hx: number, hy: number, a: number, L: number, lit: number, 
   ctx.save();
   ctx.globalCompositeOperation = 'lighter';
   const f0 = pt(0.12, 0), f1 = pt(lerp(0.12, 0.88, lit), 0);
-  ctx.strokeStyle = RED.c;
+  ctx.strokeStyle = pal.c;
   ctx.lineWidth = wb * 0.35;
   ctx.lineCap = 'round';
   ctx.beginPath();
   ctx.moveTo(f0[0], f0[1]);
   ctx.lineTo(f1[0], f1[1]);
   ctx.stroke();
-  ctx.strokeStyle = RED.core;
+  ctx.strokeStyle = pal.core;
   ctx.lineWidth = wb * 0.1;
   ctx.stroke();
   // rings near the guard, igniting in turn
@@ -292,12 +317,12 @@ function blade(g: G, hx: number, hy: number, a: number, L: number, lit: number, 
     const c = pt(0.16 + k * 0.065, 0);
     const pulse = 1 + Math.sin(t * 6 - k) * 0.08;
     ctx.globalAlpha = on;
-    ctx.strokeStyle = RED.hot;
+    ctx.strokeStyle = pal.hot;
     ctx.lineWidth = Math.max(1, wb * 0.16);
     ctx.beginPath();
     ctx.ellipse(c[0], c[1], wb * 0.55 * pulse, wb * 0.55 * pulse, a, 0, TAU);
     ctx.stroke();
-    drawSprite(ctx, glow(RED.c, 64), c[0], c[1], wb * 3 * on);
+    drawSprite(ctx, glow(pal.c, 64), c[0], c[1], wb * 3 * on);
   }
   ctx.restore();
   // guard and grip
@@ -319,14 +344,15 @@ function blade(g: G, hx: number, hy: number, a: number, L: number, lit: number, 
 }
 
 /** the corrupted knight: the warrior body, a red rim, red veins pulsing */
-function knight(g: G, hx: number, hy: number, a: number, s: number, foeX: number, groundY: number, o: { lit?: number; veins?: number; alpha?: number; vx?: number } = {}) {
+function knight(g: G, hx: number, hy: number, a: number, s: number, foeX: number, groundY: number, o: { lit?: number; veins?: number; alpha?: number; vx?: number; pal?: Pal; back?: string } = {}) {
   const { ctx, t } = g;
-  const wi = { hilt: [hx, hy] as Pt, a, foeX, s, groundY, color: RED.c, t, vx: o.vx ?? 0, vy: 0, seed: 7, alpha: o.alpha ?? 1 };
+  const pal = o.pal ?? RED;
+  const wi = { hilt: [hx, hy] as Pt, a, foeX, s, groundY, color: pal.c, t, vx: o.vx ?? 0, vy: 0, seed: 7, alpha: o.alpha ?? 1 };
   // a violet backlight so the black silhouette reads against the night
   ctx.save();
   ctx.globalCompositeOperation = 'lighter';
   ctx.globalAlpha = 0.55 * (o.alpha ?? 1);
-  drawSprite(ctx, glow(VIOLET.c, 128), hx - Math.cos(a) * s * 0.1, hy + s * 0.05, s * 1.3, s * 1.9);
+  drawSprite(ctx, glow(o.back ?? VIOLET.c, 128), hx - Math.cos(a) * s * 0.1, hy + s * 0.05, s * 1.3, s * 1.9);
   ctx.restore();
   const k = drawWarrior(ctx, wi);
   const veins = o.veins ?? 1;
@@ -342,16 +368,16 @@ function knight(g: G, hx: number, hy: number, a: number, s: number, foeX: number
       [k.pelvis, k.kneeB, k.footB],
     ];
     paths.forEach((pp, i) => {
-      drawBolt(ctx, pp, t * 0.3, { width: s * 0.004, amp: s * 0.02, seed: 40 + i, alpha: veins * pulse * (o.alpha ?? 1), branches: 2, pal: RED });
+      drawBolt(ctx, pp, t * 0.3, { width: s * 0.004, amp: s * 0.02, seed: 40 + i, alpha: veins * pulse * (o.alpha ?? 1), branches: 2, pal });
     });
     ctx.restore();
   }
-  blade(g, hx, hy, a, s * 0.95, o.lit ?? 1);
+  blade(g, hx, hy, a, s * 0.95, o.lit ?? 1, 1, pal);
   // the pool of red light under them
   ctx.save();
   ctx.globalCompositeOperation = 'lighter';
   ctx.globalAlpha = 0.35 * (o.alpha ?? 1);
-  drawSprite(ctx, glow(RED.c, 128), k.pelvis[0], groundY, s * 1.8, s * 0.35);
+  drawSprite(ctx, glow(pal.c, 128), k.pelvis[0], groundY, s * 1.8, s * 0.35);
   ctx.restore();
   return k;
 }
@@ -497,9 +523,10 @@ function beast(g: G, x: number, y: number, s: number, pose: Partial<BeastPose>) 
 interface Ember { x: number; y: number; v: number; ph: number; r: number; ash: boolean }
 let embers: Ember[] = [];
 let lastT = 0;
-function drawEmbers(g: G, alpha: number) {
+function drawEmbers(g: G, alpha: number, frozen = false) {
   const { ctx, w, h, S, t } = g;
-  const dt = Math.min(0.05, t - lastT || 0.016);
+  // frozen: time has stopped, so nothing moves; the embers hang as cold motes
+  const dt = frozen ? 0 : Math.min(0.05, t - lastT || 0.016);
   lastT = t;
   if (embers.length === 0) {
     const r = rng(3);
@@ -518,6 +545,12 @@ function drawEmbers(g: G, alpha: number) {
     if (e.y < -10) { e.y = h + 10; e.x = Math.random() * w; }
     if (e.y > h + 10) { e.y = -10; e.x = Math.random() * w; }
     const fl = 0.5 + 0.5 * Math.sin(t * 9 + e.ph * 5);
+    if (frozen) {
+      ctx.globalAlpha = alpha * (e.ash ? 0.35 : 0.3 + 0.4 * (0.5 + 0.5 * Math.sin(t * 1.5 + e.ph * 5)));
+      ctx.fillStyle = e.ash ? '#4a5a7a' : BLUE.hot;
+      ctx.fillRect(e.x, e.y, e.r, e.r);
+      continue;
+    }
     if (e.ash) {
       ctx.globalAlpha = alpha * 0.6;
       ctx.fillStyle = K.ash;
@@ -698,10 +731,10 @@ function outsideHole(g: G, x: number, y: number, r: number, seed: number, fn: ()
 }
 
 /** the red overexposure that marks a cut; k runs 0→1 from the cut */
-function cutFlash(g: G, k: number) {
+function cutFlash(g: G, k: number, rgb = '255,40,70') {
   const a = 1 - clamp(k);
   if (a <= 0) return;
-  g.ctx.fillStyle = `rgba(255,40,70,${0.18 * a})`;
+  g.ctx.fillStyle = `rgba(${rgb},${0.18 * a})`;
   g.ctx.fillRect(0, 0, g.w, g.h);
 }
 
@@ -1362,7 +1395,7 @@ function shotSlashes(g: G, q: number) {
 /* 14. regeneration, and the tendrils that come for the camera */
 
 /** a tapering, curling tendril of ink from `from` toward `to`, drawn over [u0, u1] of its length */
-function tendril(g: G, from: Pt, to: Pt, bend: number, thick: number, u0: number, u1: number, seed: number) {
+function tendril(g: G, from: Pt, to: Pt, bend: number, thick: number, u0: number, u1: number, seed: number, rim = withAlpha(VIOLET.c, 0.6)) {
   const { ctx, S, t } = g;
   const dx = to[0] - from[0], dy = to[1] - from[1];
   const L = Math.hypot(dx, dy) || 1;
@@ -1386,8 +1419,8 @@ function tendril(g: G, from: Pt, to: Pt, bend: number, thick: number, u0: number
   ctx.fill();
   ctx.save();
   ctx.globalCompositeOperation = 'lighter';
-  ctx.strokeStyle = withAlpha(VIOLET.c, 0.6);
-  ctx.lineWidth = Math.max(1, thick * 0.06);
+  ctx.strokeStyle = rim;
+  ctx.lineWidth = Math.max(1.2, thick * 0.07);
   ctx.beginPath();
   left.forEach((p, i) => (i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])));
   ctx.stroke();
@@ -1397,62 +1430,1055 @@ function tendril(g: G, from: Pt, to: Pt, bend: number, thick: number, u0: number
 
 function shotTendrils(g: G, q: number) {
   const { ctx, w, h, S } = g;
-  world(g, { x: 0.02, y: 0, z: 1.05 });
+  world(g, { x: 0.02, y: 0, z: lerp(1.05, 1.18, ease.in2(q)) });
   const bx = w * 0.55, gy = h * 0.88;
   // the wounds close
-  const heal = seg(q, 0, 0.3);
-  beast(g, bx, gy, S * 0.95, { arm: 0.6, roar: 0.4 + bell(q, 0.25, 0.5) * 0.6, boil: 1, face: -1, wounds: 1 - heal });
-  // tendrils lashing at the viewer
-  const lash = ease.in2(seg(q, 0.25, 0.62));
-  const cut = seg(q, 0.62, 0.66);
-  const drop = ease.in2(seg(q, 0.64, 0.95));
+  const heal = seg(q, 0, 0.35);
+  beast(g, bx, gy, S * 0.95, { arm: 0.6, roar: 0.4 + seg(q, 0.25, 0.5) * 0.6, boil: 1, face: -1, wounds: 1 - heal });
+  // tendrils lashing at the viewer; the shot cuts a hair before they land
+  const lash = ease.in2(seg(q, 0.3, 1));
+  if (lash <= 0) return;
   const r = rng(77);
   const from: Pt = [bx, gy - S * 0.5];
   for (let i = 0; i < 9; i++) {
     const to: Pt = [w * (r() * 1.2 - 0.1), h * (r() * 1.2 - 0.1)];
     const bend = (r() - 0.5) * 0.5;
-    const thick = S * (0.05 + 0.16 * lash);
-    if (lash <= 0) continue;
-    if (cut < 1) {
-      const end = tendril(g, from, to, bend, thick, 0, lash, i);
-      if (lash > 0.2) {
-        ctx.save();
-        ctx.globalCompositeOperation = 'lighter';
-        drawSprite(ctx, glow(RED.c, 64), end.tip[0], end.tip[1], thick * 1.6);
-        ctx.restore();
-      }
-      continue;
+    const thick = S * (0.05 + 0.2 * lash);
+    const end = tendril(g, from, to, bend, thick, 0, lash * 0.95, i);
+    if (lash > 0.2) {
+      ctx.save();
+      ctx.globalCompositeOperation = 'lighter';
+      drawSprite(ctx, glow(RED.c, 64), end.tip[0], end.tip[1], thick * 1.6);
+      ctx.restore();
     }
-    // cut through: the root whips back into the body, the severed end falls away
-    const at = 0.45 + hash(i) * 0.15;
-    tendril(g, from, to, bend, thick, 0, at * (1 - drop * 0.9), i);
-    ctx.save();
-    ctx.globalAlpha = 1 - drop;
-    const px = lerp(from[0], to[0], at), py = lerp(from[1], to[1], at);
-    ctx.translate(px, py + drop * h * 0.5);
-    ctx.rotate(drop * (hash(i * 3) - 0.5) * 2);
-    ctx.translate(-px, -py);
-    tendril(g, from, to, bend, thick, at, 1, i);
-    // the cut face, still burning
-    ctx.globalCompositeOperation = 'lighter';
-    drawSprite(ctx, glow(RED.c, 64), px, py, thick * 2 * (1 - drop));
-    ctx.restore();
   }
-  // the parry: one ring of red, cut around the camera
-  if (cut > 0) {
-    if (hitQ(0.63)) g.f.shake(S * 0.04);
-    const fade = 1 - seg(q, 0.66, 0.9);
+  speedLines(g, from[0], from[1], 'rgba(0,0,0,0.5)', 50, 0.3, lash, 41);
+  if (q > 0.6) g.f.shake(S * 0.01 * lash);
+}
+
+/* ============================================================ DEAD CALM */
+
+/*
+ * The tendrils are about to land, and the film goes silent. Inside a sphere
+ * around the knight nothing moves: the water turns to a mirror, the embers
+ * hang in the air, and the red drains out of them; the blue warrior they
+ * were before surfaces for a moment. Everything that enters the sphere is cut
+ * without the knight ever being seen to move. One drop falls from the blade,
+ * and when it lands, time comes back all at once.
+ */
+
+/** the clock everything inside the stillness is drawn at */
+const CALM_T = 4.2;
+
+const hexRgb = (c: string) => [1, 3, 5].map((i) => parseInt(c.slice(i, i + 2), 16));
+function mixHex(a: string, b: string, k: number) {
+  const A = hexRgb(a), Bc = hexRgb(b);
+  return `rgb(${A.map((v, i) => Math.round(lerp(v, Bc[i], k))).join(',')})`;
+}
+
+interface Calm { kx: number; gy: number; s: number; hy: number; cx: number; cy: number; R: number; hz: number }
+function calmLayout(g: G): Calm {
+  const { w, h, S, portrait } = g;
+  const s = S * (portrait ? 0.5 : 0.42);
+  const gy = h * 0.7, kx = w * 0.5;
+  return { kx, gy, s, hy: gy - s * 0.52, cx: kx, cy: gy - s * 0.42, R: S * 0.36, hz: h * 0.48 };
+}
+
+/** the centre line of a tendril, the same curve `tendril()` paints */
+function curveAt(g: G, from: Pt, to: Pt, bend: number, u: number, seed: number): Pt {
+  const dx = to[0] - from[0], dy = to[1] - from[1];
+  const L = Math.hypot(dx, dy) || 1;
+  const nx = -dy / L, ny = dx / L;
+  const off = Math.sin(u * Math.PI) * bend * L + Math.sin(u * 7 + g.t * 5 + seed) * g.S * 0.015 * u + u ** 4 * bend * L * 0.8;
+  return [from[0] + dx * u + nx * off, from[1] + dy * u + ny * off];
+}
+
+// [x, y] origins in S around the knight's feet (most rise out of the water), a bend, and when
+// each starts in (some are already on their way when the calm comes down)
+const CALM_TENDRILS: [number, number, number, number][] = [
+  [-0.95, 0.06, 0.32, -0.18], [0.95, -0.05, -0.3, -0.08], [-0.7, -0.85, -0.25, 0.0], [0.62, 0.16, 0.35, 0.08],
+  [-0.55, 0.22, -0.3, 0.17], [0.55, -0.95, 0.28, 0.27], [-1.05, -0.35, 0.2, 0.37], [0.9, -0.5, -0.22, 0.48],
+];
+/** the knight's blade between cuts: one pose per cut, never seen in between */
+const CALM_RIM = 'rgba(143,194,255,0.85)';
+const CALM_POSES = [0.12, -1.15, 2.5, -0.45, 1.95, -2.1, 0.85, -0.7, 0.12];
+
+interface CalmT { from: Pt; to: Pt; bend: number; thick: number; uCut: number; qCut: number; tip: (q: number) => number }
+function calmTendrils(g: G, L: Calm): CalmT[] {
+  const gf = { ...g, t: CALM_T };
+  return CALM_TENDRILS.map(([ox, oy, bend, st], i) => {
+    const from: Pt = [L.kx + ox * g.S, L.gy + oy * g.S];
+    const to: Pt = [L.cx + (hash(i) - 0.5) * g.S * 0.1, L.cy + (hash(i * 3) - 0.5) * g.S * 0.1];
+    // where the curve first enters the sphere
+    let uCut = 1;
+    for (let k = 0; k <= 60; k++) {
+      const p = curveAt(gf, from, to, bend, k / 60, i);
+      if (Math.hypot(p[0] - L.cx, p[1] - L.cy) < L.R) { uCut = k / 60; break; }
+    }
+    // slow-motion approach; cut a moment after the tip gets in
+    const x = Math.min(0.99, uCut + 0.07);
+    const tip = (q: number) => ease.out2(seg(q, st, st + 0.5));
+    const qCut = st + 0.5 * (1 - Math.sqrt(1 - x));
+    return { from, to, bend, thick: g.S * 0.09, uCut, qCut, tip };
+  });
+}
+
+/** the stillness, at progress q (cuts happen as q passes each tendril's qCut) */
+function calmScene(g: G, q: number, o: { push?: number } = {}) {
+  const { ctx, w, h, S, t } = g;
+  const L = calmLayout(g);
+  const gf: G = { ...g, t: CALM_T };
+  const push = o.push ?? 1;
+  ctx.save();
+  ctx.translate(L.kx, L.cy);
+  ctx.scale(push, push);
+  ctx.translate(-L.kx, -L.cy);
+  // sky, a cold moon, and the ruins against the horizon
+  const sky = () => {
+    const gr = ctx.createLinearGradient(0, 0, 0, L.hz);
+    gr.addColorStop(0, '#01030a');
+    gr.addColorStop(1, '#0c1d44');
+    ctx.fillStyle = gr;
+    ctx.fillRect(-w, -h, w * 3, L.hz + h);
+    const mx = w * 0.74, my = h * 0.17, mr = S * 0.08;
+    ctx.globalAlpha = 0.45;
+    drawSprite(ctx, glow(BLUE.c, 128), mx, my, mr * 7);
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = '#d7e4ff';
+    ctx.beginPath();
+    ctx.arc(mx, my, mr, 0, TAU);
+    ctx.fill();
+    ctx.save();
+    ctx.translate(mx, my);
+    ctx.scale((mr * 1.08) / 100, (mr * 1.08) / 100);
+    brush(ctx, MOON_ENSO, { width: 14, color: '#0c1d44', dry: 0.45, seed: 9, press: 1.4, alpha: 0.8 });
+    ctx.restore();
+    const sp = spires(w, h);
+    ctx.globalAlpha = 0.9;
+    ctx.drawImage(sp, -w * 0.4, L.hz - sp.height * 0.92);
+    ctx.globalAlpha = 1;
+  };
+  sky();
+  // the water: a mirror of the sky
+  ctx.fillStyle = '#01030a';
+  ctx.fillRect(-w, L.hz, w * 3, h * 2);
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(-w, L.hz, w * 3, h * 2);
+  ctx.clip();
+  ctx.translate(0, L.hz * 2);
+  ctx.scale(1, -1);
+  ctx.globalAlpha = 0.55;
+  sky();
+  ctx.restore();
+  const deep = ctx.createLinearGradient(0, L.hz, 0, h);
+  deep.addColorStop(0, 'rgba(1,3,10,0)');
+  deep.addColorStop(1, 'rgba(1,3,10,0.85)');
+  ctx.fillStyle = deep;
+  ctx.fillRect(-w, L.hz, w * 3, h * 2);
+  // outside the calm the water still shivers; inside it is glass
+  const rx = L.R * 1.5, ry = L.R * 0.26;
+  ctx.save();
+  ctx.strokeStyle = 'rgba(143,194,255,0.18)';
+  ctx.lineWidth = 1;
+  const r = rng(29);
+  for (let i = 0; i < 70; i++) {
+    const x = r() * w * 1.4 - w * 0.2, y = L.hz + (r() ** 1.6) * (h - L.hz);
+    const dx = (x - L.kx) / rx, dy = (y - L.gy) / ry;
+    if (dx * dx + dy * dy < 1.1) continue;
+    const len = S * (0.03 + r() * 0.08) * (0.4 + (y - L.hz) / h);
+    const sh = Math.sin(t * 1.2 + i) * S * 0.01;
+    ctx.beginPath();
+    ctx.moveTo(x + sh, y);
+    ctx.lineTo(x + sh + len, y);
+    ctx.stroke();
+  }
+  ctx.restore();
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  ctx.strokeStyle = withAlpha(BLUE.hot, 0.35);
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.ellipse(L.kx, L.gy, rx, ry, 0, 0, TAU);
+  ctx.stroke();
+  ctx.globalAlpha = 0.5;
+  drawSprite(ctx, glow(BLUE.c, 128), L.kx, L.gy, rx * 2.2, ry * 2.6);
+  ctx.restore();
+  // moonlight falling straight down on the knight
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  const shaft = ctx.createLinearGradient(0, 0, 0, L.gy);
+  shaft.addColorStop(0, 'rgba(143,194,255,0)');
+  shaft.addColorStop(1, 'rgba(143,194,255,0.16)');
+  ctx.fillStyle = shaft;
+  ctx.beginPath();
+  ctx.moveTo(L.kx - S * 0.12, 0);
+  ctx.lineTo(L.kx + S * 0.12, 0);
+  ctx.lineTo(L.kx + S * 0.38, L.gy);
+  ctx.lineTo(L.kx - S * 0.38, L.gy);
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+  // the beast, far back, where the tendrils come from
+  beast(gf, w * 0.93, L.hz + S * 0.06, S * 0.42, { arm: 1, roar: 0.7, boil: 0.2, face: -1 });
+
+  // the knight: the pose snaps between cuts, never caught in motion
+  const ts = calmTendrils(g, L);
+  const done = ts.filter((k) => q >= k.qCut).length;
+  const a = CALM_POSES[Math.min(done, CALM_POSES.length - 1)];
+  const kn = () => knight(gf, L.kx, L.hy, a, L.s, w * 1.5, L.gy, { lit: 1, veins: 0, pal: BLUE, back: BLUE.deep });
+  // reflection first, in the glass under their feet
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(-w, L.gy, w * 3, h * 2);
+  ctx.clip();
+  ctx.translate(0, L.gy * 2);
+  ctx.scale(1, -1);
+  ctx.globalAlpha = 0.35;
+  kn();
+  ctx.restore();
+  kn();
+  // the sphere itself is invisible but for where it is touched
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  ctx.strokeStyle = withAlpha(BLUE.hot, 0.07);
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.arc(L.cx, L.cy, L.R, 0, TAU);
+  ctx.stroke();
+  ctx.restore();
+
+  ts.forEach((k, i) => {
+    const u = k.tip(q);
+    if (u <= 0.01) return;
+    if (q < k.qCut) {
+      tendril(gf, k.from, k.to, k.bend, k.thick, 0, u, i, CALM_RIM);
+      return;
+    }
+    const since = q - k.qCut;
+    // the root stops dead at the edge of the calm
+    tendril(gf, k.from, k.to, k.bend, k.thick, 0, k.uCut, i, CALM_RIM);
+    // the piece that got in hangs where it was cut, turning very slowly
+    const uIn = k.tip(k.qCut);
+    const mid = curveAt(gf, k.from, k.to, k.bend, (k.uCut + uIn) / 2, i);
+    ctx.save();
+    ctx.translate(mid[0], mid[1] + since * S * 0.04);
+    ctx.rotate(since * (hash(i * 7) - 0.5) * 0.8);
+    ctx.translate(-mid[0], -mid[1]);
+    tendril(gf, k.from, k.to, k.bend, k.thick, k.uCut + 0.012, uIn, i, CALM_RIM);
+    ctx.restore();
+    // the cut: one hairline of light across it, and a glint on the sphere
+    const at = curveAt(gf, k.from, k.to, k.bend, k.uCut, i);
+    const fl = 1 - seg(since, 0, 0.08);
+    const nb = curveAt(gf, k.from, k.to, k.bend, k.uCut + 0.02, i);
+    const ang = Math.atan2(nb[1] - at[1], nb[0] - at[0]) + Math.PI / 2;
     ctx.save();
     ctx.globalCompositeOperation = 'lighter';
-    for (const [wd, col, al] of [[S * 0.1, RED.c, 0.35], [S * 0.035, RED.hot, 0.9], [S * 0.012, RED.core, 1]] as const) {
-      ctx.strokeStyle = withAlpha(col, al * fade);
+    if (fl > 0) {
+      ctx.strokeStyle = withAlpha(BLUE.core, fl);
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(at[0] - Math.cos(ang) * k.thick * 1.6, at[1] - Math.sin(ang) * k.thick * 1.6);
+      ctx.lineTo(at[0] + Math.cos(ang) * k.thick * 1.6, at[1] + Math.sin(ang) * k.thick * 1.6);
+      ctx.stroke();
+      drawSprite(ctx, glow(BLUE.hot, 64), at[0], at[1], S * 0.25 * fl);
+      const ga = Math.atan2(at[1] - L.cy, at[0] - L.cx);
+      ctx.strokeStyle = withAlpha(BLUE.hot, 0.8 * fl);
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(L.cx, L.cy, L.R, ga - 0.5 * (1 - fl) - 0.05, ga + 0.5 * (1 - fl) + 0.05);
+      ctx.stroke();
+    }
+    // the cut face keeps a cold glow
+    drawSprite(ctx, glow(BLUE.c, 64), at[0], at[1], k.thick * 1.2);
+    ctx.restore();
+  });
+  // the trace of the cut that was never seen: a thin arc where the blade went
+  ts.forEach((k, i) => {
+    const since = q - k.qCut;
+    if (since < 0 || since > 0.07) return;
+    const a0 = CALM_POSES[i], a1 = CALM_POSES[i + 1];
+    const fl = 1 - since / 0.07;
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    for (const [wd, al] of [[S * 0.025, 0.25], [S * 0.006, 0.9]] as const) {
+      ctx.strokeStyle = withAlpha(BLUE.hot, al * fl);
       ctx.lineWidth = wd;
       ctx.beginPath();
-      ctx.arc(w / 2, h / 2, S * 0.42, -Math.PI / 2, -Math.PI / 2 + TAU * ease.out5(cut));
+      ctx.arc(L.kx, L.hy, L.s * 0.95, Math.min(a0, a1), Math.max(a0, a1));
       ctx.stroke();
     }
     ctx.restore();
+  });
+  ctx.restore();
+  return { L, ts };
+}
+
+/* the eyes again: the red cools, the veins draw back in, and the gaze goes still */
+function shotStill(g: G, q: number) {
+  const { ctx, w, h, S } = g;
+  const k = ease.inOut2(seg(q, 0.12, 0.72));
+  ctx.fillStyle = mixHex('#030206', '#01040c', k);
+  ctx.fillRect(0, 0, w, h);
+  const band = S * 0.42;
+  const cy = h * 0.5;
+  const face = ctx.createLinearGradient(0, cy - band / 2, 0, cy + band / 2);
+  face.addColorStop(0, mixHex('#0d0914', '#070c1a', k));
+  face.addColorStop(0.5, mixHex('#1a1224', '#0f1830', k));
+  face.addColorStop(1, mixHex('#0a0710', '#050912', k));
+  ctx.fillStyle = face;
+  ctx.fillRect(0, cy - band / 2, w, band);
+  // the hair stops moving the moment the calm comes down
+  const ht = lerp(g.t, CALM_T, Math.min(1, k * 3));
+  ctx.strokeStyle = '#000';
+  ctx.lineCap = 'round';
+  for (let i = 0; i < 9; i++) {
+    const x0 = w * (0.1 + i * 0.1) + Math.sin(ht * 2 + i) * S * 0.01;
+    ctx.lineWidth = S * (0.01 + hash(i) * 0.015);
+    ctx.beginPath();
+    ctx.moveTo(x0, cy - band * 0.6);
+    ctx.quadraticCurveTo(x0 + S * 0.05, cy - band * 0.2, x0 - S * 0.02 + Math.sin(ht * 3 + i) * S * 0.01, cy + band * (0.05 + hash(i * 3) * 0.2));
+    ctx.stroke();
   }
+  const crawl = 1 - ease.inOut2(seg(q, 0.05, 0.6));
+  const open = lerp(1, 0.5, k);
+  for (const ex of [-1, 1]) {
+    const x = w / 2 + ex * S * 0.2, y = cy;
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    if (crawl > 0) {
+      for (let j = 0; j < 3; j++) {
+        const a = (ex > 0 ? 0 : Math.PI) + (j - 1) * 0.6;
+        const L = S * 0.35 * crawl;
+        drawBolt(ctx, [[x, y], [x + Math.cos(a) * L * 0.5, y + Math.sin(a) * L * 0.3], [x + Math.cos(a) * L, y + Math.sin(a) * L * 0.6]], CALM_T * 0.4, { width: S * 0.003, amp: S * 0.015, seed: j + ex * 5, alpha: crawl, branches: 1, pal: RED });
+      }
+    }
+    ctx.globalAlpha = 1 - k;
+    drawSprite(ctx, glow(RED.c, 128), x, y, S * 0.5, S * 0.22);
+    ctx.globalAlpha = k;
+    drawSprite(ctx, glow(BLUE.c, 128), x, y, S * 0.55, S * 0.2);
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = mixHex(RED.c, BLUE.c, k);
+    ctx.beginPath();
+    ctx.ellipse(x, y, S * 0.11, S * 0.03 * open + 0.5, ex * -0.12 * (1 - k), 0, TAU);
+    ctx.fill();
+    ctx.fillStyle = mixHex(RED.core, BLUE.core, k);
+    ctx.beginPath();
+    ctx.ellipse(x + ex * S * 0.01, y, S * 0.025, S * 0.02 * open + 0.3, 0, 0, TAU);
+    ctx.fill();
+    ctx.restore();
+  }
+  // a single line of light passes across the stillness
+  const sweep = seg(q, 0.68, 0.92);
+  if (sweep > 0 && sweep < 1) {
+    const x = lerp(-w * 0.2, w * 1.2, ease.inOut2(sweep));
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    const gr = ctx.createLinearGradient(x - S * 0.3, 0, x + S * 0.3, 0);
+    gr.addColorStop(0, 'rgba(143,194,255,0)');
+    gr.addColorStop(0.5, 'rgba(238,246,255,0.5)');
+    gr.addColorStop(1, 'rgba(143,194,255,0)');
+    ctx.fillStyle = gr;
+    ctx.fillRect(x - S * 0.3, cy - 1, S * 0.6, 2);
+    ctx.restore();
+  }
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0, 0, w, cy - band / 2);
+  ctx.fillRect(0, cy + band / 2, w, h);
+}
+
+/* the wide: a circle of glass in the black water, and nothing gets in */
+function shotCalm(g: G, q: number) {
+  calmScene(g, q, { push: lerp(1, 1.1, ease.inOut2(q)) });
+}
+
+/* one drop gathers at the point of the blade, and falls */
+function shotDrop(g: G, q: number) {
+  const { ctx, w, h, S, t } = g;
+  const wy = h * 0.64;
+  const sky = ctx.createLinearGradient(0, 0, 0, wy);
+  sky.addColorStop(0, '#01030a');
+  sky.addColorStop(1, '#0a1838');
+  ctx.fillStyle = sky;
+  ctx.fillRect(0, 0, w, wy);
+  ctx.fillStyle = '#01030a';
+  ctx.fillRect(0, wy, w, h - wy);
+  const gf: G = { ...g, t: CALM_T };
+  const L = w * 1.3, a = 0.04;
+  const hx = w * 0.64 - L, hy = h * 0.3;
+  const tip: Pt = [hx + Math.cos(a) * L, hy + Math.sin(a) * L];
+  // the surface: the blade's reflection, perfect until the drop lands
+  const land = 0.6;
+  const after = seg(q, land, 1);
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(0, wy, w, h - wy);
+  ctx.clip();
+  ctx.translate(0, wy * 2);
+  ctx.scale(1, -1);
+  ctx.globalAlpha = 0.35;
+  if (after > 0) {
+    // the ripple breaks the reflection into wobbling slices
+    for (let i = 0; i < 14; i++) {
+      const y0 = wy - (i + 1) * S * 0.03;
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(0, y0, w, S * 0.03);
+      ctx.clip();
+      ctx.translate(Math.sin(i * 1.7 + after * 18) * S * 0.03 * after * (1 - after), 0);
+      blade(gf, hx, hy, a, L, 1, 1, BLUE);
+      ctx.restore();
+    }
+  } else blade(gf, hx, hy, a, L, 1, 1, BLUE);
+  ctx.restore();
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  ctx.fillStyle = 'rgba(143,194,255,0.25)';
+  ctx.fillRect(0, wy, w, 1);
+  ctx.restore();
+  blade(gf, hx, hy, a, L, 1, 1, BLUE);
+  // the drop: gathers, stretches, lets go
+  const grow = ease.out2(seg(q, 0, 0.3));
+  const fall = ease.in2(seg(q, 0.3, land));
+  const dr = S * 0.045 * grow;
+  if (q < land && dr > 0.5) {
+    const stretch = 1 + seg(q, 0.15, 0.3) * 0.6 * (1 - fall) + fall * 0.4;
+    const dx = tip[0] - S * 0.01, dy = lerp(tip[1] + dr * 1.2, wy - dr, fall);
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    drawSprite(ctx, glow(BLUE.hot, 64), dx, dy, dr * 7);
+    ctx.restore();
+    ctx.save();
+    ctx.translate(dx, dy);
+    ctx.scale(1 / Math.sqrt(stretch), stretch);
+    ctx.fillStyle = '#0b1838';
+    ctx.beginPath();
+    ctx.moveTo(0, -dr * 1.6);
+    ctx.quadraticCurveTo(dr * 1.05, -dr * 0.2, dr, dr * 0.2);
+    ctx.arc(0, dr * 0.2, dr, 0, Math.PI);
+    ctx.quadraticCurveTo(-dr * 1.05, -dr * 0.2, 0, -dr * 1.6);
+    ctx.fill();
+    ctx.strokeStyle = withAlpha(BLUE.core, 0.9);
+    ctx.lineWidth = Math.max(1, dr * 0.12);
+    ctx.stroke();
+    // inside it, upside down, a speck of red: the corruption hasn't gone anywhere
+    ctx.fillStyle = RED.c;
+    ctx.beginPath();
+    ctx.arc(dr * 0.25, dr * 0.45, dr * 0.18, 0, TAU);
+    ctx.fill();
+    ctx.fillStyle = BLUE.core;
+    ctx.beginPath();
+    ctx.arc(-dr * 0.35, -dr * 0.1, dr * 0.16, 0, TAU);
+    ctx.fill();
+    ctx.restore();
+  }
+  // it lands: rings, a crown, and the red coming back into the rings
+  if (hitQ(land)) g.f.shake(S * 0.012);
+  if (after > 0) {
+    const px = tip[0] - S * 0.01;
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    for (let k = 0; k < 5; k++) {
+      const qq = clamp(after * 1.25 - k * 0.12);
+      if (qq <= 0) continue;
+      const col = k < 2 ? BLUE.hot : mixHex(BLUE.hot, RED.c, seg(after, 0.3, 0.8));
+      ctx.strokeStyle = col;
+      ctx.globalAlpha = (1 - qq) * 0.9;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.ellipse(px, wy, S * 1.1 * ease.out3(qq), S * 0.07 * ease.out3(qq), 0, 0, TAU);
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+    const crown = bell(after, 0, 0.45);
+    const r = rng(5);
+    for (let i = 0; i < 14; i++) {
+      const an = -Math.PI / 2 + (r() - 0.5) * 1.6;
+      const v = S * (0.05 + r() * 0.1) * crown;
+      ctx.fillStyle = BLUE.core;
+      ctx.beginPath();
+      ctx.arc(px + Math.cos(an) * v * 1.4, wy + Math.sin(an) * v, S * 0.004, 0, TAU);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+  void t;
+}
+
+/* time comes back: a ring runs out from the knight and the red floods in behind it */
+function shotRelease(g: G, q: number) {
+  const { ctx, w, h, S } = g;
+  if (hitQ(0.02)) {
+    g.f.shake(S * 0.04);
+    g.f.flash(0.5, RED.c);
+  }
+  // outside the ring, the stillness as it was
+  const { L, ts } = calmScene(g, 1, { push: 1.1 });
+  const ring = ease.out3(seg(q, 0, 0.5)) * Math.hypot(w, h) * 1.1;
+  ctx.save();
+  ctx.translate(L.kx, L.cy);
+  ctx.scale(1.1, 1.1);
+  ctx.translate(-L.kx, -L.cy);
+  ctx.beginPath();
+  ctx.arc(L.kx, L.gy, ring / 1.1, 0, TAU);
+  ctx.clip();
+  // inside it, the corrupted world, moving again
+  world(g, { x: 0, y: 0, z: 1 }, { horizon: L.hz / h, tint: 0.15 * (1 - q) });
+  beast(g, w * 0.93 + ease.out3(q) * S * 0.08, L.hz + S * 0.06, S * 0.42, { arm: 2, roar: 1, boil: 1, face: -1, wounds: 1 });
+  const back = ease.out3(seg(q, 0.05, 0.5));
+  knight(g, L.kx, L.hy, lerp(0.12, 0.9, back), L.s, w * 1.5, L.gy, { lit: 1, veins: back });
+  ts.forEach((k, i) => {
+    // roots whip back to the beast; the cut pieces drop into the water
+    const ret = ease.in2(seg(q, 0.05, 0.6));
+    tendril(g, k.from, k.to, k.bend, k.thick, 0, k.uCut * (1 - ret), i);
+    const uIn = k.tip(k.qCut);
+    const mid = curveAt({ ...g, t: CALM_T }, k.from, k.to, k.bend, (k.uCut + uIn) / 2, i);
+    const drop = ease.in2(seg(q, 0.02 + hash(i) * 0.15, 0.7));
+    if (drop >= 1) return;
+    ctx.save();
+    ctx.globalAlpha = 1 - drop * 0.5;
+    ctx.translate(mid[0], mid[1] + drop * (L.gy - mid[1] + S * 0.1));
+    ctx.rotate((hash(i * 7) - 0.5) * (0.8 + drop * 3));
+    ctx.translate(-mid[0], -mid[1]);
+    tendril({ ...g, t: CALM_T }, k.from, k.to, k.bend, k.thick, k.uCut + 0.012, uIn, i, CALM_RIM);
+    ctx.restore();
+  });
+  ctx.restore();
+  // the ring's edge
+  ctx.save();
+  ctx.translate(L.kx, L.cy);
+  ctx.scale(1.1, 1.1);
+  ctx.translate(-L.kx, -L.cy);
+  ctx.globalCompositeOperation = 'lighter';
+  for (const [wd, col, al] of [[S * 0.06, RED.c, 0.35], [S * 0.012, RED.hot, 0.9], [S * 0.003, '#ffffff', 1]] as const) {
+    ctx.strokeStyle = withAlpha(col, al * (1 - seg(q, 0.4, 0.55)));
+    ctx.lineWidth = wd;
+    ctx.beginPath();
+    ctx.arc(L.kx, L.gy, ring / 1.1, 0, TAU);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+/* ============================================================== THE VOID */
+
+/*
+ * The knight closes a seal and the world is swallowed: a sphere of nothing
+ * grows from their chest and everything inside it is an endless void —
+ * stars streaming out of the dark, rings turning, information pouring past
+ * faster than anything could take in. The beast hangs in the middle of it,
+ * caged in a lattice of light, overloaded and unable to move. Then the
+ * void cracks like glass from the point of the blade and blows apart.
+ */
+
+/** fibonacci sphere, unit radius */
+const LATTICE: [number, number, number][] = Array.from({ length: 220 }, (_, i) => {
+  const y = 1 - (i / 219) * 2;
+  const r = Math.sqrt(1 - y * y);
+  const th = i * 2.399963;
+  return [Math.cos(th) * r, y, Math.sin(th) * r];
+});
+
+interface VoidO { cx: number; cy: number; k: number; rot: number; z: number }
+
+/** the endless void around (cx, cy); k moves its streams with the scroll */
+function voidSpace(g: G, o: VoidO) {
+  const { ctx, w, h, S, t } = g;
+  const diag = Math.hypot(w, h);
+  ctx.fillStyle = '#000005';
+  ctx.fillRect(0, 0, w, h);
+  ctx.save();
+  ctx.translate(o.cx, o.cy);
+  ctx.rotate(o.rot);
+  ctx.scale(o.z, o.z);
+  const bg = ctx.createRadialGradient(0, 0, 0, 0, 0, diag * 0.75);
+  bg.addColorStop(0, '#0d1a4a');
+  bg.addColorStop(0.35, '#050a24');
+  bg.addColorStop(1, '#000005');
+  ctx.fillStyle = bg;
+  ctx.fillRect(-diag, -diag, diag * 2, diag * 2);
+  // nebulae, turning very slowly
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  for (let i = 0; i < 6; i++) {
+    const a = i * 1.05 + t * 0.03, r = S * (0.3 + hash(i) * 0.7);
+    ctx.globalAlpha = 0.3;
+    ctx.save();
+    ctx.translate(Math.cos(a) * r, Math.sin(a) * r);
+    ctx.rotate(a);
+    drawSprite(ctx, glow(i % 2 ? '#2a1a7a' : '#0b3a8a', 128), 0, 0, S * 1.6, S * 0.7);
+    ctx.restore();
+  }
+  ctx.globalAlpha = 1;
+  // stars coming out of the infinite distance
+  ctx.lineCap = 'round';
+  for (let i = 0; i < 240; i++) {
+    const an = hash(i * 1.3) * TAU, rad = 0.06 + hash(i * 2.1);
+    const z = (((hash(i * 3.7) - t * 0.05 - o.k * 0.5) % 1) + 1) % 1;
+    const p0 = (rad / (0.08 + z)) * S * 0.16, p1 = (rad / (0.11 + z)) * S * 0.16;
+    if (p1 > diag) continue;
+    const near = (1 - z) ** 1.5;
+    ctx.strokeStyle = i % 9 ? `rgba(220,235,255,${near})` : `rgba(184,146,255,${near})`;
+    ctx.lineWidth = 0.6 + near * 1.8;
+    ctx.beginPath();
+    ctx.moveTo(Math.cos(an) * p1, Math.sin(an) * p1);
+    ctx.lineTo(Math.cos(an) * p0, Math.sin(an) * p0);
+    ctx.stroke();
+  }
+  // information: dashes pouring outward, too fast and too many
+  for (let i = 0; i < 150; i++) {
+    const an = hash(i * 5.1) * TAU;
+    const dd = (hash(i * 7.3) + t * 0.35 + o.k * 1.5) % 1;
+    const r0 = S * 0.4 + dd * diag * 0.8, len = S * (0.01 + dd * 0.14);
+    ctx.strokeStyle = withAlpha(i % 7 ? VOID.hot : VIOLET.hot, (1 - dd) * 0.8);
+    ctx.lineWidth = i % 3 ? 1 : 2;
+    ctx.beginPath();
+    ctx.moveTo(Math.cos(an) * r0, Math.sin(an) * r0);
+    ctx.lineTo(Math.cos(an) * (r0 + len), Math.sin(an) * (r0 + len));
+    ctx.stroke();
+  }
+  // orbits, tilted every way
+  for (let i = 0; i < 6; i++) {
+    const rx = S * (0.48 + i * 0.17), ry = rx * (0.12 + hash(i) * 0.3);
+    const dir = i % 2 ? 1 : -1;
+    ctx.save();
+    ctx.rotate(hash(i * 9) * Math.PI + t * 0.02 * dir + o.k * 0.4 * dir);
+    ctx.strokeStyle = withAlpha(i % 3 ? VOID.c : VIOLET.hot, 0.25 + hash(i * 4) * 0.25);
+    ctx.lineWidth = 1;
+    ctx.setLineDash([rx * 0.5, rx * 0.12, rx * 0.05, rx * 0.12]);
+    ctx.lineDashOffset = -(t * 0.3 + o.k * 2) * rx * dir;
+    ctx.beginPath();
+    ctx.ellipse(0, 0, rx, ry, 0, 0, TAU);
+    ctx.stroke();
+    ctx.restore();
+  }
+  ctx.setLineDash([]);
+  // the horizon of it all: a ring of white light
+  drawSprite(ctx, glow(VOID.c, 128), 0, 0, S * 1.9);
+  for (const [wd, col, al] of [[S * 0.07, VOID.c, 0.3], [S * 0.018, VOID.hot, 0.8], [S * 0.004, '#ffffff', 1]] as const) {
+    ctx.strokeStyle = withAlpha(col, al);
+    ctx.lineWidth = wd;
+    ctx.beginPath();
+    ctx.arc(0, 0, S * 0.44, 0, TAU);
+    ctx.stroke();
+  }
+  // the cage: a sphere of points, turning
+  const ry = t * 0.25 + o.k * 1.4, rx = 0.45;
+  const cy = Math.cos(ry), sy = Math.sin(ry), cx = Math.cos(rx), sx = Math.sin(rx);
+  const R = S * 0.36;
+  for (const [x, y, z] of LATTICE) {
+    const x1 = x * cy + z * sy, z1 = -x * sy + z * cy;
+    const y2 = y * cx - z1 * sx, z2 = y * sx + z1 * cx;
+    const a = 0.25 + 0.75 * (z2 * 0.5 + 0.5);
+    ctx.fillStyle = withAlpha(VOID.hot, a);
+    const sz = 0.8 + a * 1.6;
+    ctx.fillRect(x1 * R - sz / 2, y2 * R - sz / 2, sz, sz);
+  }
+  ctx.restore();
+  ctx.restore();
+}
+
+/** the beast caught in the void: frozen mid-roar, stuttering as it overloads */
+function voidBeast(g: G, x: number, y: number, s: number, stutter: number) {
+  const { ctx, S, t } = g;
+  const gb: G = { ...g, t: 7.7 };
+  const step = Math.floor(t * 14);
+  const jx = (hash(step) - 0.5) * S * 0.012 * stutter, jy = (hash(step + 3) - 0.5) * S * 0.012 * stutter;
+  if (stutter > 0.2 && step % 3 === 0) {
+    ctx.save();
+    ctx.globalAlpha = 0.35;
+    ctx.translate((hash(step * 7) - 0.5) * S * 0.08, 0);
+    beast(gb, x, y, s, { arm: 1.2, roar: 1, boil: 0, face: -1 });
+    ctx.restore();
+  }
+  beast(gb, x + jx, y + jy, s, { arm: 1.2, roar: 1, boil: 0, face: -1 });
+  // light running straight through it
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  for (let i = 0; i < 10; i++) {
+    if (hash(i * 13 + Math.floor(t * 10)) < 0.45) continue;
+    const an = hash(i * 3.3) * Math.PI;
+    const L = S * 1.6;
+    const ox = x - s * 0.05, oy = y - s * 0.5;
+    ctx.strokeStyle = withAlpha(VOID.core, 0.5);
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(ox - Math.cos(an) * L, oy - Math.sin(an) * L);
+    ctx.lineTo(ox + Math.cos(an) * L, oy + Math.sin(an) * L);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+/** the void as the void shot ends it; the shatter starts from exactly this */
+function voidParams(g: G, q: number): VoidO {
+  return { cx: g.w / 2, cy: g.h * 0.44, k: 0.4 + q, rot: lerp(-0.08, 0.2, q), z: lerp(1, 1.3, ease.inOut2(q)) };
+}
+
+/** everything inside the void shot, at progress q */
+function voidFrame(g: G, q: number) {
+  const { w, h, S } = g;
+  const o = voidParams(g, q);
+  voidSpace(g, o);
+  const s = S * (g.portrait ? 0.62 : 0.5) * o.z;
+  voidBeast(g, o.cx + s * 0.04, o.cy + s * 0.5, s, 0.4 + 0.6 * bell(q, 0.1, 0.9));
+  // the knight, unhurried, in the foreground
+  const ks = S * (g.portrait ? 0.62 : 0.5);
+  const gy = h * 0.92;
+  knight(g, w * 0.16, gy - ks * 0.6, Math.PI * 0.36, ks, o.cx, gy, { lit: 0.6, veins: 0, pal: VOID, back: VOID.deep });
+}
+
+/* a seal: the hand comes up, two fingers cross, and a point of light opens behind it */
+function hand(g: G, x: number, y: number, H: number, cross: number) {
+  const { ctx } = g;
+  const cap = (x0: number, y0: number, x1: number, y1: number, r: number) => {
+    ctx.lineWidth = r * 2 * H;
+    ctx.beginPath();
+    ctx.moveTo(x + x0 * H, y + y0 * H);
+    ctx.lineTo(x + x1 * H, y + y1 * H);
+    ctx.stroke();
+  };
+  const finger = (bx: number, by: number, an: number, len: number) => [bx, by, bx + Math.cos(an) * len, by + Math.sin(an) * len] as const;
+  const index = finger(-0.085, -0.4, -Math.PI / 2 + 0.2 * cross, 0.56);
+  const middle = finger(0.06, -0.42, -Math.PI / 2 - 0.26 * cross, 0.62);
+  const parts: [number, number, number, number, number][] = [
+    [0, 0.9, 0, 0.05, 0.17], [-0.02, 0, 0, -0.3, 0.2],
+    [0.09, -0.3, 0.17, -0.37, 0.07], [0.11, -0.21, 0.19, -0.27, 0.065],
+    [-0.2, -0.06, -0.05, -0.3, 0.062],
+    [index[0], index[1], index[2], index[3], 0.056],
+    [middle[0], middle[1], middle[2], middle[3], 0.056],
+  ];
+  ctx.save();
+  ctx.lineCap = 'round';
+  // rims: cold light from the point above, red from the world below
+  ctx.globalCompositeOperation = 'lighter';
+  for (const [dx, dy, col] of [[0, -2.5, withAlpha(VOID.hot, 0.9)], [0, 2.5, withAlpha(RED.c, 0.7)]] as const) {
+    ctx.save();
+    ctx.translate(dx, dy);
+    ctx.strokeStyle = col;
+    parts.forEach((p) => cap(p[0], p[1], p[2], p[3], p[4] + 0.004));
+    ctx.restore();
+  }
+  ctx.globalCompositeOperation = 'source-over';
+  ctx.strokeStyle = '#07050b';
+  parts.forEach((p) => cap(p[0], p[1], p[2], p[3], p[4]));
+  // gauntlet plates, catching the red
+  ctx.globalCompositeOperation = 'lighter';
+  ctx.strokeStyle = withAlpha(RED.c, 0.55);
+  ctx.lineWidth = Math.max(1, H * 0.006);
+  for (const f of [index, middle]) {
+    for (const u of [0.35, 0.68]) {
+      const px = f[0] + (f[2] - f[0]) * u, py = f[1] + (f[3] - f[1]) * u;
+      ctx.beginPath();
+      ctx.arc(x + px * H, y + py * H, H * 0.05, 0.2, Math.PI - 0.2);
+      ctx.stroke();
+    }
+  }
+  for (const yy of [0.25, 0.45, 0.65]) {
+    ctx.beginPath();
+    ctx.moveTo(x - H * 0.16, y + yy * H);
+    ctx.quadraticCurveTo(x, y + (yy + 0.05) * H, x + H * 0.16, y + yy * H);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function shotSign(g: G, q: number) {
+  const { ctx, w, h, S, t } = g;
+  const px = w * 0.5, py = h * 0.36;
+  const bg = ctx.createRadialGradient(px, py, 0, px, py, Math.hypot(w, h) * 0.7);
+  bg.addColorStop(0, '#2a0a1a');
+  bg.addColorStop(1, '#050207');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, w, h);
+  // the point of light: it opens, everything drifts into it
+  const open = ease.out3(seg(q, 0.3, 0.7));
+  const pull = seg(q, 0.25, 1);
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  for (let i = 0; i < 70; i++) {
+    const life = (hash(i * 3.1) + q * 1.6 + t * 0.15) % 1;
+    const an = hash(i * 1.7) * TAU + life * 2.5;
+    const r = S * (0.1 + hash(i * 5.3) * 0.9) * (1 - life);
+    ctx.globalAlpha = pull * life * 0.8;
+    ctx.fillStyle = i % 4 ? VOID.hot : RED.hot;
+    ctx.fillRect(px + Math.cos(an) * r, py + Math.sin(an) * r * 0.7, 2, 2);
+  }
+  ctx.globalAlpha = open;
+  drawSprite(ctx, glow(VOID.c, 128), px, py, S * (0.2 + open * 1.2));
+  drawSprite(ctx, glow('#ffffff', 64), px, py, S * 0.12 * open);
+  // a lens streak across it
+  const gr = ctx.createLinearGradient(px - w * 0.6, 0, px + w * 0.6, 0);
+  gr.addColorStop(0, 'rgba(127,178,255,0)');
+  gr.addColorStop(0.5, `rgba(212,230,255,${0.7 * open})`);
+  gr.addColorStop(1, 'rgba(127,178,255,0)');
+  ctx.fillStyle = gr;
+  ctx.fillRect(px - w * 0.6, py - 1, w * 1.2, 2);
+  ctx.globalAlpha = 1;
+  ctx.restore();
+  // the click: a ring snaps out of the point
+  if (hitQ(0.72)) g.f.shake(S * 0.02);
+  const click = seg(q, 0.72, 1);
+  if (click > 0) shockRing(g, px, py, click, S * 1.3, S * 1.3, VOID.hot);
+  // the hand rises into frame and the fingers cross
+  const rise = ease.out3(seg(q, 0, 0.35));
+  const H = S * (g.portrait ? 0.8 : 0.7);
+  hand(g, w * 0.5, lerp(h * 1.3, h * 0.84, rise), H, ease.inOut3(seg(q, 0.25, 0.55)));
+}
+
+/* the expansion: a sphere of nothing grows out of the knight and takes everything */
+function shotExpand(g: G, q: number) {
+  const { ctx, w, h, S, t } = g;
+  const s = S * (g.portrait ? 0.5 : 0.42);
+  const kx = w * 0.26, gy = h * 0.86, bx = w * 0.76, bs = S * 0.78;
+  const O: Pt = [kx + s * 0.05, gy - s * 0.78];
+  const far = Math.max(...[[0, 0], [w, 0], [0, h], [w, h]].map(([x, y]) => Math.hypot(x - O[0], y - O[1]))) * 1.08;
+  const R = ease.inOut3(seg(q, 0.16, 0.86)) * far;
+  const gather = seg(q, 0, 0.14);
+  const outside = () => {
+    world(g, { x: 0, y: 0, z: lerp(1.05, 1.12, q) }, { tint: 0.15 });
+    beast(g, bx, gy, bs, { arm: 1, roar: 0.8, boil: 0.8, face: -1 });
+    knight(g, kx, gy - s * 0.6, Math.PI * 0.36, s, bx, gy, { lit: 1, veins: 1 });
+    // the world darkens and everything leans toward the point
+    ctx.fillStyle = `rgba(0,0,0,${0.45 * gather})`;
+    ctx.fillRect(0, 0, w, h);
+  };
+  outside();
+  // implosion first: lines rushing in, a point of white
+  if (q < 0.2) {
+    const k = 1 - gather;
+    ctx.save();
+    ctx.strokeStyle = withAlpha(VOID.hot, 0.5 * gather);
+    for (let i = 0; i < 50; i++) {
+      const an = hash(i * 2.3) * TAU, r0 = S * (0.2 + k * 1.5 + hash(i) * 0.4);
+      ctx.lineWidth = 1 + hash(i * 3) * 2;
+      ctx.beginPath();
+      ctx.moveTo(O[0] + Math.cos(an) * r0, O[1] + Math.sin(an) * r0);
+      ctx.lineTo(O[0] + Math.cos(an) * (r0 + S * 0.3), O[1] + Math.sin(an) * (r0 + S * 0.3));
+      ctx.stroke();
+    }
+    ctx.globalCompositeOperation = 'lighter';
+    drawSprite(ctx, glow('#ffffff', 64), O[0], O[1], S * 0.3 * gather);
+    ctx.restore();
+  }
+  if (hitQ(0.15)) {
+    g.f.shake(S * 0.05);
+    g.f.flash(0.6, '#ffffff');
+  }
+  // the inverted frame as it goes
+  if (q >= 0.14 && q < 0.18) {
+    ctx.save();
+    ctx.globalCompositeOperation = 'difference';
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, w, h);
+    ctx.restore();
+  }
+  if (R <= 0) return;
+  // things just outside the edge are blown outward ahead of it
+  ctx.save();
+  for (let i = 0; i < 60; i++) {
+    const an = hash(i * 4.1) * TAU;
+    const d = R + S * (0.02 + hash(i * 2.7) * 0.25) * (1 + q);
+    ctx.fillStyle = i % 3 ? '#1a1024' : RED.hot;
+    ctx.globalAlpha = 1 - seg(q, 0.7, 0.9);
+    ctx.fillRect(O[0] + Math.cos(an) * d, O[1] + Math.sin(an) * d, S * 0.012, S * 0.006);
+  }
+  ctx.restore();
+  // inside: the void
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(O[0], O[1], R, 0, TAU);
+  ctx.clip();
+  voidSpace(g, { cx: lerp(O[0], w / 2, seg(q, 0.6, 1)), cy: lerp(O[1], h * 0.44, seg(q, 0.6, 1)), k: q * 0.4, rot: -0.06, z: 1 });
+  voidBeast(g, bx, gy, bs, seg(q, 0.4, 0.8));
+  knight(g, kx, gy - s * 0.6, Math.PI * 0.36, s, bx, gy, { lit: 0.6, veins: 0, pal: VOID, back: VOID.deep });
+  ctx.restore();
+  // the edge: a hard white rim split into colour, and the shock rolling ahead
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  for (const [dr, col, wd] of [[3, 'rgba(80,220,255,0.7)', 2], [-3, 'rgba(255,60,200,0.6)', 2], [0, 'rgba(255,255,255,1)', 2.5]] as const) {
+    ctx.strokeStyle = col;
+    ctx.lineWidth = wd;
+    ctx.beginPath();
+    ctx.arc(O[0], O[1], Math.max(0, R + dr), 0, TAU);
+    ctx.stroke();
+  }
+  ctx.strokeStyle = withAlpha(VOID.c, 0.35);
+  ctx.lineWidth = S * 0.04;
+  ctx.beginPath();
+  ctx.arc(O[0], O[1], R, 0, TAU);
+  ctx.stroke();
+  for (const m of [1.08, 1.2]) {
+    ctx.strokeStyle = withAlpha(VOID.hot, 0.35 * (1 - seg(q, 0.7, 0.86)));
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.arc(O[0], O[1], R * m, 0, TAU);
+    ctx.stroke();
+  }
+  ctx.restore();
+  if (q > 0.16 && q < 0.86) g.f.shake(S * 0.006);
+  void t;
+}
+
+/* inside: endless, and the beast can't move */
+function shotVoid(g: G, q: number) {
+  const { ctx, w, h, S } = g;
+  voidFrame(g, q);
+  // overload: a frame or two of negative each time it all floods in
+  for (const at of [0.32, 0.58, 0.8]) {
+    if (hitQ(at)) g.f.shake(S * 0.02);
+    const k = seg(q, at, at + 0.035);
+    if (k > 0 && k < 1) {
+      ctx.save();
+      ctx.globalCompositeOperation = 'difference';
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, w, h);
+      ctx.restore();
+    }
+    const ring = seg(q, at, at + 0.2);
+    if (ring > 0 && ring < 1) shockRing(g, w / 2, h * 0.44, ring, S * 1.4, S * 1.4, VOID.hot);
+  }
+}
+
+/* the blade's point catches red, the void cracks like glass, and blows apart */
+let voidBuf: { c: HTMLCanvasElement; ctx: CanvasRenderingContext2D; key: string; ready: boolean } | null = null;
+let shardCache: { key: string; tris: Pt[][] } | null = null;
+function shards(w: number, h: number) {
+  const key = `${w}x${h}`;
+  if (shardCache?.key === key) return shardCache.tris;
+  const cols = 6, rows = Math.round(cols * (h / w));
+  const r = rng(404);
+  const V: Pt[][] = [];
+  for (let i = 0; i <= cols; i++) {
+    V.push([]);
+    for (let j = 0; j <= rows; j++) {
+      const edgeX = i === 0 || i === cols, edgeY = j === 0 || j === rows;
+      V[i].push([(i / cols) * w + (edgeX ? 0 : (r() - 0.5) * (w / cols) * 0.8), (j / rows) * h + (edgeY ? 0 : (r() - 0.5) * (h / rows) * 0.8)]);
+    }
+  }
+  const tris: Pt[][] = [];
+  for (let i = 0; i < cols; i++) {
+    for (let j = 0; j < rows; j++) {
+      const a = V[i][j], b = V[i + 1][j], c = V[i + 1][j + 1], d = V[i][j + 1];
+      if (r() < 0.5) tris.push([a, b, c], [a, c, d]);
+      else tris.push([a, b, d], [b, c, d]);
+    }
+  }
+  shardCache = { key, tris };
+  return tris;
+}
+
+function shotShatter(g: G, q: number) {
+  const { ctx, w, h, S } = g;
+  const brk = 0.32;
+  const ks = S * (g.portrait ? 0.62 : 0.5);
+  // the blade's point, where the void gives first
+  const ka = Math.PI * 0.36;
+  const P: Pt = [w * 0.16 + Math.cos(ka) * ks * 0.95, h * 0.92 - ks * 0.6 + Math.sin(ka) * ks * 0.95];
+  // behind the void: the corrupted world, and the beast on its knees
+  const behind = () => {
+    world(g, { x: 0, y: 0, z: 1.1 }, { tint: 0.25 });
+    ctx.save();
+    ctx.translate(w * 0.62, h * 0.86);
+    ctx.scale(1.05, 0.88);
+    ctx.translate(-w * 0.62, -h * 0.86);
+    beast(g, w * 0.62, h * 0.86, S * 0.8, { arm: 0, roar: 0.2, boil: 0.3, face: -1, wounds: 0.5 });
+    ctx.restore();
+    knight(g, w * 0.2, h * 0.86 - ks * 0.55, ka, ks * 0.8, w, h * 0.86, { lit: 1, veins: 1 });
+  };
+  // the void as a picture, so it can break
+  const dpr = ctx.getTransform().a;
+  const key = `${w}x${h}x${dpr}`;
+  if (voidBuf?.key !== key) {
+    const c = canvas(w * dpr, h * dpr);
+    voidBuf = { ...c, key, ready: false };
+  }
+  const vb = voidBuf!;
+  // live until it breaks; after that the pieces hold the last picture (or, landing
+  // here mid-break, the picture the void shot ends on)
+  if (q < brk + 0.02 || !vb.ready) {
+    vb.ready = true;
+    vb.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    voidFrame({ ...g, ctx: vb.ctx }, 1);
+  }
+  const tris = shards(w, h);
+  const diag = Math.hypot(w, h);
+  const crack = ease.out3(seg(q, 0.08, brk)) * diag;
+  if (q < brk) {
+    ctx.drawImage(vb.c, 0, 0, w, h);
+    // the point ignites
+    const ig = ease.out3(seg(q, 0, 0.2));
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    drawSprite(ctx, glow(RED.c, 128), P[0], P[1], S * (0.1 + ig * 0.5));
+    drawSprite(ctx, glow('#ffffff', 64), P[0], P[1], S * 0.08 * ig);
+    // cracks run along the shard edges outward from it
+    ctx.strokeStyle = 'rgba(240,246,255,0.9)';
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    for (const tr of tris) {
+      for (let e = 0; e < 3; e++) {
+        const a = tr[e], b = tr[(e + 1) % 3];
+        const m = Math.hypot((a[0] + b[0]) / 2 - P[0], (a[1] + b[1]) / 2 - P[1]);
+        if (m > crack) continue;
+        ctx.moveTo(a[0], a[1]);
+        ctx.lineTo(b[0], b[1]);
+      }
+    }
+    ctx.stroke();
+    ctx.restore();
+    g.f.shake(S * 0.01 * seg(q, 0.1, brk));
+    return;
+  }
+  if (hitQ(brk)) {
+    g.f.shake(S * 0.07);
+    g.f.flash(0.6, RED.hot);
+  }
+  behind();
+  // the shards fly at and past the camera, the nearest first
+  for (const tr of tris) {
+    const c: Pt = [(tr[0][0] + tr[1][0] + tr[2][0]) / 3, (tr[0][1] + tr[1][1] + tr[2][1]) / 3];
+    const dx = c[0] - P[0], dy = c[1] - P[1];
+    const dist = Math.hypot(dx, dy) || 1;
+    const delay = (dist / diag) * 0.25;
+    const d = ease.in2(seg(q, brk + delay * 0.6, 1));
+    if (d >= 1) continue;
+    const sd = hash(c[0] * 0.13 + c[1] * 0.07);
+    ctx.save();
+    ctx.globalAlpha = 1 - seg(d, 0.55, 1);
+    ctx.translate(c[0] + (dx / dist) * d * diag * 0.8, c[1] + (dy / dist) * d * diag * 0.8 + d * d * S * 0.4);
+    ctx.rotate((sd - 0.5) * d * 4);
+    const sc = 1 + d * (0.5 + sd);
+    ctx.scale(sc, sc);
+    ctx.translate(-c[0], -c[1]);
+    ctx.beginPath();
+    ctx.moveTo(tr[0][0], tr[0][1]);
+    ctx.lineTo(tr[1][0], tr[1][1]);
+    ctx.lineTo(tr[2][0], tr[2][1]);
+    ctx.closePath();
+    ctx.save();
+    ctx.clip();
+    const x0 = Math.min(tr[0][0], tr[1][0], tr[2][0]), y0 = Math.min(tr[0][1], tr[1][1], tr[2][1]);
+    const x1 = Math.max(tr[0][0], tr[1][0], tr[2][0]), y1 = Math.max(tr[0][1], tr[1][1], tr[2][1]);
+    const bw = Math.max(1, x1 - x0), bh = Math.max(1, y1 - y0);
+    ctx.drawImage(vb.c, x0 * dpr, y0 * dpr, bw * dpr, bh * dpr, x0, y0, bw, bh);
+    // glass: a sheen that turns with the shard
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.fillStyle = `rgba(212,230,255,${0.03 + 0.14 * Math.abs(Math.sin(sd * 9 + d * 6)) ** 4})`;
+    ctx.fillRect(x0, y0, bw, bh);
+    ctx.restore();
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.strokeStyle = 'rgba(240,246,255,0.8)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    ctx.restore();
+  }
+  // red light pours through where the glass was
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  ctx.globalAlpha = 1 - seg(q, brk, 0.8);
+  drawSprite(ctx, glow(RED.c, 128), P[0], P[1], S * 2.2);
+  ctx.restore();
 }
 
 /* 15. the charge: from below, the sword raised, the sky splitting */
