@@ -6,7 +6,7 @@ import { mkdirSync } from 'node:fs';
 const BASE = process.env.URL ?? 'http://localhost:5199';
 const OUT = process.env.OUT ?? 'scripts/shots';
 mkdirSync(OUT, { recursive: true });
-// a beat is a raw beat ("18.5") or an ALTER shot ("alter:slashes:0.3")
+// a beat is a raw beat ("18.5"), a film beat ("f:12.2") or an ALTER shot ("alter:slashes:0.3")
 const beats = (process.argv[2] ?? '0').split(',');
 const kind = process.argv[3] ?? 'phone';
 const intro = process.argv[4] === undefined || process.argv[4] === 'live' ? null : Number(process.argv[4]);
@@ -26,10 +26,11 @@ for (const b of beats) {
   await page.evaluate(([b, i]) => {
     window.__film.intro(i);
     if (b.startsWith('alter:')) { const [, n, q] = b.split(':'); window.__film.alter(n, Number(q ?? 0.5)); }
+    else if (b.startsWith('f:')) window.__film.seekFilm(Number(b.slice(2)));
     else window.__film.seek(Number(b));
   }, [b, intro]);
   await page.waitForTimeout(wait);
-  const tag = b.startsWith('alter:') ? b.replace(/:/g, '-') : Number(b).toFixed(2);
+  const tag = b.startsWith('alter:') ? b.replace(/:/g, '-') : b.startsWith('f:') ? `f${Number(b.slice(2)).toFixed(2)}` : Number(b).toFixed(2);
   await page.screenshot({ path: `${OUT}/${kind[0]}-${tag}.png` });
 }
 if (errors.length) console.log('ERRORS:\n' + errors.join('\n'));

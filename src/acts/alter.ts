@@ -364,7 +364,8 @@ function blade(g: G, hx: number, hy: number, a: number, L: number, lit: number, 
 function knight(g: G, hx: number, hy: number, a: number, s: number, foeX: number, groundY: number, o: { lit?: number; veins?: number; alpha?: number; vx?: number; pal?: Pal; back?: string } = {}) {
   const { ctx, t } = g;
   const pal = o.pal ?? RED;
-  const wi = { hilt: [hx, hy] as Pt, a, foeX, s, groundY, color: pal.c, t, vx: o.vx ?? 0, vy: 0, seed: 7, alpha: o.alpha ?? 1 };
+  // the sash and headband stay Blue's: under the corruption it's the same warrior
+  const wi = { hilt: [hx, hy] as Pt, a, foeX, s, groundY, color: pal.c, t, vx: o.vx ?? 0, vy: 0, seed: 7, alpha: o.alpha ?? 1, sash: '#2f5bff' };
   // a violet backlight so the black silhouette reads against the night
   ctx.save();
   ctx.globalCompositeOperation = 'lighter';
@@ -427,7 +428,7 @@ function rival(g: G, hx: number, hy: number, a: number, s: number, foeX: number,
     ctx.globalAlpha = 0.5 * alpha * (o.back ?? 1);
     drawSprite(ctx, glow(RIVAL.rim, 128), k.chest[0], k.chest[1] + s * 0.1, s * 1.2, s * 1.8);
     ctx.restore();
-    drawWarrior(ctx, { hilt: [hx, hy], a, foeX, s, groundY, color: RIVAL.c, t, vx: o.vx ?? 0, vy: 0, seed: 3, alpha });
+    drawWarrior(ctx, { hilt: [hx, hy], a, foeX, s, groundY, color: RIVAL.c, t, vx: o.vx ?? 0, vy: 0, seed: 3, alpha, sash: '#a6f03a' });
     // eyes: two green slits under the headband
     const eyes = (o.eyes ?? 1) * alpha;
     if (eyes > 0) {
@@ -2938,10 +2939,12 @@ const BEAM_BLUE: BeamPal = { corona: VIOLET.c, deep: RED.deep, c: RED.c, hot: RE
 interface Duel { kx: number; gy: number; s: number; hy: number; bx: number; bgy: number; bs: number; bhy: number }
 function duelLayout(g: G, step = 0): Duel {
   const { w, h, S, portrait } = g;
-  const s = S * (portrait ? 0.55 : 0.45);
-  const gy = h * 0.9;
-  const bs = s * 0.8, bgy = h * 0.72;
-  return { kx: w * 0.2 + step * S * 0.06, gy, s, hy: gy - s * 0.5, bx: w * 0.68, bgy, bs, bhy: bgy - bs * 0.5 };
+  // the knight low on the left in the water, the rival high on a broken pillar:
+  // far enough apart that the beams have room to meet between the blade tips
+  const s = S * (portrait ? 0.46 : 0.4);
+  const gy = h * 0.86;
+  const bs = s * 0.78, bgy = h * (portrait ? 0.42 : 0.5);
+  return { kx: w * 0.2 + step * S * 0.05, gy, s, hy: gy - s * 0.5, bx: w * (portrait ? 0.8 : 0.76), bgy, bs, bhy: bgy - bs * 0.5 };
 }
 
 /** where the two beams meet, as a fraction from the knight's blade point (0) to the rival's (1) */
@@ -3032,7 +3035,24 @@ function duelWide(g: G, q: number, c: number, o: { fireR: number; fireV: number;
   const mouth: Pt = [D.bx - Math.cos(a) * D.bs * 0.95, D.bhy - Math.sin(a) * D.bs * 0.95];
   const P: Pt = [lerp(tip[0], mouth[0], c), lerp(tip[1], mouth[1], c)];
   const span = Math.hypot(mouth[0] - tip[0], mouth[1] - tip[1]);
-  tearGround(g, P[0], lerp(D.gy, D.bgy, c), P[1], o.meet, 61);
+  // the pillar the rival stands on
+  ctx.save();
+  ctx.fillStyle = '#0b0614';
+  ctx.beginPath();
+  ctx.moveTo(D.bx - D.bs * 0.42, D.bgy - D.bs * 0.02);
+  ctx.lineTo(D.bx - D.bs * 0.18, D.bgy - D.bs * 0.06);
+  ctx.lineTo(D.bx + D.bs * 0.05, D.bgy + D.bs * 0.01);
+  ctx.lineTo(D.bx + D.bs * 0.35, D.bgy - D.bs * 0.04);
+  ctx.lineTo(D.bx + D.bs * 0.5, D.bgy + D.bs * 0.05);
+  ctx.lineTo(D.bx + D.bs * 0.62, g.h);
+  ctx.lineTo(D.bx - D.bs * 0.55, g.h);
+  ctx.closePath();
+  ctx.fill();
+  ctx.strokeStyle = withAlpha(RED.c, 0.45);
+  ctx.lineWidth = 1;
+  ctx.stroke();
+  ctx.restore();
+  tearGround(g, P[0], D.gy, P[1], o.meet, 61);
   rival(g, D.bx, D.bhy, a + Math.PI, D.bs, 0, D.bgy, { lit: 1, dissolve: o.dis, vx: o.meet ? S * 2 : 0 });
   knight(g, D.kx, D.hy, a, D.s, w, D.gy, { lit: 1, veins: 1 });
   // the knight's eyes, a cold blue for the last push
@@ -3044,11 +3064,12 @@ function duelWide(g: G, q: number, c: number, o: { fireR: number; fireV: number;
     ctx.restore();
   }
   // each beam runs from its blade to wherever the other one stops it
-  const W = S * 0.13;
+  const W = S * 0.085;
   const lenR = o.fireR * (o.meet > 0 ? span * c : span * 1.6);
+  const through = o.dis > 0 && o.fireR >= 1;
   const lenV = o.fireV * (o.meet > 0 ? span * (1 - c) : span * 1.6);
   if (o.fireV > 0 && o.dis < 0.5) beam(g, mouth[0], mouth[1], a + Math.PI, 0.5, W * 0.9 * (1 - o.dis * 2), lenV, BEAM_VIOLET);
-  if (o.fireR > 0) beam(g, tip[0], tip[1], a, 0.5, W, lenR, o.blue > 0.5 ? BEAM_BLUE : BEAM_RED);
+  if (o.fireR > 0) beam(g, tip[0], tip[1], a, 0.5, W, through ? undefined : lenR, o.blue > 0.5 ? BEAM_BLUE : BEAM_RED);
   if (o.meet > 0) {
     contact(g, P[0], P[1], a, o.meet, 7);
     g.f.shake(S * 0.004);
@@ -3328,21 +3349,44 @@ function beam(g: G, x: number, y: number, a: number, k: number, widthOverride?: 
   ctx.rotate(a);
   ctx.globalCompositeOperation = 'lighter';
   const flick = 1 + Math.sin(t * 40) * 0.05;
-  // the corona stays thin so the black core reads as the beam itself
-  // a beam that is stopped short ends in a rounded head, not a cut edge
-  const bar = (hh: number) => {
+  // the glow: soft across its width (no hard edges), a soft head where it is stopped
+  const soft = (hh: number, col: string, al: number) => {
+    const gr = ctx.createLinearGradient(0, -hh / 2, 0, hh / 2);
+    gr.addColorStop(0, withAlpha(col, 0));
+    gr.addColorStop(0.5, withAlpha(col, al));
+    gr.addColorStop(1, withAlpha(col, 0));
+    ctx.fillStyle = gr;
+    ctx.fillRect(0, -hh / 2, L, hh);
+    if (len !== undefined) {
+      ctx.globalAlpha = al;
+      drawSprite(ctx, glow(col, 128), L, 0, hh * 1.1);
+      ctx.globalAlpha = 1;
+    }
+  };
+  soft(W * 3.2 * flick, pal.corona, 0.35);
+  soft(W * 1.9 * flick, pal.c, 0.7);
+  // the edge light and the black core: flaring out of the source, tapering into
+  // whatever stops it, so it never reads as a capsule
+  const stopped = len !== undefined;
+  const prof = (u: number) => {
+    const x = u * L;
+    const inn = Math.min(1, x / Math.max(1, Math.min(W * 1.4, L * 0.25)));
+    const out = stopped ? Math.min(1, (L - x) / Math.max(1, Math.min(W * 1.8, L * 0.25))) : 1;
+    return Math.sqrt(Math.max(0, Math.min(inn, out)));
+  };
+  const body = (wd: number) => {
+    const n = 40;
     ctx.beginPath();
-    if (len === undefined) ctx.rect(0, -hh / 2, L, hh);
-    else ctx.roundRect(0, -hh / 2, L, hh, [0, Math.min(L, hh / 2), Math.min(L, hh / 2), 0]);
+    for (let i = 0; i <= n; i++) ctx.lineTo((i / n) * L, -prof(i / n) * wd / 2);
+    for (let i = n; i >= 0; i--) ctx.lineTo((i / n) * L, prof(i / n) * wd / 2);
+    ctx.closePath();
     ctx.fill();
   };
-  for (const [mul, col, al] of [[2.2, pal.corona, 0.16], [1.45, pal.deep, 0.4], [1.18, pal.c, 0.75], [1.06, pal.hot, 0.9]] as const) {
-    ctx.fillStyle = withAlpha(col, al);
-    bar(W * mul * flick);
-  }
+  ctx.fillStyle = withAlpha(pal.hot, 0.95);
+  body(W * 1.14 * flick);
   ctx.globalCompositeOperation = 'source-over';
   ctx.fillStyle = '#000000';
-  bar(W);
+  body(W * 0.9);
   // strands twisting along it: a long pitch, so they read as a spiral, not a mesh
   const pitch = Math.max(W, S * 0.12) * 2.4;
   ctx.lineWidth = Math.max(1, W * 0.04);
@@ -3350,8 +3394,8 @@ function beam(g: G, x: number, y: number, a: number, k: number, widthOverride?: 
     ctx.strokeStyle = s % 2 ? withAlpha(pal.strands[0], 0.8) : withAlpha(pal.strands[1], 0.6);
     ctx.beginPath();
     for (let i = 0; i <= 60; i++) {
-      const xx = (i / 60) * L;
-      const yy = Math.sin(xx / pitch - t * 18 + s * 2.1) * W * 0.42;
+      const xx = (i / 60) * Math.max(0, L - (len !== undefined ? W * 0.5 : 0));
+      const yy = Math.sin(xx / pitch - t * 18 + s * 2.1) * W * 0.34 * prof(xx / Math.max(1, L));
       if (i) ctx.lineTo(xx, yy);
       else ctx.moveTo(xx, yy);
     }

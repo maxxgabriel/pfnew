@@ -29,6 +29,8 @@ export interface WarriorIn {
   vy: number;
   seed: number;
   alpha?: number;
+  /** sash and headband colour, if not the blade's */
+  sash?: string;
 }
 
 /** two-bone IK: the joint between a and b for bones l1, l2; bend picks the side */
@@ -97,28 +99,51 @@ function strokes(ctx: CanvasRenderingContext2D, k: Skel, o: WarriorIn, color: st
   const flow = clamp(-o.vx / (s * 4), -1, 1) - f * 0.3;
   const wave = (ph: number) => Math.sin(t * 9 + ph + seed) * s * 0.02;
 
-  // hakama: flared from the waist to below the knees, hem rippling
-  const waistL: Pt = [k.pelvis[0] - s * 0.07, k.pelvis[1] - s * 0.02];
-  const waistR: Pt = [k.pelvis[0] + s * 0.07, k.pelvis[1] - s * 0.02];
-  const hemY = Math.max(k.kneeF[1], k.kneeB[1]) + s * 0.07;
-  const xs = [k.kneeF[0], k.kneeB[0], k.footF[0], k.footB[0]];
-  const hemL = Math.min(...xs) - s * 0.05, hemR = Math.max(...xs) + s * 0.05;
+  // hakama: two wide trouser legs that follow hip → knee → ankle, so a leg can
+  // never come loose from the body; each flares at the hem and flutters
   ctx.fillStyle = color;
+  const trouser = (hip: Pt, knee: Pt, foot: Pt, ph: number) => {
+    const hem: Pt = [lerp(knee[0], foot[0], 0.78), lerp(knee[1], foot[1], 0.78)];
+    const pts: [Pt, number][] = [[hip, s * 0.068], [[lerp(hip[0], knee[0], 0.5), lerp(hip[1], knee[1], 0.5)], s * 0.062], [knee, s * 0.056], [[lerp(knee[0], hem[0], 0.5), lerp(knee[1], hem[1], 0.5)], s * 0.06], [hem, s * 0.074]];
+    const L: Pt[] = [], R: Pt[] = [];
+    pts.forEach(([p, wd], i) => {
+      const a0 = pts[Math.max(0, i - 1)][0], a1 = pts[Math.min(pts.length - 1, i + 1)][0];
+      const dx = a1[0] - a0[0], dy = a1[1] - a0[1], d = Math.hypot(dx, dy) || 1;
+      const nx = -dy / d, ny = dx / d;
+      const fl = i === pts.length - 1 ? wave(ph) + flow * s * 0.03 : 0;
+      L.push([p[0] + nx * wd + fl, p[1] + ny * wd]);
+      R.push([p[0] - nx * wd + fl, p[1] - ny * wd]);
+    });
+    // smooth sides: curve through the midpoints so the cloth never shows a corner
+    const side = (P: Pt[], first: boolean) => {
+      if (first) ctx.moveTo(P[0][0], P[0][1]);
+      else ctx.lineTo(P[0][0], P[0][1]);
+      for (let i = 1; i < P.length - 1; i++) ctx.quadraticCurveTo(P[i][0], P[i][1], (P[i][0] + P[i + 1][0]) / 2, (P[i][1] + P[i + 1][1]) / 2);
+      ctx.lineTo(P[P.length - 1][0], P[P.length - 1][1]);
+    };
+    ctx.beginPath();
+    side(L, true);
+    // the hem, rippling
+    const hl = L[L.length - 1], hr = R[R.length - 1];
+    for (let i = 1; i <= 4; i++) {
+      const q = i / 4;
+      ctx.lineTo(lerp(hl[0], hr[0], q), lerp(hl[1], hr[1], q) + Math.sin(q * 7 + t * 7 + seed + ph) * s * 0.012);
+    }
+    side(R.slice(0, -1).reverse(), false);
+    ctx.closePath();
+    ctx.fill();
+    return hem;
+  };
+  const hipF: Pt = [k.pelvis[0] + f * s * 0.03, k.pelvis[1]], hipB: Pt = [k.pelvis[0] - f * s * 0.03, k.pelvis[1]];
+  // the waist that joins them
   ctx.beginPath();
-  ctx.moveTo(waistL[0], waistL[1]);
-  ctx.quadraticCurveTo(hemL + flow * s * 0.05, (waistL[1] + hemY) / 2, hemL + flow * s * 0.08 + wave(0), hemY + wave(1) * 0.5);
-  const n = 6;
-  for (let i = 1; i <= n; i++) {
-    const q = i / n;
-    ctx.lineTo(lerp(hemL, hemR, q) + flow * s * 0.08 * (1 - q * 0.5) + wave(i), hemY + Math.sin(q * 9 + t * 7 + seed) * s * 0.018);
-  }
-  ctx.quadraticCurveTo(hemR + flow * s * 0.05, (waistR[1] + hemY) / 2, waistR[0], waistR[1]);
-  ctx.closePath();
+  ctx.ellipse(k.pelvis[0], k.pelvis[1] - s * 0.01, s * 0.085, s * 0.06, 0, 0, TAU);
   ctx.fill();
-
-  // legs below the hem
-  br([k.kneeF, [lerp(k.kneeF[0], k.footF[0], 0.5), lerp(k.kneeF[1], k.footF[1], 0.5)], k.footF], W * 3.2, 1);
-  br([k.kneeB, [lerp(k.kneeB[0], k.footB[0], 0.5), lerp(k.kneeB[1], k.footB[1], 0.5)], k.footB], W * 3.2, 2);
+  const hemB = trouser(hipB, k.kneeB, k.footB, 2);
+  const hemF = trouser(hipF, k.kneeF, k.footF, 0);
+  // shins out of the hem, and the feet
+  br([hemF, k.footF], W * 3, 1, 0.2);
+  br([hemB, k.footB], W * 3, 2, 0.2);
   br([k.footF, [k.footF[0] + f * s * 0.06, k.footF[1] + s * 0.005]], W * 2.4, 3, 0.2);
   br([k.footB, [k.footB[0] + f * s * 0.06, k.footB[1] + s * 0.005]], W * 2.4, 4, 0.2);
 
@@ -126,7 +151,7 @@ function strokes(ctx: CanvasRenderingContext2D, k: Skel, o: WarriorIn, color: st
   br([k.pelvis, [lerp(k.pelvis[0], k.chest[0], 0.5) - f * s * 0.02, lerp(k.pelvis[1], k.chest[1], 0.5)], [k.chest[0], k.chest[1] - s * 0.03]], s * 0.14, 5, 0.25);
   // sash in the blade's colour
   if (!rim) {
-    ctx.strokeStyle = o.color;
+    ctx.strokeStyle = o.sash ?? o.color;
     ctx.lineWidth = s * 0.035;
     ctx.lineCap = 'round';
     ctx.beginPath();
@@ -163,7 +188,7 @@ function strokes(ctx: CanvasRenderingContext2D, k: Skel, o: WarriorIn, color: st
   ctx.fill();
   br([[k.head[0] - f * s * 0.02, k.head[1] - s * 0.06], [k.head[0] - f * s * 0.05, k.head[1] - s * 0.1]], W * 2.6, 8, 0.2);
   if (!rim) {
-    ctx.strokeStyle = o.color;
+    ctx.strokeStyle = o.sash ?? o.color;
     ctx.lineWidth = s * 0.012;
     ctx.beginPath();
     ctx.moveTo(k.head[0] - s * 0.055, k.head[1] - s * 0.015);
@@ -184,7 +209,7 @@ function strokes(ctx: CanvasRenderingContext2D, k: Skel, o: WarriorIn, color: st
       pts.forEach((p, i) => (i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])));
       ctx.stroke();
     } else {
-      ctx.strokeStyle = o.color;
+      ctx.strokeStyle = o.sash ?? o.color;
       ctx.lineWidth = s * 0.01;
       ctx.beginPath();
       pts.forEach((p, i) => (i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])));
