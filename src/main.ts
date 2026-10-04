@@ -7,12 +7,12 @@ import { drawFinale } from './acts/finale';
 import { alterShotP, drawAlter } from './acts/alter';
 import { drawPowers } from './acts/powers';
 import { drawRide, rideShotP } from './acts/ride';
-import { drawTitan, titanShotP } from './acts/titan';
+import { drawAfterSplit, drawTitan, titanShotP } from './acts/titan';
 import { drawXray } from './acts/xray';
 import { ACT, CHAPTERS, type Frame } from './core/frame';
 import { clamp, damp, seg } from './core/math';
 import { canvas, grainTiles } from './core/sprites';
-import { HOLDS, POWERS_AT, RAW_END, TITAN_AT, toFilm, toRaw } from './core/holds';
+import { ALTER_AT, HOLDS, POWERS_AT, RAW_END, TITAN_AT, toFilm, toRaw } from './core/holds';
 
 /*
  * THE FILM.
@@ -186,6 +186,9 @@ function loop(now: number) {
   }
   // after the pull-back the film is on paper: the match is over
   if (B >= ACT.matchStart && B < ACT.matchEnd && !(B > POWERS_AT || frame.hold?.kind === 'powers')) drawMatch(frame);
+  // what's left of the bolt climbs the night to where ALTER's target ring locks on
+  if (torn && !frame.hold && B < ALTER_AT) drawAfterSplit(frame, seg(B, TITAN_AT, ALTER_AT - 0.04));
+  if (frame.hold?.kind === 'alter' && frame.hold.p < 0.045) drawAfterSplit(frame, 1);
   // the gold bolt out of the machine, and its afterimage over the night sky
   if (B >= ACT.cut[0] && B < ACT.cut[1] + 0.1 && !torn) drawMachineCut(frame);
   if (B >= ACT.finaleStart && B < ACT.creditsStart + 0.4) drawFinale(frame);

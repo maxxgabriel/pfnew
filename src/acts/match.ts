@@ -822,7 +822,8 @@ function drawPlayer(ctx: CanvasRenderingContext2D, cam: Cam, p: Player, pos: V3,
 function draw3DBall(ctx: CanvasRenderingContext2D, cam: Cam, b: V3, B: number, t: number) {
   const p = P(cam, b);
   const sh = P(cam, [b[0], 0.01, b[2]]);
-  if (!p) return;
+  // the star only enters this sky after Night Ride chases it here (before that it's ALTER's)
+  if (!p || B < 12.64) return;
   const r = Math.max(2, (cam.f * 0.34) / p[2]);
   if (sh) {
     ctx.fillStyle = 'rgba(0,0,0,0.5)';
