@@ -145,6 +145,13 @@ better just do it and report to me"*; *"dedication and passion… clean
 transitions, crazy animation, crazy motion graphics"*; suggest new ideas
 before building them.
 
+**Round 8: ALTER cleaned up, the enemy replaced (approved).** Owner: *"remove
+the tentacles… it looks so weird… change the enemy, don't make it a monster…
+make it clean."* Offered three replacements; they picked **Green, reborn**: a
+violet swordsman, blade against blade. The ink-blob beast and its tendrils are
+gone and must not come back. Built with STORY step 1 (smears, orbit charge,
+beam clash, match cuts, Blot in Dead Calm and the void).
+
 **What the owner responds to.** Big, cinematic, anime-like set pieces;
 continuity jokes (Blot); hard cuts, impact frames, speed lines. Proposals
 with clear options before a build.

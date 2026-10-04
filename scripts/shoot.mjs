@@ -6,7 +6,8 @@ import { mkdirSync } from 'node:fs';
 const BASE = process.env.URL ?? 'http://localhost:5199';
 const OUT = process.env.OUT ?? 'scripts/shots';
 mkdirSync(OUT, { recursive: true });
-const beats = (process.argv[2] ?? '0').split(',').map(Number);
+// a beat is a raw beat ("18.5") or an ALTER shot ("alter:slashes:0.3")
+const beats = (process.argv[2] ?? '0').split(',');
 const kind = process.argv[3] ?? 'phone';
 const intro = process.argv[4] === undefined || process.argv[4] === 'live' ? null : Number(process.argv[4]);
 const wait = Number(process.argv[5] ?? 700);
@@ -22,9 +23,14 @@ await page.waitForFunction(() => window.__film);
 await page.waitForTimeout(1500);
 for (const b of beats) {
   await page.waitForFunction(() => window.__film);
-  await page.evaluate(([b, i]) => { window.__film.intro(i); window.__film.seek(b); }, [b, intro]);
+  await page.evaluate(([b, i]) => {
+    window.__film.intro(i);
+    if (b.startsWith('alter:')) { const [, n, q] = b.split(':'); window.__film.alter(n, Number(q ?? 0.5)); }
+    else window.__film.seek(Number(b));
+  }, [b, intro]);
   await page.waitForTimeout(wait);
-  await page.screenshot({ path: `${OUT}/${kind[0]}-${b.toFixed(2)}.png` });
+  const tag = b.startsWith('alter:') ? b.replace(/:/g, '-') : Number(b).toFixed(2);
+  await page.screenshot({ path: `${OUT}/${kind[0]}-${tag}.png` });
 }
 if (errors.length) console.log('ERRORS:\n' + errors.join('\n'));
 await browser.close();

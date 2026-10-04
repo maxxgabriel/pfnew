@@ -4,11 +4,11 @@ import { drawMachine, drawMachineBall, drawMachineCut } from './acts/machine';
 import { drawMatch } from './acts/match';
 import { drawCredits } from './acts/credits';
 import { drawFinale } from './acts/finale';
-import { drawAlter } from './acts/alter';
+import { alterShotP, drawAlter } from './acts/alter';
 import { ACT, CHAPTERS, type Frame } from './core/frame';
 import { clamp, damp, seg } from './core/math';
 import { canvas, grainTiles } from './core/sprites';
-import { ALTER_AT, RAW_END, toFilm, toRaw } from './core/holds';
+import { ALTER_AT, HOLDS, RAW_END, toFilm, toRaw } from './core/holds';
 
 /*
  * THE FILM.
@@ -277,14 +277,15 @@ fontsReady.then(() => {
 requestAnimationFrame(loop);
 
 // dev hook: jump the playhead (used by the screenshot scripts)
+function jumpRaw(b: number) {
+  window.scrollTo(0, b * beatPx);
+  target = b;
+  R = b;
+  B = prevB = toFilm(b).film;
+}
 (window as unknown as { __film: unknown }).__film = {
   /** jump to a raw (scroll) beat */
-  seek(b: number) {
-    window.scrollTo(0, b * beatPx);
-    target = b;
-    R = b;
-    B = prevB = toFilm(b).film;
-  },
+  seek: jumpRaw,
   /** jump to a film beat (just past any hold that sits there) */
   seekFilm(b: number) {
     const raw = toRaw(b) + 1e-4;
@@ -293,5 +294,10 @@ requestAnimationFrame(loop);
     B = prevB = toFilm(raw).film;
   },
   intro(s: number | null) { introOverride = s; },
+  /** jump to ALTER's shot `name` at its own progress q */
+  alter(name: string, q = 0.5) {
+    const h = HOLDS.find((k) => k.kind === 'alter')!;
+    jumpRaw(toRaw(h.at) + h.len * alterShotP(name, q));
+  },
   cost: () => cost,
 };

@@ -32,10 +32,10 @@ a playhead and redraws the whole frame every animation frame.
   | kind | film `at` | raw range | what plays |
   |---|---|---|---|
   | `thunder` | 4.86 | 4.86 → 6.11 | duel finisher (ink.ts `drawThunder`) |
-  | `alter` | 12.63 | 13.88 → 27.03 | the whole ALTER act (alter.ts) |
-  | `dash` | 15.0 | 25.25 → 26.20 | #10's thunder dash (match.ts `drawDash`) |
+  | `alter` | 12.63 | 13.88 → 28.58 | the whole ALTER act (alter.ts) |
+  | `dash` | 15.0 | 30.95 → 31.90 | #10's thunder dash (match.ts `drawDash`) |
 
-  `RAW_END = ACT.END (30) + 15.35 = 45.35`. Convert with `toFilm(raw)` /
+  `RAW_END = ACT.END (30) + 16.9 = 46.9`. Convert with `toFilm(raw)` /
   `toRaw(film)`: raw = film + sum of `len` for holds whose `at` < film.
 - **Clock (t):** wall time in seconds. Ambient motion (mist, embers, blinking,
   bobbing) runs on `t`, so the frame keeps moving when the reader stops.
@@ -63,7 +63,7 @@ a playhead and redraws the whole frame every animation frame.
 | 6.75 → 7.85 | paper + tear | ink.ts `drawPaperOver` | white cools to paper, ball pops, paper tears open |
 | 7.0 → 12.4 | Machine | machine.ts | MAKE / THINGS / THAT / MOVE chain reaction; cannon fires at 12.0; the ball charges gold 12.12–12.3 |
 | 12.3 → 12.5 | the cut | machine.ts `drawMachineCut` | the ball becomes a gold bolt that tears up the screen (`ACT.cut`), hard cut to the match's night sky, afterimage fades by 12.5 |
-| 12.63 (hold) | **ALTER** | alter.ts | 26 shots, see §3; opens by ink bleeding in over the night sky, exits by drawing back and landing its ring on the falling star |
+| 12.63 (hold) | **ALTER** | alter.ts | 31 shots, see §3; opens by ink bleeding in over the night sky, exits by drawing back and landing its ring on the falling star |
 | 12.4 → 20.0 | Match | match.ts | stadium, lights clunk on, lower third, chalk tactics, comic panels, **dash hold at 15.0**, bullet time, goal, net push |
 | 19.0 → 22.6 | Hello | finale.ts | ensō iris through the net, name repainted, contact card at 21.25–22.6 |
 | 22.55 → 30 | Credits + post-credits | credits.ts | roll, then Blot finds the hilts, "MAX GABRIEL WILL RETURN", contact card again |
@@ -79,27 +79,52 @@ removed it if it's ever wanted back.
 ## 3. ALTER (`src/acts/alter.ts`), the centrepiece
 
 Shots are a list `SHOTS: {name, dur, draw(g, q)}`. `p` (0..1) maps onto the
-summed durations (18.43 units across 13.15 raw beats) and each shot gets its own
+summed durations (20.58 units across 14.7 raw beats) and each shot gets its own
 `q` (0..1). Cuts are hard; each new shot gets a small jolt and a red
 overexposed frame. `hitQ(x)` fires once as the shot's q crosses x (use it
 for shakes and flashes).
 
-Order: corrupt → title → wide → feet → sword → eyes → ring → impact → roar
-→ standoff → dash → clash → slashes → tendrils → **dead calm** (still → calm
-→ drop → release) → **the void** (sign → expand → void → shatter) → charge →
-beam → after → exit.
+Order: corrupt → title → wide → feet → sword → eyes → ring → impact → reveal
+→ standoff → dash → clash → slashes → volley → **dead calm** (still → calm
+→ drop → release) → **the void** (sign → expand → void → shatter) → charge
+(orbit) → **beam clash** (fire → driven → strain → push → snap → column) →
+after → exit.
 
+**The enemy is the rival** (round 8): Green from the ink duel, reborn on the
+back of the page — the same brush body as the knight (`drawWarrior`), a
+violet blade of light (`drawLightLine` from ink.ts), green eyes. `rival()`
+takes `lit`, `dissolve` (breaks into ink blown along +x), `snap` (breaks the
+blade). The owner rejected the ink-blob monster and its tentacles as
+"weird"; don't bring them back. Its attacks are flying slashes
+(`crescent()`), which Dead Calm cuts in half.
+
+- Match cuts: the title's slash settles flat onto the wide's horizon; the red
+  eye rises into the sky ring's core (`matchEye`); in Dead Calm the cooled
+  blue eye rises into the moon. Those shots use `flash: null`.
+- Slashes: each cut has the knight mid-swing in the foreground with an anime
+  smear (`smear()`, one solid ribbon over the arc) and three ghost
+  multiples; the rival parries in the background.
+- Charge: the camera orbits the knight (`orbitWorld()`: far layers slide the
+  most, near rocks slide the other way; `runeCircle()` turns with the orbit).
+- Beam clash: both fire from their blades; `contactAt(q)` keys where the
+  beams meet; `contact()` is the ball of light, `tearGround()` the ground
+  lifting under it. In the last push the knight's eyes and strands go blue
+  (`BEAM_BLUE`); the rival's blade snaps (an echo of Green's in the duel) and
+  they go to ink. The Spark (`spark()`) rises out of the smoke as a star.
+- Blot: frozen mid-jump at the edge of Dead Calm (eyes on the latest cut),
+  drops into the water on release; tumbles through the void and falls out of
+  the shatter past one big shard; peeks out in the aftermath.
 - Dead calm: time stops in a sphere around the knight (`CALM_T` freezes the
-  clock, embers freeze, palette `BLUE`); tendrils are cut as they enter it
+  clock, embers freeze, palette `BLUE`); slashes are cut as they reach it
   while the knight only snaps between poses (`CALM_POSES`); a droplet lands
   and a red ring brings time back (`calmScene` is shared by calm/release).
 - The void: a hand seal, a sphere of void swallowing the world from the
-  knight's chest, the beast caged and overloaded (`voidSpace`, `voidBeast`,
+  knight's chest, the rival caged and overloaded (`voidSpace`, `voidRival`,
   palette `VOID`), then the void is rendered to a buffer and breaks into
   glass shards (`shards`, `shotShatter`).
 - Shots can set `embers: 'live' | 'frozen' | 'none'` and `flash` (the cut's
-  overexposure colour, `null` for no flash or jolt). No on-screen text in
-  either set piece, by the owner's choice.
+  overexposure colour, `null` for no flash or jolt). No on-screen text in the
+  new set pieces, by the owner's choice.
 
 Shared renderers in the same file:
 - `world(g, cam)`: parallax sky, blood ensō moon, clouds, the spire
@@ -107,13 +132,13 @@ Shared renderers in the same file:
 - `knight()`: the warrior body (warrior.ts) with a red rim, a violet
   backlight, red veins, and `blade()` (a black sword whose fuller fills red
   and whose rings ignite).
-- `beast()`: blobs of living ink with a violet rim, red veins and eyes, an
-  arm pose (`arm`: 0 hanging, 1 raised, 2 struck), `roar`, `wounds`,
-  `dissolve`.
+- `rival()`: see above.
 - Effects: `debris` (q-deterministic), `speedLines`, `hLines`, `shockRing`,
   `cracks`, `impactFrame`, `beam`, `targetRing`, `drawEmbers`.
 
-To jump to a shot: raw = 13.88 + 13.15 × (sum of earlier shot durs + dur × q) / 18.43.
+To jump to a shot, use the dev hook `__film.alter(name, q)`, or in screenshots
+`node scripts/shoot.mjs alter:slashes:0.3,alter:calm:0.5`. `node scripts/perf.mjs 1 alter`
+measures every shot.
 
 ## 4. Other building blocks
 

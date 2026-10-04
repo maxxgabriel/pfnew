@@ -305,9 +305,14 @@ ruins is **the black knight**, Blue, corrupted.
 Do these one at a time. After each, screenshot at phone size, measure
 `scripts/perf.mjs`, push, republish the preview, and report to the owner.
 
-1. **Alter finishing pass:** beam clash (21), smear frames (13), orbit charge
-   (20), match cuts (12), Blot in Dead Calm and the void (15, 18). This makes
-   the existing centrepiece complete.
+1. **Alter finishing pass — DONE (round 8).** Beam clash (21), smear frames
+   (13), orbit charge (20), match cuts (12: slash → horizon, red eye → sky
+   ring, blue eye → calm moon; the droplet → exit ripple waits for Night
+   Ride), Blot in Dead Calm and the void (15, 18). **Change from this doc:**
+   the owner rejected the Beast and its tendrils; the enemy in Alter is now
+   **Green, reborn** (a violet swordsman), and the tendrils are flying
+   slashes. Read "the Beast" below as the rival; the Dragon in Act I is
+   still planned, but keep it a clean brush-stroke dragon, not a monster.
 2. **Powers of Ten (29).** The ending that ties the film together; it also
    proves the "it was one page" idea everything else hangs on.
 3. **The Ink Dragon (6, 8)** with the prologue changes (2, 3). This makes

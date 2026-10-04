@@ -17,7 +17,7 @@ export const ALTER_AT = 12.63;
 export const HOLDS: Hold[] = [
   { at: 4.86, len: 1.25, kind: 'thunder' },
   // the Alter act plays in the night sky between the machine and the match
-  { at: ALTER_AT, len: 13.15, kind: 'alter' },
+  { at: ALTER_AT, len: 14.7, kind: 'alter' },
   { at: 15.0, len: 0.95, kind: 'dash' },
 ];
 
