@@ -455,7 +455,12 @@ const rings: Ring[] = [];
 let lastT = 0;
 let crackleSeed = 0;
 
-export function drawInk(f: Frame) {
+/**
+ * mode: 'auto' crossfades into the night on its own (the old flood); 'day' and 'night' force it;
+ * 'buffer' is the night drawn a second time for the painted window (core/paint.ts): no title,
+ * no clock or particle state touched.
+ */
+export function drawInk(f: Frame, mode: 'auto' | 'day' | 'night' | 'buffer' = 'auto') {
   build(f);
   const { ctx, w, h, B, t } = f;
   const S = Math.min(w, h);
@@ -464,7 +469,7 @@ export function drawInk(f: Frame) {
   const X = (sx: number) => ox + sx * SW;
   const Y = (sy: number) => sy * h;
   const dt = Math.min(0.05, t - lastT || 0.016);
-  lastT = t;
+  if (mode !== 'buffer') lastT = t;
 
   if (f.hold?.kind === 'thunder') {
     if (frozenT < 0) frozenT = t;
@@ -475,7 +480,7 @@ export function drawInk(f: Frame) {
 
   // pull back: the title circle becomes the moon
   const pull = ease.inOut3(seg(B, PULL[0], PULL[1]));
-  const night = ease.inOut2(seg(B, FLOOD[0] + 0.45, FLOOD[1]));
+  const night = mode === 'auto' ? ease.inOut2(seg(B, FLOOD[0] + 0.45, FLOOD[1])) : mode === 'day' ? 0 : 1;
   const zoomT = ease.in3(seg(B, ZOOM[0], ZOOM[1]));
   const zoom = Math.exp(Math.log(16) * zoomT);
 
@@ -513,7 +518,7 @@ export function drawInk(f: Frame) {
 
   // ---- the flood: ink blooms up from behind the range and takes the sky,
   // stopping at the edge of the circle
-  const flood = seg(B, FLOOD[0], FLOOD[1]);
+  const flood = mode === 'auto' ? seg(B, FLOOD[0], FLOOD[1]) : 0;
   if (flood > 0 && night < 1) {
     const r = rng(9);
     for (let i = 0; i < 16; i++) {
@@ -532,7 +537,7 @@ export function drawInk(f: Frame) {
   const enCy = lerp(h * 0.38, Y(0.2), pull);
   const enR = lerp(Math.min(w * 0.38, h * 0.25), S * 0.12, pull);
   const mx = enCx - camX * 0.05, my = enCy - camY * 0.05;
-  const lum = Math.max(night, ease.inOut2(seg(B, FLOOD[0] + 0.15, FLOOD[0] + 0.6)));
+  const lum = Math.max(night, mode === 'auto' ? ease.inOut2(seg(B, FLOOD[0] + 0.15, FLOOD[0] + 0.6)) : 0);
   if (lum > 0) {
     ctx.globalAlpha = lum * 0.5;
     drawSprite(ctx, glow(C.paper, 256), mx, my, enR * 7);
@@ -653,13 +658,13 @@ export function drawInk(f: Frame) {
   });
 
   // ---- title
-  drawTitle(f, pull, I);
+  if (mode !== 'buffer') drawTitle(f, pull, I);
 
   // ---- the duel
   // on a tall screen the fight closes in so the fighters stay in frame
   const squeeze = f.portrait ? 0.8 : 1;
   const XD = (sx: number) => ox + (0.5 + (sx - 0.5) * squeeze) * SW;
-  if (B > 2.2 && B < 7) {
+  if (B > 2.2 && B < 7 && mode !== 'buffer') {
     drawPetals(f, dt, XD, Y);
     drawDuel(f, XD, Y, SW, dt, camX, jx, jy);
   }
