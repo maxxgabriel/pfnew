@@ -7,6 +7,7 @@ import { drawFinale } from './acts/finale';
 import { alterShotP, drawAlter } from './acts/alter';
 import { drawPowers } from './acts/powers';
 import { drawSign } from './acts/sign';
+import { drawDive } from './acts/dive';
 import { drawAfterSplit, drawTitan, titanShotP } from './acts/titan';
 import { ACT, CHAPTERS, type Frame } from './core/frame';
 import { clamp, damp, seg } from './core/math';
@@ -123,6 +124,7 @@ function hud() {
   CHAPTERS.forEach((ch, i) => { if (B >= ch.at - (i && ch.at - CHAPTERS[i - 1].at < 0.2 ? 0 : 0.05)) c = i; });
   if (frame.hold?.kind === 'alter') c = CHAPTERS.findIndex((ch) => ch.name === 'Alter');
   if (frame.hold?.kind === 'powers') c = CHAPTERS.findIndex((ch) => ch.name === 'Hello');
+  if (frame.hold?.kind === 'dive') c = CHAPTERS.findIndex((ch) => ch.name === 'Match');
   if (c !== chapter) {
     chapter = c;
     chN.textContent = CHAPTERS[c].n;
@@ -197,6 +199,7 @@ function loop(now: number) {
   if (frame.hold?.kind === 'titan') drawTitan(frame, frame.hold.p);
   if (frame.hold?.kind === 'powers') drawPowers(frame, frame.hold.p);
   if (frame.hold?.kind === 'sign') drawSign(frame, frame.hold.p);
+  if (frame.hold?.kind === 'dive') drawDive(frame, frame.hold.p);
 
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   post(t, dt);
@@ -220,7 +223,6 @@ function post(t: number, dt: number) {
     ctx.globalAlpha = 1;
     flashAmt = damp(flashAmt, 0, 10, dt);
   }
-  titleCards(t);
   if (vignette) ctx.drawImage(vignette, 0, 0, w, h);
   // grain
   const pat = grainPat[Math.floor(t * 24) % grainPat.length];
@@ -235,63 +237,6 @@ function post(t: number, dt: number) {
     ctx.restore();
   }
 }
-
-/** the story, one line per chapter card */
-const BOOK: Record<string, string> = {
-  Machine: 'the line keeps moving',
-  Match: 'one last stroke',
-};
-
-/**
- * Act title cards: a black band slams across the lower third, the act's
- * number and name stagger in, and the band tears away again.
- */
-function titleCards(t: number) {
-  const S = Math.min(w, h);
-  if (frame.hold) return;
-  // the acts that play on the film's own time get a card; the ones inside holds open their own way
-  for (const c of CHAPTERS.filter((ch) => ch.name === 'Match')) {
-    // (Match's card waits for ALTER to finish: it sits just before the match)
-    const a = c.name === 'Match' ? ALTER_AT + 0.003 : c.at - 0.05;
-    const inn = seg(B, a, a + 0.12), out = seg(B, a + 0.42, a + 0.55);
-    if (inn <= 0 || out >= 1) continue;
-    const y = h * 0.72;
-    const line = BOOK[c.name];
-    const bh = S * (line ? 0.2 : 0.15);
-    const slide = (1 - easeOut(inn)) * -w + easeIn(out) * w;
-    ctx.save();
-    ctx.translate(slide, 0);
-    ctx.rotate(-0.04);
-    ctx.fillStyle = '#14120f';
-    ctx.fillRect(-w * 0.1, y - bh / 2, w * 1.2, bh);
-    ctx.fillStyle = '#ff4021';
-    ctx.fillRect(-w * 0.1, y + bh / 2 - S * 0.012, w * 1.2, S * 0.012);
-    const word = `${c.n} · ${c.name.toUpperCase()}`;
-    ctx.font = `${Math.round(Math.min(w * 0.085, S * 0.085))}px "Dela Gothic One", "Arial Black", sans-serif`;
-    ctx.textBaseline = 'middle';
-    ctx.textAlign = 'left';
-    const widths = [...word].map((ch) => ctx.measureText(ch).width);
-    let x = w / 2 - widths.reduce((p, q) => p + q, 0) / 2;
-    [...word].forEach((ch, i) => {
-      const k = seg(inn, 0.2 + i * 0.05, 0.5 + i * 0.05);
-      ctx.fillStyle = i < c.n.length ? '#ff4021' : '#ece6d6';
-      ctx.globalAlpha = k;
-      ctx.fillText(ch, x, y - (line ? bh * 0.12 : 0) + (1 - easeOut(k)) * bh * 0.4 + Math.sin(t * 6 + i) * S * 0.002);
-      x += widths[i];
-    });
-    // one line of the story, as a book would print it under a chapter title
-    if (line) {
-      ctx.globalAlpha = seg(inn, 0.55, 0.95);
-      ctx.font = `600 ${Math.round(Math.max(12, S * 0.034))}px "Shippori Mincho", Georgia, serif`;
-      ctx.textAlign = 'center';
-      ctx.fillStyle = '#ece6d6';
-      ctx.fillText(line, w / 2, y + bh * 0.24);
-    }
-    ctx.restore();
-  }
-}
-const easeOut = (x: number) => 1 - (1 - x) ** 3;
-const easeIn = (x: number) => x * x * x;
 
 /* ------------------------------------------------------------- startup */
 

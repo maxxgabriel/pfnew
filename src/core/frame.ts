@@ -17,7 +17,7 @@ export interface Frame {
   /** seconds since the film was ready; drives the opening title */
   intro: number;
   /** set while a hold is playing: the film is paused at B and `p` runs 0→1 */
-  hold: { kind: 'thunder' | 'titan' | 'dash' | 'alter' | 'powers' | 'sign'; p: number } | null;
+  hold: { kind: 'thunder' | 'titan' | 'dash' | 'alter' | 'dive' | 'powers' | 'sign'; p: number } | null;
   reduced: boolean;
   /** true on the frame the playhead passes beat `b`, in either direction */
   crossed(b: number): boolean;
