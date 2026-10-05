@@ -2,7 +2,6 @@ import { drawBlot } from '../core/blot';
 import type { Frame } from '../core/frame';
 import { type Pt, TAU, bell, clamp, ease, hash, lerp, rng, seg } from '../core/math';
 import { canvas, drawSprite, glow, withAlpha } from '../core/sprites';
-import { drawSpark } from './alter';
 
 /*
  * NIGHT RIDE.
@@ -871,4 +870,39 @@ function shotSkid(g: G, q: number) {
     ctx.fillRect(0, 0, w, wallTop);
     ctx.restore();
   }
+}
+
+/**
+ * The Spark: the thing everyone is fighting over, here a point of white
+ * light with a ring around it. It shrinks into a star.
+ */
+export function drawSpark(ctx: CanvasRenderingContext2D, x: number, y: number, r: number, a: number, t: number) {
+  if (a <= 0 || r <= 0) return;
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  ctx.globalAlpha = a;
+  drawSprite(ctx, glow('#ffd27a', 128), x, y, r * 9);
+  drawSprite(ctx, glow('#ffffff', 64), x, y, r * 3);
+  // four long rays and four short, turning slowly
+  ctx.translate(x, y);
+  ctx.rotate(t * 0.15);
+  ctx.fillStyle = '#fff6dc';
+  for (let i = 0; i < 8; i++) {
+    const L = r * (i % 2 ? 2.2 : 5.5), W = r * (i % 2 ? 0.14 : 0.2);
+    ctx.save();
+    ctx.rotate((i / 8) * TAU);
+    ctx.beginPath();
+    ctx.moveTo(0, -W);
+    ctx.lineTo(L, 0);
+    ctx.lineTo(0, W);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  }
+  ctx.strokeStyle = withAlpha('#ffe9b0', 0.6);
+  ctx.lineWidth = Math.max(1, r * 0.12);
+  ctx.beginPath();
+  ctx.arc(0, 0, r * 1.7, 0, TAU);
+  ctx.stroke();
+  ctx.restore();
 }

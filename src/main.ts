@@ -4,15 +4,15 @@ import { drawMachine, drawMachineBall, drawMachineCut } from './acts/machine';
 import { drawMatch } from './acts/match';
 import { drawCredits } from './acts/credits';
 import { drawFinale } from './acts/finale';
-import { alterShotP, drawAlter } from './acts/alter';
 import { drawPowers } from './acts/powers';
 import { drawRide, rideShotP } from './acts/ride';
-import { drawAfterSplit, drawTitan, titanShotP } from './acts/titan';
+import { drawShadow, SHADOW_HOLD_SHARE } from './acts/shadow';
+import { drawTitan, titanShotP } from './acts/titan';
 import { drawXray } from './acts/xray';
 import { ACT, CHAPTERS, type Frame } from './core/frame';
 import { clamp, damp, seg } from './core/math';
 import { canvas, grainTiles } from './core/sprites';
-import { ALTER_AT, HOLDS, POWERS_AT, RAW_END, RIDE_AT, TITAN_AT, toFilm, toRaw } from './core/holds';
+import { HOLDS, POWERS_AT, RAW_END, RIDE_AT, SHADOW_AT, TITAN_AT, toFilm, toRaw } from './core/holds';
 
 /*
  * THE FILM.
@@ -97,9 +97,8 @@ CHAPTERS.forEach((c, i) => {
   b.textContent = c.n;
   b.setAttribute('aria-label', `Chapter ${c.n}: ${c.name}`);
   b.style.left = `${(toRaw(c.at) / RAW_END) * 100}%`;
-  if (c.name === 'Alter') b.classList.add('feature');
   // chapters that live inside a hold jump to the start of the hold, not past it
-  const inHold = HOLDS.find((hd) => hd.kind === ({ Alter: 'alter', Ride: 'ride', Hello: 'powers' } as Record<string, string>)[c.name]);
+  const inHold = HOLDS.find((hd) => hd.kind === ({ Ride: 'ride', Hello: 'powers' } as Record<string, string>)[c.name]);
   b.addEventListener('click', () => (inHold ? seekRaw(toRaw(inHold.at)) : seek(i === 0 ? 0 : c.at + 0.35)));
   marks.appendChild(b);
 });
@@ -122,7 +121,6 @@ function hud() {
   let c = 0;
   // (a mark shows a touch early, except where chapters sit close together round the holds)
   CHAPTERS.forEach((ch, i) => { if (B >= ch.at - (i && ch.at - CHAPTERS[i - 1].at < 0.2 ? 0 : 0.05)) c = i; });
-  if (frame.hold?.kind === 'alter') c = CHAPTERS.findIndex((ch) => ch.name === 'Alter');
   if (frame.hold?.kind === 'powers') c = CHAPTERS.findIndex((ch) => ch.name === 'Hello');
   if (frame.hold?.kind === 'ride') c = CHAPTERS.findIndex((ch) => ch.name === 'Ride');
   if (c !== chapter) {
@@ -177,25 +175,23 @@ function loop(now: number) {
   }
 
   if (B < 6.8) drawInk(frame);
-  // after TITAN the poster is torn open: the machine is gone and the night behind the page shows
+  // after TITAN the poster is torn open: behind it the room is dark (the shadow bridge, up to the ride)
   const torn = B > TITAN_AT;
   if (B >= 6.85 && B < ACT.machineEnd && !torn) drawMachine(frame);
-  if (torn && B < ACT.matchStart) drawMatch({ ...frame, B: ACT.matchStart });
   if (B >= 6.75 && B < 7.9) {
     drawPaperOver(frame);
     drawMachineBall(frame);
   }
   // after the pull-back the film is on paper: the match is over
-  if (B >= ACT.matchStart && B < ACT.matchEnd && !(B > POWERS_AT || frame.hold?.kind === 'powers')) drawMatch(frame);
-  // what's left of the bolt climbs the night to where ALTER's target ring locks on
-  if (torn && !frame.hold && B < ALTER_AT) drawAfterSplit(frame, seg(B, TITAN_AT, ALTER_AT - 0.04));
-  if (frame.hold?.kind === 'alter' && frame.hold.p < 0.045) drawAfterSplit(frame, 1);
+  if (B >= RIDE_AT && B < ACT.matchEnd && !(B > POWERS_AT || frame.hold?.kind === 'powers')) drawMatch(frame);
+  // lights out: the hold, then on in film time until the marble rolls under the bed
+  if (frame.hold?.kind === 'shadow') drawShadow(frame, frame.hold.p * SHADOW_HOLD_SHARE);
+  else if (torn && !frame.hold && B < RIDE_AT) drawShadow(frame, B < SHADOW_AT ? 0 : SHADOW_HOLD_SHARE + (1 - SHADOW_HOLD_SHARE) * seg(B, SHADOW_AT, RIDE_AT));
   // the gold bolt out of the machine, and its afterimage over the night sky
   if (B >= ACT.cut[0] && B < ACT.cut[1] + 0.1 && !torn) drawMachineCut(frame);
   if (B >= ACT.finaleStart && B < ACT.creditsStart + 0.4) drawFinale(frame);
   if (B >= ACT.creditsStart) drawCredits(frame);
 
-  if (frame.hold?.kind === 'alter') drawAlter(frame, frame.hold.p);
   if (frame.hold?.kind === 'titan') drawTitan(frame, frame.hold.p);
   if (frame.hold?.kind === 'ride') drawRide(frame, frame.hold.p);
   if (frame.hold?.kind === 'powers') drawPowers(frame, frame.hold.p);
@@ -209,7 +205,7 @@ function loop(now: number) {
 
 function post(t: number, dt: number) {
   // letterbox: the film tightens to scope for the fights
-  const lb = frame.hold?.kind === 'alter' ? 1 : Math.max(seg(B, 2.5, 3.0) * (1 - seg(B, 6.0, 6.5)), seg(B, 15.3, 15.7) * (1 - seg(B, 17.9, 18.3)), seg(B, 27.0, 27.3) * (1 - seg(B, 28.8, 29.1)));
+  const lb = frame.hold?.kind === 'shadow' ? 1 : Math.max(seg(B, 2.5, 3.0) * (1 - seg(B, 6.0, 6.5)), seg(B, 15.3, 15.7) * (1 - seg(B, 17.9, 18.3)), seg(B, 27.0, 27.3) * (1 - seg(B, 28.8, 29.1)));
   if (lb > 0) {
     const bar = h * 0.085 * lb;
     ctx.fillStyle = '#000';
@@ -241,8 +237,8 @@ function post(t: number, dt: number) {
 
 /** the story, one line per chapter card */
 const BOOK: Record<string, string> = {
-  Machine: 'the pearl fell through the page',
-  Match: 'the same two, one more time',
+  Machine: 'the marble kept rolling',
+  Match: 'one more game before bed',
 };
 
 /**
@@ -254,7 +250,7 @@ function titleCards(t: number) {
   if (frame.hold) return;
   // the acts that play on the film's own time get a card; the ones inside holds open their own way
   for (const c of CHAPTERS.filter((ch) => ch.name === 'Machine' || ch.name === 'Match')) {
-    // (Match's card waits for Night Ride to finish: ALTER and the ride sit just before it)
+    // (Match's card waits for Night Ride to finish: the ride sits just before it)
     const a = c.name === 'Match' ? RIDE_AT + 0.003 : c.at - 0.05;
     const inn = seg(B, a, a + 0.12), out = seg(B, a + 0.42, a + 0.55);
     if (inn <= 0 || out >= 1) continue;
@@ -329,7 +325,7 @@ function jumpRaw(b: number) {
     B = prevB = toFilm(raw).film;
   },
   intro(s: number | null) { introOverride = s; },
-  /** jump into a hold (thunder, alter, dash, powers…) at its progress p */
+  /** jump into a hold (thunder, shadow, dash, powers…) at its progress p */
   hold(kind: string, p = 0.5) {
     const h = HOLDS.find((k) => k.kind === kind)!;
     jumpRaw(toRaw(h.at) + h.len * Math.min(0.9999, p));
@@ -344,10 +340,11 @@ function jumpRaw(b: number) {
     const h = HOLDS.find((k) => k.kind === 'ride')!;
     jumpRaw(toRaw(h.at) + h.len * rideShotP(name, q));
   },
-  /** jump to ALTER's shot `name` at its own progress q */
-  alter(name: string, q = 0.5) {
-    const h = HOLDS.find((k) => k.kind === 'alter')!;
-    jumpRaw(toRaw(h.at) + h.len * alterShotP(name, q));
+  /** jump to the shadow bridge at its own progress u (the hold, then film time up to the ride) */
+  shadow(u = 0.5) {
+    const h = HOLDS.find((k) => k.kind === 'shadow')!;
+    if (u < SHADOW_HOLD_SHARE) jumpRaw(toRaw(h.at) + h.len * (u / SHADOW_HOLD_SHARE));
+    else jumpRaw(toRaw(h.at) + h.len + (RIDE_AT - SHADOW_AT) * Math.min(0.999, (u - SHADOW_HOLD_SHARE) / (1 - SHADOW_HOLD_SHARE)));
   },
   cost: () => cost,
 };
