@@ -14,6 +14,7 @@ import { drawWorldTexture, worldOf } from './core/texture';
 import { drawDrift } from './core/drift';
 import { addTap, drawTaps } from './core/taps';
 import { drawTrail, trailEnd, trailMove } from './core/trail';
+import { MARK_LOOP, drawMarkLoop, startMarkLoop } from './core/markloop';
 import { drawAfterSplit, drawTitan, titanShotP } from './acts/titan';
 import { ACT, CHAPTERS, type Frame } from './core/frame';
 import { clamp, damp, seg } from './core/math';
@@ -106,7 +107,12 @@ CHAPTERS.forEach((c, i) => {
   if (c.name === 'Alter') b.classList.add('feature');
   // chapters that live inside a hold jump to the start of the hold, not past it
   const inHold = HOLDS.find((hd) => hd.kind === ({ Alter: 'alter', Hello: 'powers' } as Record<string, string>)[c.name]);
-  b.addEventListener('click', () => (inHold ? seekRaw(toRaw(inHold.at)) : seek(i === 0 ? 0 : c.at + 0.35)));
+  // each mark plays its own tiny loop of that world, then the film jumps there
+  b.addEventListener('click', () => {
+    const r = b.getBoundingClientRect();
+    startMarkLoop(c.name, r.left + r.width / 2, tapT);
+    window.setTimeout(() => (inHold ? seekRaw(toRaw(inHold.at)) : seek(i === 0 ? 0 : c.at + 0.35)), reduced ? 0 : MARK_LOOP * 1000);
+  });
   marks.appendChild(b);
 });
 document.getElementById('home')!.addEventListener('click', () => seek(0));
@@ -269,6 +275,7 @@ function post(t: number, dt: number) {
   drawDrift(ctx, tapWorld, w, h, t, B);
   drawTaps(ctx, w, h, t);
   drawTrail(ctx, w, h, t);
+  drawMarkLoop(ctx, w, h, t, 46);
   drawWorldTexture(ctx, wld, w, h, t);
   if (vignette) ctx.drawImage(vignette, 0, 0, w, h);
   // grain
