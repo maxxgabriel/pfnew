@@ -36,14 +36,17 @@ export const ACT = {
   matchEnd: 20.0,
   finaleStart: 18.7,
   creditsStart: 22.55,
-  /** INK v5: the ink world only; the loop starts once Green's blade is broken */
-  loopStart: 5.3,
-  END: 6.8,
+  /** One Day (round 13): the ink night, then a day of painted scenes (src/day/day.ts DAY) */
+  END: 12.2,
 };
 
 export const CHAPTERS = [
-  { at: 0, n: 'I', name: 'Ink' },
-  { at: 2.2, n: 'II', name: 'Play' },
-  { at: 2.3, n: 'III', name: 'Duel' },
-  { at: 5.3, n: 'IV', name: 'Loop' },
+  { at: 0, n: 'I', name: 'Night' },
+  { at: 2.2, n: 'II', name: 'Morning' },
+  { at: 3.85, n: 'III', name: 'Train' },
+  { at: 5.45, n: 'IV', name: 'Noon' },
+  { at: 6.55, n: 'V', name: 'Rain' },
+  { at: 7.75, n: 'VI', name: 'Evening' },
+  { at: 8.9, n: 'VII', name: 'Dusk' },
+  { at: 10.05, n: 'VIII', name: 'Night' },
 ];

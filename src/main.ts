@@ -1,13 +1,14 @@
 import './style.css';
 import { drawInk } from './acts/ink';
-import { drawLoopEnd } from './acts/loop';
-import { drawPlay, playFinger, playFingerUp, playTap } from './acts/play';
+import { DAY, drawDay } from './day/day';
+import { addDayTap, enableTilt, fingerDown, fingerMove, fingerUp } from './day/input';
+import { preloadDay } from './day/layers';
 import { PAINT_END, drawPainted, paintEnd, paintMove, painted } from './core/paint';
 import { drawWorldTexture, worldOf } from './core/texture';
 import { drawDrift } from './core/drift';
 import { addTap, drawTaps } from './core/taps';
-import { drawTrail, trailEnd, trailMove } from './core/trail';
-import { MARK_LOOP, drawMarkLoop, startMarkLoop } from './core/markloop';
+import { drawTrail, trailEnd } from './core/trail';
+import { drawMarkLoop } from './core/markloop';
 import { ACT, CHAPTERS, type Frame } from './core/frame';
 import { clamp, damp, ease, seg } from './core/math';
 import { canvas, grainTiles } from './core/sprites';
@@ -24,6 +25,7 @@ import { HOLDS, RAW_END, toFilm, toRaw } from './core/holds';
 
 const cvs = document.getElementById('film') as HTMLCanvasElement;
 const ctx = cvs.getContext('2d', { alpha: false })!;
+preloadDay();
 const track = document.getElementById('track')!;
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const coarse = matchMedia('(pointer: coarse)').matches;
@@ -96,11 +98,7 @@ CHAPTERS.forEach((c, i) => {
   b.setAttribute('aria-label', `Chapter ${c.n}: ${c.name}`);
   b.style.left = `${(toRaw(c.at) / RAW_END) * 100}%`;
   // each mark plays its own tiny loop of that world, then the film jumps there
-  b.addEventListener('click', () => {
-    const r = b.getBoundingClientRect();
-    startMarkLoop(c.name, r.left + r.width / 2, tapT);
-    window.setTimeout(() => seek(i === 0 ? 0 : c.at + 0.1), reduced ? 0 : MARK_LOOP * 1000);
-  });
+  b.addEventListener('click', () => seek(i === 0 ? 0 : c.at + 0.1));
   marks.appendChild(b);
 });
 document.getElementById('home')!.addEventListener('click', () => seek(0));
@@ -133,7 +131,7 @@ function hud() {
   }
   fill.style.width = `${(R / RAW_END) * 100}%`;
   // dark type over paper, light type over everything else
-  const onPaper = B < 1.75 || B > ACT.loopStart + 0.6;
+  const onPaper = B < 1.75 || B > DAY.drain[0] + 0.35;
   document.documentElement.classList.toggle('on-paper', onPaper);
   hello.classList.toggle('on', B > ACT.END - 0.35);
 }
@@ -180,11 +178,9 @@ function loop(now: number) {
     // first visit hint: one drop falls and opens a little window, before anyone touches anything
     const hint = painted() ? 0 : ease.out3(seg(frame.intro, 3.4, 4.3)) * (1 - seg(B, 0.25, 0.5));
     drawPainted(frame, (g) => drawInk({ ...frame, ctx: g }, 'buffer'), hint, frame.intro);
-  } else drawInk(frame, 'night');
-  // a breath of night before the duel: petals to blow about
-  if (frame.hold?.kind === 'play') drawPlay(frame);
-  // the loop: after the duel
-  if (B > ACT.loopStart) drawLoopEnd(frame);
+  } else if (B < DAY.bleed[1]) drawInk(frame, 'buffer');
+  // then one day goes by
+  drawDay(frame);
 
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   post(t, dt);
@@ -198,25 +194,25 @@ let tapT = 0;
 // a finger (or mouse) dragged over the film leaves a trail; listening only, never blocking the scroll
 // while the sheet is being painted, the finger is a brush instead
 const painting = () => B < PAINT_END;
-const playing = () => frame.hold?.kind === 'play';
-const brushAt = (x: number, y: number) => (painting() ? paintMove(x, y, tapT, w, h) : playing() ? playFinger(x, y, tapT) : trailMove(x, y, tapT, tapWorld));
+const brushAt = (x: number, y: number) => (painting() ? paintMove(x, y, tapT, w, h) : fingerMove(x, y, tapT));
 // a mouse paints while pressed; a finger paints whenever it moves, scrolling included (touch events keep coming while the page scrolls)
-window.addEventListener('pointerdown', (e) => { if (e.pointerType === 'mouse' && painting()) paintMove(e.clientX, e.clientY, tapT, w, h); }, { passive: true });
-window.addEventListener('pointermove', (e) => { if (e.pointerType !== 'mouse') return; if (painting() ? e.buttons & 1 : true) brushAt(e.clientX, e.clientY); }, { passive: true });
-window.addEventListener('touchstart', (e) => { const p = e.touches[0]; if (p && painting()) paintMove(p.clientX, p.clientY, tapT, w, h); }, { passive: true });
+window.addEventListener('pointerdown', (e) => { if (e.pointerType !== 'mouse') return; fingerDown(e.clientX, e.clientY, tapT); if (painting()) paintMove(e.clientX, e.clientY, tapT, w, h); }, { passive: true });
+window.addEventListener('pointermove', (e) => { if (e.pointerType !== 'mouse') return; if (e.buttons & 1) brushAt(e.clientX, e.clientY); }, { passive: true });
+window.addEventListener('touchstart', (e) => { const p = e.touches[0]; if (!p) return; fingerDown(p.clientX, p.clientY, tapT); if (painting()) paintMove(p.clientX, p.clientY, tapT, w, h); }, { passive: true });
 window.addEventListener('touchmove', (e) => { const p = e.touches[0]; if (p) brushAt(p.clientX, p.clientY); }, { passive: true });
-window.addEventListener('pointerup', () => { trailEnd(); paintEnd(); playFingerUp(); }, { passive: true });
-window.addEventListener('touchend', paintEnd, { passive: true });
+window.addEventListener('pointerup', (e) => { trailEnd(); paintEnd(); if (e.pointerType === 'mouse') fingerUp(); }, { passive: true });
+window.addEventListener('touchend', () => { paintEnd(); fingerUp(); }, { passive: true });
 window.addEventListener('touchend', trailEnd, { passive: true });
 window.addEventListener('click', (e) => {
   if ((e.target as Element | null)?.closest?.('a, button, #hello, .reel-marks')) return;
-  if (playing()) playTap(e.clientX, e.clientY);
+  enableTilt();
+  if (B >= PAINT_END) addDayTap(e.clientX, e.clientY, tapT);
   else addTap(e.clientX, e.clientY, tapT, tapWorld);
 });
 
 function post(t: number, dt: number) {
   // letterbox: the film tightens to scope for the fights
-  const lb = seg(B, 2.5, 3.0) * (1 - seg(B, ACT.loopStart + 0.3, ACT.loopStart + 0.8));
+  const lb = 0;
   if (lb > 0) {
     const bar = h * 0.085 * lb;
     ctx.fillStyle = '#000';
@@ -231,8 +227,9 @@ function post(t: number, dt: number) {
     flashAmt = damp(flashAmt, 0, 10, dt);
   }
   // each world printed on its own stuff, with the same drifting specks in its costume
-  const wld = B > ACT.loopStart + 0.6 ? null : worldOf(frame, 99);
-  tapWorld = wld ?? 'page';
+  const wld = B < PAINT_END ? worldOf(frame, 99) : null;
+  // over the paintings nothing extra drifts: the day scenes carry their own particles
+  tapWorld = wld ?? (B > DAY.drain[1] ? 'page' : null);
   tapT = t;
   drawDrift(ctx, tapWorld, w, h, t, B);
   drawTaps(ctx, w, h, t);

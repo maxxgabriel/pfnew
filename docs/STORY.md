@@ -1,4 +1,38 @@
-# STORY — INK: The Loop (v5, round 12, current)
+# STORY — One Day (v6, round 13, current)
+
+**The idea.** The calm, beautiful side of anime edits: light, skies, weather,
+the quiet. No people, no sound, no fights. The visitor paints the ink night
+with their finger; then colour bleeds through the ink and **one day goes by
+as you scroll**, the seasons turning with it, and it ends where it began.
+
+1. **Night (ink)** — paint the night with your finger (core/paint.ts).
+2. **Morning, spring** — colour blooms through the ink: a hill with a cherry
+   tree above a misty valley at sunrise. Petals blow off where you swipe.
+3. **The train** — match cut: a train window rushes up and frames the world;
+   the coast slides past, poles and wires whip by, the carriage rocks.
+4. **Tunnel** — dark, lamps streak by, a blast of light into…
+5. **Noon, summer** — a railway crossing under towering clouds, its red
+   lamps blinking.
+6. **Rain** — the storm rolls in, rain on the glass. **Hold your finger and the
+   rain stops**: beams break through and a rainbow appears.
+7. **Evening, autumn** — split-screen wipe on a seam of sunlight into golden
+   hour by a river; glitter on the water; maple leaves follow your finger.
+8. **Dusk** — the town lights up window by window; **tap to light it**; the
+   stairway lamps flicker on.
+9. **Night, winter** — stars wheel over a frozen lake, snow, a shooting star
+   (swipe for another). The colour drains back to ink, the paper goes blank:
+   it's before dawn again. The contact card sits at the end.
+
+Everywhere: tilt the phone and the painted layers drift like a window;
+flares, light rays, motes and light leaks are drawn live in code (src/day).
+
+**The art** is generated with the Codex CLI on the owner's ChatGPT plan
+(`.claude/skills/codex-images`, `scripts/gen-art.sh`), cut out by
+`scripts/cutout-day.py` into `src/assets/day/*.webp`.
+
+---
+
+# STORY — INK: The Loop (v5, round 12, superseded)
 
 **This section is the story now.** v4 (The Signature) and everything below
 it are history.

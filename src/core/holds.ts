@@ -25,11 +25,8 @@ export const POWERS_AT = 18.7;
 /** film beat of the signature, straight after the pull-back lands on the page */
 export const SIGN_AT = 18.72;
 
-export const HOLDS: Hold[] = [
-  // the night has just taken the sheet: the ink spirits come out to play before the duel
-  { at: 2.2, len: 1.6, kind: 'play' },
-  { at: 4.86, len: 1.25, kind: 'thunder' },
-];
+/** (One Day has no holds: every scene is authored straight on the film beats, src/day/day.ts) */
+export const HOLDS: Hold[] = [];
 /** (INK v5: the holds below belonged to the worlds that were cut; kept for reference) */
 export const OLD_HOLDS: Hold[] = [
   // the letters assemble into Green's robot, which punches the ball out of the page
