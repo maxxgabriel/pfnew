@@ -1,7 +1,7 @@
 import { drawBlot } from '../core/blot';
 import { brush } from '../core/brush';
 import type { Frame } from '../core/frame';
-import { type Pt, TAU, clamp, ease, hash, lerp, seg } from '../core/math';
+import { type Pt, TAU, clamp, ease, hash, lerp, seg, rubber } from '../core/math';
 import { DOT, STROKES, inBox, slice } from '../core/signature';
 import { drawSprite, glow, paperTile, withAlpha } from '../core/sprites';
 import { C, F, font } from '../core/style';
@@ -265,7 +265,7 @@ function livingName(f: Frame, p: number, Lo: Layout) {
     const kind = ENTRY[li];
     li++;
     if (k <= 0) return;
-    letter(ctx, ch, cx, base, size, kind, k, t, li);
+    letter(ctx, ch, cx, base, size, kind, k, t, li, f.vB);
   });
   // the seal, stamped at the end of the name once every letter has landed
   const st = seg(p, 0.96, 0.99);
@@ -302,7 +302,7 @@ function livingName(f: Frame, p: number, Lo: Layout) {
 }
 
 /** one letter: k 0→1 is its entrance; after it, a small breathing loop of its own */
-function letter(ctx: CanvasRenderingContext2D, ch: string, x: number, base: number, size: number, kind: Entry, k: number, t: number, seed: number) {
+function letter(ctx: CanvasRenderingContext2D, ch: string, x: number, base: number, size: number, kind: Entry, k: number, t: number, seed: number, vB = 0) {
   let dx = 0, dy = 0, rot = 0, sx = 1, sy = 1, a = 1;
   const land = (e: number) => 1 - e;
   switch (kind) {
@@ -376,6 +376,10 @@ function letter(ctx: CanvasRenderingContext2D, ch: string, x: number, base: numb
   const br = Math.sin(t * 2.2 + seed * 1.7) * 0.03 * idle;
   sy *= 1 + br;
   sx *= 1 - br * 0.6;
+  // rubber: a flick of the scroll stretches the name
+  const [rx, ry] = rubber(vB, seed, t);
+  sx *= rx;
+  sy *= ry;
   ctx.save();
   ctx.globalAlpha = a;
   ctx.translate(x + dx, base + dy);

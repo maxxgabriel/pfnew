@@ -1,7 +1,7 @@
 import { brush } from '../core/brush';
 import type { Frame } from '../core/frame';
 import { layoutWord, wordWidth } from '../core/glyphs';
-import { ease, lerp, seg } from '../core/math';
+import { ease, lerp, rubber, seg } from '../core/math';
 import { paperTile } from '../core/sprites';
 import { C, F, font } from '../core/style';
 
@@ -65,8 +65,7 @@ export function drawOpenBack(f: Frame, card: OpenCard) {
   const grow = seg(card.s, 0.5, 1);
   const push = ease.in2(grow);
   // rubber: scroll speed stretches the letters, they wobble back when you stop
-  const vel = Math.max(-1, Math.min(1, f.vB / 6));
-  const rub = (i: number) => 1 + vel * 0.12 * Math.sin(i * 1.7 + t * 2) + Math.sin(t * 2.4 + i) * 0.008;
+  const rub = (i: number) => rubber(f.vB, i, t)[1] + Math.sin(t * 2.4 + i) * 0.008;
   ctx.save();
   ctx.translate(-push * w * 0.25, -push * h * 0.2);
   max.strokes.forEach((st, i) => {

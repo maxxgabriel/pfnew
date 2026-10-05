@@ -1,5 +1,5 @@
 import { ACT, type Frame } from '../core/frame';
-import { type Pt, TAU, bell, clamp, ease, hash, lerp, seg, spline } from '../core/math';
+import { type Pt, TAU, bell, clamp, ease, hash, lerp, seg, spline, rubber } from '../core/math';
 import { CONFETTI, Particles } from '../core/particles';
 import { penTrail } from '../core/signature';
 import { halftone } from '../core/sprites';
@@ -382,7 +382,7 @@ export function drawBall(ctx: CanvasRenderingContext2D, x: number, y: number, r:
  * MACHINE, printed on the blank paper in poster colours, bigger than the page: the letters slam
  * down one by one (each overshoots and settles), and the tear (ink.ts) rips straight through them.
  */
-export function drawMachineWord(ctx: CanvasRenderingContext2D, w: number, S: number, B: number, t: number, y: number) {
+export function drawMachineWord(ctx: CanvasRenderingContext2D, w: number, S: number, B: number, t: number, y: number, vB = 0) {
   const word = 'MACHINE';
   const px = Math.round(Math.max(w * 0.34, S * 0.3));
   const faces = [C.red, C.blue, '#ffd23e', C.green, C.red, C.blue, '#ffd23e'];
@@ -407,6 +407,11 @@ export function drawMachineWord(ctx: CanvasRenderingContext2D, w: number, S: num
     ctx.translate(cx, y);
     ctx.rotate(boil + (1 - k) * (i % 2 ? 0.3 : -0.3));
     ctx.scale(sc, sc);
+    // rubber: scrolling fast stretches the letters, they settle when you slow down
+    const [rx, ry] = rubber(vB, i, t);
+    ctx.translate(0, px * 0.38);
+    ctx.scale(rx, ry);
+    ctx.translate(0, -px * 0.38);
     ctx.globalAlpha = Math.min(1, k * 3);
     extruded(ctx, ch, 0, 0, px, { face: faces[i], side: C.ink, depth: px * 0.07, line: Math.max(2, px * 0.03) });
     ctx.restore();

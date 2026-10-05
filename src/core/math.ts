@@ -120,3 +120,14 @@ export function spline(points: Pt[], spacing: number): Pt[] {
 /** Critically-damped follow, frame-rate independent. */
 export const damp = (cur: number, target: number, lambda: number, dt: number) =>
   lerp(cur, target, 1 - Math.exp(-lambda * dt));
+
+/**
+ * Rubber type: a letter's [scaleX, scaleY] from the scroll speed `vB` (raw beats/s). A flick
+ * stretches it tall and thin (each letter a little differently), slow scrolling lets it
+ * settle with a small wobble. Keeps area roughly constant.
+ */
+export function rubber(vB: number, i: number, t: number): [number, number] {
+  const v = Math.max(-1, Math.min(1, vB / 5));
+  const sy = 1 + Math.abs(v) * (0.22 + 0.1 * Math.sin(i * 1.9)) + Math.sin(t * 9 + i * 1.3) * 0.03 * Math.abs(v);
+  return [1 / Math.sqrt(sy), sy];
+}

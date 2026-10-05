@@ -1,5 +1,5 @@
 import type { Frame } from '../core/frame';
-import { ease, lerp, seg } from '../core/math';
+import { ease, lerp, rubber, seg } from '../core/math';
 import { C, F, font } from '../core/style';
 
 /*
@@ -113,6 +113,10 @@ export function drawDive(f: Frame, p: number) {
     ctx.save();
     ctx.translate(lx, 0);
     ctx.scale(sc, sc);
+    const [rx, ry] = rubber(f.vB, i, t);
+    ctx.translate(0, PX * 0.36);
+    ctx.scale(rx, ry);
+    ctx.translate(0, -PX * 0.36);
     ctx.globalAlpha = Math.min(1, k * 2.5);
     // the broadcast look: a green drop, a white face, an ink keyline
     ctx.lineJoin = 'round';

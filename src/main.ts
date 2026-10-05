@@ -150,6 +150,7 @@ function hud() {
 
 let ready = false, readyAt = 0, last = performance.now(), t0 = last;
 let introOverride: number | null = null;
+let velOverride: number | null = null;
 
 let cost = 0;
 function loop(now: number) {
@@ -170,7 +171,7 @@ function loop(now: number) {
   frame.w = w; frame.h = h;
   frame.portrait = h > w;
   frame.u = Math.min(w, h * 0.62) / 100;
-  frame.B = B; frame.vB = vB; frame.t = t; frame.dt = dt;
+  frame.B = B; frame.vB = velOverride ?? vB; frame.t = t; frame.dt = dt;
   frame.intro = introOverride ?? (ready ? (now - readyAt) / 1000 : 0);
   // landing mid-film skips the title sequence
   if (B > 1.2 && frame.intro < 6) frame.intro = 6;
@@ -310,6 +311,8 @@ function jumpRaw(b: number) {
     B = prevB = toFilm(raw).film;
   },
   intro(s: number | null) { introOverride = s; },
+  /** dev: pretend the reader is scrolling at v raw beats/s (null to stop) */
+  vel(v: number | null) { velOverride = v; },
   /** jump into a hold (thunder, alter, dash, powers…) at its progress p */
   hold(kind: string, p = 0.5) {
     const h = HOLDS.find((k) => k.kind === kind)!;

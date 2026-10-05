@@ -1238,7 +1238,7 @@ export function drawPaperOver(f: Frame) {
     ctx.fillStyle = `rgba(255,253,246,${1 - ease.out2(cool)})`;
     ctx.fillRect(-w, -h, w * 3, h * 3);
     // the next act's name, printed on the paper bigger than the page: the tear rips it in two
-    drawMachineWord(ctx, w, S, B, f.t, tearY);
+    drawMachineWord(ctx, w, S, B, f.t, tearY, f.vB);
     // a shadow under the lifting edge
     if (open > 0) {
       const g = ctx.createLinearGradient(0, tearY + (top ? -S * 0.12 : S * 0.12), 0, tearY);
