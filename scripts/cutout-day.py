@@ -81,8 +81,10 @@ for name in names:
             points['crossing_lamps'] = [b[:3] for b in blobs((r > 190) & (g < 80) & (b < 90), 3)]
         if name.endswith('stairs_on'):
             r, g, b = small[..., 0], small[..., 1], small[..., 2]
-            points['stair_lamps'] = [b[:3] for b in blobs((r > 235) & (g > 200) & (b < 170) & (r - b > 90), 4)]
-    out.save(f'{OUT}/{name}.webp', 'WEBP', quality=80, method=6)
+            points['stair_lamps'] = sorted([b[:3] for b in blobs((r > 235) & (g > 200) & (b < 170) & (r - b > 90), 4)], key=lambda b: -b[2])[:4]
+    # ~80% size: still sharp on a phone at 2x, and the page stays a few MB
+    out = out.resize((round(out.width * 0.8), round(out.height * 0.8)), Image.LANCZOS)
+    out.save(f'{OUT}/{name}.webp', 'WEBP', quality=74, method=6)
     print(name, out.size, os.path.getsize(f'{OUT}/{name}.webp') // 1024, 'KB')
 old = json.load(open(f'{OUT}/points.json')) if os.path.exists(f'{OUT}/points.json') else {}
 old.update(points)

@@ -69,10 +69,39 @@ function buffer(i: number, w: number, h: number, dpr: number) {
 }
 /** draw a scene into a buffer and return it */
 function render(g: G, i: number, scene: Scene, p: number) {
-  const dpr = Math.abs(g.ctx.getTransform().a) || 1;
+  // transitions are on screen for a moment and moving: half resolution is plenty
+  const dpr = 1;
   const b = buffer(i, g.w, g.h, dpr);
   scene({ ...g, ctx: b.g }, p);
   return b.c;
+}
+
+const tints = new Map<string, HTMLCanvasElement>();
+/** a painting pushed toward the hour, tinted once (only its own pixels) and cached */
+function tintedImg(name: string, col: string, a: number): HTMLCanvasElement | null {
+  const key = `${name}|${col}|${a}`;
+  const have = tints.get(key);
+  if (have) return have;
+  const im = img(name);
+  if (!im) return null;
+  const c = document.createElement('canvas');
+  c.width = im.naturalWidth;
+  c.height = im.naturalHeight;
+  const g = c.getContext('2d')!;
+  g.drawImage(im, 0, 0);
+  g.globalCompositeOperation = 'source-atop';
+  g.globalAlpha = a;
+  g.fillStyle = col;
+  g.fillRect(0, 0, c.width, c.height);
+  tints.set(key, c);
+  return c;
+}
+/** draw a cached tinted painting like layer() would */
+function tinted(g: G, name: string, cam: Cam, o: Parameters<typeof layer>[5], col: string, a: number) {
+  const pl = placeOf(g.w, g.h, cam, o);
+  const c = tintedImg(name, col, a);
+  if (c) g.ctx.drawImage(c, pl.x, pl.y, pl.dw, pl.dh);
+  return pl;
 }
 
 /* ================================================================ scenes */
@@ -223,10 +252,11 @@ function golden(g: G, p: number) {
   rays(ctx, sun[0], sun[1], S * 1.7, -Math.PI / 2, 2.6, 0.8, t, '255,200,140');
   flare(ctx, sun[0], sun[1], S * 0.07, 1, w, h, t);
   layer(ctx, w, h, '12_golden_far', cam, { depth: 0.3 });
-  const river = layer(ctx, w, h, '13_golden_river', cam, { depth: 0.6 });
-  const [gx0, gy0] = river.at(0.25, 0.72), [gx1, gy1] = river.at(0.78, 0.9);
+  // the river was painted in daylight: pushed to gold
+  const river = tinted(g, '13_golden_river', cam, { depth: 0.6 }, '#ff8a2a', 0.28);
+  const [gx0, gy0] = river.at(0.3, 0.56), [gx1, gy1] = river.at(0.62, 0.92);
   glitter(ctx, gx0, gy0, gx1, gy1, t, 1);
-  const maple = layer(ctx, w, h, '14_golden_maple', cam, { depth: 1 });
+  const maple = layer(ctx, w, h, '14_golden_maple', cam, { depth: 1, zoom: 0.8, ox: 0, oy: 0 });
   const fg = liveFinger(t);
   if (hash(Math.floor(t * 5) + 3) > 0.72) leaves.burst(...maple.at(0.1 + hash(t) * 0.3, 0.05 + hash(t * 3) * 0.2), S * 0.2, S * 0.05, 1);
   if (fg && Math.hypot(fg.vx, fg.vy) > S * 0.5) leaves.burst(fg.x, fg.y, fg.vx * 0.4, fg.vy * 0.4, 2);
@@ -252,11 +282,11 @@ function dusk(g: G, p: number) {
     drawSprite(ctx, glow('#fff6e0', 32), hash(i * 2.3) * w, hash(i * 5.1) * h * 0.4, S * 0.012);
   }
   ctx.restore();
-  const town = layer(ctx, w, h, '16_town_off', cam, { depth: 0.4 });
+  // the paintings came out sunlit: dusk pushes them blue-violet
+  const town = tinted(g, '16_town_off', cam, { depth: 0.4 }, '#2b2160', 0.55);
   // the lights coming on: the lit painting, cut to circles that open by themselves and where you tap
-  const dpr = Math.abs(ctx.getTransform().a) || 1;
-  const b = buffer(3, w, h, dpr);
-  layer(b.g, w, h, '17_town_on', cam, { depth: 0.4 });
+  const b = buffer(3, w, h, 1);
+  { const pl = placeOf(w, h, cam, { depth: 0.4 }); const c = tintedImg('17_town_on', '#2b2160', 0.35); if (c) b.g.drawImage(c, pl.x, pl.y, pl.dw, pl.dh); }
   b.g.globalCompositeOperation = 'destination-in';
   b.g.fillStyle = '#000';
   b.g.beginPath();
@@ -275,15 +305,17 @@ function dusk(g: G, p: number) {
   }
   if (p > 0.85) b.g.rect(0, 0, w, h * ease.in2(seg(p, 0.85, 1)) * 2);
   b.g.fill();
-  ctx.save();
-  ctx.setTransform(1, 0, 0, 1, 0, 0);
-  ctx.drawImage(b.c, 0, 0);
-  ctx.restore();
+  ctx.drawImage(b.c, 0, 0, w, h);
   // the stairway: its lamps flicker on halfway through
   const lampOn = seg(p, 0.42, 0.5);
   const flick = lampOn > 0 && lampOn < 1 ? (hash(Math.floor(t * 20)) > 0.5 ? 1 : 0.2) : lampOn;
-  const st = layer(ctx, w, h, '18_stairs_off', cam, { depth: 0.75 });
-  layer(ctx, w, h, '19_stairs_on', cam, { depth: 0.75, alpha: flick });
+  const st = tinted(g, '18_stairs_off', cam, { depth: 0.75 }, '#2b2160', 0.5);
+  if (flick > 0) {
+    ctx.save();
+    ctx.globalAlpha = flick;
+    tinted(g, '19_stairs_on', cam, { depth: 0.75 }, '#2b2160', 0.3);
+    ctx.restore();
+  }
   if (flick > 0.5) {
     ctx.save();
     ctx.globalCompositeOperation = 'lighter';
@@ -506,8 +538,5 @@ function maskBleed(ctx: CanvasRenderingContext2D, c: HTMLCanvasElement, w: numbe
   g.setTransform(1, 0, 0, 1, 0, 0);
   g.drawImage(m.c, 0, 0);
   g.restore();
-  ctx.save();
-  ctx.setTransform(1, 0, 0, 1, 0, 0);
-  ctx.drawImage(c, 0, 0);
-  ctx.restore();
+  ctx.drawImage(c, 0, 0, w, h);
 }

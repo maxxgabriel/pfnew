@@ -14,6 +14,32 @@ the owner's taste and decisions; this file is the technical side.
 
 ---
 
+
+## Current film: One Day (round 13) — read this first
+
+The film is now: the ink night you paint (`core/paint.ts`, `acts/ink.ts`),
+then **One Day** (`src/day/`): painted scenes from morning to night, the
+seasons turning, ending back on paper with the contact card. No holds
+(`HOLDS = []`); chapters in `core/frame.ts`; beats in `DAY` (`day/day.ts`).
+
+- `day/day.ts` — the timeline: scenes (spring, train, summer + rain, golden,
+  dusk, night) and the edit between them (colour bleed, window match cut,
+  tunnel, split-screen seam, dissolves, the drain to ink and paper).
+- `day/layers.ts` — paintings (`assets/day/*.webp`, inlined) as cover-fit
+  layers sharing one 1024x1536 frame; parallax by depth, tilt, push-in.
+- `day/fx.ts` — flares, light rays, motes, glitter, leaks, rain on glass,
+  rainbow, petals/leaves/snow (`Drift`), shooting stars.
+- `day/input.ts` — finger (move, hold, tap), phone tilt (iOS asks on first tap).
+- Interactions: swipe blows petals/leaves/snow; **hold stops the rain**; **tap
+  lights the town's windows** at dusk; a fast swipe throws a shooting star.
+- Art: `.claude/skills/codex-images` + `scripts/gen-art.sh` (Codex CLI on
+  the owner's ChatGPT plan) → `scripts/cutout-day.py` → `assets/day` +
+  `points.json` (train window, crossing lamps, stair lamps). The paintings for
+  the town/stairs/river came out daylit; dusk/gold are pushed by cached tints.
+- The older acts (machine, match, alter, titan, powers, sign, strip, credits,
+  meteor, hero art, hero3d) are still in `src/` but unwired; git history has
+  them working.
+
 ## 1. How the film works
 
 `index.html` has one fixed `<canvas id="film">` and a tall empty `#track`
