@@ -65,64 +65,106 @@ function drawRoll(f: Frame, S: number) {
   ctx.restore();
   if (inn < 0.5) return;
 
-  // the roll: line positions are fixed on a tall strip that the scroll lifts
-  // narrow screens stack each role above its name
-  const stacked = w < 640;
-  const lh = Math.max(34, S * 0.095) * (stacked ? 1.45 : 1);
+  // the roll, on rollers: the title rises away, then the roles roll up the left while the names
+  // roll down the right, and each pair meets in the middle in a band of its own colour
   const p = seg(B, CRED.roll[0], CRED.roll[1]);
-  // the roll comes to rest with its last line in the middle of the frame
-  const top = lerp(h * 1.02, h * 0.5 - (LINES.length - 1) * lh, ease.out2(p));
   const mid = w / 2;
+  const pairs = LINES.filter((l) => l.kind === 'pair');
+  const head = LINES.filter((l, i) => l.kind !== 'pair' && i < LINES.indexOf(pairs[0]));
+  const tail = LINES.filter((l, i) => l.kind === 'note' && i > LINES.indexOf(pairs[pairs.length - 1]));
+  const lh = Math.max(30, S * 0.075);
   ctx.textBaseline = 'middle';
-  LINES.forEach((ln, i) => {
-    const y = top + i * lh + (ln.kind === 'big' ? lh * 0.2 : 0);
-    if (y < -lh || y > h + lh) return;
-    // lines brighten as they pass the centre and fade at the edges (clear of the HUD at the top,
-    // and of Blot's lane at the bottom)
-    const edge = Math.min(1, Math.min(y - h * 0.08, h * 0.81 - y) / (h * 0.15));
-    ctx.globalAlpha = Math.max(0, edge);
-    const crossed = 1 - Math.min(1, Math.max(0, (y - h * 0.5) / (h * 0.25)));
-    if (ln.kind === 'head') {
-      ctx.font = font(Math.max(12, S * 0.034), F.serif, 600);
-      ctx.textAlign = 'center';
-      ctx.fillStyle = withAlpha(C.ink, 0.7);
-      ctx.fillText(ln.a!, mid, y);
-    } else if (ln.kind === 'big') {
-      ctx.font = font(Math.min(w * 0.11, S * 0.1), F.display);
-      ctx.textAlign = 'center';
-      ctx.fillStyle = C.ink;
-      ctx.fillText(ln.a!, mid, y);
-      const tw = ctx.measureText(ln.a!).width;
-      brush(ctx, [[mid - tw / 2, y + lh * 0.45], [mid, y + lh * 0.5], [mid + tw / 2, y + lh * 0.44]], {
-        width: S * 0.012, color: C.red, progress: ease.inOut2(crossed), dry: 0.6, seed: 77, alpha: ctx.globalAlpha,
-      });
-    } else if (ln.kind === 'pair') {
-      const gap = S * 0.025;
-      const rx = stacked ? mid : mid - gap, ry = stacked ? y - lh * 0.2 : y;
-      const nx = stacked ? mid : mid + gap, ny = stacked ? y + lh * 0.14 : y;
-      ctx.font = font(Math.max(10, S * 0.028), F.serif, 600);
-      ctx.textAlign = stacked ? 'center' : 'right';
-      ctx.fillStyle = withAlpha(C.ink, 0.62);
-      ctx.fillText(ln.a!.toUpperCase(), rx, ry);
-      ctx.font = font(Math.max(13, S * (stacked ? 0.05 : 0.042)), F.display);
-      ctx.textAlign = stacked ? 'center' : 'left';
-      ctx.fillStyle = C.ink;
-      ctx.fillText(ln.b!, nx, ny);
-      if (ln.color) {
-        const tw = ctx.measureText(ln.b!).width;
-        const x0 = stacked ? nx - tw / 2 : nx;
-        brush(ctx, [[x0, ny + lh * 0.2], [x0 + tw * 0.5, ny + lh * 0.23], [x0 + tw, ny + lh * 0.19]], {
-          width: S * 0.008, color: ln.color, progress: ease.inOut2(crossed), dry: 0.5, seed: 30 + i, alpha: ctx.globalAlpha,
-        });
+
+  // 1. "a film by MAX GABRIEL", lifting away
+  const hk = seg(p, 0, 0.12);
+  if (hk < 1) {
+    const y0 = lerp(h * 0.45, -h * 0.2, ease.in2(hk));
+    head.forEach((ln) => {
+      if (ln.kind === 'head') {
+        ctx.font = font(Math.max(12, S * 0.034), F.serif, 600);
+        ctx.textAlign = 'center';
+        ctx.fillStyle = withAlpha(C.ink, 0.7);
+        ctx.fillText(ln.a!, mid, y0 - lh * 0.9);
+      } else if (ln.kind === 'big') {
+        ctx.font = font(Math.min(w * 0.11, S * 0.1), F.display);
+        ctx.textAlign = 'center';
+        ctx.fillStyle = C.ink;
+        ctx.fillText(ln.a!, mid, y0);
+        const tw = ctx.measureText(ln.a!).width;
+        brush(ctx, [[mid - tw / 2, y0 + lh * 0.55], [mid, y0 + lh * 0.6], [mid + tw / 2, y0 + lh * 0.54]], { width: S * 0.012, color: C.red, dry: 0.6, seed: 77 });
       }
-    } else if (ln.kind === 'note') {
+    });
+  }
+
+  // 2. the rollers
+  // each pair rests in the band, then the rollers turn quickly to the next
+  const raw = lerp(-1, pairs.length, seg(p, 0.1, 0.86));
+  const fl = Math.floor(raw);
+  const c = fl + ease.inOut3(seg(raw - fl, 0.55, 1));
+  const listA = seg(p, 0.1, 0.15) * (1 - seg(p, 0.86, 0.9));
+  const side = Math.max(16, w * 0.05);
+  const room = w * 0.44;
+  // the band first, under the text
+  const ci = Math.round(c);
+  if (ci >= 0 && ci < pairs.length) {
+    const near = 1 - Math.min(1, Math.abs(ci - c) * 1.6);
+    if (near > 0) {
+      const col = pairs[ci].color ?? C.ink;
+      ctx.save();
+      ctx.globalAlpha = near * listA;
+      ctx.fillStyle = col;
+      const bh = lh * 1.35 * ease.out3(near);
+      ctx.fillRect(0, h / 2 - bh / 2, w * ease.out3(near), bh);
+      ctx.restore();
+    }
+  }
+  pairs.forEach((ln, i) => {
+    const d = i - c;
+    const ad = Math.min(1, Math.abs(d));
+    const k = ease.inOut2(ad); // 0 = in the band, 1 = out on its roller
+    const yR = h / 2 + d * lh * 2.1; // the roles roll up
+    const yN = h / 2 - d * lh * 2.1; // the names roll down
+    if ((yR < -lh || yR > h + lh) && (yN < -lh || yN > h + lh)) return;
+    const inBand = Math.round(c) === i ? 1 - Math.min(1, Math.abs(i - c) * 1.6) : 0;
+    const light = ln.color === C.green || ln.color === '#ffd23e';
+    const onBand = (base: string) => (inBand > 0.5 && !light ? C.paper : base);
+    const fade = (y: number) => listA * Math.max(0, 1 - Math.abs(d) / 3.2) * Math.max(0, Math.min(1, Math.min(y - h * 0.09, h * 0.84 - y) / (h * 0.1)));
+    // the role: small caps, from the left edge to centred above the name
+    ctx.font = font(Math.max(10, Math.round(S * 0.027)), F.serif, 600);
+    const role = ln.a!.toUpperCase();
+    const rw = Math.min(room, ctx.measureText(role).width);
+    const rx = lerp(mid - rw / 2, side, k);
+    const ry = lerp(h / 2 - lh * 0.3, yR, k);
+    ctx.globalAlpha = fade(ry) * (0.45 + 0.55 * (1 - k));
+    ctx.textAlign = 'left';
+    ctx.fillStyle = onBand(withAlpha(C.ink, 0.8));
+    ctx.fillText(role, rx, ry, room);
+    // the name: big in the band, smaller out on the right
+    const size = lerp(S * 0.06, S * 0.034, k);
+    ctx.font = font(Math.max(13, Math.round(size)), F.display);
+    const nw = Math.min(lerp(w * 0.9, room, k), ctx.measureText(ln.b!).width);
+    const nx = lerp(mid + nw / 2, w - side, k);
+    const ny = lerp(h / 2 + lh * 0.22, yN, k);
+    ctx.globalAlpha = fade(ny) * (0.45 + 0.55 * (1 - k));
+    ctx.textAlign = 'right';
+    ctx.fillStyle = onBand(C.ink);
+    ctx.fillText(ln.b!, nx, ny, lerp(w * 0.9, room, k));
+  });
+  ctx.globalAlpha = 1;
+
+  // 3. the last lines, rising to the middle
+  const tk = ease.out2(seg(p, 0.88, 1));
+  if (tk > 0) {
+    tail.forEach((ln, i) => {
+      const y = lerp(h * 1.1, h * 0.46, tk) + i * lh * 0.8;
+      ctx.globalAlpha = tk;
       ctx.font = font(Math.max(11, S * 0.03), F.serif, 600);
       ctx.textAlign = 'center';
       ctx.fillStyle = withAlpha(C.ink, 0.75);
       ctx.fillText(ln.a!, mid, y);
-    }
-  });
-  ctx.globalAlpha = 1;
+    });
+    ctx.globalAlpha = 1;
+  }
 
   // Blot strolls the bottom of the page, waving at the names going by
   const loop = (t * 0.07) % 1.3;
