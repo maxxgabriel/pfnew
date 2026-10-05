@@ -6,6 +6,7 @@ import { C, F, extruded, font } from '../core/style';
 import { drawBall } from './machine';
 import { drawBlot } from '../core/blot';
 import { GOLD, drawBolt, drawCrackle } from '../core/bolt';
+import { penTrail } from '../core/signature';
 import { brush, ensoPath } from '../core/brush';
 
 const MOON_ENSO = ensoPath(0, 0, 100, 3, 0.93, -2.3);
@@ -820,6 +821,17 @@ function drawPlayer(ctx: CanvasRenderingContext2D, cam: Cam, p: Player, pos: V3,
 }
 
 function draw3DBall(ctx: CanvasRenderingContext2D, cam: Cam, b: V3, B: number, t: number) {
+  // the flourish of the signature: the ball's whole route, from the long ball to the net,
+  // left on the pitch as a pen-line that lingers through the celebration
+  const pen = seg(B, 14.25, 14.4) * (1 - seg(B, 18.1, 18.6));
+  if (pen > 0) {
+    const trail: Pt[] = [];
+    for (let bb = 14.22; bb <= Math.min(B, 17.0); bb += 0.015) {
+      const q = P(cam, ballAt(bb));
+      if (q) trail.push([q[0], q[1]]);
+    }
+    penTrail(ctx, trail, pen * 0.4, Math.min(cam.cx, cam.cy) * 2);
+  }
   const p = P(cam, b);
   const sh = P(cam, [b[0], 0.01, b[2]]);
   // the star only enters this sky once it has risen out of ALTER

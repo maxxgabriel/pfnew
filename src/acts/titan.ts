@@ -2,6 +2,7 @@ import { drawBlot } from '../core/blot';
 import { drawBolt, drawCrackle, GOLD, jag } from '../core/bolt';
 import type { Frame } from '../core/frame';
 import { type Pt, TAU, bell, clamp, ease, hash, lerp, rng, seg } from '../core/math';
+import { penTrail } from '../core/signature';
 import { drawSprite, glow, halftone, withAlpha } from '../core/sprites';
 import { C, extruded } from '../core/style';
 import { drawBall, drawMachine } from './machine';
@@ -479,6 +480,8 @@ function shotPunch(g: G, q: number) {
     ctx.fillStyle = gr;
     ctx.fillRect(bx - S * 0.03, by, S * 0.06, h * 0.36 - by);
     ctx.restore();
+    // the joining stroke of the signature: a pen-line straight up, lingering after the streak
+    penTrail(ctx, [[bx, h * 0.36], [bx, by]], 0.4 * seg(q, hit, hit + 0.06) * (1 - seg(q, 0.88, 1)), S);
   }
   const charge = seg(q, hit, 0.8);
   drawBall(ctx, bx, by, S * 0.045, t * 3 + q * 20, t, 1 + seg(q, hit, hit + 0.2) * 0.4);

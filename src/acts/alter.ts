@@ -4,6 +4,7 @@ import { brush, ensoPath } from '../core/brush';
 import type { Frame } from '../core/frame';
 import { type Pt, TAU, bell, clamp, ease, hash, lerp, rng, seg } from '../core/math';
 import { blot, canvas, drawSprite, glow, withAlpha } from '../core/sprites';
+import { penTrail } from '../core/signature';
 import { F, font } from '../core/style';
 import { drawLightLine } from './ink';
 import { drawWarrior, solve } from './warrior';
@@ -1413,6 +1414,12 @@ function shotClash(g: G, q: number) {
   drawSprite(ctx, glow('#ffffff', 64), P[0], P[1], S * 0.18 * (1 - k * 0.6));
   ctx.restore();
   shockRing(g, P[0], P[1], k, S * 1.2, S * 1.2, '#ffffff');
+  // the x of the signature: two pen-lines along the crossed blades, lingering after the hit
+  const L = S * 0.34;
+  for (const a of [ka, ra]) {
+    const d: Pt = [Math.cos(a), Math.sin(a)];
+    penTrail(ctx, [[P[0] - d[0] * L, P[1] - d[1] * L], [P[0] + d[0] * L, P[1] + d[1] * L]], 0.4 * (1 - seg(k, 0.6, 1)), S, ease.out3(seg(k, 0, 0.25)));
+  }
   cracks(g, cx, h * 0.9, k * 2, S * 0.9, 0.2, 31);
   debris(g, cx, h * 0.9, ease.out2(k) * 0.8, 30, 9, 3);
   // sparks off the blades
