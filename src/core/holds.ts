@@ -8,7 +8,7 @@ import { ACT } from './frame';
  * hold's own progress runs 0→1. Everything authored in film beats keeps its
  * timing; the scroll track just gets longer.
  */
-export type HoldKind = 'thunder' | 'titan' | 'dash' | 'alter' | 'powers';
+export type HoldKind = 'thunder' | 'titan' | 'dash' | 'alter' | 'powers' | 'sign';
 export interface Hold { at: number; len: number; kind: HoldKind }
 
 /** film beat where the machine's letters become TITAN (the ball is in the cannon) */
@@ -20,6 +20,8 @@ export const ALTER_AT = 12.63;
 
 /** film beat where the pull-back (Powers of Ten) starts: the ball is in the net */
 export const POWERS_AT = 18.7;
+/** film beat of the signature, straight after the pull-back lands on the page */
+export const SIGN_AT = 18.72;
 
 export const HOLDS: Hold[] = [
   { at: 4.86, len: 1.25, kind: 'thunder' },
@@ -30,6 +32,8 @@ export const HOLDS: Hold[] = [
   { at: 15.0, len: 0.95, kind: 'dash' },
   // out of the net and out of every world, back to the page
   { at: POWERS_AT, len: 6.4, kind: 'powers' },
+  // on the page: the moves rise out of the first circle and are inked as one signature
+  { at: SIGN_AT, len: 3.6, kind: 'sign' },
 ];
 
 export const RAW_END = ACT.END + HOLDS.reduce((a, h) => a + h.len, 0);

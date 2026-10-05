@@ -16,19 +16,19 @@ import { type Pt } from './math';
 
 export const STROKES: Record<'m' | 'a' | 'up' | 'x1' | 'x2' | 'flourish', Pt[]> = {
   // M: up, down to the middle, up, and down through the opponent
-  m: [[0.02, 0.62], [0.08, 0.08], [0.15, 0.5], [0.22, 0.08], [0.27, 0.62]],
-  // a: the loop the ball runs in the chute, closed, then on to the right
-  a: [[0.27, 0.62], [0.34, 0.6], [0.38, 0.45], [0.35, 0.33], [0.3, 0.36], [0.29, 0.5], [0.33, 0.62], [0.4, 0.63]],
-  // the joining stroke: punched straight up
-  up: [[0.4, 0.63], [0.44, 0.3], [0.47, 0.14]],
+  m: [[0.02, 0.62], [0.1, 0.04], [0.17, 0.46], [0.26, 0.04], [0.29, 0.62]],
+  // a: up to the top of the bowl, round it anticlockwise, back up and down the stem
+  a: [[0.29, 0.62], [0.35, 0.5], [0.43, 0.42], [0.38, 0.4], [0.335, 0.47], [0.33, 0.57], [0.37, 0.625], [0.415, 0.58], [0.44, 0.43], [0.44, 0.55], [0.455, 0.62], [0.49, 0.6]],
+  // the joining stroke: punched up, into the top of the x
+  up: [[0.49, 0.6], [0.535, 0.38]],
   // x: the two blades, crossing
-  x1: [[0.47, 0.3], [0.6, 0.64]],
-  x2: [[0.6, 0.3], [0.47, 0.64]],
-  // the flourish: a long sweep under the name, back out to the right
-  flourish: [[0.47, 0.64], [0.66, 0.7], [0.82, 0.78], [0.6, 0.92], [0.25, 0.95], [0.08, 0.88], [0.3, 0.84], [0.7, 0.86], [0.96, 0.78]],
+  x1: [[0.535, 0.38], [0.665, 0.63]],
+  x2: [[0.665, 0.38], [0.535, 0.63]],
+  // the flourish: out of the x, a long sweep back under the name, and out to the right
+  flourish: [[0.535, 0.63], [0.47, 0.73], [0.33, 0.8], [0.15, 0.83], [0.06, 0.79], [0.16, 0.75], [0.42, 0.75], [0.68, 0.77], [0.86, 0.72]],
 };
 /** the full stop: the ball in the net */
-export const DOT: Pt = [0.985, 0.66];
+export const DOT: Pt = [0.93, 0.68];
 
 /** the pen-line's colour: warm white, the same in every world */
 export const PEN = '#fff1cf';

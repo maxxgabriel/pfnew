@@ -6,6 +6,7 @@ import { drawCredits } from './acts/credits';
 import { drawFinale } from './acts/finale';
 import { alterShotP, drawAlter } from './acts/alter';
 import { drawPowers } from './acts/powers';
+import { drawSign } from './acts/sign';
 import { drawAfterSplit, drawTitan, titanShotP } from './acts/titan';
 import { ACT, CHAPTERS, type Frame } from './core/frame';
 import { clamp, damp, seg } from './core/math';
@@ -195,6 +196,7 @@ function loop(now: number) {
   if (frame.hold?.kind === 'alter') drawAlter(frame, frame.hold.p);
   if (frame.hold?.kind === 'titan') drawTitan(frame, frame.hold.p);
   if (frame.hold?.kind === 'powers') drawPowers(frame, frame.hold.p);
+  if (frame.hold?.kind === 'sign') drawSign(frame, frame.hold.p);
 
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   post(t, dt);
