@@ -7,6 +7,7 @@ import { drawFinale } from './acts/finale';
 import { alterShotP, drawAlter } from './acts/alter';
 import { drawPowers } from './acts/powers';
 import { drawSign } from './acts/sign';
+import { drawStrip, stripK, stripPointer } from './acts/strip';
 import { drawDive } from './acts/dive';
 import { drawCardEdge, drawOpenBack, enterCard, openCard } from './acts/open';
 import { posterRepaint, whipK, whipShift, whipSmear } from './core/cuts';
@@ -148,7 +149,7 @@ function hud() {
   }
   fill.style.width = `${(R / RAW_END) * 100}%`;
   // dark type over paper, light type over everything else
-  const onPaper = B < 1.75 || (B > 6.7 && B < 7.55) || (B > POWERS_AT && B < 26.8) || (frame.hold?.kind === 'powers' && frame.hold.p > 0.68);
+  const onPaper = stripK(B) < 0.5 && (B < 1.75 || (B > 6.7 && B < 7.55) || (B > POWERS_AT && B < 26.8) || (frame.hold?.kind === 'powers' && frame.hold.p > 0.68));
   document.documentElement.classList.toggle('on-paper', onPaper);
   hello.classList.toggle('on', (B > 20.7 && B < 22.6) || B > 29.45);
 }
@@ -222,7 +223,11 @@ function loop(now: number) {
   if (frame.hold?.kind === 'alter' && frame.hold.p < 0.045) drawAfterSplit(frame, 1);
   // the gold bolt out of the machine, and its afterimage over the night sky
   if (B >= ACT.cut[0] && B < ACT.cut[1] + 0.1 && !torn) drawMachineCut(frame);
-  if (B >= ACT.finaleStart && B < ACT.creditsStart + 0.4) drawFinale(frame);
+  if (B >= ACT.finaleStart && B < ACT.creditsStart + 0.4) {
+    // after the signature the page pulls back into a film strip you can swipe through
+    if (!frame.hold && stripK(B) > 0.001) drawStrip(frame, drawFinale);
+    else drawFinale(frame);
+  }
   if (B >= ACT.creditsStart) drawCredits(frame);
 
   if (frame.hold?.kind === 'alter') drawAlter(frame, frame.hold.p);
@@ -245,6 +250,12 @@ let tapT = 0;
 window.addEventListener('pointermove', (e) => trailMove(e.clientX, e.clientY, tapT, tapWorld), { passive: true });
 window.addEventListener('touchmove', (e) => { const p = e.touches[0]; if (p) trailMove(p.clientX, p.clientY, tapT, tapWorld); }, { passive: true });
 window.addEventListener('pointerup', trailEnd, { passive: true });
+// the film strip listens for a sideways swipe while it's open
+const stripOn = () => !frame.hold && stripK(B) > 0.9;
+window.addEventListener('pointerdown', (e) => stripPointer('down', e.clientX, tapT, stripOn(), w), { passive: true });
+window.addEventListener('pointermove', (e) => stripPointer('move', e.clientX, tapT, stripOn(), w), { passive: true });
+window.addEventListener('pointerup', (e) => stripPointer('up', e.clientX, tapT, stripOn(), w), { passive: true });
+window.addEventListener('pointercancel', (e) => stripPointer('up', e.clientX, tapT, stripOn(), w), { passive: true });
 window.addEventListener('touchend', trailEnd, { passive: true });
 window.addEventListener('click', (e) => {
   if ((e.target as Element | null)?.closest?.('a, button, #hello, .reel-marks')) return;
