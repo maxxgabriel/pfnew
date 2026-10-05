@@ -8,6 +8,7 @@ import { between, penTrail, STROKES } from '../core/signature';
 import { C, F, font } from '../core/style';
 import { drawBlot } from '../core/blot';
 import { drawWarrior } from './warrior';
+import { drawMachineWord } from './machine';
 import { GOLD, drawBolt, drawCrackle } from '../core/bolt';
 
 /*
@@ -1211,6 +1212,8 @@ export function drawPaperOver(f: Frame) {
     // the white heat fading into the paper
     ctx.fillStyle = `rgba(255,253,246,${1 - ease.out2(cool)})`;
     ctx.fillRect(-w, -h, w * 3, h * 3);
+    // the next act's name, printed on the paper bigger than the page: the tear rips it in two
+    drawMachineWord(ctx, w, S, B, f.t, tearY);
     // a shadow under the lifting edge
     if (open > 0) {
       const g = ctx.createLinearGradient(0, tearY + (top ? -S * 0.12 : S * 0.12), 0, tearY);

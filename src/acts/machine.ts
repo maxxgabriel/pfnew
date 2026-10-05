@@ -3,7 +3,7 @@ import { type Pt, TAU, bell, clamp, ease, hash, lerp, seg, spline } from '../cor
 import { CONFETTI, Particles } from '../core/particles';
 import { penTrail } from '../core/signature';
 import { halftone } from '../core/sprites';
-import { C, F, font } from '../core/style';
+import { C, F, extruded, font } from '../core/style';
 import { drawBlot } from '../core/blot';
 import { GOLD, drawBolt, drawCrackle } from '../core/bolt';
 
@@ -375,6 +375,42 @@ export function drawBall(ctx: CanvasRenderingContext2D, x: number, y: number, r:
   ctx.lineWidth = r * 0.16;
   ctx.strokeStyle = C.ink;
   ctx.stroke();
+  ctx.restore();
+}
+
+/**
+ * MACHINE, printed on the blank paper in poster colours, bigger than the page: the letters slam
+ * down one by one (each overshoots and settles), and the tear (ink.ts) rips straight through them.
+ */
+export function drawMachineWord(ctx: CanvasRenderingContext2D, w: number, S: number, B: number, t: number, y: number) {
+  const word = 'MACHINE';
+  const px = Math.round(Math.max(w * 0.34, S * 0.3));
+  const faces = [C.red, C.blue, '#ffd23e', C.green, C.red, C.blue, '#ffd23e'];
+  ctx.save();
+  ctx.font = font(px);
+  const widths = [...word].map((ch) => ctx.measureText(ch).width * 0.96);
+  const total = widths.reduce((a, b) => a + b, 0);
+  // wider than the screen: it pans past as the letters land, so you read it M to E
+  let x = lerp(w * 0.06, w * 0.94 - total, ease.inOut2(seg(B, 6.86, 7.4)));
+  ctx.translate(w / 2, y);
+  ctx.rotate(-0.07);
+  ctx.translate(-w / 2, -y);
+  [...word].forEach((ch, i) => {
+    const cx = x + widths[i] / 2;
+    x += widths[i];
+    const a0 = 6.86 + i * 0.065;
+    const k = seg(B, a0, a0 + 0.1);
+    if (k <= 0) return;
+    const sc = lerp(2.4, 1, ease.outBack(k, 2.2));
+    const boil = (hash(i * 7 + boilIx(t)) - 0.5) * 0.02;
+    ctx.save();
+    ctx.translate(cx, y);
+    ctx.rotate(boil + (1 - k) * (i % 2 ? 0.3 : -0.3));
+    ctx.scale(sc, sc);
+    ctx.globalAlpha = Math.min(1, k * 3);
+    extruded(ctx, ch, 0, 0, px, { face: faces[i], side: C.ink, depth: px * 0.07, line: Math.max(2, px * 0.03) });
+    ctx.restore();
+  });
   ctx.restore();
 }
 

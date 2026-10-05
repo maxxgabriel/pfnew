@@ -250,7 +250,7 @@ function titleCards(t: number) {
   const S = Math.min(w, h);
   if (frame.hold) return;
   // the acts that play on the film's own time get a card; the ones inside holds open their own way
-  for (const c of CHAPTERS.filter((ch) => ch.name === 'Machine' || ch.name === 'Match')) {
+  for (const c of CHAPTERS.filter((ch) => ch.name === 'Match')) {
     // (Match's card waits for ALTER to finish: it sits just before the match)
     const a = c.name === 'Match' ? ALTER_AT + 0.003 : c.at - 0.05;
     const inn = seg(B, a, a + 0.12), out = seg(B, a + 0.42, a + 0.55);
