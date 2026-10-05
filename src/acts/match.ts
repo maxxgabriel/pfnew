@@ -626,7 +626,9 @@ function drawCrowd(ctx: CanvasRenderingContext2D, cam: Cam, f: Frame, L: number)
   const pts: number[][] = [[], [], [], []];
   for (const fan of fans) {
     // the crowd rises on the goal, otherwise they sway
-    const jump = goal > 0 ? Math.abs(Math.sin(t * 9 + fan.ph)) * 0.6 * goal : Math.sin(t * 2 + fan.ph) * 0.05;
+    // a slow Mexican wave rolls round the stands between the sways
+    const wave = Math.max(0, Math.sin(fan.p[0] * 0.08 - t * 1.6)) ** 12 * 0.5;
+    const jump = goal > 0 ? Math.abs(Math.sin(t * 9 + fan.ph)) * 0.6 * goal : Math.sin(t * 2 + fan.ph) * 0.05 + wave;
     const q = toCam(cam, [fan.p[0], fan.p[1] + jump, fan.p[2]]);
     if (q[2] < NEAR) continue;
     const s = proj(cam, q);

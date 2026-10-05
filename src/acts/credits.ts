@@ -34,6 +34,7 @@ const LINES: Line[] = [
   { kind: 'pair', a: 'the other one', b: 'Green, reborn', color: '#7b3cff' },
   { kind: 'pair', a: 'the first drop', b: 'Blot', color: C.red },
   { kind: 'pair', a: 'the spark', b: 'every circle in this film' },
+  { kind: 'pair', a: 'the signature', b: 'every move in this film', color: '#ffd23e' },
   { kind: 'pair', a: 'the hand', b: 'Max Gabriel' },
   { kind: 'pair', a: 'machine operator', b: 'a see-saw' },
   { kind: 'pair', a: 'goalkeeper (wrong way)', b: 'No. 1, Blue' },

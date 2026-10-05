@@ -422,8 +422,11 @@ function shotHero(g: G, q: number) {
   ctx.translate(w / 2, h * 0.92);
   ctx.scale(1 + push * 0.06, 1 + push * 0.06);
   ctx.translate(-w / 2, -h * 0.92);
-  titan(g, w / 2, h * 0.92, H, { ...REST, armL: [0.5, 0.6], armR: [0.5, 0.6], eyes: 1, core: 1, steam: 1 }, 1, 3);
-  const R = rig(w / 2, h * 0.92, H, { ...REST, armL: [0.5, 0.6], armR: [0.5, 0.6] });
+  // it breathes: a slow loop on the clock, so it's alive even when the scroll stops
+  const br = Math.sin(t * 1.7);
+  const arms: [number, number] = [0.5 + br * 0.04, 0.6 + br * 0.05];
+  titan(g, w / 2, h * 0.92, H, { ...REST, armL: arms, armR: arms, crouch: 0.04 + br * 0.04, eyes: 0.85 + 0.15 * Math.sin(t * 3.4), core: 1, steam: 1 }, 1, 3);
+  const R = rig(w / 2, h * 0.92, H, { ...REST, armL: arms, armR: arms, crouch: 0.04 + br * 0.04 });
   // Blot rode the poster all the way here, and now rides on top
   const hd = R['head'];
   drawBlot(ctx, hd.x - H * 0.05, hd.y - H * 0.09, S * 0.09, { t, pose: 'cheer', seed: 5, eye: C.white });
