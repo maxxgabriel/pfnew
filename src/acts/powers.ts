@@ -101,7 +101,8 @@ export function drawHand(ctx: CanvasRenderingContext2D, tip: Pt, S0: number, t: 
     ctx.closePath();
     ctx.fill();
   };
-  const sleeve: Pt[] = [P(0.29, 0.075), P(0.33, -0.035), P(0.55, -0.06), P(0.85, 0.02), P(1.05, 0.2), P(0.85, 0.32), P(0.6, 0.26), P(0.42, 0.16)];
+  // (it runs on off the edge of the frame: an arm reaching in, never a closed shape on the page)
+  const sleeve: Pt[] = [P(0.29, 0.075), P(0.33, -0.035), P(0.55, -0.065), P(0.95, -0.05), P(1.7, 0.0), P(2.8, 0.08), P(2.8, 0.4), P(1.7, 0.33), P(0.95, 0.28), P(0.6, 0.24), P(0.42, 0.16)];
   ctx.save();
   ctx.translate(-1.5, -1.5);
   curve(sleeve, withAlpha(C.paper, 0.9));
