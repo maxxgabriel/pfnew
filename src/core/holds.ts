@@ -8,7 +8,7 @@ import { ACT } from './frame';
  * hold's own progress runs 0→1. Everything authored in film beats keeps its
  * timing; the scroll track just gets longer.
  */
-export type HoldKind = 'thunder' | 'titan' | 'dash' | 'alter' | 'dive' | 'powers' | 'sign';
+export type HoldKind = 'thunder' | 'titan' | 'dash' | 'alter' | 'dive' | 'meteor' | 'powers' | 'sign';
 export interface Hold { at: number; len: number; kind: HoldKind }
 
 /** film beat where the machine's letters become TITAN (the ball is in the cannon) */
@@ -34,6 +34,8 @@ export const HOLDS: Hold[] = [
   // MATCH slams into the night sky and the camera dives through the A
   { at: DIVE_AT, len: 1.2, kind: 'dive' },
   { at: 15.0, len: 0.95, kind: 'dash' },
+  // #10's shooting star: the ball up into space, the leap, the volley, the blade of light
+  { at: 15.55, len: 4.4, kind: 'meteor' },
   // out of the net and out of every world, back to the page
   { at: POWERS_AT, len: 6.4, kind: 'powers' },
   // on the page: the moves rise out of the first circle and are inked as one signature

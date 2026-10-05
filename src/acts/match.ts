@@ -4,6 +4,7 @@ import { CONFETTI, Particles } from '../core/particles';
 import { drawSprite, glow, withAlpha } from '../core/sprites';
 import { C, F, extruded, font } from '../core/style';
 import { drawBall } from './machine';
+import { drawBlade } from './meteor';
 import { drawBlot } from '../core/blot';
 import { GOLD, drawBolt, drawCrackle } from '../core/bolt';
 import { penTrail } from '../core/signature';
@@ -117,8 +118,10 @@ const CAM_KEYS: [number, ...number[]][] = [
   [14.6, -10, 11, 52, -21, 0, 72],
   [14.95, -13, 9, 64, -19, 0, 84],
   [15.3, -5, 5, 75, -2, 0.5, 89],
-  [15.55, -1.2, 1.6, 83, 0.3, 1.2, 100],
-  [16.45, 0.8, 1.5, 96.5, 2.4, 1.7, 106],
+  // the shooting star: a low camera far back, tilted up into the sky it falls out of
+  [15.55, 5, 1.2, 60, -5, 22, 100],
+  [16.1, 4.4, 1.3, 64, -2, 15, 103],
+  [16.5, 3, 1.5, 72, 2.2, 3, 106],
   [17.0, 1.6, 1.75, 100, 2.6, 1.9, 108],
   [17.6, 2.3, 1.9, 104.2, 2.6, 1.9, 112],
   [18.3, 2.6, 1.9, 106.9, 2.6, 1.9, 120],
@@ -151,7 +154,8 @@ function makeCam(f: { w: number; h: number }, shake: Pt, pos: V3, look: V3, rect
  * air, before the shot is let go. Implemented as a remap of the playhead:
  * the act lives in its own "match time", which stops for FZ beats.
  */
-const FREEZE = 15.6, FZ = 1.1;
+// (the bullet-time freeze was replaced by #10's shooting star, meteor.ts; FZ = 0 keeps the remap a no-op)
+const FREEZE = 15.6, FZ = 0;
 export function matchLocal(B: number) {
   return B < FREEZE ? B : B < FREEZE + FZ ? FREEZE : B - FZ;
 }
@@ -213,11 +217,14 @@ function hold(B: number, b0: number, b1: number, p: V3): V3 | null {
   return B >= b0 && B < b1 ? [p[0], 0.35, p[2]] : null;
 }
 const IMPACT: V3 = [2.6, 1.95, 105];
+/** the shooting star comes back down out of the sky, over the camera and into the top corner */
+const METEOR_FROM: V3 = [-20, 60, 100];
+export const METEOR_AT = 15.55;
 function shot(B: number): V3 {
+  if (B <= METEOR_AT) return [0, 0.35, 89.5];
   if (B < 16.5) {
-    const s = seg(B, 15.5, 16.5);
-    // bend: drifts out then curls back in
-    return [lerp(0, IMPACT[0], s) - Math.sin(s * Math.PI) * 1.6, lerp(0.35, IMPACT[1], ease.out2(s)) + Math.sin(s * Math.PI) * 0.6, lerp(89.5, IMPACT[2], s)];
+    const s = ease.in2(seg(B, METEOR_AT, 16.5));
+    return [lerp(METEOR_FROM[0], IMPACT[0], s), lerp(METEOR_FROM[1], IMPACT[1], s), lerp(METEOR_FROM[2], IMPACT[2], s)];
   }
   const s = seg(B, 16.5, 17.0);
   return [IMPACT[0] + s * 0.2, lerp(IMPACT[1], 0.35, ease.in2(s)), lerp(IMPACT[2], 106.4, ease.out3(s))];
@@ -529,6 +536,7 @@ function scene(f: Frame, cam: Cam, S: number, frozen: number) {
   if (bq[2] > NEAR) items.push({ z: bq[2] - 0.01, draw: () => draw3DBall(ctx, cam, ball, B, t) });
   items.sort((a, b) => b.z - a.z);
   for (const it of items) it.draw();
+  inkWake(ctx, cam, B, S);
 
   // ---- the towers, drawn last: they stand in front of the stands
   drawTowers(ctx, cam, B, t, S);
@@ -559,7 +567,7 @@ export function drawMatch(fg: Frame) {
     stars = Array.from({ length: 140 }, () => [r(), r() * 0.7, r()]);
   }
   const S = Math.min(w, h);
-  const bt = seg(fg.B, FREEZE, FREEZE + FZ);
+  const bt = FZ > 0 ? seg(fg.B, FREEZE, FREEZE + FZ) : 0;
   if (fg.hold?.kind === 'dash') {
     dashP = fg.hold.p;
     if (frozenMT < 0) frozenMT = t;
@@ -847,7 +855,7 @@ function draw3DBall(ctx: CanvasRenderingContext2D, cam: Cam, b: V3, B: number, t
   const pen = seg(B, 14.25, 14.4) * (1 - seg(B, 18.1, 18.6));
   if (pen > 0) {
     const trail: Pt[] = [];
-    for (let bb = 14.22; bb <= Math.min(B, 17.0); bb += 0.015) {
+    for (let bb = 14.22; bb <= Math.min(B, METEOR_AT); bb += 0.015) {
       const q = P(cam, ballAt(bb));
       if (q) trail.push([q[0], q[1]]);
     }
@@ -879,21 +887,45 @@ function draw3DBall(ctx: CanvasRenderingContext2D, cam: Cam, b: V3, B: number, t
     drawSprite(ctx, glow('#ffffff', 64), p[0], p[1], r * 9);
     ctx.restore();
   }
-  // during the shot it smears
-  if (B > 15.5 && B < 16.5) {
+  // the shooting star on its way down: the blade, pointing along its path, its wake behind it
+  if (B > METEOR_AT && B < 16.5) {
+    const S = Math.min(cam.cx, cam.cy) * 2;
+    const back = P(cam, ballAt(Math.max(METEOR_AT + 0.001, B - 0.2)));
+    const ang = back ? Math.atan2(p[1] - back[1], p[0] - back[0]) : 1;
+    const near = seg(B, METEOR_AT, 16.5);
+    const W = Math.max(r * 3, S * lerp(0.022, 0.05, near * near));
+    const len = Math.max(W * 8, back ? Math.hypot(p[0] - back[0], p[1] - back[1]) * 2.2 : 0);
+    // the whole stadium lit blue as it comes
     ctx.save();
-    ctx.globalAlpha = 0.25;
-    for (let i = 1; i < 5; i++) {
-      const q = P(cam, ballAt(B - i * 0.012));
-      if (!q) continue;
-      ctx.fillStyle = C.white;
-      ctx.beginPath();
-      ctx.arc(q[0], q[1], r * (1 - i * 0.12), 0, TAU);
-      ctx.fill();
-    }
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.globalAlpha = 0.25 + 0.5 * near * near;
+    drawSprite(ctx, glow('#1658e8', 128), p[0], p[1], S * (0.8 + near * 1.6));
     ctx.restore();
+    drawBlade(ctx, p[0], p[1], ang, W, len, t, 1);
+    return;
   }
   drawBall(ctx, p[0], p[1], r, b[2] * 0.9 + b[0] * 0.4, t, 1);
+}
+
+/**
+ * The blend: when the shooting star hits, its wake turns to ink. The path it came down is laid
+ * across the sky and the stadium as one huge brush stroke (thin up in space, fat at the goal),
+ * over a blue burn. It dries away before the pull-back.
+ */
+function inkWake(ctx: CanvasRenderingContext2D, cam: Cam, B: number, S: number) {
+  if (B < 16.47 || B > 18.5) return;
+  const k = ease.out3(seg(B, 16.48, 16.6));
+  const dry = seg(B, 17.9, 18.5);
+  const pts: Pt[] = [];
+  for (let bb = METEOR_AT + 0.02; bb <= 16.5; bb += 0.008) {
+    const q = P(cam, ballAt(bb));
+    if (q && Math.abs(q[0]) < cam.cx * 6 && Math.abs(q[1]) < cam.cy * 6) pts.push([q[0], q[1]]);
+  }
+  if (pts.length < 3) return;
+  // a blue burn under the ink, so the stroke reads against the night
+  penTrail(ctx, pts, (1 - k * 0.6) * 0.9 * (1 - dry), S * 2.2);
+  brush(ctx, pts, { width: S * 0.075, color: '#35c8ff', progress: 1, dry: 0.4, seed: 91, press: 0.25, tail: 1.5, alpha: k * 0.55 * (1 - dry) });
+  brush(ctx, pts, { width: S * 0.05, color: C.ink, progress: 1, dry: 0.55, seed: 91, press: 0.25, tail: 1.5, alpha: k * 0.92 * (1 - dry), halo: 0.2 });
 }
 
 function drawGoal(ctx: CanvasRenderingContext2D, cam: Cam, S: number, B: number, t: number) {
@@ -1048,7 +1080,7 @@ function drawLowerThird(f: Frame, S: number) {
 function drawPlayerCard(f: Frame, S: number) {
   const { ctx, w, h, B, t } = f;
   const inn = seg(B, 15.01, 15.16);
-  const out = seg(B, 15.45, 15.6);
+  const out = seg(B, 15.4, 15.53);
   if (inn <= 0 || out >= 1) return;
   const cw = Math.min(w * 0.62, S * 0.62, 300), ch = cw * 1.38;
   const x = w - cw - 16, y = h * 0.16;

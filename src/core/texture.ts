@@ -15,7 +15,7 @@ export type World = 'ink' | 'machine' | 'alter' | 'match' | null;
 
 export function worldOf(f: Frame, titanAt: number): World {
   const hd = f.hold?.kind;
-  if (hd === 'alter') return 'alter';
+  if (hd === 'alter' || hd === 'meteor') return 'alter';
   if (hd === 'titan') return 'machine';
   if (hd === 'powers' || hd === 'sign') return null;
   if (hd === 'dive') return 'match';

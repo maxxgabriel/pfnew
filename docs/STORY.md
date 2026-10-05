@@ -107,6 +107,14 @@ Borrow the technique, never his palette (ivory/cyan/lime) or his font:
 - **Drag the final page.** After the signature, a wall of key frames from
   every act you can drag around, with inertia.
 
+**The goal is a special move (round 11).** The winning shot is #10's
+shooting star, after Ryusei Blade: the ball ignites, is flicked into space,
+becomes a blue sphere in a constellation, #10 leaps and volleys it, everything
+holds on a white frame, the stars collapse into it, it goes off, and a blade
+of yellow light with a blue wake falls out of space into the goal, its trail
+turning to ink. #10 stays the match's green light-pin (a drawn human figure
+was tried and looked wrong).
+
 Offered and not picked (don't build unasked): exploding act titles.
 Offered and not picked (don't build unasked): titles written live by the pen,
 a squash/stretch/smear craft pass, hit-stop with animation on twos, onion-skin

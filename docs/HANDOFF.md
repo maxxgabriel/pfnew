@@ -37,10 +37,11 @@ a playhead and redraws the whole frame every animation frame.
   | `alter` | 12.63 | 18.68 → 24.28 | ALTER, a third of its shots (`KEEP` in alter.ts); ends on a whip-pan up | alter.ts |
   | `dive` | 12.636 | 24.29 → 25.49 | MATCH slams in; the camera dives through the A | dive.ts |
   | `dash` | 15.0 | 27.85 → 28.80 | The Zone, then #10's thunder dash | match.ts `drawZone`, `drawDash` |
-  | `powers` | 18.7 | 32.50 → 38.90 | Powers of Ten: the pull-back to the page | powers.ts |
-  | `sign` | 18.72 | 38.92 → 42.52 | the signature: the moves rise, the Hand inks "Max", the living name, the invitation | sign.ts |
+  | `meteor` | 15.55 | 29.35 → 33.75 | #10's shooting star (Ryusei-Blade-style special move), then the 3D camera catches it falling into the goal | meteor.ts, match.ts `shot()` / `inkWake` |
+  | `powers` | 18.7 | 36.90 → 43.30 | Powers of Ten: the pull-back to the page | powers.ts |
+  | `sign` | 18.72 | 43.32 → 46.92 | the signature: the moves rise, the Hand inks "Max", the living name, the invitation | sign.ts |
 
-  `RAW_END = ACT.END (30) + 23.8 = 53.8`. Convert with `toFilm(raw)` /
+  `RAW_END = ACT.END (30) + 28.2 = 58.2`. Convert with `toFilm(raw)` /
   `toRaw(film)`: raw = film + sum of `len` for holds whose `at` < film. Holds
   must stay sorted by `at` in `HOLDS`. A set piece that plays in a hold is
   drawn on top of everything from `main.ts` (`if (frame.hold?.kind === …)`).
@@ -90,7 +91,7 @@ III Alter, IV Ride, V Match, VI Hello, VII Credits.
 | 7.0 → 11.98 | Machine | machine.ts | MAKE / THINGS / THAT / MOVE chain reaction; card "II · MACHINE — the pearl fell through the page"; **titan hold at 11.98** |
 | 11.98 → 12.4 | the night behind the page | main.ts | after TITAN the machine is gone (`torn`) and the match's night sky shows |
 | 12.63 / 12.636 (holds) | **ALTER** (a third), then **the dive** through MATCH | alter.ts, dive.ts | see §3 and §4 |
-| 12.4 → 20.0 | Match | match.ts | the star falls onto the centre spot; card "V · MATCH — the same two, one more time"; lights, lower third, chalk tactics, panels, **dash hold at 15.0** (The Zone, then the dash), bullet time, goal; **powers hold at 18.7** |
+| 12.4 → 20.0 | Match | match.ts | the star falls onto the centre spot; card "V · MATCH — the same two, one more time"; lights, lower third, chalk tactics, panels, **dash hold at 15.0** (The Zone, then the dash), **meteor hold at 15.55** (the shooting star), the star falls out of the sky into the goal, goal; **powers hold at 18.7** |
 | 18.7 → 22.6 | Hello | finale.ts | the page: the ensō, Blot, and the Hand signing MAX (18.85) and GABRIEL (19.62), seal 20.32; the rivals' lights circle; contact card 20.7–22.6 |
 | 22.55 → 30 | Credits + post-credits | credits.ts | roll; "wait —"; Blot finds the hilts; "MAX GABRIEL WILL RETURN" |
 
@@ -98,8 +99,24 @@ The match is skipped after the pull-back (`B > POWERS_AT`), and the machine
 after TITAN (`B > TITAN_AT`); the old machine cut (`drawMachineCut`) no
 longer plays.
 
-Match has an internal remap: `matchLocal()` (the bullet-time freeze). Read it
-before editing the match's internal constants.
+Match has an internal remap: `matchLocal()` (the bullet-time freeze). It is a
+no-op now (`FZ = 0`): the shooting star replaced bullet time. Read it before
+editing the match's internal constants.
+
+**The shooting star** (`src/acts/meteor.ts`, `meteor` hold). #10's special
+move, staged after the anime meteor-shot sequence (Ryusei Blade): control →
+ignite → launch → sphere in space → leap and spin → contact (white frame, held)
+→ the constellation collapses into the ball → bang → the blade falls out of
+space. Timing is deliberately uneven (slow, FAST, stop, slow, FAST, FREEZE,
+violent acceleration). #10 is the same green light-pin the broadcast camera
+shows, close up (`drawPin`): his "leg" is the whole pin swung from the head,
+with a smear fan on the kick. The blade (`drawBlade`: white core, yellow head,
+blue wake, lightning, orbs) is exported and reused by match.ts, where after the
+hold the ball falls from `METEOR_FROM` high in the sky to `IMPACT` (a low
+camera tilted up catches it), and on impact its path becomes an ink brush
+stroke over a blue burn (`inkWake`) that dries before the pull-back. Palette
+is the original's blue/yellow; the owner first asked for green and gold, so
+that swap is an open offer. Dev hook: `__film.meteor(name, q)`.
 
 ## 3. ALTER (`src/acts/alter.ts`), the centrepiece
 

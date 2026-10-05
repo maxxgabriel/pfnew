@@ -9,6 +9,7 @@ import { drawPowers } from './acts/powers';
 import { drawSign } from './acts/sign';
 import { drawStrip, stripK, stripPointer } from './acts/strip';
 import { drawDive } from './acts/dive';
+import { drawMeteor, meteorShotP } from './acts/meteor';
 import { drawCardEdge, drawOpenBack, enterCard, openCard } from './acts/open';
 import { posterRepaint, whipK, whipShift, whipSmear } from './core/cuts';
 import { drawWorldTexture, worldOf } from './core/texture';
@@ -217,7 +218,7 @@ function loop(now: number) {
     drawMachineBall(frame);
   }
   // after the pull-back the film is on paper: the match is over
-  if (B >= ACT.matchStart && B < ACT.matchEnd && !(B > POWERS_AT || frame.hold?.kind === 'powers')) drawMatch(frame);
+  if (B >= ACT.matchStart && B < ACT.matchEnd && !(B > POWERS_AT || frame.hold?.kind === 'powers' || frame.hold?.kind === 'meteor')) drawMatch(frame);
   // what's left of the bolt climbs the night to where ALTER's target ring locks on
   if (torn && !frame.hold && B < ALTER_AT) drawAfterSplit(frame, seg(B, TITAN_AT, ALTER_AT - 0.04));
   if (frame.hold?.kind === 'alter' && frame.hold.p < 0.045) drawAfterSplit(frame, 1);
@@ -235,6 +236,7 @@ function loop(now: number) {
   if (frame.hold?.kind === 'powers') drawPowers(frame, frame.hold.p);
   if (frame.hold?.kind === 'sign') drawSign(frame, frame.hold.p);
   if (frame.hold?.kind === 'dive') drawDive(frame, frame.hold.p);
+  if (frame.hold?.kind === 'meteor') drawMeteor(frame, frame.hold.p);
 
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   if (wk > 0) whipSmear(ctx, wk, w, h);
@@ -264,7 +266,7 @@ window.addEventListener('click', (e) => {
 
 function post(t: number, dt: number) {
   // letterbox: the film tightens to scope for the fights
-  const lb = frame.hold?.kind === 'alter' ? 1 : Math.max(seg(B, 2.5, 3.0) * (1 - seg(B, 6.0, 6.5)), seg(B, 15.3, 15.7) * (1 - seg(B, 17.9, 18.3)), seg(B, 27.0, 27.3) * (1 - seg(B, 28.8, 29.1)));
+  const lb = frame.hold?.kind === 'alter' || frame.hold?.kind === 'meteor' ? 1 : Math.max(seg(B, 2.5, 3.0) * (1 - seg(B, 6.0, 6.5)), seg(B, 15.3, 15.7) * (1 - seg(B, 17.9, 18.3)), seg(B, 27.0, 27.3) * (1 - seg(B, 28.8, 29.1)));
   if (lb > 0) {
     const bar = h * 0.085 * lb;
     ctx.fillStyle = '#000';
@@ -342,6 +344,11 @@ function jumpRaw(b: number) {
   hold(kind: string, p = 0.5) {
     const h = HOLDS.find((k) => k.kind === kind)!;
     jumpRaw(toRaw(h.at) + h.len * Math.min(0.9999, p));
+  },
+  /** jump to the shooting star's shot `name` at its own progress q */
+  meteor(name: string, q = 0.5) {
+    const h = HOLDS.find((k) => k.kind === 'meteor')!;
+    jumpRaw(toRaw(h.at) + h.len * meteorShotP(name, q));
   },
   /** jump to TITAN's shot `name` at its own progress q */
   titan(name: string, q = 0.5) {
