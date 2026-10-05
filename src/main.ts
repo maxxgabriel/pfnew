@@ -11,6 +11,7 @@ import { drawDive } from './acts/dive';
 import { posterRepaint, whipK, whipShift, whipSmear } from './core/cuts';
 import { drawWorldTexture, worldOf } from './core/texture';
 import { drawDrift } from './core/drift';
+import { addTap, drawTaps } from './core/taps';
 import { drawAfterSplit, drawTitan, titanShotP } from './acts/titan';
 import { ACT, CHAPTERS, type Frame } from './core/frame';
 import { clamp, damp, seg } from './core/math';
@@ -218,6 +219,14 @@ function loop(now: number) {
   cost = cost * 0.9 + (performance.now() - c0) * 0.1;
 }
 
+// tap to play: a tap (a click, so a scroll flick never fires one) gets an answer from the world on screen
+let tapWorld: Parameters<typeof addTap>[3] = null;
+let tapT = 0;
+window.addEventListener('click', (e) => {
+  if ((e.target as Element | null)?.closest?.('a, button, #hello, .reel-marks')) return;
+  addTap(e.clientX, e.clientY, tapT, tapWorld);
+});
+
 function post(t: number, dt: number) {
   // letterbox: the film tightens to scope for the fights
   const lb = frame.hold?.kind === 'alter' ? 1 : Math.max(seg(B, 2.5, 3.0) * (1 - seg(B, 6.0, 6.5)), seg(B, 15.3, 15.7) * (1 - seg(B, 17.9, 18.3)), seg(B, 27.0, 27.3) * (1 - seg(B, 28.8, 29.1)));
@@ -237,7 +246,10 @@ function post(t: number, dt: number) {
   // each world printed on its own stuff, with the same drifting specks in its costume
   const wld = worldOf(frame, TITAN_AT);
   const onPage = frame.hold?.kind === 'sign' || (!frame.hold && B > POWERS_AT && B < ACT.creditsStart);
-  drawDrift(ctx, wld ?? (onPage ? 'page' : null), w, h, t, B);
+  tapWorld = wld ?? (onPage ? 'page' : null);
+  tapT = t;
+  drawDrift(ctx, tapWorld, w, h, t, B);
+  drawTaps(ctx, w, h, t);
   drawWorldTexture(ctx, wld, w, h, t);
   if (vignette) ctx.drawImage(vignette, 0, 0, w, h);
   // grain
