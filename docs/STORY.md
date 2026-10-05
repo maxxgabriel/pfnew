@@ -89,6 +89,25 @@ marble; two-thirds of ALTER.
 - **A loop at every rest stop:** where an act settles it plays a short
   perfect loop (blades humming, TITAN breathing steam, the crowd swaying).
 
+**From a real teardown of Mat Voyce's site (round 10b; owner picked six).**
+Borrow the technique, never his palette (ivory/cyan/lime) or his font:
+
+- **Opening: window takeover.** MAX and GABRIEL huge, bleeding off the
+  edges; a small tilted window onto the ink world between them grows with
+  scroll, straightens and takes the whole screen.
+- **Credits on rollers.** Roles scroll up on the left, names down on the
+  right; the row crossing the middle lights up with a band, and a still of
+  that character sits in the centre.
+- **Rubber type.** Big type stretches and squashes per letter with scroll
+  speed and wobbles back when you stop.
+- **Finger trail of sprites.** Dragging leaves a trail of tiny drawn icons
+  per world (petals, bolts and nuts, sparks, footballs, ink dots).
+- **Chapter marks play a loop.** Pressing a chapter mark plays a tiny loop
+  of that world on the mark before jumping.
+- **Drag the final page.** After the signature, a wall of key frames from
+  every act you can drag around, with inertia.
+
+Offered and not picked (don't build unasked): exploding act titles.
 Offered and not picked (don't build unasked): titles written live by the pen,
 a squash/stretch/smear craft pass, hit-stop with animation on twos, onion-skin
 ghosts. Rejected in round 10 as well: the X-Ray blueprint (removed).
