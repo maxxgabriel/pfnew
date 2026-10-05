@@ -284,8 +284,16 @@ oxlint`, and screenshots of what you touched.
   holds are where the content is; if the owner finds it long, shorten hold
   lengths rather than cutting beats.
 - Sound (STORY item 34) is still optional and not built: ask the owner.
-- `scripts/perf.mjs` (no argument) still samples the old raw beats; use
-  `node scripts/perf.mjs 1 alter` for ALTER, and `__film.cost()` elsewhere.
+- `scripts/perf.mjs` (no argument) samples raw beats across the whole film
+  (0.2–5.8 ms at 1× in round 9); `node scripts/perf.mjs 1 alter` measures
+  every ALTER shot.
+- Between the split and ALTER (film 11.98 → 12.63) the night behind the page
+  is the match's pre-light stadium; `drawAfterSplit` (titan.ts) carries the
+  gold ember up to where ALTER's target ring locks on. The match's own
+  falling star is hidden until film 12.64 (after Night Ride).
+- The ink duel's hilt cords are a small physics sim with state; a teleport
+  guard in `Cord.step` keeps them sane when the ink world is drawn again at
+  another size (Powers of Ten). Any new stateful effect needs the same care.
 - `prefers-reduced-motion` only softens shakes and flashes; there's no
   reduced cut.
 

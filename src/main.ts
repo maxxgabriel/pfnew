@@ -12,7 +12,7 @@ import { drawXray } from './acts/xray';
 import { ACT, CHAPTERS, type Frame } from './core/frame';
 import { clamp, damp, seg } from './core/math';
 import { canvas, grainTiles } from './core/sprites';
-import { ALTER_AT, HOLDS, POWERS_AT, RAW_END, TITAN_AT, toFilm, toRaw } from './core/holds';
+import { ALTER_AT, HOLDS, POWERS_AT, RAW_END, RIDE_AT, TITAN_AT, toFilm, toRaw } from './core/holds';
 
 /*
  * THE FILM.
@@ -120,7 +120,8 @@ document.getElementById('copy')!.addEventListener('click', (e) => {
 let chapter = -1;
 function hud() {
   let c = 0;
-  CHAPTERS.forEach((ch, i) => { if (B >= ch.at - 0.05) c = i; });
+  // (a mark shows a touch early, except where chapters sit close together round the holds)
+  CHAPTERS.forEach((ch, i) => { if (B >= ch.at - (i && ch.at - CHAPTERS[i - 1].at < 0.2 ? 0 : 0.05)) c = i; });
   if (frame.hold?.kind === 'alter') c = CHAPTERS.findIndex((ch) => ch.name === 'Alter');
   if (frame.hold?.kind === 'powers') c = CHAPTERS.findIndex((ch) => ch.name === 'Hello');
   if (frame.hold?.kind === 'ride') c = CHAPTERS.findIndex((ch) => ch.name === 'Ride');
@@ -253,7 +254,8 @@ function titleCards(t: number) {
   if (frame.hold) return;
   // the acts that play on the film's own time get a card; the ones inside holds open their own way
   for (const c of CHAPTERS.filter((ch) => ch.name === 'Machine' || ch.name === 'Match')) {
-    const a = c.at - 0.05;
+    // (Match's card waits for Night Ride to finish: ALTER and the ride sit just before it)
+    const a = c.name === 'Match' ? RIDE_AT + 0.003 : c.at - 0.05;
     const inn = seg(B, a, a + 0.12), out = seg(B, a + 0.42, a + 0.55);
     if (inn <= 0 || out >= 1) continue;
     const y = h * 0.72;
