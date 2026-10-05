@@ -1,4 +1,18 @@
-# STORY — One Day (v6, round 13, current)
+# STORY — Ink in Water (v7, round 14, current)
+
+The whole screen is a dish of still water on paper. MAX GABRIEL is brushed
+in; a drop of ink falls and blooms. As you scroll, the drifting clouds of
+ink gather into pictures and let go of them: **the moonlit mountains** (the
+original ink film's range), **a bamboo grove**, **rain falling into the
+water**, and at last **one great ensō** with Max's red seal and the contact
+card. Two layers like real sumi-e: a live fluid wash (src/water/fluid.ts)
+pulled toward each picture, and the crisp brushwork rising through it once it
+settles. The finger stirs the water; a tap drops ink. No people, no sound,
+no generated images (the owner found the One Day paintings bad).
+
+---
+
+# STORY — One Day (v6, round 13, superseded)
 
 **The idea.** The calm, beautiful side of anime edits: light, skies, weather,
 the quiet. No people, no sound, no fights. The visitor paints the ink night

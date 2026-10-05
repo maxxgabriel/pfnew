@@ -15,7 +15,19 @@ the owner's taste and decisions; this file is the technical side.
 ---
 
 
-## Current film: One Day (round 13) — read this first
+## Current film: Ink in Water (round 14) — read this first
+
+`main.ts` draws one thing: `drawWater` (`src/water/water.ts`), beats in `W`,
+chapters in `core/frame.ts`, no holds. `water/fluid.ts` is a CPU stable-fluids
+solver (110 cells wide on phones) with vorticity, drag, `attract()` toward a
+target, and a sumi renderer with a wet edge. Each picture is ink art rendered
+once with paper made transparent (`art()`); its darkness at grid size is the
+target the wash gathers into, and the art fades in over the wash. Mountains
+reuse `drawInk(..., 'day')` from acts/ink.ts; bamboo and the ensō are drawn
+in water.ts. Finger stirs (`waterMove`), tap drops ink (`waterTap`).
+`scripts/water-run.mjs` scrolls through in real time (the sim needs time).
+
+## Previous: One Day (round 13, superseded)
 
 The film is now: the ink night you paint (`core/paint.ts`, `acts/ink.ts`),
 then **One Day** (`src/day/`): painted scenes from morning to night, the

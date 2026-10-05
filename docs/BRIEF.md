@@ -217,3 +217,11 @@ Your Name style key art (sharp, vivid, crisp clouds, star flares). The owner
 has a ChatGPT subscription and no API key: they signed in to the **Codex
 CLI** with a device code, and the paintings are generated through it
 (`.claude/skills/codex-images`). Never ask for passwords or keys in chat.
+
+**Round 14: Ink in Water (current).** On One Day: *"this looks so bad lol.
+lets use the original style and not use generated image"*. Picked: ink drawn
+in code, and a new idea: **Ink in Water**. The owner suggested using Codex
+(ChatGPT, gpt-6.1-sol) as a sub-agent to save usage: it wrote the fluid
+solver (src/water/fluid.ts) to a spec; reviewed and fixed (drag, wet-edge
+renderer). Codex is run with `codex exec … < /dev/null` (it waits on stdin
+otherwise).

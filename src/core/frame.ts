@@ -37,14 +37,13 @@ export const ACT = {
   finaleStart: 18.7,
   creditsStart: 22.55,
   /** Ink in Water (round 14): src/water/water.ts W */
-  END: 9.6,
+  END: 8.7,
 };
 
 export const CHAPTERS = [
   { at: 0, n: 'I', name: 'Drop' },
   { at: 0.9, n: 'II', name: 'Mountains' },
-  { at: 2.9, n: 'III', name: 'Bamboo' },
-  { at: 4.7, n: 'IV', name: 'Waves' },
-  { at: 6.4, n: 'V', name: 'Rain' },
-  { at: 7.9, n: 'VI', name: 'Ensō' },
+  { at: 3.3, n: 'III', name: 'Bamboo' },
+  { at: 5.4, n: 'IV', name: 'Rain' },
+  { at: 7.0, n: 'V', name: 'Ensō' },
 ];
