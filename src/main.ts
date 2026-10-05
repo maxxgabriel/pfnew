@@ -7,7 +7,6 @@ import { drawFinale } from './acts/finale';
 import { alterShotP, drawAlter } from './acts/alter';
 import { drawPowers } from './acts/powers';
 import { drawAfterSplit, drawTitan, titanShotP } from './acts/titan';
-import { drawXray } from './acts/xray';
 import { ACT, CHAPTERS, type Frame } from './core/frame';
 import { clamp, damp, seg } from './core/math';
 import { canvas, grainTiles } from './core/sprites';
@@ -196,7 +195,6 @@ function loop(now: number) {
   if (frame.hold?.kind === 'alter') drawAlter(frame, frame.hold.p);
   if (frame.hold?.kind === 'titan') drawTitan(frame, frame.hold.p);
   if (frame.hold?.kind === 'powers') drawPowers(frame, frame.hold.p);
-  if (frame.hold?.kind === 'xray') drawXray(frame, frame.hold.p);
 
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   post(t, dt);

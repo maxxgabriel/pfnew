@@ -23,7 +23,8 @@ Before changing anything, read:
   rewind, overheat burn, cracks, reel slicing, confetti pile) were built and
   **rejected**; they were reverted in `085d0d6`. Don't bring any back unless
   the owner asks. Also out: the ink-blob beast and its tentacles (round 8);
-  the Ink Dragon, the Night Ride and the hand-shadow bridge (round 10). ALTER
+  the Ink Dragon, the Night Ride, the hand-shadow bridge and the X-Ray
+  blueprint (round 10). ALTER
   stays, but cut to about a third (round 10).
 - **Original, not copied.** References (Mat Voyce, Demon Slayer, Fate/HF) are
   for energy and technique. Don't reproduce their characters, logos or text.
