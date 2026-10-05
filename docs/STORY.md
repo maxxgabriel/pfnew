@@ -1,4 +1,32 @@
-# STORY — Ink in Water (v7, round 14, current)
+# STORY — Two Drops (v8, round 15, current)
+
+The owner on Ink in Water: *"there is legit no story here or animations…
+we had something in the first one"*, then: keep the current art style, but
+bring back story and animation. Picked a mix of "Two Drops" and "The Last
+Stroke" (src/water/story.ts):
+
+1. **Drops** — MAX GABRIEL brushed on paper; a blue and a green drop fall,
+   bloom, and their ink floods the dish into the first film's moonlit night;
+   the ink gathers into the two brush swordsmen.
+2. **Ridge** — they duel on the moonlit range (acts/ink.ts night): three
+   clashes, sparks, flashes, every blade dragging ink through the water.
+3. **Wave** — the water rises as a great slate wave with a foam crest; the
+   rivals stand together and cut it with an X of light; it splits and sprays.
+4. **Bamboo** — leaves whirl; a spinning slash rings the grove; the stalks
+   above the cut slide and topple.
+5. **Rain** — a still standoff; one draw: they flash past each other, the rain
+   splits in the air, Green's blade snaps and its half falls into the water;
+   Green kneels.
+6. **Reflection** — Green's reflection rises out of the water as a dark
+   red-eyed figure; the two strike together; it bursts into ink.
+7. **Ensō** — dawn turns the night back to paper, the ink swirls into the
+   circle, the brush goes round once, the seal, the contact card.
+
+Finger stirs the water everywhere; a tap drops ink.
+
+---
+
+# STORY — Ink in Water (v7, round 14, superseded)
 
 The whole screen is a dish of still water on paper. MAX GABRIEL is brushed
 in; a drop of ink falls and blooms. As you scroll, the drifting clouds of

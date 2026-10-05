@@ -225,3 +225,10 @@ in code, and a new idea: **Ink in Water**. The owner suggested using Codex
 solver (src/water/fluid.ts) to a spec; reviewed and fixed (drag, wet-edge
 renderer). Codex is run with `codex exec … < /dev/null` (it waits on stdin
 otherwise).
+
+**Round 15: Two Drops (current).** Ink in Water had "no story or
+animations". The owner first seemed to want the old film restored, then
+clarified: *"not restore… do something in the current art style"*. Built a
+story in the ink-in-water style with the first film's swordsmen (Two Drops +
+The Last Stroke): src/water/story.ts. Lesson: the owner wants story and set
+pieces, not just mood.

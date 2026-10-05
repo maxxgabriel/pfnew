@@ -148,7 +148,7 @@ function target(scene: Scene, f: Frame, nx: number, ny: number): Float32Array {
 }
 
 /** a bamboo grove: jointed stalks, twigs at the joints, drooping leaves in fans */
-function drawBamboo(g: CanvasRenderingContext2D, w: number, h: number, S: number) {
+export function drawBamboo(g: CanvasRenderingContext2D, w: number, h: number, S: number) {
   const r = rng(8);
   // uneven spacing, near stalks dark and thick, far ones pale and thin
   const stalks: [number, boolean][] = [[0.08, true], [0.22, false], [0.31, false], [0.47, true], [0.6, false], [0.74, true], [0.9, false]];
@@ -331,7 +331,7 @@ function drawLines(f: Frame, _S: number) {
     ctx.restore();
   }
 }
-const ENSO = ensoPath(0, 0, 100, 3, 0.9, -2.2);
+export const ENSO = ensoPath(0, 0, 100, 3, 0.9, -2.2);
 
 function drawRain(f: Frame, k: number, S: number) {
   if (k <= 0) return;

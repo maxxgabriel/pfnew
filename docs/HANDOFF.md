@@ -15,7 +15,17 @@ the owner's taste and decisions; this file is the technical side.
 ---
 
 
-## Current film: Ink in Water (round 14) — read this first
+## Current film: Two Drops (round 15) — read this first
+
+`main.ts` draws `drawStory` (`src/water/story.ts`): beats in `T`, the two
+fighters' choreography as keyframes (`BLUE`, `GREEN`: beat, hilt x/y, blade
+angle, length), scenes `backdrop` (ridge from acts/ink.ts night, then a
+moonlit water night), `wave`, `bamboo`, `rain`, `mirror`, and `enso`. The
+fighters are `drawWarrior` + `drawLightLine` from the first film; the water is
+`water/fluid.ts` (rendered as moonlit mist at night via `render(…, light)`).
+`scripts/water-run.mjs` scrolls through in real time.
+
+## Previous: Ink in Water (round 14)
 
 `main.ts` draws one thing: `drawWater` (`src/water/water.ts`), beats in `W`,
 chapters in `core/frame.ts`, no holds. `water/fluid.ts` is a CPU stable-fluids

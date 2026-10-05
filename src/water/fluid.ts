@@ -130,7 +130,8 @@ export class InkWater {
   }
 
   /** Render transparent sumi washes over the caller's paper. */
-  render(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number): void {
+  /** light = moonlit mist on a night background instead of ink on paper (0..1) */
+  render(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, light = 0): void {
     if (!this.canvas) {
       const canvas = document.createElement('canvas');
       canvas.width = this.nx;
@@ -158,10 +159,10 @@ export class InkWater {
         const body = 1 - Math.exp(-d * 3.2);
         const alpha = Math.min(1, body * (0.85 + edge));
         const tint = Math.max(0, 1 - d / 0.35);
-        data[j++] = 18 + tint * 14;
-        data[j++] = 16 + tint * 18;
-        data[j++] = 16 + tint * 26;
-        data[j++] = Math.round(alpha * 255);
+        data[j++] = 18 + tint * 14 + light * (175 - tint * 10);
+        data[j++] = 16 + tint * 18 + light * (180 - tint * 8);
+        data[j++] = 16 + tint * 26 + light * (190 - tint * 4);
+        data[j++] = Math.round(alpha * (1 - light * 0.45) * 255);
       }
     }
     context.putImageData(pixels, 0, 0);
