@@ -181,8 +181,8 @@ function loop(now: number) {
     const hint = painted() ? 0 : ease.out3(seg(frame.intro, 3.4, 4.3)) * (1 - seg(B, 0.25, 0.5));
     drawPainted(frame, (g) => drawInk({ ...frame, ctx: g }, 'buffer'), hint, frame.intro);
   } else drawInk(frame, 'night');
-  // the spirits come out to play in the night, before the duel
-  if (frame.hold?.kind === 'play') drawPlay(frame, frame.hold.p);
+  // a breath of night before the duel: petals to blow about
+  if (frame.hold?.kind === 'play') drawPlay(frame);
   // the loop: after the duel
   if (B > ACT.loopStart) drawLoopEnd(frame);
 
@@ -210,7 +210,7 @@ window.addEventListener('touchend', paintEnd, { passive: true });
 window.addEventListener('touchend', trailEnd, { passive: true });
 window.addEventListener('click', (e) => {
   if ((e.target as Element | null)?.closest?.('a, button, #hello, .reel-marks')) return;
-  if (playing()) playTap(e.clientX, e.clientY, tapT);
+  if (playing()) playTap(e.clientX, e.clientY);
   else addTap(e.clientX, e.clientY, tapT, tapWorld);
 });
 

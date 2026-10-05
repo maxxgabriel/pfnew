@@ -15,7 +15,6 @@ await p.mouse.move(100, 700, { steps: 5 }); await shot(900);
 await p.mouse.move(300, 450, { steps: 8 }); await shot(500);
 await p.mouse.move(320, 460, { steps: 3 }); await shot(150);
 // tap the spirit nearest the finger
-const pos = await p.evaluate(() => 0);
 await p.mouse.click(300, 700); await shot(120); await shot(250);
 await at(0.82); await shot(400);
 await at(0.93); await shot(300);
