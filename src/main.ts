@@ -9,6 +9,7 @@ import { drawPowers } from './acts/powers';
 import { drawSign } from './acts/sign';
 import { drawDive } from './acts/dive';
 import { posterRepaint, whipK, whipShift, whipSmear } from './core/cuts';
+import { drawWorldTexture, worldOf } from './core/texture';
 import { drawAfterSplit, drawTitan, titanShotP } from './acts/titan';
 import { ACT, CHAPTERS, type Frame } from './core/frame';
 import { clamp, damp, seg } from './core/math';
@@ -232,6 +233,8 @@ function post(t: number, dt: number) {
     ctx.globalAlpha = 1;
     flashAmt = damp(flashAmt, 0, 10, dt);
   }
+  // each world printed on its own stuff
+  drawWorldTexture(ctx, worldOf(frame, TITAN_AT), w, h, t);
   if (vignette) ctx.drawImage(vignette, 0, 0, w, h);
   // grain
   const pat = grainPat[Math.floor(t * 24) % grainPat.length];
