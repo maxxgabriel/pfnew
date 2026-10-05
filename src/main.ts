@@ -1,6 +1,7 @@
 import './style.css';
 import { drawInk } from './acts/ink';
 import { drawLoopEnd } from './acts/loop';
+import { drawPlay, playFinger, playFingerUp, playTap } from './acts/play';
 import { PAINT_END, drawPainted, paintEnd, paintMove, painted } from './core/paint';
 import { drawWorldTexture, worldOf } from './core/texture';
 import { drawDrift } from './core/drift';
@@ -180,6 +181,8 @@ function loop(now: number) {
     const hint = painted() ? 0 : ease.out3(seg(frame.intro, 3.4, 4.3)) * (1 - seg(B, 0.25, 0.5));
     drawPainted(frame, (g) => drawInk({ ...frame, ctx: g }, 'buffer'), hint, frame.intro);
   } else drawInk(frame, 'night');
+  // the spirits come out to play in the night, before the duel
+  if (frame.hold?.kind === 'play') drawPlay(frame, frame.hold.p);
   // the loop: after the duel
   if (B > ACT.loopStart) drawLoopEnd(frame);
 
@@ -195,18 +198,20 @@ let tapT = 0;
 // a finger (or mouse) dragged over the film leaves a trail; listening only, never blocking the scroll
 // while the sheet is being painted, the finger is a brush instead
 const painting = () => B < PAINT_END;
-const brushAt = (x: number, y: number) => (painting() ? paintMove(x, y, tapT, w, h) : trailMove(x, y, tapT, tapWorld));
+const playing = () => frame.hold?.kind === 'play';
+const brushAt = (x: number, y: number) => (painting() ? paintMove(x, y, tapT, w, h) : playing() ? playFinger(x, y, tapT) : trailMove(x, y, tapT, tapWorld));
 // a mouse paints while pressed; a finger paints whenever it moves, scrolling included (touch events keep coming while the page scrolls)
 window.addEventListener('pointerdown', (e) => { if (e.pointerType === 'mouse' && painting()) paintMove(e.clientX, e.clientY, tapT, w, h); }, { passive: true });
 window.addEventListener('pointermove', (e) => { if (e.pointerType !== 'mouse') return; if (painting() ? e.buttons & 1 : true) brushAt(e.clientX, e.clientY); }, { passive: true });
 window.addEventListener('touchstart', (e) => { const p = e.touches[0]; if (p && painting()) paintMove(p.clientX, p.clientY, tapT, w, h); }, { passive: true });
 window.addEventListener('touchmove', (e) => { const p = e.touches[0]; if (p) brushAt(p.clientX, p.clientY); }, { passive: true });
-window.addEventListener('pointerup', () => { trailEnd(); paintEnd(); }, { passive: true });
+window.addEventListener('pointerup', () => { trailEnd(); paintEnd(); playFingerUp(); }, { passive: true });
 window.addEventListener('touchend', paintEnd, { passive: true });
 window.addEventListener('touchend', trailEnd, { passive: true });
 window.addEventListener('click', (e) => {
   if ((e.target as Element | null)?.closest?.('a, button, #hello, .reel-marks')) return;
-  addTap(e.clientX, e.clientY, tapT, tapWorld);
+  if (playing()) playTap(e.clientX, e.clientY, tapT);
+  else addTap(e.clientX, e.clientY, tapT, tapWorld);
 });
 
 function post(t: number, dt: number) {

@@ -17,7 +17,7 @@ export interface Frame {
   /** seconds since the film was ready; drives the opening title */
   intro: number;
   /** set while a hold is playing: the film is paused at B and `p` runs 0→1 */
-  hold: { kind: 'thunder' | 'titan' | 'dash' | 'alter' | 'dive' | 'meteor' | 'powers' | 'sign'; p: number } | null;
+  hold: { kind: 'play' | 'thunder' | 'titan' | 'dash' | 'alter' | 'dive' | 'meteor' | 'powers' | 'sign'; p: number } | null;
   reduced: boolean;
   /** true on the frame the playhead passes beat `b`, in either direction */
   crossed(b: number): boolean;
@@ -43,6 +43,7 @@ export const ACT = {
 
 export const CHAPTERS = [
   { at: 0, n: 'I', name: 'Ink' },
-  { at: 2.3, n: 'II', name: 'Duel' },
-  { at: 5.3, n: 'III', name: 'Loop' },
+  { at: 2.2, n: 'II', name: 'Play' },
+  { at: 2.3, n: 'III', name: 'Duel' },
+  { at: 5.3, n: 'IV', name: 'Loop' },
 ];

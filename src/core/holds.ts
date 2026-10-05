@@ -8,7 +8,7 @@ import { ACT } from './frame';
  * hold's own progress runs 0→1. Everything authored in film beats keeps its
  * timing; the scroll track just gets longer.
  */
-export type HoldKind = 'thunder' | 'titan' | 'dash' | 'alter' | 'dive' | 'meteor' | 'powers' | 'sign';
+export type HoldKind = 'play' | 'thunder' | 'titan' | 'dash' | 'alter' | 'dive' | 'meteor' | 'powers' | 'sign';
 export interface Hold { at: number; len: number; kind: HoldKind }
 
 /** film beat where the machine's letters become TITAN (the ball is in the cannon) */
@@ -26,6 +26,8 @@ export const POWERS_AT = 18.7;
 export const SIGN_AT = 18.72;
 
 export const HOLDS: Hold[] = [
+  // the night has just taken the sheet: the ink spirits come out to play before the duel
+  { at: 2.2, len: 1.6, kind: 'play' },
   { at: 4.86, len: 1.25, kind: 'thunder' },
 ];
 /** (INK v5: the holds below belonged to the worlds that were cut; kept for reference) */
