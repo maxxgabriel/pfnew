@@ -19,7 +19,7 @@ const BG = '#06101f', LINE = '#9fe3ff', DIM = 'rgba(159,227,255,0.25)', HOT = '#
 
 interface G { ctx: CanvasRenderingContext2D; w: number; h: number; S: number; t: number }
 type Seg = (g: G, u: number) => void;
-const SEGS: Seg[] = [inkBones, dragonSpline, titanBoxes, alterLayers, voidOrbits, rideCircles, matchWire, pageHandles];
+const SEGS: Seg[] = [inkBones, titanBoxes, alterLayers, voidOrbits, matchWire, pageHandles];
 
 export function drawXray(f: Frame, p: number) {
   const { ctx, w, h, t } = f;
@@ -177,46 +177,6 @@ function floor(g: G, y: number) {
   ctx.setLineDash([]);
 }
 
-/* 2. the dragon: its path, the control points, the spine frames riding it */
-function dragonSpline(g: G, u: number) {
-  const { ctx, w, h, S } = g;
-  const way: Pt[] = [[-0.1, 0.8], [0.3, 0.7], [0.7, 0.75], [0.85, 0.45], [0.55, 0.25], [0.2, 0.35], [0.35, 0.55], [1.1, 0.5]].map(([x, y]) => [x * w, y * h]);
-  const at = (v: number): Pt => {
-    const x = clamp(v) * (way.length - 1), k = Math.min(way.length - 2, Math.floor(x)), f = x - k;
-    const p0 = way[Math.max(0, k - 1)], p1 = way[k], p2 = way[k + 1], p3 = way[Math.min(way.length - 1, k + 2)];
-    const cr = (a: number, b: number, c: number, d: number) => 0.5 * (2 * b + (-a + c) * f + (2 * a - 5 * b + 4 * c - d) * f * f + (-a + 3 * b - 3 * c + d) * f * f * f);
-    return [cr(p0[0], p1[0], p2[0], p3[0]), cr(p0[1], p1[1], p2[1], p3[1])];
-  };
-  ctx.strokeStyle = DIM;
-  ctx.setLineDash([4, 6]);
-  ctx.beginPath();
-  for (let i = 0; i <= 120; i++) {
-    const p = at(i / 120);
-    if (i) ctx.lineTo(p[0], p[1]);
-    else ctx.moveTo(p[0], p[1]);
-  }
-  ctx.stroke();
-  ctx.setLineDash([]);
-  ctx.strokeStyle = MARK;
-  for (const p of way) ctx.strokeRect(p[0] - 4, p[1] - 4, 8, 8);
-  // the spine: thirty frames following the head
-  const head = lerp(0.3, 1, u);
-  for (let i = 0; i < 30; i++) {
-    const v = head - i * 0.012;
-    if (v < 0) break;
-    const p = at(v), q = at(v + 0.004);
-    const a = Math.atan2(q[1] - p[1], q[0] - p[0]);
-    const r = S * 0.03 * (1 - i / 34);
-    ctx.strokeStyle = i ? LINE : HOT;
-    ctx.lineWidth = i ? 1 : 2;
-    ctx.beginPath();
-    ctx.arc(p[0], p[1], r, 0, TAU);
-    ctx.moveTo(p[0] - Math.sin(a) * r * 1.8, p[1] + Math.cos(a) * r * 1.8);
-    ctx.lineTo(p[0] + Math.sin(a) * r * 1.8, p[1] - Math.cos(a) * r * 1.8);
-    ctx.stroke();
-  }
-}
-
 /* 3. TITAN: boxes on motion arcs, flying into a body */
 function titanBoxes(g: G, u: number) {
   const { ctx, w, h, S } = g;
@@ -320,58 +280,6 @@ function voidOrbits(g: G, u: number) {
     const x1 = x * Math.cos(ry) + z * Math.sin(ry);
     ctx.fillRect(cx + x1 * R - 1, cy + y * R - 1, 2, 2);
   }
-}
-
-/* 6. the ride: circles for wheels, the road as a curve, the star's fall as a parabola */
-function rideCircles(g: G, u: number) {
-  const { ctx, w, h, S, t } = g;
-  const gy = h * 0.7;
-  floor(g, gy);
-  // the star's path, plotted
-  ctx.strokeStyle = DIM;
-  ctx.setLineDash([3, 5]);
-  ctx.beginPath();
-  for (let i = 0; i <= 40; i++) {
-    const v = i / 40;
-    const x = lerp(w * 0.05, w * 0.95, v), y = lerp(h * 0.08, h * 0.45, v * v);
-    if (i) ctx.lineTo(x, y);
-    else ctx.moveTo(x, y);
-  }
-  ctx.stroke();
-  ctx.setLineDash([]);
-  const sx = lerp(w * 0.05, w * 0.95, u), sy = lerp(h * 0.08, h * 0.45, u * u);
-  ctx.strokeStyle = HOT;
-  ctx.beginPath();
-  ctx.arc(sx, sy, S * 0.015, 0, TAU);
-  ctx.stroke();
-  // the bike
-  const bx = lerp(-S * 0.3, w * 0.6, ease.out3(u)), s = S * 0.45;
-  for (const ox of [-0.4, 0.42]) {
-    ctx.strokeStyle = LINE;
-    ctx.beginPath();
-    ctx.arc(bx + ox * s, gy - s * 0.2, s * 0.2, 0, TAU);
-    ctx.stroke();
-    const a = -bx / (s * 0.2) + t;
-    ctx.beginPath();
-    ctx.moveTo(bx + ox * s, gy - s * 0.2);
-    ctx.lineTo(bx + ox * s + Math.cos(a) * s * 0.2, gy - s * 0.2 + Math.sin(a) * s * 0.2);
-    ctx.stroke();
-  }
-  ctx.beginPath();
-  ctx.moveTo(bx - s * 0.4, gy - s * 0.2);
-  ctx.lineTo(bx - s * 0.05, gy - s * 0.5);
-  ctx.lineTo(bx + s * 0.32, gy - s * 0.6);
-  ctx.lineTo(bx + s * 0.42, gy - s * 0.2);
-  ctx.stroke();
-  // Blot: a drop as two circles and a point
-  ctx.strokeStyle = MARK;
-  ctx.beginPath();
-  ctx.arc(bx - s * 0.07, gy - s * 0.62, s * 0.1, 0, TAU);
-  ctx.moveTo(bx - s * 0.07, gy - s * 0.85);
-  ctx.lineTo(bx - s * 0.15, gy - s * 0.66);
-  ctx.moveTo(bx - s * 0.07, gy - s * 0.85);
-  ctx.lineTo(bx + s * 0.01, gy - s * 0.66);
-  ctx.stroke();
 }
 
 /* 7. the match: a wireframe pitch and the camera's path through it */

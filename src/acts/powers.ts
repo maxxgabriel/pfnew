@@ -9,7 +9,6 @@ import { alterShotP, drawAlter } from './alter';
 import { drawInk } from './ink';
 import { drawMachine, machineBall } from './machine';
 import { drawMatch } from './match';
-import { drawRide, rideShotP } from './ride';
 
 /*
  * V · POWERS OF TEN.
@@ -155,19 +154,10 @@ function pageLevel(f: Frame) {
 const LEVELS: Level[] = [
   // 0: the net, the ball in it
   { draw: (f) => drawMatch(sub(f, POWERS_AT)) },
-  // 1: the city at night; the stadium is a glow among the towers
+  // 1: the back of the page; the stadium is a star in its sky
   {
-    draw: (f) => drawRide(sub(f, f.B), rideShotP('chase', 0.92)),
-    portal: (f) => {
-      const S = Math.min(f.w, f.h);
-      return { x: f.w * 0.74, y: f.h * 0.62 + f.h * 0.05 - S * 0.3 * 0.3, r: S * 0.11 };
-    },
-    edge: (f, P, k) => stadiumEdge(f.ctx, P, k),
-  },
-  // 2: the back of the page; the city is a star in its sky
-  {
-    draw: (f) => drawAlter(sub(f, f.B), alterShotP('after', 0.85)),
-    portal: (f) => ({ x: f.w * 0.3, y: f.h * 0.2, r: Math.min(f.w, f.h) * 0.1 }),
+    draw: (f) => drawAlter(sub(f, f.B), alterShotP('column', 0.999)),
+    portal: (f) => ({ x: f.w * 0.56, y: f.h * 0.22, r: Math.min(f.w, f.h) * 0.1 }),
     edge: (f, P, k) => starEdge(f.ctx, P, k, f.t),
   },
   // 2: the machine; the back of the page is inside the ball
@@ -224,26 +214,6 @@ function starEdge(ctx: CanvasRenderingContext2D, P: Portal, k: number, t: number
     ctx.lineTo(P.r * 0.95, P.r * 0.06);
     ctx.fill();
   }
-  ctx.restore();
-}
-
-function stadiumEdge(ctx: CanvasRenderingContext2D, P: Portal, k: number) {
-  ctx.save();
-  ctx.globalCompositeOperation = 'lighter';
-  ctx.beginPath();
-  ctx.rect(P.x - P.r * 4, P.y - P.r * 4, P.r * 8, P.r * 8);
-  ctx.arc(P.x, P.y, P.r, 0, TAU, true);
-  ctx.clip();
-  ctx.globalAlpha = 0.7 * k;
-  drawSprite(ctx, glow('#9fd2ff', 128), P.x, P.y, P.r * 4);
-  ctx.restore();
-  ctx.save();
-  ctx.globalAlpha = k;
-  ctx.strokeStyle = 'rgba(220,236,255,0.9)';
-  ctx.lineWidth = Math.max(1, P.r * 0.05);
-  ctx.beginPath();
-  ctx.arc(P.x, P.y, P.r, 0, TAU);
-  ctx.stroke();
   ctx.restore();
 }
 

@@ -7,8 +7,6 @@ import { blot, canvas, drawSprite, glow, paperTile, withAlpha } from '../core/sp
 import { C, F, font } from '../core/style';
 import { drawBlot } from '../core/blot';
 import { drawWarrior } from './warrior';
-import { drawCoil, drawDragonRise, drawPearl, drawSwallow, pearlHome, risePearl } from './dragon';
-import { DRAGON_AT, SWALLOW_AT } from '../core/holds';
 import { GOLD, drawBolt, drawCrackle } from '../core/bolt';
 
 /*
@@ -636,8 +634,6 @@ export function drawInk(f: Frame) {
     ctx.globalAlpha = 1;
     // drifting mist between layers
     if (i < 3) drawMist(ctx, w, py + (L.ridge[0] ?? 0) + h * 0.05, t, i, night, S, seg(B, 1.3, 1.75));
-    // the dragon comes up out of the flood from behind the near range
-    if (i === 1 && f.hold?.kind === 'dragon') drawDragonRise(f, f.hold.p);
     if (i === 3) {
       // the pine on the near crag, swaying
       const cragX = px + L.day.width * 0.15;
@@ -660,30 +656,9 @@ export function drawInk(f: Frame) {
   // on a tall screen the fight closes in so the fighters stay in frame
   const squeeze = f.portrait ? 0.8 : 1;
   const XD = (sx: number) => ox + (0.5 + (sx - 0.5) * squeeze) * SW;
-  // (the warriors wait at the bottom of the frame while the dragon rises over them)
   if (B > 2.2 && B < 7) {
     drawPetals(f, dt, XD, Y);
     drawDuel(f, XD, Y, SW, dt, camX, jx, jy);
-  }
-
-  // ---- the pearl and its guardian
-  if (f.hold?.kind === 'dragon') {
-    const pe = risePearl(f, f.hold.p);
-    if (pe) drawPearl(ctx, pe.at[0], pe.at[1], S * 0.014, t, pe.a);
-  } else if (f.hold?.kind === 'swallow') {
-    // pulled down into the meeting of the beams; then the dragon takes it
-    const p = f.hold.p;
-    const home = pearlHome(f, t);
-    const k = ease.in2(seg(p, 0, 0.3));
-    if (p < 0.45) drawPearl(ctx, lerp(home[0], jx, k), lerp(home[1], jy, k), S * 0.014 * (1 + k * 0.5), t, 1);
-    if (f.crossed(SWALLOW_AT) || (p >= 0.45 && p < 0.47)) f.flash(0.35, '#ffffff');
-    drawSwallow(f, p, [jx, jy]);
-  } else if (B > DRAGON_AT && B <= SWALLOW_AT) {
-    const home = pearlHome(f, t);
-    drawPearl(ctx, home[0], home[1], S * 0.014, t, seg(B, DRAGON_AT, DRAGON_AT + 0.05));
-  } else if (B > SWALLOW_AT && B < 6.8) {
-    // curled into a circle round the place it was; the camera dives through it
-    drawCoil(f, [jx, jy]);
   }
 
   ctx.restore();
@@ -1098,9 +1073,8 @@ function drawDuel(
     ctx.restore();
   }
 
-  // ---- beams: the blades give up their light and throw it (until the dragon swallows the pearl)
-  const swallowed = f.hold?.kind === 'swallow' ? f.hold.p >= 0.45 : B > SWALLOW_AT;
-  if (beams > 0 && !swallowed) {
+  // ---- beams: the blades give up their light and throw it
+  if (beams > 0) {
     const grow = ease.out3(beams);
     const orb = ease.in2(seg(B, 5.7, 6.4));
     ctx.save();

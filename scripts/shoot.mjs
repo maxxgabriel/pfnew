@@ -27,14 +27,13 @@ for (const b of beats) {
   await page.evaluate(([b, i]) => {
     window.__film.intro(i);
     if (b.startsWith('alter:')) { const [, n, q] = b.split(':'); window.__film.alter(n, Number(q ?? 0.5)); }
-    else if (b.startsWith('ride:')) { const [, n, q] = b.split(':'); window.__film.ride(n, Number(q ?? 0.5)); }
     else if (b.startsWith('titan:')) { const [, n, q] = b.split(':'); window.__film.titan(n, Number(q ?? 0.5)); }
     else if (b.startsWith('f:')) window.__film.seekFilm(Number(b.slice(2)));
     else if (b.startsWith('hold:')) { const [, k, q] = b.split(':'); window.__film.hold(k, Number(q ?? 0.5)); }
     else window.__film.seek(Number(b));
   }, [b, intro]);
   await page.waitForTimeout(wait);
-  const tag = b.startsWith('alter:') || b.startsWith('hold:') || b.startsWith('ride:') || b.startsWith('titan:') ? b.replace(/:/g, '-') : b.startsWith('f:') ? `f${Number(b.slice(2)).toFixed(2)}` : Number(b).toFixed(2);
+  const tag = b.startsWith('alter:') || b.startsWith('hold:') || b.startsWith('titan:') ? b.replace(/:/g, '-') : b.startsWith('f:') ? `f${Number(b.slice(2)).toFixed(2)}` : Number(b).toFixed(2);
   await page.screenshot({ path: `${OUT}/${kind[0]}-${tag}.png` });
 }
 if (errors.length) console.log('ERRORS:\n' + errors.join('\n'));

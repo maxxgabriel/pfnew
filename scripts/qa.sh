@@ -7,7 +7,7 @@ node scripts/shoot.mjs "$beats" "$kind" 8 500 >/dev/null || exit 1
 files=""
 for b in $(echo "$beats" | tr ',' ' '); do
   case "$b" in
-    alter:*|hold:*|ride:*|titan:*) tag=$(echo "$b" | tr ':' '-') ;;
+    alter:*|hold:*|titan:*) tag=$(echo "$b" | tr ':' '-') ;;
     f:*) tag=$(printf "f%.2f" "${b#f:}") ;;
     *) tag=$(printf "%.2f" "$b") ;;
   esac

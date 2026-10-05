@@ -56,7 +56,7 @@ interface G {
   portrait: boolean;
 }
 
-const SHOTS: Shot[] = [
+const ALL_SHOTS: Shot[] = [
   { name: 'corrupt', dur: 0.9, draw: shotCorrupt },
   { name: 'title', dur: 0.6, draw: shotTitle },
   { name: 'wide', dur: 1.0, draw: shotWide, flash: null },
@@ -94,6 +94,13 @@ const SHOTS: Shot[] = [
   { name: 'after', dur: 0.75, draw: shotAfter },
   { name: 'exit', dur: 0.5, draw: shotExit },
 ];
+/**
+ * Round 10: the owner wanted the act about a third as long. Only these shots play (in this
+ * order); the rest stay in ALL_SHOTS so the cut is easy to retune. It ends on the column: the
+ * Spark rising out of the beam clash, which falls into the stadium as the match ball.
+ */
+const KEEP = ['corrupt', 'title', 'standoff', 'dash', 'clash', 'slashes', 'calm', 'charge', 'fire', 'push', 'snap', 'column'];
+const SHOTS = ALL_SHOTS.filter((s) => KEEP.includes(s.name));
 const TOTAL = SHOTS.reduce((a, s) => a + s.dur, 0);
 
 let lastShot = -1;
