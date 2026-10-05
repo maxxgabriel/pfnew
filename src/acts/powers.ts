@@ -5,6 +5,7 @@ import { POWERS_AT } from '../core/holds';
 import { type Pt, TAU, ease, lerp, seg } from '../core/math';
 import { drawSprite, glow, paperTile, withAlpha } from '../core/sprites';
 import { C } from '../core/style';
+import { alterShotP, drawAlter } from './alter';
 import { drawInk } from './ink';
 import { drawMachine, machineBall } from './machine';
 import { drawMatch } from './match';
@@ -163,7 +164,13 @@ const LEVELS: Level[] = [
     },
     edge: (f, P, k) => stadiumEdge(f.ctx, P, k),
   },
-  // 2: the machine; the city is inside the ball
+  // 2: the back of the page; the city is a star in its sky
+  {
+    draw: (f) => drawAlter(sub(f, f.B), alterShotP('after', 0.85)),
+    portal: (f) => ({ x: f.w * 0.3, y: f.h * 0.2, r: Math.min(f.w, f.h) * 0.1 }),
+    edge: (f, P, k) => starEdge(f.ctx, P, k, f.t),
+  },
+  // 2: the machine; the back of the page is inside the ball
   {
     draw: (f) => drawMachine(sub(f, 11.3)),
     portal: (f) => {
@@ -188,6 +195,37 @@ const LEVELS: Level[] = [
     edge: (f, P, k) => ensoEdge(f, P, k),
   },
 ];
+
+function starEdge(ctx: CanvasRenderingContext2D, P: Portal, k: number, t: number) {
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(P.x - P.r * 4, P.y - P.r * 4, P.r * 8, P.r * 8);
+  ctx.arc(P.x, P.y, P.r, 0, TAU, true);
+  ctx.clip();
+  ctx.globalAlpha = k;
+  drawSprite(ctx, glow('#ffd27a', 128), P.x, P.y, P.r * 4.5);
+  ctx.restore();
+  ctx.globalAlpha = k;
+  ctx.strokeStyle = '#fff6dc';
+  ctx.lineWidth = P.r * 0.06;
+  ctx.beginPath();
+  ctx.arc(P.x, P.y, P.r, 0, TAU);
+  ctx.stroke();
+  ctx.translate(P.x, P.y);
+  ctx.rotate(t * 0.15);
+  ctx.fillStyle = '#fff6dc';
+  for (let i = 0; i < 4; i++) {
+    ctx.rotate(Math.PI / 2);
+    ctx.beginPath();
+    ctx.moveTo(P.r * 0.95, -P.r * 0.06);
+    ctx.lineTo(P.r * 2.6, 0);
+    ctx.lineTo(P.r * 0.95, P.r * 0.06);
+    ctx.fill();
+  }
+  ctx.restore();
+}
 
 function stadiumEdge(ctx: CanvasRenderingContext2D, P: Portal, k: number) {
   ctx.save();

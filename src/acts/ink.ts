@@ -569,6 +569,19 @@ export function drawInk(f: Frame) {
       const r0 = S * 0.012;
       ctx.ellipse(st[0], st[1] + dy, r0, r0 * (1 + fall * 1.6), 0, 0, TAU);
       ctx.fill();
+      // for a blink, inside the drop, the red eye of the knight it will become: a foreshadow
+      const eye = bell(I, 0.36, 0.45);
+      if (eye > 0) {
+        ctx.save();
+        ctx.globalCompositeOperation = 'lighter';
+        ctx.globalAlpha = eye;
+        drawSprite(ctx, glow('#ff1f3d', 64), st[0], st[1] + dy, S * 0.06);
+        ctx.restore();
+        ctx.fillStyle = `rgba(255,60,80,${eye})`;
+        ctx.beginPath();
+        ctx.ellipse(st[0], st[1] + dy, r0 * 0.75, r0 * 0.22, -0.15, 0, TAU);
+        ctx.fill();
+      }
     }
   }
   if (f.crossedFwd(0) && I > 0.5 && I < 0.7) {
@@ -1247,6 +1260,18 @@ export function drawPaperOver(f: Frame) {
   };
   pass(true);
   pass(false);
+  // Blue, still reaching for the pearl, falls through the tear after it
+  const fall = seg(B, 7.3, 7.75);
+  if (fall > 0 && fall < 1) {
+    const s = S * 0.2;
+    const x = w * 0.42 + fall * S * 0.12, y = lerp(-h * 0.1, tearY + gap * 0.3 + h * 0.2, ease.in2(fall));
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(fall * 2.4 - 0.5);
+    ctx.translate(-x, -y);
+    drawWarrior(ctx, { hilt: [x + s * 0.1, y - s * 0.3], a: -Math.PI / 2 - 0.6, foeX: x + s, s, groundY: y + s * 3, color: C.blue, t: f.t, vx: 0, vy: 0, seed: 1 });
+    ctx.restore();
+  }
 }
 
 const edges = new Map<string, Pt[]>();

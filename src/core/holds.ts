@@ -8,7 +8,7 @@ import { ACT } from './frame';
  * hold's own progress runs 0→1. Everything authored in film beats keeps its
  * timing; the scroll track just gets longer.
  */
-export type HoldKind = 'dragon' | 'thunder' | 'swallow' | 'titan' | 'dash' | 'shadow' | 'ride' | 'powers' | 'xray';
+export type HoldKind = 'dragon' | 'thunder' | 'swallow' | 'titan' | 'dash' | 'alter' | 'ride' | 'powers' | 'xray';
 export interface Hold { at: number; len: number; kind: HoldKind }
 
 /** film beat where the ink dragon rises (the flood has just taken the sky) */
@@ -19,13 +19,10 @@ export const SWALLOW_AT = 5.95;
 /** film beat where the machine's letters become TITAN (the ball is in the cannon) */
 export const TITAN_AT = 11.98;
 
-/**
- * film beat where the lights go out and the hand shadows fight (straight after TITAN). The bridge
- * carries on in film time after the hold, up to the ride (see acts/shadow.ts).
- */
-export const SHADOW_AT = 11.985;
+/** film beat where the Alter act plays */
+export const ALTER_AT = 12.63;
 
-/** film beat where the night ride plays: the marble has rolled under the bed */
+/** film beat where the night ride plays: straight after ALTER, as the star falls */
 export const RIDE_AT = 12.64;
 
 /** film beat of the post-credits pencil test, just after "wait —" */
@@ -41,8 +38,8 @@ export const HOLDS: Hold[] = [
   { at: SWALLOW_AT, len: 2.0, kind: 'swallow' },
   // the letters assemble into Green's robot, which punches the ball out of the page
   { at: TITAN_AT, len: 4.8, kind: 'titan' },
-  // lights out: a torch under the blanket, two hand shadows fight over the marble
-  { at: SHADOW_AT, len: 1.7, kind: 'shadow' },
+  // the Alter act plays in the night sky between the machine and the match
+  { at: ALTER_AT, len: 15.45, kind: 'alter' },
   // Blot chases the falling star through the city to the stadium
   { at: RIDE_AT, len: 5.2, kind: 'ride' },
   { at: 15.0, len: 0.95, kind: 'dash' },

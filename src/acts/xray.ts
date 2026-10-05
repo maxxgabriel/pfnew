@@ -19,7 +19,7 @@ const BG = '#06101f', LINE = '#9fe3ff', DIM = 'rgba(159,227,255,0.25)', HOT = '#
 
 interface G { ctx: CanvasRenderingContext2D; w: number; h: number; S: number; t: number }
 type Seg = (g: G, u: number) => void;
-const SEGS: Seg[] = [inkBones, dragonSpline, titanBoxes, rideCircles, matchWire, pageHandles];
+const SEGS: Seg[] = [inkBones, dragonSpline, titanBoxes, alterLayers, voidOrbits, rideCircles, matchWire, pageHandles];
 
 export function drawXray(f: Frame, p: number) {
   const { ctx, w, h, t } = f;
@@ -258,7 +258,71 @@ function titanBoxes(g: G, u: number) {
   floor(g, y);
 }
 
-/* 4. the ride: circles for wheels, the road as a curve, the star's fall as a parabola */
+/* 4. ALTER: two skeletons and the beams as unblended colour layers */
+function alterLayers(g: G, u: number) {
+  const { ctx, w, h, S } = g;
+  const s = S * 0.42;
+  const k: Pt = [w * 0.25, h * 0.72], r: Pt = [w * 0.78, h * 0.42];
+  const a = Math.atan2(r[1] - k[1], r[0] - k[0]);
+  bones(g, k, a, w, s, h * 0.72 + s * 0.5, 1, '#ff6a7c');
+  bones(g, r, a + Math.PI, 0, s * 0.8, h * 0.42 + s * 0.4, 1, '#c1a4ff');
+  const c = 0.5 + Math.sin(u * TAU * 1.5) * 0.15;
+  const t0: Pt = [k[0] + Math.cos(a) * s * 0.7, k[1] + Math.sin(a) * s * 0.7];
+  const t1: Pt = [r[0] - Math.cos(a) * s * 0.56, r[1] - Math.sin(a) * s * 0.56];
+  const P: Pt = [lerp(t0[0], t1[0], c), lerp(t0[1], t1[1], c)];
+  // three channels, misregistered, not added together
+  const nx = -Math.sin(a), ny = Math.cos(a);
+  [['rgba(255,60,80,0.7)', -1], ['rgba(80,255,160,0.5)', 0], ['rgba(90,140,255,0.7)', 1]].forEach(([col, o]) => {
+    ctx.strokeStyle = col as string;
+    ctx.lineWidth = S * 0.02;
+    ctx.beginPath();
+    ctx.moveTo(t0[0] + nx * (o as number) * S * 0.012, t0[1] + ny * (o as number) * S * 0.012);
+    ctx.lineTo(P[0] + nx * (o as number) * S * 0.012, P[1] + ny * (o as number) * S * 0.012);
+    ctx.stroke();
+  });
+  ctx.strokeStyle = 'rgba(193,164,255,0.8)';
+  ctx.lineWidth = S * 0.012;
+  ctx.beginPath();
+  ctx.moveTo(P[0], P[1]);
+  ctx.lineTo(t1[0], t1[1]);
+  ctx.stroke();
+  ctx.strokeStyle = HOT;
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.arc(P[0], P[1], S * 0.05, 0, TAU);
+  ctx.stroke();
+}
+
+/* 5. the void: wireframe orbits and a sphere of points */
+function voidOrbits(g: G, u: number) {
+  const { ctx, w, h, S, t } = g;
+  const cx = w / 2, cy = h * 0.46;
+  for (let i = 0; i < 6; i++) {
+    const rx = S * (0.2 + i * 0.07), ry = rx * (0.15 + hash(i) * 0.4);
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(hash(i * 9) * Math.PI + u * (i % 2 ? 1.5 : -1.5));
+    ctx.strokeStyle = i % 2 ? LINE : DIM;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.ellipse(0, 0, rx, ry, 0, 0, TAU);
+    ctx.stroke();
+    const a = t * (0.5 + i * 0.2) + i;
+    ctx.fillStyle = HOT;
+    ctx.fillRect(Math.cos(a) * rx - 2, Math.sin(a) * ry - 2, 4, 4);
+    ctx.restore();
+  }
+  const ry = u * 4, R = S * 0.16;
+  ctx.fillStyle = LINE;
+  for (let i = 0; i < 120; i++) {
+    const y = 1 - (i / 119) * 2, rr = Math.sqrt(1 - y * y), th = i * 2.399963;
+    const x = Math.cos(th) * rr, z = Math.sin(th) * rr;
+    const x1 = x * Math.cos(ry) + z * Math.sin(ry);
+    ctx.fillRect(cx + x1 * R - 1, cy + y * R - 1, 2, 2);
+  }
+}
+
+/* 6. the ride: circles for wheels, the road as a curve, the star's fall as a parabola */
 function rideCircles(g: G, u: number) {
   const { ctx, w, h, S, t } = g;
   const gy = h * 0.7;
@@ -310,7 +374,7 @@ function rideCircles(g: G, u: number) {
   ctx.stroke();
 }
 
-/* 5. the match: a wireframe pitch and the camera's path through it */
+/* 7. the match: a wireframe pitch and the camera's path through it */
 function matchWire(g: G, u: number) {
   const { ctx, w, h, S } = g;
   const vp: Pt = [w / 2, h * 0.32];
@@ -368,7 +432,7 @@ function matchWire(g: G, u: number) {
   void cn;
 }
 
-/* 6. the page: the first circle with its handles out, and the drop's construction */
+/* 8. the page: the first circle with its handles out, and the drop's construction */
 function pageHandles(g: G, u: number) {
   const { ctx, w, h, S } = g;
   const cx = w / 2, cy = h * 0.42, R = S * 0.28;

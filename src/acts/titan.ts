@@ -5,6 +5,7 @@ import { type Pt, TAU, bell, clamp, ease, hash, lerp, rng, seg } from '../core/m
 import { drawSprite, glow, halftone, withAlpha } from '../core/sprites';
 import { C, extruded } from '../core/style';
 import { drawBall, drawMachine } from './machine';
+import { drawMatch } from './match';
 
 /*
  * TITAN.
@@ -15,8 +16,8 @@ import { drawBall, drawMachine } from './machine';
  * A transformation sequence — rivets popping, plates locking, steam, the eyes
  * lighting up — then a low-angle hero shot, and TITAN punches the ball into
  * the sky. It goes up so hard it turns into a gold bolt, and the bolt splits
- * the picture in two: the halves slide apart and behind them the room is
- * dark (lights out: the hand-shadow bridge, acts/shadow.ts).
+ * the picture in two: the halves slide apart and behind them is the back of
+ * the page, where ALTER begins.
  *
  * Plays inside a hold (`titan`) as the machine reaches its cannon.
  */
@@ -497,6 +498,45 @@ function shotPunch(g: G, q: number) {
   void fist;
 }
 
+/**
+ * Between the split and ALTER: the seam where the page tore fades, and the Spark, a gold ember now,
+ * climbs to the spot where ALTER's target ring will lock on (k 0..1).
+ */
+export function drawAfterSplit(f: Frame, k: number) {
+  const { ctx, w, h, t } = f;
+  const S = Math.min(w, h);
+  const scar = 1 - seg(k, 0, 0.45);
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  if (scar > 0) {
+    const r = rng(77);
+    ctx.strokeStyle = `rgba(255,226,122,${0.5 * scar})`;
+    ctx.lineWidth = Math.max(1, S * 0.004);
+    ctx.beginPath();
+    for (let i = 0; i <= 10; i++) {
+      const x = w * (0.5 + (r() - 0.5) * 0.3), y = (h * i) / 10;
+      if (i) ctx.lineTo(x, y);
+      else ctx.moveTo(x, y);
+    }
+    ctx.stroke();
+  }
+  const up = ease.inOut2(k);
+  const x = w * 0.5 + Math.sin(k * 7 + t * 0.5) * S * 0.02 * (1 - k), y = lerp(h * 0.92, h * 0.32, up);
+  // a short fading tail under it
+  const gr = ctx.createLinearGradient(x, y, x, y + S * 0.3);
+  gr.addColorStop(0, `rgba(255,226,122,${0.5 * (1 - k * 0.7)})`);
+  gr.addColorStop(1, 'rgba(255,226,122,0)');
+  ctx.fillStyle = gr;
+  ctx.fillRect(x - S * 0.006, y, S * 0.012, S * 0.3);
+  drawSprite(ctx, glow(GOLD.c, 64), x, y, S * (0.14 + 0.06 * Math.sin(t * 9)));
+  ctx.restore();
+  ctx.fillStyle = '#fff6d8';
+  ctx.beginPath();
+  ctx.arc(x, y, S * 0.012, 0, TAU);
+  ctx.fill();
+  drawCrackle(ctx, x, y, S * 0.05, t, 0.5, 4);
+}
+
 /* the ball, now lightning, comes back down the frame and splits it; the halves slide apart */
 let buf: { c: HTMLCanvasElement; ctx: CanvasRenderingContext2D; key: string } | null = null;
 function shotSplit(g: G, q: number) {
@@ -524,9 +564,9 @@ function shotSplit(g: G, q: number) {
   poster(gb, { burst: 0.6, ground: h * 0.95 });
   const H = S * (g.portrait ? 1.0 : 0.8);
   titan(gb, w * 0.42, h * 0.95, H, { ...REST, armL: [0.4, 0.8], armR: [3.0, 0.05], eyes: 1, core: 1, steam: 1 }, 1, 3);
-  // behind the poster: the room, dark (the lights-out bridge starts from here)
-  ctx.fillStyle = '#07080d';
-  ctx.fillRect(0, 0, w, h);
+  // behind the page: the night, as it was before the poster
+  if (apart > 0) drawMatch({ ...f, B: 12.4, hold: null, crossed: () => false, crossedFwd: () => false });
+  else ctx.clearRect(0, 0, w, h);
   // the two halves, each clipped along the tear, sliding and tipping away
   for (const side of [-1, 1]) {
     ctx.save();
