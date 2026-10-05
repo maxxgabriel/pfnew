@@ -53,12 +53,37 @@ Match: the spark rises out of ALTER and falls into the stadium as the ball.
 **Gone:** the dragon, the Night Ride, the hand-shadow bridge, the Bedroom
 marble; two-thirds of ALTER.
 
+## How the act changes look (owner's picks, round 10)
+
+- **Whip-pans on the point:** the camera locks onto the moving point and, at
+  an act change, whips with it: a few frames of streaked blur, and the next
+  world lands in place with a small overshoot.
+- **Style-morph cuts:** before a change, the last frame repaints itself in
+  the next act's medium along the pen line's path (ink wash → halftone
+  poster, poster → cel shading and speed lines, anime → broadcast).
+
+- **Light that moves:** blades, thunder and floodlights are real light
+  sources: rim light slides across the fighters as a blade swings, the ground
+  lights up under the bolt, players' shadows swing when the stadium lights
+  come on.
+- **Particles that travel:** one particle system crosses every world and
+  changes costume at each cut: ink petals → poster confetti → ALTER embers →
+  stadium confetti → ink drops on the page, same positions and drift.
+
+Offered and not picked (don't build unasked): titles written live by the pen,
+a squash/stretch/smear craft pass, hit-stop with animation on twos, onion-skin
+ghosts. Rejected in round 10 as well: the X-Ray blueprint (removed).
+
 ## Build order
 
-1. Cleanup: cut the dragon, the Night Ride and the bridge; ALTER at a third.
-2. The four strokes and their trails.
-3. The signature reveal.
-4. The invitation card, credits, X-Ray.
+1. Cleanup: cut the dragon, the Night Ride, the bridge and the X-Ray; ALTER
+   at a third. (Done.)
+2. The four strokes and their trails (subtle).
+3. The act changes: whip-pans and style-morphs.
+4. Light that moves.
+5. Particles that travel.
+6. The signature reveal.
+7. The invitation card and credits.
 
 A preview link after each step.
 
