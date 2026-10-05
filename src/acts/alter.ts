@@ -3570,7 +3570,8 @@ function beam(g: G, x: number, y: number, a: number, k: number, widthOverride?: 
   const fade = 1 - seg(k, 0.85, 1);
   const W = (widthOverride ?? S * 0.32) * grow * fade;
   if (W <= 0) return;
-  const L = len ?? Math.hypot(w, h) * 2;
+  // (an unstopped beam only needs to reach past the edge of the frame)
+  const L = len ?? Math.hypot(w, h) * 1.1;
   if (L <= 0) return;
   ctx.save();
   ctx.translate(x, y);

@@ -213,7 +213,7 @@ function loop(now: number) {
   if (frame.hold?.kind === 'dive') drawDive(frame, frame.hold.p);
 
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  if (wk > 0) whipSmear(ctx, cvs, wk, w, h);
+  if (wk > 0) whipSmear(ctx, wk, w, h);
   post(t, dt);
   hud();
   cost = cost * 0.9 + (performance.now() - c0) * 0.1;

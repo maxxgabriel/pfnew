@@ -30,39 +30,28 @@ export function whipShift(k: number, h: number): number {
   return -(1 - ease.outBack((k - 0.5) * 2, 1.6)) * h * 0.85;
 }
 
-let buf: { c: HTMLCanvasElement; g: CanvasRenderingContext2D } | null = null;
-
-/** motion blur along the pan: the frame smeared over itself, strongest at the cut */
-export function whipSmear(ctx: CanvasRenderingContext2D, src: HTMLCanvasElement, k: number, w: number, h: number) {
+/**
+ * motion blur along the pan, faked without reading the canvas back (that's slow on phones):
+ * a darkening veil and long vertical streaks, strongest at the cut
+ */
+export function whipSmear(ctx: CanvasRenderingContext2D, k: number, w: number, h: number) {
   const amt = Math.sin(Math.min(1, k) * Math.PI);
   if (amt < 0.05) return;
-  if (!buf || buf.c.width !== src.width || buf.c.height !== src.height) {
-    const c = document.createElement('canvas');
-    c.width = src.width;
-    c.height = src.height;
-    buf = { c, g: c.getContext('2d')! };
-  }
-  buf.g.drawImage(src, 0, 0);
   ctx.save();
-  ctx.setTransform(1, 0, 0, 1, 0, 0);
-  const span = (h * 0.12 * amt * src.height) / h;
-  for (let i = 1; i <= 6; i++) {
-    ctx.globalAlpha = 0.2 * amt;
-    ctx.drawImage(buf.c, 0, (i / 6) * span);
-    ctx.drawImage(buf.c, 0, (-i / 6) * span * 0.5);
-  }
-  ctx.restore();
-  // a few hard streaks in the direction of travel
-  ctx.save();
-  ctx.globalAlpha = 0.5 * amt;
-  ctx.strokeStyle = '#ffffff';
-  for (let i = 0; i < 18; i++) {
+  ctx.fillStyle = `rgba(4,3,10,${0.45 * amt})`;
+  ctx.fillRect(0, 0, w, h);
+  ctx.globalCompositeOperation = 'lighter';
+  for (let i = 0; i < 40; i++) {
     const x = hash(i * 3.1) * w;
-    ctx.lineWidth = 1 + hash(i) * 2;
-    ctx.beginPath();
-    ctx.moveTo(x, hash(i * 7) * h);
-    ctx.lineTo(x, hash(i * 7) * h + h * (0.2 + hash(i * 5) * 0.4) * amt);
-    ctx.stroke();
+    const y = (hash(i * 7) - 0.2) * h;
+    const len = h * (0.3 + hash(i * 5) * 0.6) * amt;
+    const g = ctx.createLinearGradient(0, y, 0, y + len);
+    const col = i % 5 === 0 ? '255,80,120' : '220,230,255';
+    g.addColorStop(0, `rgba(${col},0)`);
+    g.addColorStop(0.5, `rgba(${col},${0.35 * amt})`);
+    g.addColorStop(1, `rgba(${col},0)`);
+    ctx.fillStyle = g;
+    ctx.fillRect(x, y, 1 + hash(i) * 3, len);
   }
   ctx.restore();
 }

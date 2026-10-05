@@ -269,7 +269,6 @@ function ensoEdge(f: Frame, P: Portal, k: number) {
 
 /* ------------------------------------------------------------- the zoom */
 
-let buf: { c: HTMLCanvasElement; ctx: CanvasRenderingContext2D; key: string } | null = null;
 
 /** how much of world `li` fits in its parent's portal: the disc of radius S/2 */
 const kOf = (f: Frame, P: Portal) => P.r / (Math.min(f.w, f.h) / 2);
@@ -323,59 +322,23 @@ export function drawPowers(f: Frame, p: number) {
     ctx.fill();
     ctx.restore();
   }
-  // the outer world, everywhere outside the circle; drawn straight to the frame
-  // once it's fully in, and aside (so it can fade) only while the iris closes
-  if (around >= 1) {
+  // the outer world, everywhere outside the circle, drawn straight to the frame; while the iris
+  // closes it fades in by alpha (no offscreen buffer: copying a whole canvas each frame is slow on phones)
+  if (around > 0) {
     ctx.save();
     camera();
     ctx.beginPath();
     ctx.rect(0, 0, w, h);
     ctx.arc(P.x, P.y, P.r, 0, TAU, true);
     ctx.clip();
+    ctx.globalAlpha = around;
     outer.draw(f);
     if (i + 1 === N) pageLife(f, p);
     ctx.restore();
     ctx.save();
     camera();
-    outer.edge?.(f, P, 1);
-    ctx.restore();
-  } else if (around > 0) {
-    const dpr = ctx.getTransform().a;
-    const key = `${w}x${h}x${dpr}`;
-    if (buf?.key !== key) {
-      const c = document.createElement('canvas');
-      c.width = Math.ceil(w * dpr);
-      c.height = Math.ceil(h * dpr);
-      buf = { c, ctx: c.getContext('2d')!, key };
-    }
-    const b = buf!;
-    b.ctx.setTransform(1, 0, 0, 1, 0, 0);
-    b.ctx.clearRect(0, 0, b.c.width, b.c.height);
-    b.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    const fb: Frame = { ...f, ctx: b.ctx };
-    b.ctx.save();
-    b.ctx.translate(Cx, Cy);
-    b.ctx.scale(s, s);
-    b.ctx.translate(-cx, -cy);
-    b.ctx.save();
-    b.ctx.beginPath();
-    b.ctx.rect(0, 0, w, h);
-    b.ctx.clip();
-    outer.draw(fb);
-    b.ctx.restore();
-    if (i + 1 === N) pageLife(fb, p);
-    // cut the circle out, so the inner world shows through
-    b.ctx.globalCompositeOperation = 'destination-out';
-    b.ctx.beginPath();
-    b.ctx.arc(P.x, P.y, P.r, 0, TAU);
-    b.ctx.fill();
-    b.ctx.globalCompositeOperation = 'source-over';
-    outer.edge?.(fb, P, 1);
-    b.ctx.restore();
-    ctx.save();
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.globalAlpha = around;
-    ctx.drawImage(b.c, 0, 0);
+    outer.edge?.(f, P, 1);
     ctx.restore();
   }
 }
