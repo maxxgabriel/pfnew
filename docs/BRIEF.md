@@ -187,3 +187,23 @@ with clear options before a build.
 
 **What the owner reacted against.** Additions that clutter the frame without a
 strong set piece (round 3).
+
+**Round 11: the shooting star, and the character problem.** The match's goal
+became a Ryusei-Blade-style special move (meteor hold). Drawing #10 in code
+failed three times (a stick-figure rig, a 2D cel rig, a 3D model built with
+three.js): the owner called each "weird". What worked: the owner generated
+consistent anime key poses with ChatGPT from one character sheet (magenta
+background), and code cut them out and animated them. Lesson: **code draws
+light, motion, particles and type; people come from real drawings.**
+
+**Round 12: INK — the loop (current direction, replaces everything).** The
+owner, asked what I'd actually suggest and open to major changes: the site is
+**a showpiece** (not for hiring), they **code**, **no projects yet**. Of
+everything built they like **the ink duel** most; the star should be
+**animation and interaction**; the first seconds should give **every feeling
+at once** (hype, delight, awe, mind-blown). They rejected the anime-opening,
+playable-goal, infinite-zoom and source-code pitches, and several twists, then
+asked for twists **like Dark, 1899 or Silo**. Chosen: **A + B** — a time loop
+the site remembers across visits (Dark), and on the last loop the painted sky
+tears to show every other visitor's world (Silo). Everything but the ink world
+is cut (still in git history). See `docs/STORY.md` v5.

@@ -4,7 +4,7 @@ import { layoutWord, wordWidth } from '../core/glyphs';
 import { type Pt, TAU, bell, clamp, ease, fbm1, hash, lerp, noise1, rng, seg } from '../core/math';
 import { Particles, DOT, SPARK } from '../core/particles';
 import { blot, canvas, drawSprite, glow, paperTile, withAlpha } from '../core/sprites';
-import { between, penTrail, STROKES } from '../core/signature';
+import { between, STROKES } from '../core/signature';
 import { C, F, font } from '../core/style';
 import { drawBlot } from '../core/blot';
 import { drawWarrior } from './warrior';
@@ -25,8 +25,9 @@ import { GOLD, drawBolt, drawCrackle } from '../core/bolt';
 const PULL = [0, 1.4] as const;
 const FLOOD = [1.25, 2.35] as const;
 const CLASHES = [3.55, 4.12, 4.45, 4.75];
-const BEAMS = 5.3;
-const ZOOM = [6.0, 6.75] as const;
+// (INK v5: the beams, the dive and the white-out that led to the other worlds are off)
+const BEAMS = 99;
+const ZOOM = [99, 100] as const;
 
 let paper: HTMLCanvasElement;
 let paperPattern: CanvasPattern | null = null;
@@ -666,7 +667,7 @@ export function drawInk(f: Frame) {
   ctx.restore();
 
   // ---- into the light
-  const white = seg(B, 6.4, 6.75);
+  const white = seg(B, ZOOM[0], ZOOM[1]);
   if (white > 0) {
     ctx.fillStyle = `rgba(255,253,246,${ease.in2(white)})`;
     ctx.fillRect(0, 0, w, h);
@@ -861,11 +862,11 @@ export function drawSeal(ctx: CanvasRenderingContext2D, x: number, y: number, s:
   ctx.textBaseline = 'middle';
   ctx.fillText('M', 0, -s * 0.2);
   ctx.fillText('G', 0, s * 0.22);
-  // worn stamp: knock pale flecks out of the red
-  ctx.globalCompositeOperation = 'destination-out';
+  // worn stamp: pale flecks where the ink didn't take (painted, not cut: the canvas is opaque)
+  ctx.fillStyle = C.paper;
   const rr = rng(12);
   for (let i = 0; i < 26; i++) {
-    ctx.globalAlpha = 0.5 + rr() * 0.5;
+    ctx.globalAlpha = alpha * (0.5 + rr() * 0.5);
     ctx.beginPath();
     ctx.arc((rr() - 0.5) * s, (rr() - 0.5) * s, s * (0.008 + rr() * 0.02), 0, TAU);
     ctx.fill();
@@ -1381,11 +1382,8 @@ function drawThunder(
     ctx.restore();
   }
 
-  // 3. the flash: a zig-zag up and down through the opponent. Secretly it's the first stroke
-  // of the signature, the M (core/signature.ts), and its pen-line lingers after the bolt cools.
+  // 3. the flash: a zig-zag up and down through the opponent
   const path: Pt[] = between(STROKES.m, me.chest, foe.chest, 0.55);
-  const pen = seg(p, 0.42, 0.5) * (1 - seg(p, 0.62, 0.8));
-  penTrail(ctx, path, pen * 0.4, S, ease.out3(seg(p, 0.4, 0.44)));
   const head = ease.out3(seg(p, 0.4, 0.44));
   const after = 1 - ease.in2(seg(p, 0.47, 0.6));
   if (hit(0.4)) {

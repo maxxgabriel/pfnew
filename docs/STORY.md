@@ -1,4 +1,47 @@
-# STORY — The Signature (v4, round 10, current)
+# STORY — INK: The Loop (v5, round 12, current)
+
+**This section is the story now.** v4 (The Signature) and everything below
+it are history.
+
+**The idea.** One world: sumi ink on paper, colour only from the two blades
+(Blue, Green) and the red seal. The visitor holds the brush. It is a mystery
+box in the spirit of Dark / 1899 / Silo: clues are planted early, the end
+reframes them, and because it is a website it can **remember you** and show
+that **you are not alone**.
+
+**The beats** (each gives a feeling, each reacts to the finger):
+1. **Awe — the painting.** Blank paper. Dragging paints; the night landscape
+   (moon, mountains, river, mist) blooms out of your strokes. If you only
+   scroll, it paints itself. MAX GABRIEL in big brushwork.
+2. **Delight — the ink is alive.** Ink drops become creatures (Blot and
+   friends) that chase the finger, splash on a tap, hide in petals.
+3. **Hype — the duel.** Blue and Green fight; swipes slash, clashes spark,
+   a long charged swipe calls the thunder finisher that snaps Green's blade.
+4. **The loop (Dark).** The broken half of Green's blade spins away into the
+   dark, arcs back across the whole landscape, and lands in the opening hill
+   — in the past. The watcher on the far mountain was Green, older. The last
+   frame is the first frame; the film starts again by itself.
+5. **The seal.** A red seal with Max's name and the loop number; press to
+   stamp it; it opens the contact card.
+
+**Planted clues (loop 1):** a broken blade already stuck in the opening hill;
+a lone watcher on the far ridge; the seal in the corner reads 1; the moon
+never moves; a hairline crack across the sky; a tiny door in the mountain.
+
+**What changes per visit** (remembered in the browser): the seal counts the
+loops; the watcher comes closer each loop; new clues appear; one loop the
+other fighter wins. **The last loop (Silo):** the winner's slash cuts the sky
+along the crack — the sky is paper — and behind it hang thousands of other ink
+worlds in rows: every other visitor's painting, their real strokes (shared
+storage). Yours has a number.
+
+**Build order:** 1 cut to ink · 2 paint the landscape · 3 living ink ·
+4 interactive duel · 5 the loop + memory · 6 the seal · 7 the torn sky
+(shared strokes).
+
+---
+
+# STORY — The Signature (v4, round 10, superseded)
 
 **This section is the story now.** Everything below is history (v2, "The
 First Drop", rounds 7–9); keep it for reasoning, but where it conflicts,

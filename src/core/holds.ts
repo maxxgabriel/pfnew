@@ -27,6 +27,9 @@ export const SIGN_AT = 18.72;
 
 export const HOLDS: Hold[] = [
   { at: 4.86, len: 1.25, kind: 'thunder' },
+];
+/** (INK v5: the holds below belonged to the worlds that were cut; kept for reference) */
+export const OLD_HOLDS: Hold[] = [
   // the letters assemble into Green's robot, which punches the ball out of the page
   { at: TITAN_AT, len: 4.8, kind: 'titan' },
   // the Alter act plays in the night sky between the machine and the match

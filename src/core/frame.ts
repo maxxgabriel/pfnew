@@ -36,16 +36,13 @@ export const ACT = {
   matchEnd: 20.0,
   finaleStart: 18.7,
   creditsStart: 22.55,
-  END: 30.0,
+  /** INK v5: the ink world only; the loop starts once Green's blade is broken */
+  loopStart: 5.3,
+  END: 6.8,
 };
 
 export const CHAPTERS = [
   { at: 0, n: 'I', name: 'Ink' },
-  { at: 7.4, n: 'II', name: 'Machine' },
-  // Alter plays inside a hold at 12.63; its chapter starts as the bolt cuts to the night sky
-  { at: 12.45, n: 'III', name: 'Alter' },
-  { at: 12.66, n: 'IV', name: 'Match' },
-  // the pull-back plays inside a hold at 18.7, and the page follows it
-  { at: 18.69, n: 'V', name: 'Hello' },
-  { at: 22.7, n: 'VI', name: 'Credits' },
+  { at: 2.3, n: 'II', name: 'Duel' },
+  { at: 5.3, n: 'III', name: 'Loop' },
 ];

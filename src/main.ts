@@ -1,28 +1,16 @@
 import './style.css';
-import { drawInk, drawPaperOver } from './acts/ink';
-import { drawMachine, drawMachineBall, drawMachineCut } from './acts/machine';
-import { drawMatch } from './acts/match';
-import { drawCredits } from './acts/credits';
-import { drawFinale } from './acts/finale';
-import { alterShotP, drawAlter } from './acts/alter';
-import { drawPowers } from './acts/powers';
-import { drawSign } from './acts/sign';
-import { drawStrip, stripK, stripPointer } from './acts/strip';
-import { drawDive } from './acts/dive';
-import { drawMeteor, meteorShotP } from './acts/meteor';
+import { drawInk } from './acts/ink';
+import { drawLoopEnd } from './acts/loop';
 import { drawCardEdge, drawOpenBack, enterCard, openCard } from './acts/open';
-import { posterRepaint, whipK, whipShift, whipSmear } from './core/cuts';
 import { drawWorldTexture, worldOf } from './core/texture';
 import { drawDrift } from './core/drift';
 import { addTap, drawTaps } from './core/taps';
 import { drawTrail, trailEnd, trailMove } from './core/trail';
 import { MARK_LOOP, drawMarkLoop, startMarkLoop } from './core/markloop';
-import { drawAfterSplit, drawTitan, titanShotP } from './acts/titan';
 import { ACT, CHAPTERS, type Frame } from './core/frame';
 import { clamp, damp, seg } from './core/math';
 import { canvas, grainTiles } from './core/sprites';
-import { ALTER_AT, HOLDS, POWERS_AT, RAW_END, TITAN_AT, toFilm, toRaw } from './core/holds';
-import { preloadArt } from './acts/heroArt';
+import { HOLDS, RAW_END, toFilm, toRaw } from './core/holds';
 
 /*
  * THE FILM.
@@ -35,7 +23,6 @@ import { preloadArt } from './acts/heroArt';
 
 const cvs = document.getElementById('film') as HTMLCanvasElement;
 const ctx = cvs.getContext('2d', { alpha: false })!;
-preloadArt();
 const track = document.getElementById('track')!;
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const coarse = matchMedia('(pointer: coarse)').matches;
@@ -100,7 +87,6 @@ const fill = document.getElementById('reel-fill')!;
 const marks = document.getElementById('reel-marks')!;
 const hello = document.getElementById('hello')!;
 const seek = (b: number) => window.scrollTo({ top: toRaw(b) * beatPx, behavior: reduced ? 'auto' : 'smooth' });
-const seekRaw = (r: number) => window.scrollTo({ top: r * beatPx, behavior: reduced ? 'auto' : 'smooth' });
 
 CHAPTERS.forEach((c, i) => {
   const b = document.createElement('button');
@@ -108,14 +94,11 @@ CHAPTERS.forEach((c, i) => {
   b.textContent = c.n;
   b.setAttribute('aria-label', `Chapter ${c.n}: ${c.name}`);
   b.style.left = `${(toRaw(c.at) / RAW_END) * 100}%`;
-  if (c.name === 'Alter') b.classList.add('feature');
-  // chapters that live inside a hold jump to the start of the hold, not past it
-  const inHold = HOLDS.find((hd) => hd.kind === ({ Alter: 'alter', Hello: 'powers' } as Record<string, string>)[c.name]);
   // each mark plays its own tiny loop of that world, then the film jumps there
   b.addEventListener('click', () => {
     const r = b.getBoundingClientRect();
     startMarkLoop(c.name, r.left + r.width / 2, tapT);
-    window.setTimeout(() => (inHold ? seekRaw(toRaw(inHold.at)) : seek(i === 0 ? 0 : c.at + 0.35)), reduced ? 0 : MARK_LOOP * 1000);
+    window.setTimeout(() => seek(i === 0 ? 0 : c.at + 0.1), reduced ? 0 : MARK_LOOP * 1000);
   });
   marks.appendChild(b);
 });
@@ -138,9 +121,6 @@ function hud() {
   let c = 0;
   // (a mark shows a touch early, except where chapters sit close together round the holds)
   CHAPTERS.forEach((ch, i) => { if (B >= ch.at - (i && ch.at - CHAPTERS[i - 1].at < 0.2 ? 0 : 0.05)) c = i; });
-  if (frame.hold?.kind === 'alter') c = CHAPTERS.findIndex((ch) => ch.name === 'Alter');
-  if (frame.hold?.kind === 'powers') c = CHAPTERS.findIndex((ch) => ch.name === 'Hello');
-  if (frame.hold?.kind === 'dive') c = CHAPTERS.findIndex((ch) => ch.name === 'Match');
   if (c !== chapter) {
     chapter = c;
     chN.textContent = CHAPTERS[c].n;
@@ -152,9 +132,9 @@ function hud() {
   }
   fill.style.width = `${(R / RAW_END) * 100}%`;
   // dark type over paper, light type over everything else
-  const onPaper = stripK(B) < 0.5 && (B < 1.75 || (B > 6.7 && B < 7.55) || (B > POWERS_AT && B < 26.8) || (frame.hold?.kind === 'powers' && frame.hold.p > 0.68));
+  const onPaper = B < 1.75 || B > ACT.loopStart + 0.6;
   document.documentElement.classList.toggle('on-paper', onPaper);
-  hello.classList.toggle('on', (B > 20.7 && B < 22.6) || B > 29.45);
+  hello.classList.toggle('on', B > ACT.END - 0.35);
 }
 
 /* ---------------------------------------------------------------- loop */
@@ -193,55 +173,21 @@ function loop(now: number) {
     ctx.translate((Math.random() - 0.5) * shakeAmt, (Math.random() - 0.5) * shakeAmt);
   }
 
-  // the whip-pan between worlds moves the whole frame
-  const wk = whipK(frame);
-  if (wk > 0) ctx.translate(0, whipShift(wk, h));
-
-  if (B < 6.8) {
-    // the opening: the film shrinks into a card on paper under the giant name, then takes the screen back
-    const card = openCard(frame);
-    if (card) {
-      drawOpenBack(frame, card);
-      drawCardEdge(frame, card, true);
-      ctx.save();
-      enterCard(frame, card);
-      drawInk(frame);
-      ctx.restore();
-      drawCardEdge(frame, card, false);
-    } else drawInk(frame);
-    posterRepaint(frame);
-  }
-  // after TITAN the poster is torn open: the machine is gone and the night behind the page shows
-  const torn = B > TITAN_AT;
-  if (B >= 6.85 && B < ACT.machineEnd && !torn) drawMachine(frame);
-  if (torn && B < ACT.matchStart) drawMatch({ ...frame, B: ACT.matchStart });
-  if (B >= 6.75 && B < 7.9) {
-    drawPaperOver(frame);
-    drawMachineBall(frame);
-  }
-  // after the pull-back the film is on paper: the match is over
-  if (B >= ACT.matchStart && B < ACT.matchEnd && !(B > POWERS_AT || frame.hold?.kind === 'powers' || frame.hold?.kind === 'meteor')) drawMatch(frame);
-  // what's left of the bolt climbs the night to where ALTER's target ring locks on
-  if (torn && !frame.hold && B < ALTER_AT) drawAfterSplit(frame, seg(B, TITAN_AT, ALTER_AT - 0.04));
-  if (frame.hold?.kind === 'alter' && frame.hold.p < 0.045) drawAfterSplit(frame, 1);
-  // the gold bolt out of the machine, and its afterimage over the night sky
-  if (B >= ACT.cut[0] && B < ACT.cut[1] + 0.1 && !torn) drawMachineCut(frame);
-  if (B >= ACT.finaleStart && B < ACT.creditsStart + 0.4) {
-    // after the signature the page pulls back into a film strip you can swipe through
-    if (!frame.hold && stripK(B) > 0.001) drawStrip(frame, drawFinale);
-    else drawFinale(frame);
-  }
-  if (B >= ACT.creditsStart) drawCredits(frame);
-
-  if (frame.hold?.kind === 'alter') drawAlter(frame, frame.hold.p);
-  if (frame.hold?.kind === 'titan') drawTitan(frame, frame.hold.p);
-  if (frame.hold?.kind === 'powers') drawPowers(frame, frame.hold.p);
-  if (frame.hold?.kind === 'sign') drawSign(frame, frame.hold.p);
-  if (frame.hold?.kind === 'dive') drawDive(frame, frame.hold.p);
-  if (frame.hold?.kind === 'meteor') drawMeteor(frame, frame.hold.p);
+  // the opening: the film shrinks into a card on paper under the giant name, then takes the screen back
+  const card = openCard(frame);
+  if (card) {
+    drawOpenBack(frame, card);
+    drawCardEdge(frame, card, true);
+    ctx.save();
+    enterCard(frame, card);
+    drawInk(frame);
+    ctx.restore();
+    drawCardEdge(frame, card, false);
+  } else drawInk(frame);
+  // the loop: after the duel
+  if (B > ACT.loopStart) drawLoopEnd(frame);
 
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  if (wk > 0) whipSmear(ctx, wk, w, h);
   post(t, dt);
   hud();
   cost = cost * 0.9 + (performance.now() - c0) * 0.1;
@@ -254,12 +200,6 @@ let tapT = 0;
 window.addEventListener('pointermove', (e) => trailMove(e.clientX, e.clientY, tapT, tapWorld), { passive: true });
 window.addEventListener('touchmove', (e) => { const p = e.touches[0]; if (p) trailMove(p.clientX, p.clientY, tapT, tapWorld); }, { passive: true });
 window.addEventListener('pointerup', trailEnd, { passive: true });
-// the film strip listens for a sideways swipe while it's open
-const stripOn = () => !frame.hold && stripK(B) > 0.9;
-window.addEventListener('pointerdown', (e) => stripPointer('down', e.clientX, tapT, stripOn(), w), { passive: true });
-window.addEventListener('pointermove', (e) => stripPointer('move', e.clientX, tapT, stripOn(), w), { passive: true });
-window.addEventListener('pointerup', (e) => stripPointer('up', e.clientX, tapT, stripOn(), w), { passive: true });
-window.addEventListener('pointercancel', (e) => stripPointer('up', e.clientX, tapT, stripOn(), w), { passive: true });
 window.addEventListener('touchend', trailEnd, { passive: true });
 window.addEventListener('click', (e) => {
   if ((e.target as Element | null)?.closest?.('a, button, #hello, .reel-marks')) return;
@@ -268,7 +208,7 @@ window.addEventListener('click', (e) => {
 
 function post(t: number, dt: number) {
   // letterbox: the film tightens to scope for the fights
-  const lb = frame.hold?.kind === 'alter' || frame.hold?.kind === 'meteor' ? 1 : Math.max(seg(B, 2.5, 3.0) * (1 - seg(B, 6.0, 6.5)), seg(B, 15.3, 15.7) * (1 - seg(B, 17.9, 18.3)), seg(B, 27.0, 27.3) * (1 - seg(B, 28.8, 29.1)));
+  const lb = seg(B, 2.5, 3.0) * (1 - seg(B, ACT.loopStart + 0.3, ACT.loopStart + 0.8));
   if (lb > 0) {
     const bar = h * 0.085 * lb;
     ctx.fillStyle = '#000';
@@ -283,9 +223,8 @@ function post(t: number, dt: number) {
     flashAmt = damp(flashAmt, 0, 10, dt);
   }
   // each world printed on its own stuff, with the same drifting specks in its costume
-  const wld = worldOf(frame, TITAN_AT);
-  const onPage = frame.hold?.kind === 'sign' || (!frame.hold && B > POWERS_AT && B < ACT.creditsStart);
-  tapWorld = wld ?? (onPage ? 'page' : null);
+  const wld = B > ACT.loopStart + 0.6 ? null : worldOf(frame, 99);
+  tapWorld = wld ?? 'page';
   tapT = t;
   drawDrift(ctx, tapWorld, w, h, t, B);
   drawTaps(ctx, w, h, t);
@@ -346,21 +285,6 @@ function jumpRaw(b: number) {
   hold(kind: string, p = 0.5) {
     const h = HOLDS.find((k) => k.kind === kind)!;
     jumpRaw(toRaw(h.at) + h.len * Math.min(0.9999, p));
-  },
-  /** jump to the shooting star's shot `name` at its own progress q */
-  meteor(name: string, q = 0.5) {
-    const h = HOLDS.find((k) => k.kind === 'meteor')!;
-    jumpRaw(toRaw(h.at) + h.len * meteorShotP(name, q));
-  },
-  /** jump to TITAN's shot `name` at its own progress q */
-  titan(name: string, q = 0.5) {
-    const h = HOLDS.find((k) => k.kind === 'titan')!;
-    jumpRaw(toRaw(h.at) + h.len * titanShotP(name, q));
-  },
-  /** jump to ALTER's shot `name` at its own progress q */
-  alter(name: string, q = 0.5) {
-    const h = HOLDS.find((k) => k.kind === 'alter')!;
-    jumpRaw(toRaw(h.at) + h.len * alterShotP(name, q));
   },
   cost: () => cost,
 };
