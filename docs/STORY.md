@@ -1,4 +1,83 @@
-# STORY — The First Drop
+# STORY — The Bedroom (v3, round 10, current)
+
+**This section is the story now.** Everything below it ("The First Drop",
+rounds 7–9) is history: keep it for the reasoning, but where it conflicts,
+this wins. The owner watched round 9 and said the story still didn't click,
+the anime act (ALTER) was too long, made no sense and its animation wasn't
+liked, and the vibe was lost. Every other new scene (Dragon, TITAN, Night
+Ride, the zoom-out, X-Ray) is liked and stays.
+
+**What the ending must do (owner):** *"at the end someone should feel like
+woah what a fucking edit. he really turned the whole thing upside down… all
+these had a second or third meaning which only showed when you zoomed out.
+Chapter by chapter it was great animations, fun looking, and when you zoom
+out reality hits."* Doesn't need to be sad. One hero (the owner pointed at
+the genre-hopping of Split Fiction; ours is original).
+
+## The twist
+
+Every world was a kid (young Max) playing in his bedroom at night. **Blot is
+a doodle on the back of his hand**: the hero you followed was his hand. The
+last layer: the same objects on a grown-up designer's desk. He never stopped
+playing.
+
+**The hero:** Blot, chasing **one glass marble** through every world. The
+marble is the thread: the pearl (Ink), the ball (Machine), the star (Night
+Ride), the football (Match). It must read as the same marble every time.
+
+**The kid:** hands and silhouette only, never a face (owner's choice).
+
+## Chapters, and what they really were
+
+Fun first; the clues are small and only click on a rewatch.
+
+| chapter | what you see | planted clue | what it was |
+|---|---|---|---|
+| Ink | the moon | a faint lampshade rim | the desk lamp |
+| Ink | the mountains | a stitched seam | the crumpled duvet |
+| Ink | two blade fighters | caps on the hilts | two highlighters in his fists |
+| Ink | the dragon | a string from its tail | a paper kite on the wall |
+| Machine | the chain reaction | cm marks on the seesaw | the toy shelf: a ruler, a cup |
+| Machine | TITAN | letter blocks | alphabet blocks |
+| Bridge (replaces ALTER, ~8 s) | the light snaps off; a fight in shadow on the wall | it's literally hands | hand shadows from a torch under the blanket |
+| Night Ride | the neon city, the tunnel | lights blink like chargers | under the bed: charger LEDs, the night light |
+| Match | the stadium, the net, the goal | the net has a bin's mesh | the marble drops into the waste bin: GOAL |
+
+## The reveal (the zoom-out, now with a payoff)
+
+1. Out of the bin the camera pulls back through the dark bedroom.
+2. Match-cut pairs: each world snaps into its real object in the same
+   framing (moon → lamp, mountains → duvet, fighters → highlighters, dragon
+   → kite, TITAN → blocks, city → under the bed).
+3. The door opens, a wedge of hallway light; the kid dives into bed; lights
+   out.
+4. Third layer: the room dissolves into the grown-up desk with the same lamp,
+   highlighters, marble, MAKE THINGS THAT MOVE in blocks, the kite pinned up.
+   The adult hand signs MAX GABRIEL; Blot is on a sticky note on the monitor.
+5. Contact card.
+
+**Credits:** real-object cast lines ("THE DRAGON — a kite from the fair",
+"TITAN — 26 alphabet blocks", "THE MOON — a desk lamp"). X-Ray stays.
+Post-credits: two highlighters crossed on the carpet; one clicks on.
+
+**Gone:** ALTER entirely (rejected round 10), the rivals-reincarnated lore,
+the page-circles version of the zoom-out (the zoom engine stays; what it
+reveals changes).
+
+## Build order
+
+1. Cut ALTER, add the shadow bridge.
+2. One marble everywhere.
+3. Plant the clues.
+4. The bedroom reveal.
+5. The desk layer.
+6. Credits and post-credits.
+
+A preview link after each step.
+
+---
+
+# (history) STORY v2 — The First Drop
 
 This is the story the film is being rebuilt around, and the plan for every
 idea the owner approved in round 7. It turns "ink duel, cartoon machine,

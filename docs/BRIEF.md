@@ -168,6 +168,17 @@ becomes the knight; Green builds TITAN, is reborn in ALTER, wins the match;
 the Spark changes shape every act; Blot is in every world) and by one line
 under the Machine and Match cards. Sound is still not built.
 
+**Round 10: rethink — The Bedroom (approved direction).** After round 9 the
+owner: *"i don't think the changes felt right… the anime arc is too long and
+makes no sense nor do I like the animations there"*; the story still didn't
+click and the vibe was lost; every other new scene is good. The ending must
+make you go *"woah what an edit"*: everything had a second meaning that only
+shows when you zoom out. One hero. Offered three twists (The Bedroom, The Edit
+Bay, Your Phone); they picked **The Bedroom**: it was all a kid playing in his
+room at night, Blot is a doodle on his hand, last layer the grown-up's desk.
+ALTER is cut and replaced by a short hand-shadow bridge. The kid: hands and
+silhouette only. See `docs/STORY.md` v3.
+
 **What the owner responds to.** Big, cinematic, anime-like set pieces;
 continuity jokes (Blot); hard cuts, impact frames, speed lines. Proposals
 with clear options before a build.
