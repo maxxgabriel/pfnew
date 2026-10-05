@@ -36,17 +36,15 @@ export const ACT = {
   matchEnd: 20.0,
   finaleStart: 18.7,
   creditsStart: 22.55,
-  /** One Day (round 13): the ink night, then a day of painted scenes (src/day/day.ts DAY) */
-  END: 12.2,
+  /** Ink in Water (round 14): src/water/water.ts W */
+  END: 9.6,
 };
 
 export const CHAPTERS = [
-  { at: 0, n: 'I', name: 'Night' },
-  { at: 2.2, n: 'II', name: 'Morning' },
-  { at: 3.85, n: 'III', name: 'Train' },
-  { at: 5.45, n: 'IV', name: 'Noon' },
-  { at: 6.55, n: 'V', name: 'Rain' },
-  { at: 7.75, n: 'VI', name: 'Evening' },
-  { at: 8.9, n: 'VII', name: 'Dusk' },
-  { at: 10.05, n: 'VIII', name: 'Night' },
+  { at: 0, n: 'I', name: 'Drop' },
+  { at: 0.9, n: 'II', name: 'Mountains' },
+  { at: 2.9, n: 'III', name: 'Bamboo' },
+  { at: 4.7, n: 'IV', name: 'Waves' },
+  { at: 6.4, n: 'V', name: 'Rain' },
+  { at: 7.9, n: 'VI', name: 'Ensō' },
 ];
