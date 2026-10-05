@@ -3470,7 +3470,8 @@ function shotSnap(g: G, q: number) {
   }
   // the red beam coming in from the left over everything
   const by = hy - s * 0.1;
-  beam(g, -w * 0.1, by, 0, 0.5, S * 0.3, lerp(w * 0.3, w * 1.2, ease.in2(q)), BEAM_BLUE);
+  // (from far off the left edge, so what's on screen is the beam and its tapered head, never a stub)
+  beam(g, -w * 0.7, by, 0, 0.5, S * 0.2, lerp(w * 1.15, w * 1.95, ease.in2(q)), BEAM_BLUE);
   ctx.save();
   ctx.globalCompositeOperation = 'lighter';
   drawSprite(ctx, glow(RED.hot, 128), lerp(w * 0.4, w * 0.75, ease.in2(q)), by, S * (0.9 + Math.sin(t * 50) * 0.08));
@@ -3569,8 +3570,15 @@ function beam(g: G, x: number, y: number, a: number, k: number, widthOverride?: 
     gr.addColorStop(0.5, withAlpha(col, al));
     gr.addColorStop(1, withAlpha(col, 0));
     ctx.fillStyle = gr;
-    ctx.fillRect(0, -hh / 2, L, hh);
-    if (len !== undefined) {
+    if (len === undefined) ctx.fillRect(0, -hh / 2, L, hh);
+    else {
+      // fade out lengthwise into the head, so the glow has no square end
+      const fl = Math.min(L * 0.5, hh * 0.6), x1 = L - fl;
+      ctx.fillRect(0, -hh / 2, x1, hh);
+      for (let i = 0; i < 10; i++) {
+        ctx.globalAlpha = 1 - (i + 0.5) / 10;
+        ctx.fillRect(x1 + (fl * i) / 10, -hh / 2, fl / 10 + 0.5, hh);
+      }
       ctx.globalAlpha = al;
       drawSprite(ctx, glow(col, 128), L, 0, hh * 1.1);
       ctx.globalAlpha = 1;
@@ -3585,10 +3593,11 @@ function beam(g: G, x: number, y: number, a: number, k: number, widthOverride?: 
     const x = u * L;
     const inn = Math.min(1, x / Math.max(1, Math.min(W * 1.4, L * 0.25)));
     const out = stopped ? Math.min(1, (L - x) / Math.max(1, Math.min(W * 1.8, L * 0.25))) : 1;
-    return Math.sqrt(Math.max(0, Math.min(inn, out)));
+    // eased so the taper meets the straight body without a corner
+    return 1 - (1 - Math.max(0, Math.min(inn, out))) ** 2.4;
   };
   const body = (wd: number) => {
-    const n = 40;
+    const n = 120;
     ctx.beginPath();
     for (let i = 0; i <= n; i++) ctx.lineTo((i / n) * L, -prof(i / n) * wd / 2);
     for (let i = n; i >= 0; i--) ctx.lineTo((i / n) * L, prof(i / n) * wd / 2);
