@@ -8,6 +8,7 @@ import { alterShotP, drawAlter } from './acts/alter';
 import { drawPowers } from './acts/powers';
 import { drawSign } from './acts/sign';
 import { drawDive } from './acts/dive';
+import { posterRepaint, whipK, whipShift, whipSmear } from './core/cuts';
 import { drawAfterSplit, drawTitan, titanShotP } from './acts/titan';
 import { ACT, CHAPTERS, type Frame } from './core/frame';
 import { clamp, damp, seg } from './core/math';
@@ -176,7 +177,14 @@ function loop(now: number) {
     ctx.translate((Math.random() - 0.5) * shakeAmt, (Math.random() - 0.5) * shakeAmt);
   }
 
-  if (B < 6.8) drawInk(frame);
+  // the whip-pan between worlds moves the whole frame
+  const wk = whipK(frame);
+  if (wk > 0) ctx.translate(0, whipShift(wk, h));
+
+  if (B < 6.8) {
+    drawInk(frame);
+    posterRepaint(frame);
+  }
   // after TITAN the poster is torn open: the machine is gone and the night behind the page shows
   const torn = B > TITAN_AT;
   if (B >= 6.85 && B < ACT.machineEnd && !torn) drawMachine(frame);
@@ -202,6 +210,7 @@ function loop(now: number) {
   if (frame.hold?.kind === 'dive') drawDive(frame, frame.hold.p);
 
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  if (wk > 0) whipSmear(ctx, cvs, wk, w, h);
   post(t, dt);
   hud();
   cost = cost * 0.9 + (performance.now() - c0) * 0.1;
