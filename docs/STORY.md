@@ -112,8 +112,10 @@ shooting star, after Ryusei Blade: the ball ignites, is flicked into space,
 becomes a blue sphere in a constellation, #10 leaps and volleys it, everything
 holds on a white frame, the stars collapse into it, it goes off, and a blade
 of yellow light with a blue wake falls out of space into the goal, its trail
-turning to ink. #10 stays the match's green light-pin (a drawn human figure
-was tried and looked wrong).
+turning to ink. In the special move #10 is a real anime character: a dark-haired
+striker in the lime kit, drawn as key poses (the owner generated them from a
+character sheet; they're cut out and animated in code). A hand-coded 2D figure
+and a code-built 3D model were tried first and rejected as weird.
 
 Offered and not picked (don't build unasked): exploding act titles.
 Offered and not picked (don't build unasked): titles written live by the pen,

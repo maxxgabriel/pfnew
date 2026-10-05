@@ -13,7 +13,7 @@ const kind = process.argv[3] ?? 'phone';
 const intro = process.argv[4] === undefined || process.argv[4] === 'live' ? null : Number(process.argv[4]);
 const wait = Number(process.argv[5] ?? 700);
 
-const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium', args: ['--use-gl=swiftshader', '--enable-unsafe-swiftshader'] });
+const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium', args: ['--use-gl=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
 const vp = kind === 'phone' ? { width: 390, height: 844, deviceScaleFactor: 2 } : { width: 1440, height: 900, deviceScaleFactor: 1 };
 const page = await browser.newPage({ ignoreHTTPSErrors: true, viewport: { width: vp.width, height: vp.height }, deviceScaleFactor: vp.deviceScaleFactor });
 const errors = [];

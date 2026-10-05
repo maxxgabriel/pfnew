@@ -108,9 +108,17 @@ move, staged after the anime meteor-shot sequence (Ryusei Blade): control →
 ignite → launch → sphere in space → leap and spin → contact (white frame, held)
 → the constellation collapses into the ball → bang → the blade falls out of
 space. Timing is deliberately uneven (slow, FAST, stop, slow, FAST, FREEZE,
-violent acceleration). #10 is the same green light-pin the broadcast camera
-shows, close up (`drawPin`): his "leg" is the whole pin swung from the head,
-with a smear fan on the kick. The blade (`drawBlade`: white core, yellow head,
+violent acceleration). #10 is drawn art (`src/acts/heroArt.ts`): eleven
+key-pose drawings (control, windup, flick, crouch, rise, tuck, bicycle,
+follow, kneel, boot close-up, face close-up) cut out of magenta by
+`scripts/cutout.py` into `src/assets/hero/*.webp` (inlined, ~650 KB) with a
+`manifest.json` of crops. `drawArt(ctx, pose, x, y, height, anchor, opts)`
+places a drawing by a named anchor measured in the original 1024x1536 pixels
+(planted foot, sole, toe, eye...), and adds rim light, a flat silhouette or a
+wash of light from tinted copies of the cut-out. To add a pose: run cutout.py
+on the new PNG, add its anchors to `A` in heroArt.ts. `src/hero3d/` (a 3D
+model built in code with three.js) and `src/acts/striker.ts` (a 2D rig) are
+earlier attempts, not used by the film and not in the bundle. The blade (`drawBlade`: white core, yellow head,
 blue wake, lightning, orbs) is exported and reused by match.ts, where after the
 hold the ball falls from `METEOR_FROM` high in the sky to `IMPACT` (a low
 camera tilted up catches it), and on impact its path becomes an ink brush

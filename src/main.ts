@@ -22,6 +22,7 @@ import { ACT, CHAPTERS, type Frame } from './core/frame';
 import { clamp, damp, seg } from './core/math';
 import { canvas, grainTiles } from './core/sprites';
 import { ALTER_AT, HOLDS, POWERS_AT, RAW_END, TITAN_AT, toFilm, toRaw } from './core/holds';
+import { preloadArt } from './acts/heroArt';
 
 /*
  * THE FILM.
@@ -34,6 +35,7 @@ import { ALTER_AT, HOLDS, POWERS_AT, RAW_END, TITAN_AT, toFilm, toRaw } from './
 
 const cvs = document.getElementById('film') as HTMLCanvasElement;
 const ctx = cvs.getContext('2d', { alpha: false })!;
+preloadArt();
 const track = document.getElementById('track')!;
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const coarse = matchMedia('(pointer: coarse)').matches;

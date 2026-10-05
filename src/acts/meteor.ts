@@ -3,7 +3,7 @@ import type { Frame } from '../core/frame';
 import { type Pt, TAU, clamp, ease, hash, lerp, rng, seg } from '../core/math';
 import { drawSprite, glow, withAlpha } from '../core/sprites';
 import { drawBall } from './machine';
-import { type HeroOpts, POSE, drawHero, heroPoints, mix } from '../hero3d';
+import { artPoints, drawArt, preloadArt } from './heroArt';
 
 /*
  * THE SHOOTING STAR (#10's special move, in the `meteor` hold).
@@ -55,6 +55,7 @@ let lastShot = -1, lastQ = 0;
 let hitQ: (x: number) => boolean = () => false;
 
 export function drawMeteor(f: Frame, p: number) {
+  preloadArt();
   const { ctx, w, h, t } = f;
   const g: G = { f, ctx, w, h, S: Math.min(w, h), t };
   let acc = 0, i = 0;
@@ -263,30 +264,37 @@ function constellation(ctx: CanvasRenderingContext2D, cx: number, cy: number, R:
 
 /* =============================================================== shots */
 
-/* 1. low and wide in the stadium: #10 rolls the ball under his boot, scarf and hair moving; blue sparks begin */
+/* 1. low and wide in the stadium: #10 taps the ball under his sole, again and again; blue sparks begin */
 function shotControl(g: G, q: number) {
   const { ctx, w, h, S, t } = g;
-  const hz = h * 0.52;
+  const hz = h * 0.5;
   const push = 1 + ease.inOut2(q) * 0.08;
   ctx.translate(w / 2, h * 0.8);
   ctx.scale(push, push);
   ctx.translate(-w / 2, -h * 0.8);
   stadium(g, hz);
-  const H = Math.min(h * 0.6, w * 1.3);
-  const gy = h * 0.88;
-  // on twos: the pose steps every other frame (the scarf and hair stay on ones)
+  const H = Math.min(h * 0.6, w * 1.25);
+  const gy = h * 0.87;
+  const px = w * 0.36;
+  // he rocks a little on his planted foot (stepped on twos, like a drawn cel)
   const tw = Math.floor(t * 12) / 12;
-  const twist = Math.sin(tw * 3.2) * 0.5 + 0.5;
-  const ps = mix(POSE.stand, POSE.roll, 0.55 + 0.45 * twist);
-  const hero: HeroOpts = { x: w * 0.4, y: gy, anchor: 'footL', height: H, pose: ps, yaw: Math.PI / 2 - 0.45, pitch: -0.08, t, light: [-0.6, -0.8, 0.4], rim: '#dfe9ff', rimA: 0.9, wind: 0.3, flow: [-1, -0.1] };
-  const sk = heroPoints(w, h, hero);
+  const rock = Math.sin(tw * 3) * 0.015;
+  const look = { rot: rock, rim: '#e6efff', rimA: 0.9, rimDir: [-0.8, -0.6] as Pt };
+  const pts = artPoints('control', px, gy, H, 'plant', look);
+  // the ball bounces between the grass and his sole: tap, tap, tap
   const br = H * 0.062;
-  const bx = sk ? (sk.footR[0] + sk.toeR[0]) / 2 : w * 0.5, by = gy - br;
-  shadow(ctx, w * 0.4, gy, H);
-  const spark = seg(q, 0.4, 1);
+  const top = pts.sole[1] + br * 0.95, low = gy - br;
+  const bounce = Math.abs(Math.sin(t * 5.2));
+  const bx = pts.sole[0] + br * 0.1, by = lerp(low, top, 1 - bounce * bounce);
+  shadow(ctx, px + H * 0.12, gy, H);
+  ctx.fillStyle = 'rgba(0,0,0,0.4)';
+  ctx.beginPath();
+  ctx.ellipse(bx, gy, br * 1.2 * (0.6 + 0.4 * (by - top) / (low - top || 1)), br * 0.25, 0, 0, TAU);
+  ctx.fill();
+  const spark = seg(q, 0.35, 1);
   aura(ctx, bx, by, br, t, spark * 0.7);
-  drawBall(ctx, bx, by, br, bx / br + t * 2, t, 1);
-  drawHero(ctx, w, h, { ...hero, wind: 0.3 + spark * 0.4 });
+  drawBall(ctx, bx, by, br, t * 5, t, 1);
+  drawArt(ctx, 'control', px, gy, H, 'plant', { ...look, wash: K.blue, washA: spark * 0.12 });
   sparks(ctx, bx, by, br, t, spark, S);
 }
 
@@ -302,16 +310,18 @@ function shotEye(g: G, q: number) {
   drawSprite(ctx, glow(K.deep, 256), w * 0.5, h * 1.05, S * 2.4, S * 1.4);
   drawSprite(ctx, glow(K.blue, 256), w * 0.6, h * 0.95, S * 1.2, S * 0.7);
   ctx.restore();
-  const s = S * lerp(1.15, 1.3, ease.inOut2(q));
+  const ex = w * 0.34, ey = h * 0.45;
+  const size = h * lerp(1.0, 1.12, ease.inOut2(q));
   const gl = seg(q, 0.45, 0.6) * (1 - seg(q, 0.75, 1) * 0.6);
-  drawHero(ctx, w, h, { x: w * 0.5, y: h * 0.46, anchor: 'eye', height: s * 7, pose: POSE.stand, yaw: Math.PI / 2 - 0.6, pitch: -0.05, fov: 30, t, light: [0.2, 0.9, 0.5], rim: K.cyan, rimA: 1, wind: 0.85, flow: [-1, -0.3] });
-  // the glint flares
+  // a slow drift, and a shiver of wind in the frame
+  const sh = Math.sin(t * 23) * 0.6;
+  drawArt(ctx, 'face', ex + sh, ey, size, 'eye', { rim: K.cyan, rimA: 0.9, rimDir: [0.3, 1], rimW: S * 0.012, wash: K.blue, washA: 0.08 + gl * 0.12 });
   if (gl > 0) {
     ctx.save();
     ctx.globalCompositeOperation = 'lighter';
     ctx.globalAlpha = gl;
-    drawSprite(ctx, glow(K.cyan, 64), w * 0.5, h * 0.46, S * 0.5);
-    glint4(ctx, w * 0.5, h * 0.45, S * 0.16 * gl);
+    drawSprite(ctx, glow(K.cyan, 64), ex, ey, S * 0.5);
+    glint4(ctx, ex, ey - S * 0.005, S * 0.16 * gl);
     ctx.restore();
   }
   // embers drifting up across the frame
@@ -326,7 +336,7 @@ function shotEye(g: G, q: number) {
   if (hitQ(0.5)) g.f.shake(S * 0.006);
 }
 
-/* 2. close on the boot and the ball: the ball ignites blue under his foot, the grass lit around it */
+/* 2. close on the boot and the ball: the ball ignites blue under his sole, the grass lit around it */
 function shotIgnite(g: G, q: number) {
   const { ctx, w, h, S, t } = g;
   const gy = h * 0.7;
@@ -359,10 +369,10 @@ function shotIgnite(g: G, q: number) {
   }
   aura(ctx, bx, by, br, t, k);
   drawBall(ctx, bx, by, br, t * (2 + k * 9), t, 1);
-  // his boot rests on top of the ball, rolling it, and lifts away at the end
+  // his boot presses down on the ball, rolling it, and lifts away at the end
   const lift = ease.in2(seg(q, 0.8, 1)) * h * 0.6;
-  const fx = bx - br * 0.25 + Math.sin(t * 6) * br * 0.1, fy = by - br * 0.92 - lift;
-  drawHero(ctx, w, h, { x: fx, y: fy, anchor: 'footR', height: (br / 0.11) * 1.68, pose: { ...POSE.roll, ftR: 0 }, yaw: Math.PI / 2 - 0.5, pitch: 0.05, fov: 35, t, light: [0.1, 1, 0.4], rim: K.cyan, rimA: 0.4 + k * 0.6, wind: 0.5 });
+  const roll = Math.sin(t * 6) * br * 0.08;
+  drawArt(ctx, 'boot', bx + roll, by - br * 0.97 - lift, br * 5.6, 'sole', { rot: -0.04, rim: K.cyan, rimA: 0.4 + k * 0.6, rimDir: [0, 1], rimW: S * 0.008, wash: K.blue, washA: k * 0.15 });
   // a ring of sparks pumping out
   ctx.save();
   ctx.globalCompositeOperation = 'lighter';
@@ -377,7 +387,7 @@ function shotIgnite(g: G, q: number) {
   if (hitQ(0.3)) g.f.shake(S * 0.01);
 }
 
-/* 3. the leg swings back and flicks the ball straight up; the camera tilts after it */
+/* 3. the leg swings back, then the cut to the flick: the ball goes straight up; the camera tilts after it */
 function shotLaunch(g: G, q: number) {
   const { ctx, w, h, S, t } = g;
   const kick = 0.42;
@@ -385,42 +395,51 @@ function shotLaunch(g: G, q: number) {
   ctx.save();
   ctx.translate(0, tilt);
   stadium(g, h * 0.55, 0);
-  const H = Math.min(h * 0.52, w * 1.15);
+  const H = Math.min(h * 0.58, w * 1.25);
   const gy = h * 0.9;
-  const poseAt = (x: number) => (x < kick ? mix(POSE.roll, POSE.windup, ease.inOut2(seg(x, 0, kick))) : mix(POSE.windup, POSE.flick, ease.out5(seg(x, kick, kick + 0.13))));
-  const stepQ = Math.floor(q * 30) / 30;
-  const ps = poseAt(stepQ);
-  const base: HeroOpts = { x: w * 0.36, y: gy, anchor: 'footL', height: H, pose: ps, yaw: Math.PI / 2 - 0.4, pitch: -0.1, t, light: [-0.5, -0.8, 0.4], rim: q > kick ? K.cyan : '#dfe9ff', rimA: 1, wind: 0.5, flow: [-1, q > kick ? 0.4 : -0.1] };
-  shadow(ctx, w * 0.36, gy, H);
-  const sk0 = heroPoints(w, h, { ...base, pose: POSE.windup });
+  const px = w * 0.42;
+  shadow(ctx, px, gy, H);
   const br = H * 0.062;
-  const bx0 = (sk0 ? sk0.footL[0] : w * 0.36) + H * 0.14, by0 = gy - br;
+  const bx0 = px + H * 0.13, by0 = gy - br;
   const up = ease.in2(seg(q, kick, 1));
   const bx = bx0 - up * w * 0.05, by = lerp(by0, -h * 1.6, up);
   if (q < kick) {
     aura(ctx, bx0, by0, br, t, 0.8);
     drawBall(ctx, bx0, by0, br, t * 4, t, 1);
-  }
-  // the smear of the kick: a fan of light swept by the boot
-  if (q > kick && q < kick + 0.25) {
-    const a = 1 - seg(q, kick + 0.08, kick + 0.25);
-    const fan: Pt[] = [];
-    for (let i = 0; i <= 8; i++) {
-      const p = heroPoints(w, h, { ...base, pose: poseAt(lerp(kick - 0.02, Math.min(q, kick + 0.13), i / 8)) });
-      if (p) fan.push(p.toeR);
+    // the windup: a slow lean back into it
+    const k = ease.inOut2(seg(q, 0, kick));
+    drawArt(ctx, 'windup', px, gy, H, 'plant', { rot: -0.04 * k, stretch: 1 - 0.02 * k, rim: '#e6efff', rimA: 0.9, rimDir: [-0.8, -0.6] });
+  } else {
+    // the smear: a fan of light swept by the boot from behind him up to where it ends
+    const k = seg(q, kick, kick + 0.22);
+    const wp = artPoints('windup', px, gy, H, 'plant');
+    const fp = artPoints('flick', px, gy, H, 'plant');
+    if (k < 1) {
+      const hip = fp.hip;
+      const a0 = Math.atan2(wp.back[1] - hip[1], wp.back[0] - hip[0]);
+      let a1 = Math.atan2(fp.toe[1] - hip[1], fp.toe[0] - hip[0]);
+      if (a1 > a0) a1 -= TAU;
+      const R = Math.hypot(fp.toe[0] - hip[0], fp.toe[1] - hip[1]);
+      ctx.save();
+      ctx.globalCompositeOperation = 'lighter';
+      // a crescent where the boot travelled, bright at the leading edge
+      ctx.globalAlpha = 0.7 * (1 - k);
+      const gr = ctx.createRadialGradient(hip[0], hip[1], R * 0.78, hip[0], hip[1], R * 1.04);
+      gr.addColorStop(0, withAlpha(K.cyan, 0));
+      gr.addColorStop(0.8, withAlpha(K.cyan, 0.7));
+      gr.addColorStop(1, withAlpha('#ffffff', 0.9));
+      ctx.fillStyle = gr;
+      ctx.beginPath();
+      ctx.arc(hip[0], hip[1], R * 1.04, a0, a1, true);
+      ctx.arc(hip[0], hip[1], R * 0.78, a1, a0, false);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
     }
-    const knee = heroPoints(w, h, base)?.kneeR ?? [0, 0];
-    ctx.save();
-    ctx.globalCompositeOperation = 'lighter';
-    ctx.globalAlpha = 0.28 * a;
-    ctx.fillStyle = K.cyan;
-    ctx.beginPath();
-    ctx.moveTo(knee[0], knee[1]);
-    for (const p of fan) ctx.lineTo(p[0], p[1]);
-    ctx.fill();
-    ctx.restore();
+    // the follow-through settles: overshoot back a touch
+    const settle = Math.sin(seg(q, kick, kick + 0.2) * Math.PI) * 0.05;
+    drawArt(ctx, 'flick', px, gy, H, 'plant', { rot: settle, rim: K.cyan, rimA: 1, rimDir: [0.4, -1], wash: K.blue, washA: 0.12 * (1 - k) });
   }
-  drawHero(ctx, w, h, { ...base, wind: 0.5 + up * 0.4 });
   ctx.restore();
   const sy = by + tilt;
   if (q >= kick) {
@@ -464,9 +483,8 @@ function shotSphere(g: G, q: number) {
   ctx.beginPath();
   ctx.ellipse(sx, sy + S * 0.02, S * 0.4, S * 0.07, 0, Math.PI, TAU);
   ctx.fill();
-  // #10, tiny on the pitch, looking up
-  const sH = S * 0.045;
-  drawHero(ctx, w, h, { x: sx, y: sy - S * 0.03, anchor: 'footL', height: sH, pose: { ...POSE.stand, nod: -0.7, lean: -0.1 }, yaw: Math.PI / 2 - 0.3, t, light: [0, -1, 0.3], rim: K.cyan, rimA: 1, wind: 0.6, line: 0.5 });
+  // #10, small on the pitch, crouched, looking up at it
+  drawArt(ctx, 'crouch', sx, sy - S * 0.025, S * 0.1, 'plant', { rim: K.cyan, rimA: 1, rimDir: [0, -1], rimW: 1.2 });
   const cx = w * 0.5, cy = h * 0.36;
   const arrive = ease.out5(seg(q, 0, 0.18));
   const by = lerp(h * 1.1, cy, arrive);
@@ -503,7 +521,7 @@ function shotSphere(g: G, q: number) {
   if (hitQ(0.18)) g.f.shake(S * 0.02);
 }
 
-/* 5. he leaps after it and spins, the scarf wrapping the turn, the stars wheeling round him */
+/* 5. he leaps after it: up out of the frame's floor, curls and spins among the stars, opens into the volley */
 function shotLeap(g: G, q: number) {
   const { ctx, w, h, S, t } = g;
   const orbit = ease.inOut2(q);
@@ -514,40 +532,54 @@ function shotLeap(g: G, q: number) {
   drawSprite(ctx, glow(K.blue, 256), scx, scy, S * 1.6);
   ctx.restore();
   constellation(ctx, scx, scy, S * 0.3, 1, t, 0.8);
+  const H = Math.min(h * 0.5, w * 1.05);
   const k = ease.out2(q);
-  const H = Math.min(h * 0.4, w * 0.85);
-  const x = lerp(w * 0.2, w * 0.5, k), y = lerp(h * 1.05, h * 0.5, k);
-  // on twos for the body; a full forward spin across the middle of the leap
+  const x = lerp(w * 0.3, w * 0.5, k), y = lerp(h * 1.15, h * 0.48, k);
+  const look = { rim: K.cyan, rimA: 1, rimDir: [0.7, -0.7] as Pt, wash: K.blue, washA: 0.08 };
+  // on twos: the drawings step, the light and stars run on ones
   const stepQ = Math.floor(q * 24) / 24;
-  const spinAt = (s: number) => ease.inOut2(seg(s, 0.2, 0.85)) * TAU;
-  const spin = spinAt(stepQ);
-  const poseAt = (s: number) => (s < 0.2 ? mix(POSE.crouch, POSE.rise, seg(s, 0, 0.2)) : s < 0.85 ? mix(POSE.rise, POSE.tuck, seg(s, 0.2, 0.32)) : mix(POSE.tuck, POSE.volley, seg(s, 0.85, 1)));
-  const ps = poseAt(stepQ);
-
-  if (spin > 0.1 && spin < TAU - 0.1) {
+  const spin = ease.inOut2(seg(stepQ, 0.28, 0.82)) * TAU * 1.5;
+  if (stepQ < 0.28) {
+    // the rise: stretched, arms up, rushing up the frame
+    const st = 1.06 - seg(stepQ, 0, 0.28) * 0.06;
+    drawArt(ctx, 'rise', x, y, H, 'hip', { ...look, stretch: st });
+    // speed lines under him
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.strokeStyle = withAlpha(K.cyan, 0.5);
+    ctx.lineWidth = 1.5;
+    for (let i = 0; i < 12; i++) {
+      const lx = x + (hash(i * 3.7) - 0.5) * H * 0.4;
+      ctx.beginPath();
+      ctx.moveTo(lx, y + H * (0.35 + hash(i) * 0.2));
+      ctx.lineTo(lx, y + H * (0.7 + hash(i * 2) * 0.4));
+      ctx.stroke();
+    }
+    ctx.restore();
+  } else if (stepQ < 0.82) {
+    // the spin: curled tight, a wheel of light around him
     ctx.save();
     ctx.globalCompositeOperation = 'lighter';
     ctx.strokeStyle = withAlpha(K.cyan, 0.6);
     ctx.lineWidth = S * 0.012;
     ctx.beginPath();
-    ctx.arc(x, y - H * 0.1, H * 0.5, -Math.PI / 2, -Math.PI / 2 + spin);
+    ctx.arc(x, y, H * 0.36, -Math.PI / 2 + spin - 2.2, -Math.PI / 2 + spin);
     ctx.stroke();
-    ctx.restore();
-    // speed lines streaming off the turn
-    ctx.save();
-    ctx.globalCompositeOperation = 'lighter';
-    ctx.strokeStyle = withAlpha(K.cyan, 0.5);
-    ctx.lineWidth = 1.5;
+    ctx.globalAlpha = 0.5;
     for (let i = 0; i < 14; i++) {
-      const a = -Math.PI / 2 + spin - 0.4 - i * 0.12;
-      const r0 = H * (0.42 + hash(i) * 0.15);
+      const a = -Math.PI / 2 + spin - 0.3 - i * 0.12;
+      ctx.lineWidth = 1.5;
       ctx.beginPath();
-      ctx.arc(x, y - H * 0.1, r0, a - 0.5, a);
+      ctx.arc(x, y, H * (0.3 + hash(i) * 0.14), a - 0.5, a);
       ctx.stroke();
     }
     ctx.restore();
+    drawArt(ctx, 'tuck', x, y, H, 'centre', { ...look, rot: spin });
+  } else {
+    // opening out into the volley
+    const o = ease.out3(seg(stepQ, 0.82, 1));
+    drawArt(ctx, 'bicycle', x, y, H, 'centre', { ...look, rot: lerp(-0.6, 0, o) });
   }
-  drawHero(ctx, w, h, { x, y, anchor: 'hips', height: H, pose: ps, yaw: Math.PI / 2 - 0.35, flip: spin, t, light: [0.6, -0.8, 0.3], rim: K.cyan, rimA: 1, wind: 0.8, flow: [-0.6, 0.8] });
   const br = S * 0.04;
   aura(ctx, w * 0.72, h * 0.18, br, t, 1);
   drawBall(ctx, w * 0.72, h * 0.18, br, t * 2, t, 1);
@@ -558,7 +590,7 @@ function shotContact(g: G, q: number) {
   const { ctx, w, h, S, t } = g;
   const hold = 0.7;
   const release = ease.out3(seg(q, hold, 1));
-  const cx = w * 0.62, cy = h * 0.4;
+  const cx = w * 0.6, cy = h * 0.36;
   ctx.fillStyle = '#eef8ff';
   ctx.fillRect(0, 0, w, h);
   const grow = seg(q, 0, hold);
@@ -593,10 +625,10 @@ function shotContact(g: G, q: number) {
       ctx.stroke();
     }
   }
-  // him, a black silhouette with a hard blue rim, the volley's boot on the ball
-  const H = S * 0.95;
-  const ps = mix(POSE.volley, POSE.follow, release);
-  drawHero(ctx, w, h, { x: cx - br * 0.75, y: cy + br * 0.25, anchor: 'toeR', height: H, pose: ps, yaw: Math.PI / 2 - 0.3, flip: -0.55, t, light: [1, -0.3, 0.2], rimDir: [1, -0.4, -0.3], rim: K.blue, rimA: 1, silhouette: true, wind: 0.9, flow: [-0.8, 0.6] });
+  // him, a black silhouette with a hard blue rim: the volley's boot on the ball, then the fall away
+  const H = Math.min(h * 0.75, w * 1.6);
+  if (q < hold) drawArt(ctx, 'bicycle', cx - br * 0.55, cy + br * 0.35, H, 'toe', { silhouette: '#070a14', rim: K.blue, rimA: 1, rimDir: [0.7, -0.7], rimW: S * 0.008 });
+  else drawArt(ctx, 'follow', cx - br * 0.9 - release * S * 0.1, cy + br * 0.6 + release * S * 0.15, H, 'toe', { silhouette: '#070a14', rim: K.blue, rimA: 1, rimDir: [0.7, -0.7], rimW: S * 0.008, rot: -0.15 * release });
   const sq = q < hold ? 0.82 : lerp(0.82, 1.15, release);
   ctx.save();
   ctx.translate(cx + release * S * 0.25, cy - release * S * 0.15);
