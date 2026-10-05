@@ -13,6 +13,7 @@ import { posterRepaint, whipK, whipShift, whipSmear } from './core/cuts';
 import { drawWorldTexture, worldOf } from './core/texture';
 import { drawDrift } from './core/drift';
 import { addTap, drawTaps } from './core/taps';
+import { drawTrail, trailEnd, trailMove } from './core/trail';
 import { drawAfterSplit, drawTitan, titanShotP } from './acts/titan';
 import { ACT, CHAPTERS, type Frame } from './core/frame';
 import { clamp, damp, seg } from './core/math';
@@ -234,6 +235,11 @@ function loop(now: number) {
 // tap to play: a tap (a click, so a scroll flick never fires one) gets an answer from the world on screen
 let tapWorld: Parameters<typeof addTap>[3] = null;
 let tapT = 0;
+// a finger (or mouse) dragged over the film leaves a trail; listening only, never blocking the scroll
+window.addEventListener('pointermove', (e) => trailMove(e.clientX, e.clientY, tapT, tapWorld), { passive: true });
+window.addEventListener('touchmove', (e) => { const p = e.touches[0]; if (p) trailMove(p.clientX, p.clientY, tapT, tapWorld); }, { passive: true });
+window.addEventListener('pointerup', trailEnd, { passive: true });
+window.addEventListener('touchend', trailEnd, { passive: true });
 window.addEventListener('click', (e) => {
   if ((e.target as Element | null)?.closest?.('a, button, #hello, .reel-marks')) return;
   addTap(e.clientX, e.clientY, tapT, tapWorld);
@@ -262,6 +268,7 @@ function post(t: number, dt: number) {
   tapT = t;
   drawDrift(ctx, tapWorld, w, h, t, B);
   drawTaps(ctx, w, h, t);
+  drawTrail(ctx, w, h, t);
   drawWorldTexture(ctx, wld, w, h, t);
   if (vignette) ctx.drawImage(vignette, 0, 0, w, h);
   // grain
