@@ -49,7 +49,14 @@ a playhead and redraws the whole frame every animation frame.
   strokes and the lingering pen-lines), `core/cuts.ts` (poster repaint before
   the white-out; the whip-pan out of ALTER), `core/texture.ts` (a texture per
   world), `core/drift.ts` (the travelling particles), `core/taps.ts` (tap to
-  play), `acts/dive.ts`, `acts/sign.ts`. The dragon, Night Ride and X-Ray
+  play), `acts/dive.ts`, `acts/sign.ts`. Round 10b (from a Mat Voyce
+  teardown): `acts/open.ts` (the opening window takeover, B 0→2.3, the film
+  drawn live inside a tilted card), the credit rollers (credits.ts
+  `drawRoll`), `rubber()` in core/math.ts (type stretches with scroll speed;
+  dev hook `__film.vel(v)`), `core/trail.ts` (finger trail),
+  `core/markloop.ts` (chapter marks play a loop before jumping),
+  `acts/strip.ts` (the film strip after the signature, B 18.76→20.55; swipe
+  sideways). The dragon, Night Ride and X-Ray
   files are deleted (rejected round 10).
 - **Clock (t):** wall time in seconds. Ambient motion (mist, embers, blinking,
   bobbing) runs on `t`, so the frame keeps moving when the reader stops.
