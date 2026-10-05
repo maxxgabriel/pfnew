@@ -26,7 +26,7 @@ export const KIT = {
   sock: new THREE.Color('#f2f4f8'),
   sockBand: new THREE.Color('#a6f03a'),
   boot: new THREE.Color('#15171f'),
-  hair: new THREE.Color('#3b3448'),
+  hair: new THREE.Color('#2c3150'),
   scarf: new THREE.Color('#f3ead6'),
   scarfBand: new THREE.Color('#a6f03a'),
 };
@@ -399,9 +399,9 @@ export function buildHero(): Hero {
   decals.push(num);
 
   // ---- hair: a shell over the skull and tapered curved strands
-  const hairMat = toon(KIT.hair, { gloss: 0.35, side: THREE.DoubleSide });
+  const hairMat = toon(KIT.hair, { gloss: 0.5, side: THREE.DoubleSide });
   const shell = new THREE.SphereGeometry(1, 30, 22, 0, Math.PI * 2, 0, Math.PI * 0.56);
-  shell.scale(0.106, 0.118, 0.112);
+  shell.scale(0.103, 0.114, 0.108);
   shell.rotateX(-0.5);
   shell.translate(0, hy + 0.012, -0.008);
   const hairGroup = new THREE.Group();
@@ -418,36 +418,39 @@ export function buildHero(): Hero {
     return HC.clone().add(new THREE.Vector3(n.x * HR.x, n.y * HR.y, n.z * HR.z).multiplyScalar(1 + lift));
   };
   /**
-   * One lock of a normal haircut: it grows from the crown, lies along the scalp with a little
-   * volume, and ends in a soft tapered tip at `end` (a direction from the head's centre).
+   * One lock: it grows near the crown, sweeps over the scalp by way of `via` (directions from the
+   * head's centre), arches off the head by `vol` for volume, and ends in a pointed tip at `end`,
+   * lifting away by `tip`. Soft, flat, wide in the middle: an anime lock of hair.
    */
-  const lock = (end: V3, r0: number, vol = 0.07, tipLift = 0.03, give = 0.3) => {
-    const crown = new THREE.Vector3(0, 1, -0.25).normalize();
-    const e = new THREE.Vector3(...end).normalize();
-    const N = 14, R = 8;
+  const lock = (end: V3, via: V3, r0: number, vol: number, tip: number, give = 0.3) => {
+    const seed = strands.length;
+    const root = new THREE.Vector3(Math.sin(seed * 2.3) * 0.15, 1, -0.3 + Math.cos(seed * 1.7) * 0.15).normalize();
+    const m = new THREE.Vector3(...via).normalize(), e = new THREE.Vector3(...end).normalize();
+    const N = 16, R = 8;
     const pts: THREE.Vector3[] = [];
     for (let i = 0; i <= N; i++) {
       const u = i / N;
-      const d = crown.clone().lerp(e, u);
-      pts.push(onScalp(d, vol * Math.sin(Math.PI * Math.min(1, u * 1.15)) * 0.6 + 0.01 + tipLift * u ** 3));
+      const d = root.clone().multiplyScalar((1 - u) ** 2).addScaledVector(m, 2 * u * (1 - u)).addScaledVector(e, u * u);
+      pts.push(onScalp(d, 0.012 + vol * Math.sin(Math.PI * Math.min(1, u * 1.05)) * (1 - u * 0.4) + tip * u ** 2.5));
     }
     const curve = new THREE.CatmullRomCurve3(pts);
-    const root = curve.getPoint(0);
+    const r0p = curve.getPoint(0);
     const pivot = new THREE.Object3D();
-    pivot.position.copy(root);
+    pivot.position.copy(r0p);
     hairGroup.add(pivot);
     const pos: number[] = [], idx: number[] = [];
     for (let i = 0; i <= N; i++) {
       const u = i / N;
-      const p = curve.getPoint(u).sub(root);
+      const p = curve.getPoint(u).sub(r0p);
       const T = curve.getTangent(u);
       const out = curve.getPoint(u).sub(HC).normalize();
       const across = new THREE.Vector3().crossVectors(T, out).normalize();
       const thin = new THREE.Vector3().crossVectors(across, T).normalize();
-      const r = r0 * Math.pow(Math.max(0, 1 - u), 0.75) * Math.min(1, 0.55 + u * 2) + 0.0008;
+      // wide through the middle, a fine point at the end
+      const r = r0 * Math.min(1, 0.6 + u * 2.5) * Math.pow(Math.max(0, 1 - u), 0.8) + 0.0006;
       for (let j = 0; j < R; j++) {
         const ang = (j / R) * Math.PI * 2;
-        const q = p.clone().addScaledVector(across, Math.cos(ang) * r).addScaledVector(thin, Math.sin(ang) * r * 0.32);
+        const q = p.clone().addScaledVector(across, Math.cos(ang) * r).addScaledVector(thin, Math.sin(ang) * r * 0.34);
         pos.push(q.x, q.y, q.z);
       }
     }
@@ -463,22 +466,33 @@ export function buildHero(): Hero {
     pivot.add(new THREE.Mesh(g, outline(0.6)));
     const axis = new THREE.Vector3().crossVectors(e, new THREE.Vector3(0, 1, 0));
     if (axis.lengthSq() < 1e-4) axis.set(1, 0, 0);
-    strands.push({ pivot, axis: axis.normalize(), phase: strands.length * 1.7, give });
+    strands.push({ pivot, axis: axis.normalize(), phase: seed * 1.7, give });
   };
-  // fringe: pointed locks of different lengths, falling to the brows, one or two between the eyes
-  for (const [x, y, tl] of [[-0.68, 0.18, 0.06], [-0.46, 0.08, 0.03], [-0.24, 0.12, 0.05], [-0.04, 0.02, 0.03], [0.16, 0.1, 0.05], [0.38, 0.04, 0.03], [0.6, 0.16, 0.06]] as const) {
-    lock([x, y, 1], 0.05, 0.1, tl, 0.3);
+  // the fringe: swept across to his right, pointed locks of different lengths, one fine lock between the eyes
+  lock([0.58, 0.04, 1], [0.6, 0.85, 0.55], 0.055, 0.12, 0.05);
+  lock([0.27, -0.1, 1], [0.38, 0.9, 0.6], 0.06, 0.14, 0.04);
+  lock([0.02, -0.02, 1], [0.15, 0.9, 0.65], 0.062, 0.14, 0.04);
+  lock([-0.26, -0.06, 1], [0.02, 0.9, 0.7], 0.062, 0.15, 0.05);
+  lock([-0.52, 0.04, 0.95], [-0.18, 0.9, 0.7], 0.056, 0.13, 0.05);
+  lock([-0.78, 0.0, 0.7], [-0.4, 0.9, 0.5], 0.052, 0.12, 0.06);
+  lock([0.1, -0.27, 1], [0.2, 0.85, 0.7], 0.034, 0.12, 0.03, 0.5);
+  // sides: over the ears, the tips kicking out a little
+  for (const x of [1, -1]) {
+    lock([x, -0.3, 0.38], [x * 0.8, 0.6, 0.3], 0.055, 0.1, 0.05);
+    lock([x, -0.48, -0.12], [x * 0.8, 0.5, -0.2], 0.06, 0.1, 0.07);
   }
-  // sides: over the ears, tips flicking out a little
-  for (const sx of [1, -1]) {
-    lock([sx, -0.05, 0.5], 0.05, 0.09, 0.06, 0.3);
-    lock([sx, -0.25, 0.1], 0.055, 0.09, 0.08, 0.3);
-    lock([sx, -0.3, -0.35], 0.055, 0.09, 0.1, 0.3);
-  }
-  // the back: locks down the back of the head, tips lifting into a slightly messy nape
-  for (const x of [-0.8, -0.45, -0.1, 0.25, 0.6]) lock([x, -0.55, -1], 0.06, 0.1, 0.12, 0.3);
-  // volume on top: a few locks whose tips stand up
-  for (const [x, z, tl] of [[-0.55, 0.45, 0.14], [0.05, 0.6, 0.1], [0.55, 0.45, 0.14], [-0.85, -0.25, 0.16], [0.85, -0.25, 0.16], [0, -0.6, 0.18]] as const) lock([x, 0.3, z], 0.065, 0.12, tl, 0.4);
+  // the top: arching locks for volume, and a small cowlick at the crown
+  lock([0.5, 0.55, 0.75], [0.3, 1, 0.3], 0.075, 0.3, 0.12);
+  lock([-0.3, 0.6, 0.8], [0, 1, 0.3], 0.075, 0.3, 0.12);
+  lock([0.85, 0.35, 0.1], [0.4, 1, 0], 0.075, 0.27, 0.14);
+  lock([-0.85, 0.35, 0.1], [-0.4, 1, 0], 0.075, 0.27, 0.14);
+  lock([0.2, 0.7, 0.2], [0.1, 1, 0], 0.07, 0.32, 0.16);
+  lock([-0.6, 0.6, -0.3], [-0.3, 1, -0.2], 0.07, 0.3, 0.16);
+  lock([0.1, 0.9, -0.7], [0, 1.2, -0.3], 0.05, 0.3, 0.2, 0.6);
+  lock([-0.35, 0.8, -0.8], [-0.2, 1.1, -0.4], 0.055, 0.25, 0.18, 0.6);
+  // the back: layered, pointed, the ends lifting off the nape
+  [-0.8, -0.45, -0.12, 0.2, 0.5, 0.8].forEach((x, i) => lock([x, -0.5, -1], [x * 0.6, 0.6, -0.9], 0.065, 0.14, i % 2 ? 0.14 : 0.08));
+  for (const x of [-0.4, 0, 0.4]) lock([x, -0.8, -0.8], [x * 0.5, 0, -1], 0.045, 0.06, 0.1);
 
   // (no scarf: he's a footballer in his kit)
   const tails: Hero['tails'] = [];

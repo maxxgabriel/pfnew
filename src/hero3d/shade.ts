@@ -75,7 +75,7 @@ void main() {
   // a soft second band toward the light, and a sharp gloss for hair
   col += base * 0.07 * smoothstep(0.7, 0.75, nl);
   vec3 h = normalize(normalize(uLight) + v);
-  col += vec3(1.0) * uGloss * smoothstep(0.93, 0.95, dot(n, h)) * lit;
+  col += vec3(0.75, 0.85, 1.0) * uGloss * smoothstep(0.9, 0.93, dot(n, h)) * lit;
   // rim: the edge that faces the rim light
   float fres = 1.0 - max(dot(n, v), 0.0);
   float rim = smoothstep(0.5, 0.58, fres) * smoothstep(-0.1, 0.35, dot(n, normalize(uRimDir)));
