@@ -1,5 +1,6 @@
 import type { Frame } from '../core/frame';
 import { type Pt, TAU, bell, clamp, ease, hash, lerp, seg } from '../core/math';
+import { drawMarble } from '../core/marble';
 import { drawSprite, glow, withAlpha } from '../core/sprites';
 
 /*
@@ -445,48 +446,7 @@ function marble(g: G, u: number, pan: number, span: number, on: number) {
     ctx.ellipse(x + r * 0.3, ey + r * 0.8, r * 1.2, r * 0.35, 0, 0, TAU);
     ctx.fill();
   }
-  drawMarbleBall(ctx, x, y, r, t);
-  ctx.restore();
-}
-
-/** a glass marble with a coloured twist inside: the one object that runs through every world */
-export function drawMarbleBall(ctx: CanvasRenderingContext2D, x: number, y: number, r: number, t: number) {
-  ctx.save();
-  const body = ctx.createRadialGradient(x - r * 0.35, y - r * 0.35, r * 0.1, x, y, r);
-  body.addColorStop(0, 'rgba(235,250,255,0.95)');
-  body.addColorStop(0.5, 'rgba(120,200,235,0.75)');
-  body.addColorStop(1, 'rgba(20,60,110,0.9)');
-  ctx.fillStyle = body;
-  ctx.beginPath();
-  ctx.arc(x, y, r, 0, TAU);
-  ctx.fill();
-  // the twist inside: a red and a blue ribbon
-  ctx.save();
-  ctx.beginPath();
-  ctx.arc(x, y, r * 0.92, 0, TAU);
-  ctx.clip();
-  ctx.translate(x, y);
-  ctx.rotate(t * 0.4);
-  ctx.lineWidth = r * 0.22;
-  ctx.lineCap = 'round';
-  for (const [col, off] of [['#ff4021', 0], ['#2f5bff', Math.PI]] as const) {
-    ctx.strokeStyle = col;
-    ctx.beginPath();
-    for (let i = 0; i <= 12; i++) {
-      const a = off + (i / 12) * Math.PI;
-      const rr = r * 0.62 * Math.sin((i / 12) * Math.PI);
-      const px = Math.cos(a) * rr, py = Math.sin(a) * rr * 0.5;
-      if (i) ctx.lineTo(px, py);
-      else ctx.moveTo(px, py);
-    }
-    ctx.stroke();
-  }
-  ctx.restore();
-  // the window highlight
-  ctx.fillStyle = 'rgba(255,255,255,0.9)';
-  ctx.beginPath();
-  ctx.ellipse(x - r * 0.38, y - r * 0.42, r * 0.22, r * 0.13, -0.6, 0, TAU);
-  ctx.fill();
+  drawMarble(ctx, x, y, r, { spin: k * 9 + t * 0.3 });
   ctx.restore();
 }
 

@@ -1,4 +1,5 @@
 import { brush } from '../core/brush';
+import { drawMarble } from '../core/marble';
 import type { Frame } from '../core/frame';
 import { type Pt, TAU, clamp, ease, lerp, seg } from '../core/math';
 import { drawSprite, glow, withAlpha } from '../core/sprites';
@@ -317,13 +318,8 @@ export function drawPearl(ctx: CanvasRenderingContext2D, x: number, y: number, r
   ctx.arc(x, y, r * (1.7 + Math.sin(t * 2) * 0.1), 0, TAU);
   ctx.stroke();
   ctx.restore();
-  ctx.save();
-  ctx.globalAlpha = alpha;
-  ctx.fillStyle = '#fffaf0';
-  ctx.beginPath();
-  ctx.arc(x, y, r, 0, TAU);
-  ctx.fill();
-  ctx.restore();
+  // the pearl is the marble: glass, with the twist inside
+  drawMarble(ctx, x, y, r * 1.45, { spin: t * 0.5, alpha });
 }
 
 /** where the pearl hovers over the duel */

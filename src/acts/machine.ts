@@ -1,6 +1,7 @@
 import { ACT, type Frame } from '../core/frame';
 import { type Pt, TAU, bell, clamp, ease, hash, lerp, seg, spline } from '../core/math';
 import { CONFETTI, Particles } from '../core/particles';
+import { marbleTwist } from '../core/marble';
 import { halftone } from '../core/sprites';
 import { C, F, font } from '../core/style';
 import { drawBlot } from '../core/blot';
@@ -320,7 +321,6 @@ function drawWorld(f: Frame, withBall: boolean) {
 
 /* --------------------------------------------------------------- pieces */
 
-const PATCH: Pt[] = [[0, 0], [0.62, 0.3], [-0.6, 0.35], [0.05, -0.68], [0.55, -0.45], [-0.55, -0.4]];
 
 export function drawBall(ctx: CanvasRenderingContext2D, x: number, y: number, r: number, rot: number, t: number, stretch = 1) {
   ctx.save();
@@ -333,26 +333,14 @@ export function drawBall(ctx: CanvasRenderingContext2D, x: number, y: number, r:
   ctx.fill();
   ctx.restore();
   ctx.scale(1 / Math.sqrt(stretch), stretch);
+  // the marble, poster-printed: pale glass, the red and blue twist, an ink rim
   ctx.beginPath();
   ctx.arc(0, 0, r, 0, TAU);
-  ctx.fillStyle = C.white;
+  ctx.fillStyle = '#d9f1fb';
   ctx.fill();
   ctx.save();
   ctx.clip();
-  ctx.rotate(rot);
-  ctx.fillStyle = C.ink;
-  for (const [px, py] of PATCH) {
-    ctx.beginPath();
-    const pr = r * (px === 0 && py === 0 ? 0.3 : 0.26);
-    for (let k = 0; k < 5; k++) {
-      const a = (k / 5) * TAU + rot * 0.2;
-      const xx = px * r + Math.cos(a) * pr, yy = py * r + Math.sin(a) * pr;
-      if (k) ctx.lineTo(xx, yy);
-      else ctx.moveTo(xx, yy);
-    }
-    ctx.closePath();
-    ctx.fill();
-  }
+  marbleTwist(ctx, r, rot, [C.red, C.blue]);
   ctx.restore();
   // shade + rim
   const g = ctx.createRadialGradient(-r * 0.35, -r * 0.4, r * 0.1, 0, 0, r);
@@ -361,6 +349,11 @@ export function drawBall(ctx: CanvasRenderingContext2D, x: number, y: number, r:
   ctx.fillStyle = g;
   ctx.beginPath();
   ctx.arc(0, 0, r, 0, TAU);
+  ctx.fill();
+  // the glass window
+  ctx.fillStyle = 'rgba(255,255,255,0.95)';
+  ctx.beginPath();
+  ctx.ellipse(-r * 0.4, -r * 0.42, r * 0.24, r * 0.13, -0.6, 0, TAU);
   ctx.fill();
   wob(ctx, circlePts(0, 0, r, 20), r * 0.08, 7, t);
   ctx.lineWidth = r * 0.16;

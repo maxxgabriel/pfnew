@@ -1,5 +1,6 @@
 import { drawBlot } from '../core/blot';
 import type { Frame } from '../core/frame';
+import { drawMarble } from '../core/marble';
 import { type Pt, TAU, bell, clamp, ease, hash, lerp, rng, seg } from '../core/math';
 import { canvas, drawSprite, glow, withAlpha } from '../core/sprites';
 
@@ -398,7 +399,9 @@ function star(g: G, x: number, y: number, r: number, dir: Pt, a = 1) {
   ctx.lineTo(x - dir[0] * L, y - dir[1] * L);
   ctx.stroke();
   ctx.restore();
-  drawSpark(ctx, x, y, r, a, t);
+  // the marble, burning in like a star
+  drawSpark(ctx, x, y, r * 0.7, a * 0.7, t);
+  drawMarble(ctx, x, y, r * 1.05, { spin: t * 2, glowA: 0.5 * a, glowCol: '#ffe9b0', alpha: a });
 }
 
 /* ================================================================ SHOTS */
@@ -428,7 +431,8 @@ function shotPuddle(g: G, q: number) {
   }
   // the star, reflected
   ctx.globalAlpha = 1;
-  drawSpark(ctx, px - prx * 0.3 + wob(11), py - pry * 0.3, S * 0.012, 0.9, t);
+  drawSpark(ctx, px - prx * 0.3 + wob(11), py - pry * 0.3, S * 0.009, 0.6, t);
+  drawMarble(ctx, px - prx * 0.3 + wob(11), py - pry * 0.3, S * 0.013, { spin: -t, alpha: 0.75 });
   ctx.restore();
   // the ring that came from the sword: it carries on outward across the puddle
   ctx.save();
