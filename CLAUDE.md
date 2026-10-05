@@ -6,8 +6,8 @@ product; projects are deliberately absent.
 
 Before changing anything, read:
 
-0. `docs/STORY.md` — the story (v3, The Bedroom, at the top), what each
-   world really was, and the build order. Start here.
+0. `docs/STORY.md` — the story (v4, The Signature, at the top), the stroke
+   each act secretly writes, and the build order. Start here.
 1. `docs/BRIEF.md` — the owner's creative brief and every decision they've
    made since (what they asked for, what they approved, **what they rejected**).
 2. `docs/HANDOFF.md` — architecture, the beat timeline, how holds work, every
@@ -22,9 +22,9 @@ Before changing anything, read:
   the hand-scroll interludes and the "glass" effects (idle knocking, VHS
   rewind, overheat burn, cracks, reel slicing, confetti pile) were built and
   **rejected**; they were reverted in `085d0d6`. Don't bring any back unless
-  the owner asks. ALTER (the anime act: the knight, Green reborn, Dead Calm,
-  the Void, the beam clash) was **rejected in round 10** and cut; so was the
-  ink-blob beast and its tentacles (round 8).
+  the owner asks. Also out: the ink-blob beast and its tentacles (round 8);
+  the Ink Dragon, the Night Ride and the hand-shadow bridge (round 10). ALTER
+  stays, but cut to about a third (round 10).
 - **Original, not copied.** References (Mat Voyce, Demon Slayer, Fate/HF) are
   for energy and technique. Don't reproduce their characters, logos or text.
 - **Never re-time existing acts casually.** Everything is authored in *film

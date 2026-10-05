@@ -1,77 +1,64 @@
-# STORY — The Bedroom (v3, round 10, current)
+# STORY — The Signature (v4, round 10, current)
 
-**This section is the story now.** Everything below it ("The First Drop",
-rounds 7–9) is history: keep it for the reasoning, but where it conflicts,
-this wins. The owner watched round 9 and said the story still didn't click,
-the anime act (ALTER) was too long, made no sense and its animation wasn't
-liked, and the vibe was lost. Every other new scene (Dragon, TITAN, Night
-Ride, the zoom-out, X-Ray) is liked and stays.
+**This section is the story now.** Everything below is history (v2, "The
+First Drop", rounds 7–9); keep it for reasoning, but where it conflicts,
+this wins. A v3 ("The Bedroom": it was all a kid playing) was pitched,
+approved, then dropped by the owner after the first step was built; it's not
+in the film.
 
-**What the ending must do (owner):** *"at the end someone should feel like
-woah what a fucking edit. he really turned the whole thing upside down… all
-these had a second or third meaning which only showed when you zoomed out.
-Chapter by chapter it was great animations, fun looking, and when you zoom
-out reality hits."* Doesn't need to be sad. One hero (the owner pointed at
-the genre-hopping of Split Fiction; ours is original).
+**What the owner asked for (round 10):** the story didn't click and the vibe
+was lost. Keep Ink, the Machine and TITAN, the anime act **cut to about a
+third**, the Match, the zoom-out and the X-Ray. **Remove the dragon and the
+Night Ride.** The ending must make you go *"woah what an edit"*: every
+chapter is fun on its own, and zooming out reveals a second meaning in all of
+it. One hero.
 
 ## The twist
 
-Every world was a kid (young Max) playing in his bedroom at night. **Blot is
-a doodle on the back of his hand**: the hero you followed was his hand. The
-last layer: the same objects on a grown-up designer's desk. He never stopped
-playing.
+Every big movement in the film was a pen stroke. Zoomed out, the motion of
+every act joins into one continuous line: Max's handwritten signature. The
+pen never left the page.
 
-**The hero:** Blot, chasing **one glass marble** through every world. The
-marble is the thread: the pearl (Ink), the ball (Machine), the star (Night
-Ride), the football (Match). It must read as the same marble every time.
+**The hero** is the moving point (brush tip, thunder, ball, blade, ball).
 
-**The kid:** hands and silhouette only, never a face (owner's choice).
+| act | the big move | the stroke |
+|---|---|---|
+| Prologue | the ensō is painted | the pen touches paper |
+| I · Ink | Blue's thunder finisher, a clean zig-zag | **M** |
+| II · Machine | the ball's run through the chain reaction, with one loop | **a** |
+| II · TITAN | the punch sends it straight up | the joining stroke |
+| III · Anime (a third of ALTER) | the two blades cross (clash, slashes) | **x** |
+| IV · Match | #10's curving run, then the curling shot | the flourish under the name |
+| | the ball in the net | the full stop |
 
-## Chapters, and what they really were
+**The clue:** each of those moves leaves a faint glowing trail that lingers a
+beat too long. On a rewatch you notice they line up.
 
-Fun first; the clues are small and only click on a rewatch.
+**Connectors (the line never breaks):** Ink → Machine: the beams meet, the
+dive into the meeting point, the paper tears, the ball drops in. Anime →
+Match: the spark rises out of ALTER and falls into the stadium as the ball.
 
-| chapter | what you see | planted clue | what it was |
-|---|---|---|---|
-| Ink | the moon | a faint lampshade rim | the desk lamp |
-| Ink | the mountains | a stitched seam | the crumpled duvet |
-| Ink | two blade fighters | caps on the hilts | two highlighters in his fists |
-| Ink | the dragon | a string from its tail | a paper kite on the wall |
-| Machine | the chain reaction | cm marks on the seesaw | the toy shelf: a ruler, a cup |
-| Machine | TITAN | letter blocks | alphabet blocks |
-| Bridge (replaces ALTER, ~8 s) | the light snaps off; a fight in shadow on the wall | it's literally hands | hand shadows from a torch under the blanket |
-| Night Ride | the neon city, the tunnel | lights blink like chargers | under the bed: charger LEDs, the night light |
-| Match | the stadium, the net, the goal | the net has a bin's mesh | the marble drops into the waste bin: GOAL |
+## The reveal
 
-## The reveal (the zoom-out, now with a payoff)
+1. Pull back out of the net.
+2. The acts appear side by side on one long page, like panels, each with its
+   motion trail glowing.
+3. Further out, the panels fade and the trails join into one wet ink line:
+   **Max**, a flourish and a full stop.
+4. The Hand lifts the pen.
+5. Third layer: the signature on a card with "your project here" and a blank
+   line beside it, and the email. An invitation (never styled as a real
+   contract).
 
-1. Out of the bin the camera pulls back through the dark bedroom.
-2. Match-cut pairs: each world snaps into its real object in the same
-   framing (moon → lamp, mountains → duvet, fighters → highlighters, dragon
-   → kite, TITAN → blocks, city → under the bed).
-3. The door opens, a wedge of hallway light; the kid dives into bed; lights
-   out.
-4. Third layer: the room dissolves into the grown-up desk with the same lamp,
-   highlighters, marble, MAKE THINGS THAT MOVE in blocks, the kite pinned up.
-   The adult hand signs MAX GABRIEL; Blot is on a sticky note on the monitor.
-5. Contact card.
-
-**Credits:** real-object cast lines ("THE DRAGON — a kite from the fair",
-"TITAN — 26 alphabet blocks", "THE MOON — a desk lamp"). X-Ray stays.
-Post-credits: two highlighters crossed on the carpet; one clicks on.
-
-**Gone:** ALTER entirely (rejected round 10), the rivals-reincarnated lore,
-the page-circles version of the zoom-out (the zoom engine stays; what it
-reveals changes).
+**Gone:** the dragon, the Night Ride, the hand-shadow bridge, the Bedroom
+marble; two-thirds of ALTER.
 
 ## Build order
 
-1. Cut ALTER, add the shadow bridge.
-2. One marble everywhere.
-3. Plant the clues.
-4. The bedroom reveal.
-5. The desk layer.
-6. Credits and post-credits.
+1. Cleanup: cut the dragon, the Night Ride and the bridge; ALTER at a third.
+2. The four strokes and their trails.
+3. The signature reveal.
+4. The invitation card, credits, X-Ray.
 
 A preview link after each step.
 

@@ -168,16 +168,18 @@ becomes the knight; Green builds TITAN, is reborn in ALTER, wins the match;
 the Spark changes shape every act; Blot is in every world) and by one line
 under the Machine and Match cards. Sound is still not built.
 
-**Round 10: rethink — The Bedroom (approved direction).** After round 9 the
-owner: *"i don't think the changes felt right… the anime arc is too long and
-makes no sense nor do I like the animations there"*; the story still didn't
-click and the vibe was lost; every other new scene is good. The ending must
-make you go *"woah what an edit"*: everything had a second meaning that only
-shows when you zoom out. One hero. Offered three twists (The Bedroom, The Edit
-Bay, Your Phone); they picked **The Bedroom**: it was all a kid playing in his
-room at night, Blot is a doodle on his hand, last layer the grown-up's desk.
-ALTER is cut and replaced by a short hand-shadow bridge. The kid: hands and
-silhouette only. See `docs/STORY.md` v3.
+**Round 10: rethink — The Signature.** After round 9 the owner: the story
+still didn't click and the vibe was lost; the anime arc (ALTER) was too long.
+I first misread that as "replace ALTER" and pitched The Bedroom (it was all a
+kid playing; ALTER swapped for a hand-shadow bridge). After step 1 the owner
+corrected it: *"the anime was alright, just shorten… remove the night drive
+as well and the dragon as well. we need to rethink."* Then, on the twist:
+*"try to think harder. zoom out and think more."* Offered Player 2 (a
+two-player game) and The Signature; they picked **The Signature**: every big
+movement in the film was a pen stroke, and zoomed out they join into Max's
+signature. ALTER stays at about a third. The dragon and the Night Ride are
+removed. See `docs/STORY.md` v4. Lesson: when the owner says "shorten", don't
+replace; when unsure, ask.
 
 **What the owner responds to.** Big, cinematic, anime-like set pieces;
 continuity jokes (Blot); hard cuts, impact frames, speed lines. Proposals
