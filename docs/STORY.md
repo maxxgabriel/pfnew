@@ -70,6 +70,25 @@ marble; two-thirds of ALTER.
   changes costume at each cut: ink petals → poster confetti → ALTER embers →
   stadium confetti → ink drops on the page, same positions and drift.
 
+**From Mat Voyce's site (owner asked to study it; picked all six):**
+
+- **Living letters at the end:** when the signature is written, the letters
+  of MAX GABRIEL peel off the page with their own physics (the M stomps, the
+  X spins, the G rolls).
+- **Fly through a letter:** act changes dive through the counter of a giant
+  letter or shape (the O of MOVE into ALTER, the ensō into the duel, the G
+  into the stadium); pairs with the whip-pans.
+- **Type bigger than the screen:** each act opens with its name so big you
+  scroll through it, the letters becoming scenery.
+- **Texture per world:** rice-paper fibres (Ink), risograph misregistration
+  (Machine), cel grain (ALTER), broadcast noise (Match); clean paper at the
+  end.
+- **Tap to play:** a tap leaves an ink splash (Ink), bounces a letter
+  (Machine), throws sparks (ALTER), gets a cheer (Match). Optional, touch,
+  never hover.
+- **A loop at every rest stop:** where an act settles it plays a short
+  perfect loop (blades humming, TITAN breathing steam, the crowd swaying).
+
 Offered and not picked (don't build unasked): titles written live by the pen,
 a squash/stretch/smear craft pass, hit-stop with animation on twos, onion-skin
 ghosts. Rejected in round 10 as well: the X-Ray blueprint (removed).
@@ -79,10 +98,10 @@ ghosts. Rejected in round 10 as well: the X-Ray blueprint (removed).
 1. Cleanup: cut the dragon, the Night Ride, the bridge and the X-Ray; ALTER
    at a third. (Done.)
 2. The four strokes and their trails (subtle).
-3. The act changes: whip-pans and style-morphs.
-4. Light that moves.
-5. Particles that travel.
-6. The signature reveal.
+3. The signature reveal, then the living letters.
+4. The act changes: whip-pans, style-morphs, fly-through letters, giant type.
+5. Texture per world, light that moves, particles that travel.
+6. Tap to play, loops at rest stops.
 7. The invitation card and credits.
 
 A preview link after each step.
