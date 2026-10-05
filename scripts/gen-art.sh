@@ -11,7 +11,7 @@ gen() { # name, prompt, [reference image]
   local name=$1 prompt=$2 ref=$3
   [ -n "$ONLY" ] && [ "$ONLY" != "$name" ] && return
   [ -f "$name.png" ] && return
-  local args=(); [ -n "$ref" ] && args=(-i "$ref")
+  local args=(); [ -n "$ref" ] && args=("--image=$ref")
   echo "== $name"
   timeout 900 codex exec --skip-git-repo-check -s workspace-write --color never "${args[@]}" \
     "Use your image generation tool to create ONE image, then save the generated PNG into the current directory as $name.png. $prompt" > "$name.log" 2>&1
