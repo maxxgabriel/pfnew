@@ -246,14 +246,14 @@ function livingName(f: Frame, p: number, Lo: Layout) {
   const { ctx, w, t } = f;
   const S = Lo.S;
   const E = pageEnso(f);
-  const size = Math.round(Math.min(w * 0.078, S * 0.075));
+  const size = Math.round(Math.min(w * 0.078, S * (f.portrait ? 0.075 : 0.06)));
   ctx.save();
   ctx.font = font(size, F.display);
   ctx.textBaseline = 'alphabetic';
   ctx.textAlign = 'center';
   const ws = [...NAME].map((ch) => (ch === ' ' ? size * 0.45 : ctx.measureText(ch).width + size * 0.06));
   const total = ws.reduce((a, b) => a + b, 0);
-  const base = Math.max(E.y + E.r + S * 0.12, Lo.box.y + Lo.box.h + S * 0.07);
+  const base = Math.max(E.y + E.r + S * (f.portrait ? 0.12 : 0.09), Lo.box.y + Lo.box.h + S * 0.07);
   let x = w / 2 - total / 2;
   let li = 0;
   [...NAME].forEach((ch, i) => {
@@ -272,6 +272,31 @@ function livingName(f: Frame, p: number, Lo: Layout) {
   if (st > 0) {
     const sc = st < 1 ? lerp(2.2, 1, ease.outBack(st, 2.2)) : 1;
     drawSeal(ctx, w / 2 + total / 2 + size * 0.55, base - size * 0.35, size * 0.8 * sc, -0.06 + (1 - st) * 0.4, Math.min(1, st * 3));
+  }
+  // and a second line beside it, left blank: the invitation
+  const inv = ease.out3(seg(p, 0.975, 1));
+  if (inv > 0) {
+    const ly = base + size * 1.1, x0 = w / 2 - Math.min(w * 0.26, S * 0.4), x1 = lerp(x0, w - x0, inv);
+    ctx.globalAlpha = 0.75;
+    ctx.strokeStyle = C.ink;
+    ctx.lineWidth = Math.max(1, S * 0.0025);
+    ctx.beginPath();
+    ctx.moveTo(x0, ly);
+    ctx.lineTo(x1, ly);
+    ctx.stroke();
+    // the little x where you sign
+    const xs = size * 0.18;
+    ctx.beginPath();
+    ctx.moveTo(x0 - xs * 2.2, ly - xs * 1.6);
+    ctx.lineTo(x0 - xs * 0.6, ly);
+    ctx.moveTo(x0 - xs * 0.6, ly - xs * 1.6);
+    ctx.lineTo(x0 - xs * 2.2, ly);
+    ctx.stroke();
+    ctx.globalAlpha = 0.55 * inv;
+    ctx.font = font(Math.max(11, Math.round(S * (f.portrait ? 0.03 : 0.022))), F.serif, 600);
+    ctx.textAlign = 'center';
+    ctx.fillStyle = C.ink;
+    ctx.fillText('your project here', w / 2, ly + Math.max(14, S * 0.035));
   }
   ctx.restore();
 }

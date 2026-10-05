@@ -49,7 +49,7 @@ const ENSO = ensoPath(0, 0, 100, 8, 0.95, -2.0);
 /** the finale's composition: where the first circle sits on the page */
 export function pageEnso(f: { w: number; h: number; portrait: boolean }) {
   const { w, h, portrait } = f;
-  return { x: w / 2, y: h * (portrait ? 0.3 : 0.31), r: Math.min(w * 0.34, h * (portrait ? 0.19 : 0.2)) };
+  return { x: w / 2, y: h * (portrait ? 0.3 : 0.25), r: Math.min(w * 0.34, h * (portrait ? 0.19 : 0.165)) };
 }
 export { ENSO as PAGE_ENSO };
 
