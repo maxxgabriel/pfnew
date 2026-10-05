@@ -8,6 +8,7 @@ import { alterShotP, drawAlter } from './acts/alter';
 import { drawPowers } from './acts/powers';
 import { drawSign } from './acts/sign';
 import { drawDive } from './acts/dive';
+import { drawCardEdge, drawOpenBack, enterCard, openCard } from './acts/open';
 import { posterRepaint, whipK, whipShift, whipSmear } from './core/cuts';
 import { drawWorldTexture, worldOf } from './core/texture';
 import { drawDrift } from './core/drift';
@@ -185,7 +186,17 @@ function loop(now: number) {
   if (wk > 0) ctx.translate(0, whipShift(wk, h));
 
   if (B < 6.8) {
-    drawInk(frame);
+    // the opening: the film shrinks into a card on paper under the giant name, then takes the screen back
+    const card = openCard(frame);
+    if (card) {
+      drawOpenBack(frame, card);
+      drawCardEdge(frame, card, true);
+      ctx.save();
+      enterCard(frame, card);
+      drawInk(frame);
+      ctx.restore();
+      drawCardEdge(frame, card, false);
+    } else drawInk(frame);
     posterRepaint(frame);
   }
   // after TITAN the poster is torn open: the machine is gone and the night behind the page shows
