@@ -1,6 +1,7 @@
 import { ACT, type Frame } from '../core/frame';
 import { type Pt, TAU, bell, clamp, ease, hash, lerp, seg, spline } from '../core/math';
 import { CONFETTI, Particles } from '../core/particles';
+import { penTrail } from '../core/signature';
 import { halftone } from '../core/sprites';
 import { C, F, font } from '../core/style';
 import { drawBlot } from '../core/blot';
@@ -33,7 +34,15 @@ const SAW = { x: 34, y: 152, len: 56, tilt: 0.24 };
 const CANNON = { x: 78, y: 214 };
 
 const ramp: [Pt, Pt] = [[57, 40], [7, 52]];
-const chute = spline([[7, 153], [6, 166], [12, 178], [28, 185], [50, 187], [CANNON.x - 6, 188]], 1);
+// the chute runs down, then round a loop-the-loop (secretly the 'a' of the signature), then on
+// to the cannon; the ball rides the inside of the loop
+const chute = spline([[7, 153], [6, 166], [12, 178], [26, 186], [42, 188], [56, 186], [65, 180], [67, 172], [62, 166], [55, 167], [52, 174], [56, 183], [64, 188], [CANNON.x - 6, 189]], 1);
+/** the track's side of the ball at chute point i: the outside of the curve (left of travel, y down) */
+function chuteNormal(i: number): Pt {
+  const a = chute[Math.max(0, i - 1)], b = chute[Math.min(chute.length - 1, i + 1)];
+  const dx = b[0] - a[0], dy = b[1] - a[1], l = Math.hypot(dx, dy) || 1;
+  return [-dy / l, dx / l];
+}
 
 function onRamp(s: number): Pt {
   const [a, b] = ramp;
@@ -289,7 +298,7 @@ function drawWorld(f: Frame, withBall: boolean) {
   if (vis(40, 90)) drawMAKE(ctx, B, t);
   if (vis(85, 135)) drawTHINGS(ctx, B, t);
   if (vis(125, 165)) drawSeesaw(ctx, B, t);
-  if (vis(150, 205)) drawChute(ctx, t);
+  if (vis(150, 205)) drawChute(ctx, B, t);
   if (vis(150, 260)) drawCannon(ctx, B, t);
   drawGears(ctx, t, camY, screenH);
   drawBlobs(ctx, B, t, camY, screenH);
@@ -536,13 +545,17 @@ function drawSeesaw(ctx: CanvasRenderingContext2D, B: number, t: number) {
   shape(ctx, [[80, 128], [99, 128], [99, 131], [80, 131]], C.ink, 1, t, 63, false);
 }
 
-function drawChute(ctx: CanvasRenderingContext2D, t: number) {
+function drawChute(ctx: CanvasRenderingContext2D, B: number, t: number) {
   ctx.save();
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
   const path = (off: number) => {
     ctx.beginPath();
-    chute.forEach(([x, y], i) => (i ? ctx.lineTo(x, y + off) : ctx.moveTo(x, y + off)));
+    chute.forEach(([x, y], i) => {
+      const n = chuteNormal(i);
+      if (i) ctx.lineTo(x + n[0] * off, y + n[1] * off);
+      else ctx.moveTo(x + n[0] * off, y + n[1] * off);
+    });
   };
   ctx.strokeStyle = C.ink;
   ctx.lineWidth = 3.4;
@@ -557,12 +570,16 @@ function drawChute(ctx: CanvasRenderingContext2D, t: number) {
   ctx.lineWidth = 0.8;
   for (let i = 0; i < chute.length; i += 6) {
     const [x, y] = chute[i];
+    const n = chuteNormal(i);
     ctx.beginPath();
-    ctx.moveTo(x, y + R + 1);
-    ctx.lineTo(x, y + R + 5);
+    ctx.moveTo(x + n[0] * (R + 1), y + n[1] * (R + 1));
+    ctx.lineTo(x + n[0] * (R + 5), y + n[1] * (R + 5));
     ctx.stroke();
   }
   ctx.restore();
+  // the pen-line the ball leaves through the loop, lingering a beat too long
+  const pen = seg(B, 10.95, 11.02) * (1 - seg(B, 11.45, 11.75));
+  if (pen > 0) penTrail(ctx, chute, pen * 0.4, 100, ease.in2(seg(B, 10.92, 11.3)));
   void t;
 }
 

@@ -4,6 +4,7 @@ import { layoutWord, wordWidth } from '../core/glyphs';
 import { type Pt, TAU, bell, clamp, ease, fbm1, hash, lerp, noise1, rng, seg } from '../core/math';
 import { Particles, DOT, SPARK } from '../core/particles';
 import { blot, canvas, drawSprite, glow, paperTile, withAlpha } from '../core/sprites';
+import { between, penTrail, STROKES } from '../core/signature';
 import { C, F, font } from '../core/style';
 import { drawBlot } from '../core/blot';
 import { drawWarrior } from './warrior';
@@ -1276,7 +1277,7 @@ const KANJI_FONT = '800 {px}px "Shippori Mincho", "Hiragino Mincho ProN", "Yu Mi
  */
 function drawThunder(
   f: Frame, p: number, hilts: Pt[], skel: ReturnType<typeof drawWarrior>[], wIn: Parameters<typeof drawWarrior>[1][],
-  X: (n: number) => number, Y: (n: number) => number, S: number, tt: number,
+  X: (n: number) => number, _Y: (n: number) => number, S: number, tt: number,
   colors: { c: string; hot: string }[],
 ) {
   const { ctx, w, h, t } = f;
@@ -1352,19 +1353,11 @@ function drawThunder(
     ctx.restore();
   }
 
-  // 3. the flash: a six-fold zig-zag, bouncing crag to crag, through the
-  // opponent and home again
-  // bounces kept low and flat, the way a body would actually travel
-  const path: Pt[] = [
-    me.chest,
-    [X(0.22), Y(0.6)],
-    [X(0.55), Y(0.7)],
-    foe.chest,
-    [X(1.04), Y(0.62)],
-    [X(0.72), Y(0.5)],
-    [X(0.36), Y(0.64)],
-    me.chest,
-  ];
+  // 3. the flash: a zig-zag up and down through the opponent. Secretly it's the first stroke
+  // of the signature, the M (core/signature.ts), and its pen-line lingers after the bolt cools.
+  const path: Pt[] = between(STROKES.m, me.chest, foe.chest, 0.55);
+  const pen = seg(p, 0.42, 0.5) * (1 - seg(p, 0.62, 0.8));
+  penTrail(ctx, path, pen * 0.4, S, ease.out3(seg(p, 0.4, 0.44)));
   const head = ease.out3(seg(p, 0.4, 0.44));
   const after = 1 - ease.in2(seg(p, 0.47, 0.6));
   if (hit(0.4)) {
