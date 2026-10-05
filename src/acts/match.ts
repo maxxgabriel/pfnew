@@ -773,6 +773,25 @@ function drawPlayer(ctx: CanvasRenderingContext2D, cam: Cam, p: Player, pos: V3,
   const head = P(cam, [pos[0] + Math.cos(spin) * 1.3 * kn, pos[1] + 1.85 - 0.7 * kn, pos[2] + Math.sin(spin) * 1.3 * kn]);
   if (!foot || !head) return;
   const r = (cam.f * 0.75) / foot[2];
+  // long shadows thrown away from each floodlight tower, snapping out as each one clunks on
+  TOWERS.forEach((tw, i) => {
+    const on = seg(B, LIGHT_ON[i], LIGHT_ON[i] + 0.12);
+    if (on <= 0 || kn > 0.5) return;
+    const dx = pos[0] - tw[0], dz = pos[2] - tw[2], d = Math.hypot(dx, dz) || 1;
+    const len = 4.2 * ease.outBack(on, 1.6);
+    const end = P(cam, [pos[0] + (dx / d) * len, 0.02, pos[2] + (dz / d) * len]);
+    if (!end) return;
+    const g = ctx.createLinearGradient(foot[0], foot[1], end[0], end[1]);
+    g.addColorStop(0, 'rgba(0,0,0,0.38)');
+    g.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.strokeStyle = g;
+    ctx.lineWidth = Math.max(1, r * 0.5);
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(foot[0], foot[1]);
+    ctx.lineTo(end[0], end[1]);
+    ctx.stroke();
+  });
   // shadow disc
   ctx.fillStyle = 'rgba(0,0,0,0.45)';
   ctx.beginPath();

@@ -933,6 +933,20 @@ function drawDuel(
     bl.a = a;
   });
 
+  // the blades are lights: a pool of their colour slides along the ground under each one,
+  // brighter the lower the blade is held
+  const gy = h * 0.83;
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  blades.forEach((bl, i) => {
+    if (bl.len < 0.05 || (gone && i === 0)) return;
+    const mx = (hilts[i][0] + tips[i][0]) / 2, my = (hilts[i][1] + tips[i][1]) / 2;
+    const near = Math.max(0, 1 - Math.abs(gy - my) / (h * 0.5));
+    ctx.globalAlpha = 0.42 * near * Math.min(1, bl.len * 1.5);
+    drawSprite(ctx, glow(colors[i].c, 128), mx, gy, S * 0.55, S * 0.12);
+  });
+  ctx.restore();
+
   // the fighters, painted around the blades they hold
   const skel: ReturnType<typeof drawWarrior>[] = [];
   const wIn: Parameters<typeof drawWarrior>[1][] = [];
@@ -956,6 +970,17 @@ function drawDuel(
     skel[i] = k;
     wIn[i] = wi;
   });
+
+  // and their light falls on the fighters: a wash of each blade's colour over whoever stands near it
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  blades.forEach((bl, i) => {
+    if (bl.len < 0.05 || (gone && i === 0)) return;
+    const mx = (hilts[i][0] + tips[i][0]) / 2, my = (hilts[i][1] + tips[i][1]) / 2;
+    ctx.globalAlpha = 0.1 * Math.min(1, bl.len * 1.5) * appear;
+    drawSprite(ctx, glow(colors[i].c, 128), mx, my + S * 0.08, S * 0.7, S * 0.8);
+  });
+  ctx.restore();
 
   // swing trails: where the blades were a moment of scroll ago
   ctx.save();
@@ -1369,6 +1394,14 @@ function drawThunder(
   }
   if (p >= 0.4 && after > 0) {
     const shown = p < 0.44 ? slicePath(path, head) : path;
+    // the ground lights up gold under wherever the bolt has been
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    for (const pt of shown) {
+      ctx.globalAlpha = 0.28 * after;
+      drawSprite(ctx, glow(GOLD.c, 128), pt[0], gy, S * 0.4, S * 0.09);
+    }
+    ctx.restore();
     drawBolt(ctx, shown, t, { width: S * 0.0055, amp: S * 0.014, seed: 7, alpha: after, branches: 10 });
     // afterimages of the striker at every bounce, fading in the order it passed
     for (let i = 1; i < path.length - 1; i++) {
