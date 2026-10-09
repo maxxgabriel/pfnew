@@ -376,7 +376,7 @@ export function drawRivalsFlat(ctx: CanvasRenderingContext2D, B: number, t: numb
   }
 }
 
-/** one fighter at any hilt, blade angle and facing (painting units): chapter VI's choreography */
+/** one fighter at any hilt, blade angle and facing (painting units): chapter IV's choreography */
 export function drawFighter(ctx: CanvasRenderingContext2D, hilt: Pt, a: number, face: number, col: string, t: number, vx: number, vy: number, seed: number) {
   drawWarrior(ctx, { hilt, a, foeX: hilt[0] + face * 100, s: S, groundY: 1842, color: col, t, vx, vy, seed, alpha: 1 });
   drawBlade(ctx, hilt[0], hilt[1], a, col, seed);

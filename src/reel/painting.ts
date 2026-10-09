@@ -1,5 +1,5 @@
 import { brush, ensoPath } from '../core/brush';
-import { type Pt, TAU, clamp, ease, hash, lerp, rng, seg } from '../core/math';
+import { type Pt, TAU, clamp, ease, lerp, rng, seg } from '../core/math';
 import { canvas } from '../core/sprites';
 
 /*
@@ -562,35 +562,4 @@ function drawMoon(ctx: CanvasRenderingContext2D, B: number) {
     press: 1.4,
     tail: 0.25,
   });
-}
-
-/** where painted bird i is at clock t (painting units) */
-export function birdAt(i: number, t: number): Pt {
-  return [120 + i * 70 + ((t * (8 + i * 2)) % 300) - 60 + hash(i) * 30, 520 + i * 26 + Math.sin(t * 0.8 + i) * 8];
-}
-export const BIRDS = 5;
-/** the next chapter takes the painted birds over (they come alive and leave the paper) */
-let birdsHidden = false;
-export function hideBirds(on: boolean) { birdsHidden = on; }
-
-/** birds lifting off the cliff as the painting settles (ambient, on the clock) */
-export function drawBirds(ctx: CanvasRenderingContext2D, B: number, t: number) {
-  const a = seg(B, 8.6, 9.2);
-  if (a <= 0 || birdsHidden) return;
-  ctx.save();
-  ctx.strokeStyle = PIG.inkMid;
-  ctx.lineCap = 'round';
-  ctx.lineWidth = 4;
-  ctx.globalAlpha = a;
-  for (let i = 0; i < BIRDS; i++) {
-    const [x, y] = birdAt(i, t);
-    const flap = Math.sin(t * 7 + i * 1.7) * 7;
-    const s = 14 + hash(i * 3) * 6;
-    ctx.beginPath();
-    ctx.moveTo(x - s, y - flap);
-    ctx.quadraticCurveTo(x - s * 0.4, y - 2, x, y + 2);
-    ctx.quadraticCurveTo(x + s * 0.4, y - 2, x + s, y - flap);
-    ctx.stroke();
-  }
-  ctx.restore();
 }

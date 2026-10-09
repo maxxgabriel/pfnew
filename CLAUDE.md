@@ -8,7 +8,7 @@ Before changing anything, read:
 
 -1. `docs/OWNER_INSTRUCTIONS.md` — every instruction, reference and website the
    owner has given, their messages word for word, and the standing rules.
-0. `docs/STORY.md` — the story at the top (v9, the Reel: seven chapters,
+0. `docs/STORY.md` — the story at the top (v10, the Reel: five chapters,
    each a different craft, seamless). Start here.
 1. `docs/BRIEF.md` — the owner's creative brief and every decision they've
    made since (what they asked for, what they approved, **what they rejected**).
@@ -28,7 +28,11 @@ Before changing anything, read:
   the Ink Dragon, the Night Ride, the hand-shadow bridge and the X-Ray
   blueprint (round 10). ALTER
   stays, but cut to about a third (round 10). Round 16: Machine and TITAN
-  are cut from the Reel ("very weird").
+  are cut from the Reel ("very weird"). Round 17: Flock (murmuration), the
+  painted birds, Neon (the letter city) and Shadow's shard cloud are cut.
+- **No clusters of small things.** The owner finds many small things
+  together "yuck" (flocks, swarms, shard clouds, dense particle fields).
+  Prefer one strong shape over many small ones.
 - **Original, not copied.** References (Mat Voyce, Demon Slayer, Fate/HF) are
   for energy and technique. Don't reproduce their characters, logos or text.
 - **Never re-time existing acts casually.** Everything is authored in *film

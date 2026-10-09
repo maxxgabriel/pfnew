@@ -6,7 +6,7 @@ import { paperTile } from '../core/sprites';
 import { F, font } from '../core/style';
 import { drawSeal } from '../acts/ink';
 import { CLASHES, SEAL, drawDuel, impactNow } from './duel';
-import { type Cam, PIG, PW, applyCam, camAt, camZoom, drawBirds, drawLandscape, drawSheet, fadeSides, mixHex, trimToSheet } from './painting';
+import { type Cam, PIG, PW, applyCam, camAt, camZoom, drawLandscape, drawSheet, fadeSides, mixHex, trimToSheet } from './painting';
 
 /*
  * I · INK.
@@ -78,7 +78,6 @@ function drawPainting(f: Frame) {
   const around = mixHex(PIG.sheet, '#ddd4c2', edge);
   fadeSides(ctx, around);
   trimToSheet(ctx, edge, around);
-  drawBirds(ctx, B, t);
   drawDrops(ctx, B);
   drawDuel(f, ctx, B, t);
   drawInscription(ctx, B);

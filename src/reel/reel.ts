@@ -1,8 +1,6 @@
 import type { Frame } from '../core/frame';
 import { drawInk } from './ink';
 import { drawFold } from './fold';
-import { drawMurmur } from './murmur';
-import { drawNeon } from './neon';
 import { drawShadow } from './shadow';
 import { drawImpact } from './impact';
 import { drawPage } from './page';
@@ -10,16 +8,14 @@ import { drawPage } from './page';
 /*
  * THE REEL.
  *
- * A showreel in one scroll: seven chapters, each a different craft at full
+ * A showreel in one scroll: five chapters, each a different craft at full
  * strength, each flowing into the next with no hard cut.
  *
  *   I    Ink         brush animation — the fight paints a hanging scroll
- *   II   Flock       simulation — the painted birds become a murmuration
- *   III  Fold        3D geometry — the flock packs into a sheet that folds into a crane
- *   IV   Neon        kinetic type — a city of giant glowing letters
- *   V    Shadow      light and silhouette — one bulb, shadows that morph
- *   VI   Impact      an anime set piece — the shadows tear off the wall
- *   VII  Page        the finale — every chapter still playing on one page
+ *   II   Fold        3D geometry — the scroll becomes a sheet that folds into a crane
+ *   III  Shadow      light and silhouette — one bulb, shadows that morph
+ *   IV   Impact      an anime set piece — the shadows tear off the wall
+ *   V    Page        the finale — every chapter still playing on one page
  *
  * Each chapter owns [from, to) in film beats and draws itself from its own
  * local beat L = B - from. Its opening is responsible for the seam: it may
@@ -38,15 +34,13 @@ export interface Chapter {
 
 export const CHAPTERS: Chapter[] = [
   { n: 'I', name: 'Ink', from: 0, to: 9.6, paper: true, draw: (f) => drawInk(f) },
-  { n: 'II', name: 'Flock', from: 9.6, to: 17.2, paper: false, draw: drawMurmur },
-  { n: 'III', name: 'Fold', from: 17.2, to: 24.6, paper: false, draw: drawFold },
-  { n: 'IV', name: 'Neon', from: 24.6, to: 31.4, paper: false, draw: drawNeon },
-  { n: 'V', name: 'Shadow', from: 31.4, to: 37.6, paper: false, draw: drawShadow },
-  { n: 'VI', name: 'Impact', from: 37.6, to: 43.6, paper: false, draw: drawImpact },
-  { n: 'VII', name: 'Page', from: 43.6, to: 49.2, paper: true, draw: drawPage },
+  { n: 'II', name: 'Fold', from: 9.6, to: 17.6, paper: false, draw: drawFold },
+  { n: 'III', name: 'Shadow', from: 17.6, to: 23.8, paper: false, draw: drawShadow },
+  { n: 'IV', name: 'Impact', from: 23.8, to: 29.8, paper: false, draw: drawImpact },
+  { n: 'V', name: 'Page', from: 29.8, to: 35.4, paper: true, draw: drawPage },
 ];
 
-export const REEL_END = 49.6;
+export const REEL_END = 35.8;
 
 export function chapterAt(B: number) {
   let i = 0;

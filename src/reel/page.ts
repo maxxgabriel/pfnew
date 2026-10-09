@@ -4,22 +4,20 @@ import type { Frame } from '../core/frame';
 import { type Pt, TAU, ease, lerp, seg } from '../core/math';
 import { canvas } from '../core/sprites';
 import { drawInk } from './ink';
-import { drawMurmur } from './murmur';
-import { drawFold } from './fold';
-import { drawNeon } from './neon';
+import { PRE, drawFold } from './fold';
 import { drawShadow } from './shadow';
 import { drawImpact } from './impact';
 import { PIG } from './painting';
 
 /*
- * VII · THE PAGE.
+ * V · THE PAGE.
  *
  * The white the last chapter burned to is the inside of a brushed circle on
- * a page. The camera pulls out of it; round it, six more circles brush
+ * a page. The camera pulls out of it; round it, four more circles brush
  * themselves onto the paper, and each one is a chapter still playing: the
- * duel, the flock, the crane, the city, the bulb, the beams. The seal stamps
- * into the middle one. A single stroke runs through all six, in order, and
- * ends at the seal — a signature — and the contact card rises under it.
+ * duel, the crane, the bulb, the beams. The seal stamps into the middle one.
+ * A single stroke runs round all four, in order, and ends at the seal — a
+ * signature — and the contact card rises under it.
  */
 
 /** local beats */
@@ -38,22 +36,22 @@ const INK = '#1b1714';
 /** each ring's chapter, the stretch of it that loops, and its order round the ring (from the top, clockwise) */
 const LOOPS: { draw: (f: Frame, L: number) => void; from: number; a: number; b: number }[] = [
   { draw: (f) => drawInk(f), from: 0, a: 2.4, b: 7.9 },
-  { draw: drawMurmur, from: 9.6, a: 1.6, b: 6.4 },
-  { draw: drawFold, from: 17.2, a: 1.2, b: 5.6 },
-  { draw: drawNeon, from: 24.6, a: 1.4, b: 5.4 },
-  { draw: drawShadow, from: 31.4, a: 0.8, b: 4.6 },
-  { draw: drawImpact, from: 37.6, a: 0.6, b: 4.7 },
+  { draw: drawFold, from: 9.6, a: PRE + 1.2, b: PRE + 5.2 },
+  { draw: drawShadow, from: 17.6, a: 0.8, b: 4.6 },
+  { draw: drawImpact, from: 23.8, a: 0.6, b: 4.7 },
 ];
 const SPEED = 0.6; // beats a second inside the circles
+/** the first circle's angle: a corner, so four sit as a square and clear the sides of a phone */
+const A0 = -Math.PI / 2 + Math.PI / LOOPS.length;
 
-/** the page's layout: the centre circle and six round it, clear of the contact card */
+/** the page's layout: the centre circle and the others round it, clear of the contact card */
 function layout(w: number, h: number) {
   const r = Math.min(w * 0.15, h * 0.075);
   const D = r * 2.18;
   // low enough that the wreath clears the top, high enough to clear the contact card
   const c: Pt = [w / 2, Math.max(h * 0.32, D + r * 1.45 + h * 0.06)];
   const ring = LOOPS.map((_, i) => {
-    const an = -Math.PI / 2 + (i / 6) * TAU;
+    const an = A0 + (i / LOOPS.length) * TAU;
     return [c[0] + Math.cos(an) * D, c[1] + Math.sin(an) * D] as Pt;
   });
   return { r, c, ring };
@@ -144,7 +142,7 @@ export function drawPage(f: Frame, L: number) {
   ctx.scale(zoom, zoom);
   ctx.translate(-c[0], -c[1]);
 
-  // the six chapters, in their circles
+  // the chapters, in their circles
   ring.forEach((p, i) => {
     const rk = ease.out3(seg(L, PG.rings[0] + i * 0.1, PG.rings[0] + i * 0.1 + 0.45));
     if (rk <= 0) return;
@@ -230,7 +228,7 @@ function signPath(ring: Pt[], c: Pt, r: number): Pt[] {
   for (let i = 0; i <= 72; i++) {
     const u = i / 72;
     const an = a0 + u * TAU * 1.04;
-    const R = D + r * 1.18 + r * 0.16 * Math.cos(6 * (an + Math.PI / 2)) - u * r * 0.12;
+    const R = D + r * 1.18 + r * 0.16 * Math.cos(LOOPS.length * (an - A0)) - u * r * 0.12;
     pts.push([c[0] + Math.cos(an) * R, c[1] + Math.sin(an) * R]);
   }
   const last = pts[pts.length - 1];

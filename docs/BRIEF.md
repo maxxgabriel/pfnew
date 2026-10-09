@@ -205,6 +205,13 @@ pictures), VI Impact (the rivals in silhouette at sunset, beam clash,
 white-out), VII the Page (every chapter live in a brushed circle, the seal,
 a signature, contact). See `docs/STORY.md` v9.
 
+**Round 17: less is more.** The owner cut Flock, Neon, the painted birds
+and Shadow's shard cloud: *"i hate multiple small things together its yuck
+for me"*; the birds didn't match the aesthetic; the neon city with the
+letter buildings looked bad. The reel is now I Ink, II Fold, III Shadow,
+IV Impact, V Page (`docs/STORY.md` v10). **Never build swarms, flocks,
+particle clouds or anything made of many small pieces repeated together.**
+
 **What the owner responds to.** Big, cinematic, anime-like set pieces;
 continuity jokes (Blot); hard cuts, impact frames, speed lines. Proposals
 with clear options before a build.

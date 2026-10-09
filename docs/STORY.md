@@ -1,4 +1,42 @@
-# STORY — The Reel (v9, round 16, current)
+# STORY — The Reel (v10, round 17, current)
+
+A showreel in the first film's format: five chapters, each a different
+craft at full strength, each flowing into the next with no hard cut. One
+art direction (paper, ink, a few strong colours) and one thread: a pair of
+rivals and a piece of paper that keeps changing what it is.
+
+1. **I · Ink** (brush animation) — MAX GABRIEL brushed on white paper; two
+   drops of pigment fall and bloom into two fighters; every cut of the duel
+   stays on the paper and flows into the landscape; the seal; pull back to
+   the whole hanging scroll.
+2. **II · Fold** (3D geometry) — the scroll lets go of its painting: the
+   paper closes in to a square on a dusk sky and the ink washes off. The
+   square tilts back, its crease pattern draws on, it folds (the vermilion
+   back turns over), snaps into a bird base and a crane rises out of it and
+   flies over a paper countryside that folds up as it passes. Night; the
+   camera lets it go and it flies on into the dark until it is one warm
+   point.
+3. **III · Shadow** (light) — the point is a bulb. It clicks on, swinging,
+   over a sheet of paper; the crane's shadow lies on it, swaying against the
+   swing. Each flick melts the shadow soft and it sets as something else:
+   mountains under a moon, then the two rivals. The light sinks into sunset.
+4. **IV · Impact** (anime) — the silhouettes fight at sunset: standoff,
+   glint cut-in, dash, impact frames, blade lock, a pass across the sun,
+   back to back, a beam clash whose meeting point swells to white.
+5. **V · The Page** — the white is the inside of a brushed circle; the
+   camera pulls out to a page of five circles, four of them still playing
+   their chapters; the seal stamps the centre; one stroke wreathes them all;
+   the contact card.
+
+Round 17: the owner cut **Flock** (the murmuration, and the little painted
+birds on the scroll), **Neon** (the city of letters) and **Shadow's cloud of
+paper shards**: *"i hate multiple small things together its yuck for me"*,
+the birds didn't match the aesthetic, and the neon city looked bad. What
+comes next is to be discussed with them.
+
+---
+
+# STORY — The Reel (v9, round 16, superseded)
 
 A showreel in the first film's format: seven chapters, each a different
 craft at full strength, each flowing into the next with no hard cut. One

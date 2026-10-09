@@ -1,21 +1,23 @@
 import type { Frame } from '../core/frame';
 import { type Pt, TAU, clamp, ease, hash, lerp, rng, seg } from '../core/math';
 import { drawSprite, glow } from '../core/sprites';
-import { drawSky, sheetRect } from './murmur';
-import { mixHex } from './painting';
+import { drawInk } from './ink';
+import { PIG, mixHex } from './painting';
 import { type Cam3, type Tri, type V3, add, cross, drawTris, lerp3, lookAt, norm, project, rotAbout, rotX, rotY, rotZ, sub } from './v3';
 
 /*
- * III · FOLD.
+ * II · FOLD.
  *
- * The square the flock became tilts back and lies flat; its crease pattern
- * draws itself (blue valleys, green mountains). Then it folds — two true
- * rigid folds, so the vermilion back of the paper turns over into view —
- * snaps open into a bird base, and the crane rises out of it: neck and tail
- * up, head bent, wings open, all flat-shaded facets catching the last light.
- * It lifts off and flies over a landscape of paper whose hills, trees and
- * houses fold up out of the ground as it passes. Night falls; windows light;
- * a city glows on the horizon (chapter IV is that city).
+ * The finished scroll lets go of its painting: the paper closes in to a
+ * square on a dusk sky and the ink washes off it. The square tilts back and
+ * lies flat; its crease pattern draws itself (blue valleys, green
+ * mountains). Then it folds — two true rigid folds, so the vermilion back of
+ * the paper turns over into view — snaps open into a bird base, and the
+ * crane rises out of it: neck and tail up, head bent, wings open, all
+ * flat-shaded facets catching the last light. It lifts off and flies over a
+ * landscape of paper whose hills, trees and houses fold up out of the ground
+ * as it passes. Night falls; the camera lets it go, and it flies on into the
+ * dark until it is one warm point (chapter III's bulb).
  */
 
 /** local beats */
@@ -31,13 +33,106 @@ export const FD = {
   turn: [4.05, 4.6] as const,
   fly: 4.5,
   night: [4.8, 6.4] as const,
-  city: [5.6, 7.2] as const,
-  end: 7.4,
+  /** the camera slows and lets the crane fly on alone */
+  away: [5.3, 6.5] as const,
+  dark: [5.9, 6.7] as const,
+  end: 6.8,
 };
+
+/** the opening (chapter beats before FD's): the scroll becomes the square */
+export const PRE = 1.2;
 
 const H = 100; // half the sheet, world units
 const PAPER = '#f3eee3';
 const BACK = '#c8432f';
+
+/* ------------------------------------------------------------ the sky */
+
+/** the square of paper, on screen: the scroll shrinks into exactly this */
+export function sheetRect(w: number, h: number) {
+  const S = Math.min(w, h);
+  return { cx: w / 2, cy: h * 0.45, side: S * 0.62 };
+}
+
+let reeds: { x: number; h: number; ph: number }[] = [];
+
+export function drawSky(f: Frame) {
+  const { ctx, w, h, t } = f;
+  const S = Math.min(w, h);
+  const g = ctx.createLinearGradient(0, 0, 0, h);
+  g.addColorStop(0, '#222b4a');
+  g.addColorStop(0.42, '#6b5878');
+  g.addColorStop(0.7, '#d4956f');
+  g.addColorStop(0.85, '#f0c48f');
+  g.addColorStop(1, '#f5d9ab');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, w, h);
+  // the sun, low and soft
+  const sx = w * 0.7, sy = h * 0.81;
+  ctx.save();
+  ctx.globalAlpha = 0.55;
+  drawSprite(ctx, glow('#ffe7b8', 128), sx, sy, S * 1.1);
+  ctx.globalAlpha = 1;
+  ctx.fillStyle = '#fff3da';
+  ctx.beginPath();
+  ctx.arc(sx, sy, S * 0.055, 0, TAU);
+  ctx.fill();
+  ctx.restore();
+  // far hills, nearer hills, water
+  const hy = h * 0.86;
+  for (const [col, amp, seed, off] of [['rgba(92,74,96,0.55)', 0.05, 3, 0.012], ['rgba(54,42,62,0.85)', 0.03, 7, 0.0]] as const) {
+    ctx.fillStyle = col;
+    ctx.beginPath();
+    ctx.moveTo(0, h);
+    for (let i = 0; i <= 40; i++) {
+      const x = (i / 40) * w;
+      const y = hy - off * h - amp * h * (0.5 + 0.5 * Math.sin(i * 0.55 + seed) * Math.sin(i * 0.23 + seed * 2));
+      ctx.lineTo(x, y);
+    }
+    ctx.lineTo(w, h);
+    ctx.closePath();
+    ctx.fill();
+  }
+  const wg = ctx.createLinearGradient(0, hy, 0, h);
+  wg.addColorStop(0, '#e9b98a');
+  wg.addColorStop(1, '#4a3a4e');
+  ctx.fillStyle = wg;
+  ctx.fillRect(0, hy, w, h - hy);
+  // the sun's path on the water
+  ctx.fillStyle = 'rgba(255,240,210,0.6)';
+  for (let i = 0; i < 9; i++) {
+    const y = hy + 4 + i * (h - hy) / 10;
+    const ww = S * (0.05 + i * 0.012) * (0.7 + 0.3 * Math.sin(t * 2 + i));
+    ctx.fillRect(sx - ww / 2 + Math.sin(t * 1.3 + i) * 3, y, ww, 1.5);
+  }
+  // reeds in the foreground, in the wind
+  if (reeds.length === 0) {
+    const r = rng(9);
+    // two clumps at the sides; the middle stays open for the sun on the water
+    reeds = Array.from({ length: 22 }, (_, i) => {
+      const side = i % 2 ? r() * 0.3 : 0.72 + r() * 0.3;
+      return { x: side, h: 0.03 + r() ** 1.6 * 0.12, ph: r() * TAU };
+    });
+  }
+  ctx.strokeStyle = '#1d1720';
+  ctx.lineCap = 'round';
+  for (const rd of reeds) {
+    const x = rd.x * w, top = h - rd.h * h * 1.4;
+    const sway = Math.sin(t * 1.1 + rd.ph) * S * 0.012 + Math.sin(t * 2.7 + rd.ph * 2) * S * 0.004;
+    ctx.lineWidth = Math.max(1, S * 0.004);
+    ctx.beginPath();
+    ctx.moveTo(x, h + 4);
+    ctx.quadraticCurveTo(x + sway * 0.3, (h + top) / 2, x + sway, top);
+    ctx.stroke();
+    if (rd.h > 0.1) {
+      ctx.lineWidth = Math.max(2, S * 0.01);
+      ctx.beginPath();
+      ctx.moveTo(x + sway, top);
+      ctx.lineTo(x + sway * 1.05, top + S * 0.03);
+      ctx.stroke();
+    }
+  }
+}
 
 /* ------------------------------------------------------------ the sheet */
 
@@ -309,7 +404,7 @@ export function drawGround(ctx: CanvasRenderingContext2D, cam: Cam3, w: number, 
   ctx.restore();
 }
 
-/* ------------------------------------------------- the night (shared with IV) */
+/* ------------------------------------------------------------ the night */
 
 /** night falls over the dusk: a deep gradient and a field of stars */
 export function drawNight(ctx: CanvasRenderingContext2D, w: number, h: number, t: number, a: number) {
@@ -328,31 +423,6 @@ export function drawNight(ctx: CanvasRenderingContext2D, w: number, h: number, t
     const x = r() * w, y = r() * h * 0.55, tw = 0.5 + 0.5 * Math.sin(t * (1 + r() * 2) + i);
     ctx.globalAlpha = a * (0.3 + 0.7 * tw) * r();
     ctx.fillRect(x, y, 1.6, 1.6);
-  }
-  ctx.restore();
-}
-
-/** the city on the horizon: a glow, and a skyline made of letters */
-export function drawHorizonCity(ctx: CanvasRenderingContext2D, w: number, h: number, hy: number, a: number) {
-  if (a <= 0) return;
-  ctx.save();
-  ctx.globalCompositeOperation = 'lighter';
-  ctx.globalAlpha = a * 0.8;
-  drawSprite(ctx, glow('#ff3fa4', 128), w * 0.55, hy, w * 1.5, h * 0.16);
-  drawSprite(ctx, glow('#2fd6ff', 128), w * 0.38, hy, w * 0.8, h * 0.1);
-  ctx.restore();
-  ctx.save();
-  ctx.globalAlpha = a;
-  ctx.fillStyle = '#0b0c1a';
-  ctx.textBaseline = 'alphabetic';
-  ctx.textAlign = 'center';
-  const r = rng(31);
-  const S = Math.min(w, h);
-  for (let i = 0; i < 16; i++) {
-    const x = (i + 0.5) * (w / 16) + (r() - 0.5) * S * 0.03;
-    const px = Math.round(S * (0.04 + r() * 0.05));
-    ctx.font = `${px}px "Dela Gothic One", "Arial Black", sans-serif`;
-    ctx.fillText('MAXGABRIELMOTION'[i], x, hy + 1);
   }
   ctx.restore();
 }
@@ -379,7 +449,7 @@ function camAt(L: number): [V3, V3] {
   return [lerp3(a[1], b[1], k), lerp3(a[2], b[2], k)];
 }
 
-/** the crane's place in the world at local beat L (also used by chapter IV as it flies into the city) */
+/** the crane's place in the world at local beat L */
 export function cranePose(L: number, t: number) {
   const zc = flightZ(L);
   const turn = ease.inOut3(seg(L, FD.turn[0], FD.turn[1]));
@@ -396,12 +466,59 @@ export function placeCrane(L: number, t: number) {
   return (p: V3): V3 => add(rotY(rotZ(rotX(p, bank), turn * 0.15), turn * (Math.PI / 2)), [0, alt, zc]);
 }
 
+/** the camera's own beat once it lets the crane go: it slows to a stop over FD.away */
+function camBeat(L: number) {
+  const A = FD.away[0], D = FD.away[1] - A;
+  if (L < A) return L;
+  const u = clamp((L - A) / D);
+  return A + D * (u - (u * u) / 2);
+}
+
+/** the scroll lets go of its painting: the paper closes in to the square and the ink washes off */
+function drawLetGo(f: Frame, L: number) {
+  const { ctx, w, h } = f;
+  const S = Math.min(w, h);
+  const sr = sheetRect(w, h);
+  const k = ease.inOut3(seg(L, 0.05, 1.05));
+  const wash = ease.inOut2(seg(L, 0.35, 1.0));
+  drawSky(f);
+  const x0 = lerp(0, sr.cx - sr.side / 2, k), x1 = lerp(w, sr.cx + sr.side / 2, k);
+  const y0 = lerp(0, sr.cy - sr.side / 2, k), y1 = lerp(h, sr.cy + sr.side / 2, k);
+  // its shadow on the evening light, as it comes free of the wall
+  ctx.save();
+  ctx.globalAlpha = k;
+  ctx.fillStyle = 'rgba(40,24,30,0.18)';
+  ctx.fillRect(x0 + S * 0.012, y0 + S * 0.02, x1 - x0, y1 - y0);
+  ctx.restore();
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(x0, y0, x1 - x0, y1 - y0);
+  ctx.clip();
+  // the scroll's last frame rides inside the paper, cropped as it closes in
+  const sc = (x1 - x0) / w;
+  ctx.translate((x0 + x1) / 2, (y0 + y1) / 2);
+  ctx.scale(sc, sc);
+  ctx.translate(-w / 2, -sr.cy);
+  drawInk({ ...f, B: f.B - L, crossed: () => false, crossedFwd: () => false });
+  ctx.restore();
+  ctx.save();
+  ctx.globalAlpha = wash;
+  ctx.fillStyle = mixHex(PIG.sheet, PAPER, k);
+  ctx.fillRect(x0, y0, x1 - x0, y1 - y0);
+  ctx.restore();
+}
+
 export function drawFold(f: Frame, L: number) {
+  if (L < PRE) drawLetGo(f, L);
+  else drawFolding(f, L - PRE);
+}
+
+function drawFolding(f: Frame, L: number) {
   const { ctx, w, h, t } = f;
   const sr = sheetRect(w, h);
   const night = ease.inOut2(seg(L, FD.night[0], FD.night[1]));
 
-  // ---- the sky: the same dusk, then night falls and a city lights the horizon
+  // ---- the sky: the same dusk, then night falls
   drawSky(f);
   drawNight(ctx, w, h, t, night);
 
@@ -413,19 +530,22 @@ export function drawFold(f: Frame, L: number) {
   else {
     const k = ease.inOut3(seg(L, FD.turn[0], FD.fly + 0.4));
     const [p0, a0] = camAt(FD.turn[0]);
-    const follow: V3 = [150, pose.alt + 120, pose.zc + 520];
+    // the camera rides behind the crane, then slows and lets it fly on
+    const cz = flightZ(camBeat(L));
+    const follow: V3 = [150, pose.alt + 120, cz + 520];
     // aimed so the crane sits in the middle of the frame
-    const look: V3 = [-90, pose.alt - 10, pose.zc - 300];
+    const look: V3 = [-90, pose.alt - 10, cz - 300];
     pos = lerp3(p0, follow, k);
     at = lerp3(a0, look, k);
   }
-  const cam = lookAt(pos, at, fl, sr.cx, sr.cy, L > FD.fly ? -pose.bank * 0.4 : 0);
-
-  // the city glow on the horizon
-  const city = seg(L, FD.city[0], FD.city[1]);
-  if (city > 0) {
-    const far = project(cam, [0, 0, cam.pos[2] - 1e6]);
-    drawHorizonCity(ctx, w, h, far ? far[1] : h * 0.4, city);
+  const roll = L > FD.fly ? -pose.bank * 0.4 : 0;
+  let cam = lookAt(pos, at, fl, sr.cx, sr.cy, roll);
+  // as it flies off, the frame drifts so the crane ends dead centre, where chapter III's bulb hangs
+  const centre = ease.inOut2(seg(L, FD.away[0] + 0.3, FD.dark[1]));
+  const birdAt: V3 = [0, pose.alt, pose.zc];
+  if (centre > 0) {
+    const c = project(cam, birdAt);
+    if (c) cam = lookAt(pos, at, fl, sr.cx + (sr.cx - c[0]) * centre, sr.cy + (sr.cy - c[1]) * centre, roll);
   }
 
   // the paper ground unrolls under the take-off
@@ -447,7 +567,7 @@ export function drawFold(f: Frame, L: number) {
     tris.push(...craneTris(verts, place, night * 0.35));
   }
   if (L > FD.turn[0]) tris.push(...popTris(pose.zc, night));
-  // facing the viewer the sheet is exactly the square the flock left; the light comes in as it tilts
+  // facing the viewer the sheet is exactly the square the scroll became; the light comes in as it tilts
   drawTris(ctx, cam, tris, lerp(1, 0.6, ease.inOut2(seg(L, FD.tilt[0], FD.tilt[1]))));
   if (L < FD.fold1[0] + 0.2) drawCreases(ctx, cam, L);
   drawWindows(ctx, cam, pose.zc, night, t);
@@ -470,6 +590,24 @@ export function drawFold(f: Frame, L: number) {
       }
       ctx.restore();
     }
+  }
+
+  // ---- the dark: everything goes but the crane, a warm point of paper in the night
+  const dark = ease.inOut2(seg(L, FD.dark[0], FD.dark[1]));
+  if (dark > 0) {
+    ctx.save();
+    ctx.globalAlpha = dark;
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, w, h);
+    const c = project(cam, birdAt);
+    if (c) {
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.globalAlpha = dark * 0.35;
+      drawSprite(ctx, glow('#ffcf7a', 64), c[0], c[1], 70);
+      ctx.globalAlpha = dark;
+      drawSprite(ctx, glow('#fff4dc', 32), c[0], c[1], 10);
+    }
+    ctx.restore();
   }
   void cross;
 }

@@ -6,14 +6,14 @@ import { PIG } from './painting';
 import { SH, drawShadow, rivalsOnScreen } from './shadow';
 
 /*
- * VI · IMPACT.
+ * IV · IMPACT.
  *
  * The two silhouettes the shadow left at sunset fight it out as an anime
  * set piece: a held standoff, a blade's glint in a cut-in panel, the dash,
  * a clash on impact frames, the blades locked and grinding, a leap across
  * the sun, a pass and a landing back to back, then each turns and pours
  * everything into one beam. The beams meet; the light where they meet grows
- * until it's all there is (chapter VII begins on that white).
+ * until it's all there is (chapter V begins on that white).
  */
 
 /** local beats */

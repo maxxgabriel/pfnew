@@ -3,36 +3,31 @@ import { type Pt, TAU, clamp, ease, hash, lerp, seg } from '../core/math';
 import { canvas, drawSprite, glow } from '../core/sprites';
 import { drawRivalsFlat } from './duel';
 import { FD, craneShape, FACES } from './fold';
-import { type V3, add, lookAt, mul, norm, project, rotX, rotY, sub } from './v3';
+import { type V3, lookAt, project, rotX, rotY } from './v3';
 
 /*
- * V · SHADOW.
+ * III · SHADOW.
  *
- * In the dark after the O, one bulb. It clicks on, swinging, over a sheet
- * of paper standing in the void, and between the bulb and the paper hangs a
- * cloud of nine hundred paper shards. Their shadow is noise — until the
- * swing dies and the bulb comes to rest, and the noise snaps into a crane.
- * Flick the bulb, the shards drift, and the shadow becomes mountains under
+ * The crane's last point of light, in the dark, is a bulb. It clicks on,
+ * swinging, over a sheet of paper standing in the void, and the crane's
+ * shadow lies on the paper, swaying with the light. Each flick of the bulb
+ * melts the shadow soft and it sets again as something else: mountains under
  * a moon, then the two rivals from the first chapter, blades raised. The
- * camera walks round the side to show the trick (the shards are scattered
- * through depth; only the bulb sees the picture). Then the shards fall —
- * and the shadow stays. The light sinks into a sunset on the paper, and two
- * silhouettes stand on its horizon (chapter VI is their fight).
+ * light sinks into a sunset on the paper, and the two silhouettes harden on
+ * its horizon (chapter IV is their fight).
  */
 
 /** local beats */
 export const SH = {
   click: 0.32,
   shapes: [[1.75, 2.55], [2.95, 3.75]] as const,
+  /** the camera drifts round a little and back */
   reveal: [3.95, 4.55] as const,
   back: [4.55, 5.1] as const,
-  real: 5.08,
-  fall: [5.12, 5.7] as const,
   sunset: [5.15, 6.0] as const,
   end: 6.2,
 };
 
-const N = 900;
 // the light at rest, the pivot it hangs from
 const REST: V3 = [0, 420, 700];
 const PIVOT: V3 = [0, 1500, 700];
@@ -89,42 +84,16 @@ const RIVALS: Paint = (g) => {
   drawRivalsFlat(g, RIVALS_B, 0, '#000');
 };
 
-interface Shape { pts: Pt[]; cell: number; img: HTMLCanvasElement }
-let shapes: Shape[] | null = null;
+let shapes: HTMLCanvasElement[] | null = null;
 
-function build(paint: Paint, seed: number): Shape {
+function build(paint: Paint): HTMLCanvasElement {
   const { c, ctx } = canvas(MW, MW);
   paint(ctx);
-  const d = ctx.getImageData(0, 0, MW, MW).data;
-  const on = (x: number, y: number) => {
-    const xi = x | 0, yi = y | 0;
-    return xi >= 0 && yi >= 0 && xi < MW && yi < MW && d[(yi * MW + xi) * 4 + 3] > 90;
-  };
-  let filled = 0;
-  for (let i = 0; i < MW * MW; i++) if (d[i * 4 + 3] > 90) filled++;
-  const step = Math.sqrt(filled / N);
-  let pts: Pt[] = [];
-  for (let y = 0; y < MW; y += step) {
-    for (let x = 0; x < MW; x += step) {
-      const k = pts.length + seed * 977;
-      const px = x + hash(k) * step, py = y + hash(k + 0.5) * step;
-      if (on(px, py)) pts.push([(px - MW / 2) * WU, (MW - py) * WU]);
-    }
-  }
-  // exactly N: drop or double up (with a nudge) evenly
-  while (pts.length > N) pts.splice(Math.floor(hash(pts.length + seed) * pts.length), 1);
-  const base = pts.slice();
-  for (let i = 0; pts.length < N; i++) {
-    const p = base[Math.floor(hash(i * 3 + seed) * base.length)];
-    pts.push([p[0] + (hash(i + 7) - 0.5) * step * WU, p[1] + (hash(i + 9) - 0.5) * step * WU]);
-  }
-  // shuffle, so a morph scrambles rather than slides
-  pts = pts.map((p, i) => [hash(i * 13.1 + seed * 7), p] as const).sort((a, b) => a[0] - b[0]).map((e) => e[1]);
-  return { pts, cell: step * WU, img: c };
+  return c;
 }
 
 function getShapes() {
-  if (!shapes) shapes = [build(CRANE, 1), build(PEAKS, 2), build(RIVALS, 3)];
+  if (!shapes) shapes = [build(CRANE), build(PEAKS), build(RIVALS)];
   return shapes;
 }
 
@@ -148,60 +117,16 @@ function lightAt(L: number): V3 {
   return [Math.sin(a) * ROPE, PIVOT[1] - Math.cos(a) * ROPE + up, PIVOT[2] + Math.sin(a * 0.6) * 120];
 }
 
-/** where the shards are, and how they're turned, at L */
-function shardFrame(L: number) {
-  const sh = getShapes();
-  const m1 = ease.inOut3(seg(L, SH.shapes[0][0], SH.shapes[0][1]));
-  const m2 = ease.inOut3(seg(L, SH.shapes[1][0], SH.shapes[1][1]));
-  const out: { c: V3; r: number; rot: number; tilt: number; tax: number }[] = [];
-  for (let i = 0; i < N; i++) {
-    const at = (k: number): V3 => {
-      const q = sh[k].pts[i];
-      const s = 0.3 + 0.62 * hash(i * 1.37 + k * 101);
-      return add(REST, mul(sub([q[0], q[1], 0], REST), s));
-    };
-    const size = (k: number) => sh[k].cell * 1.2 * (0.3 + 0.62 * hash(i * 1.37 + k * 101));
-    let c = at(0), r = size(0);
-    if (m1 > 0) { c = lerpV(c, at(1), m1); r = lerp(r, size(1), m1); }
-    if (m2 > 0) { c = lerpV(c, at(2), m2); r = lerp(r, size(2), m2); }
-    // a drift through the morph so they swirl rather than slide
-    const sw = Math.sin(m1 * Math.PI) + Math.sin(m2 * Math.PI);
-    if (sw > 0) {
-      const ang = hash(i * 5.3) * TAU;
-      c = add(c, [Math.cos(ang) * 90 * sw, Math.sin(ang) * 90 * sw, (hash(i * 2.1) - 0.5) * 160 * sw]);
-    }
-    // the fall: the shadow has become real, so the paper drops
-    const fd = L - SH.fall[0] - hash(i * 3.3) * 0.3;
-    if (fd > 0) {
-      const y = c[1] - 2600 * fd * fd;
-      c = [c[0] + (hash(i * 8.1) - 0.5) * 200 * fd, Math.max(4, y), c[2]];
-    }
-    out.push({ c, r, rot: hash(i * 7.7) * TAU + (m1 + m2) * (hash(i) - 0.5) * 6 + (fd > 0 ? fd * 9 * (hash(i * 4) - 0.5) : 0), tilt: (hash(i * 9.9) - 0.5) * 0.9, tax: hash(i * 6.6) * TAU });
-  }
-  return out;
-}
-const lerpV = (a: V3, b: V3, k: number): V3 => [lerp(a[0], b[0], k), lerp(a[1], b[1], k), lerp(a[2], b[2], k)];
-
-function triOf(s: { c: V3; r: number; rot: number; tilt: number; tax: number }): [V3, V3, V3] {
-  const ax: V3 = [Math.cos(s.tax), Math.sin(s.tax), 0];
-  const out: V3[] = [];
-  for (let j = 0; j < 3; j++) {
-    const a = s.rot + (j * TAU) / 3;
-    let v: V3 = [Math.cos(a) * s.r, Math.sin(a) * s.r, 0];
-    // tilt about an axis in the plane (Rodrigues, axis ⟂ z)
-    const c = Math.cos(s.tilt), sn = Math.sin(s.tilt), d = v[0] * ax[0] + v[1] * ax[1];
-    v = [v[0] * c + ax[0] * d * (1 - c), v[1] * c + ax[1] * d * (1 - c), (ax[0] * v[1] - ax[1] * v[0]) * sn];
-    out.push(add(s.c, v));
-  }
-  return out as [V3, V3, V3];
-}
-
-/** the point on the wall (z = 0) that a ray from the light through p lands on */
-function onWall(Lp: V3, p: V3): V3 | null {
-  const dz = Lp[2] - p[2];
-  if (dz <= 1) return null;
-  const t = Lp[2] / dz;
-  return [Lp[0] + (p[0] - Lp[0]) * t, Lp[1] + (p[1] - Lp[1]) * t, 0];
+/** a picture, softened: drawn small and scaled back up (no canvas filter on iOS) */
+const softs: { c: HTMLCanvasElement; ctx: CanvasRenderingContext2D }[] = [];
+function soft(img: HTMLCanvasElement, k: number, slot: number) {
+  const px = Math.max(10, Math.round(MW / (1.6 + k * 12)));
+  if (!softs[slot] || softs[slot].c.width !== px) softs[slot] = canvas(px, px);
+  const s = softs[slot];
+  s.ctx.clearRect(0, 0, px, px);
+  s.ctx.imageSmoothingQuality = 'high';
+  s.ctx.drawImage(img, 0, 0, px, px);
+  return s.c;
 }
 
 /* ------------------------------------------------------------- the camera */
@@ -213,10 +138,9 @@ function camera(L: number, w: number, h: number) {
   const kIn = ease.inOut3(seg(L, SH.click, 1.25));
   const kRev = ease.inOut3(seg(L, SH.reveal[0], SH.reveal[1]));
   const kBack = ease.inOut3(seg(L, SH.back[0], SH.back[1]));
-  const th = lerp(lerp(0, 0.42, kIn) + 0.55 * kRev, 0, kBack);
+  const th = lerp(lerp(0, 0.42, kIn) + 0.18 * kRev, 0, kBack);
   const r = lerp(lerp(4900, 1750, kIn) + 150 * kRev, 1650, kBack);
   const atY = lerp(REST[1], 400, kIn);
-  // round the side, the eye goes to the cloud between the bulb and the paper
   const at: V3 = [lerp(lerp(0, -30, kIn), -120, kRev) * (1 - kBack), lerp(atY, 470, kBack), lerp(lerp(0, 120, kIn), 260, kRev) * (1 - kBack)];
   const pos: V3 = [Math.sin(th) * r, lerp(REST[1], 520, kIn) - 90 * kBack, Math.cos(th) * r];
   return lookAt(pos, at, fl, w / 2, cy);
@@ -290,10 +214,7 @@ export function drawShadow(f: Frame, L: number, rivals = true) {
       }
     }
 
-    // ---- the shadow: every shard projected from the bulb onto the paper, one union, soft-edged
-    const shards = shardFrame(L);
-    const tris = shards.map(triOf);
-    const real = L >= SH.real;
+    // ---- the shadow: the picture on the paper, swaying against the swing, melting soft as it changes
     const sw = Math.ceil(w / 2), shh = Math.ceil(h / 2);
     if (!off.c || off.c.width !== sw || off.c.height !== shh) {
       const o = canvas(sw, shh);
@@ -304,7 +225,6 @@ export function drawShadow(f: Frame, L: number, rivals = true) {
     o.setTransform(1, 0, 0, 1, 0, 0);
     o.clearRect(0, 0, sw, shh);
     o.setTransform(0.5, 0, 0, 0.5, 0, 0);
-    o.fillStyle = '#000';
     // shadows land only on the paper
     const WP = [[-1500, 0], [1500, 0], [1500, 3400], [-1500, 3400]].map(([x, y]) => project(cam, [x, y, 0]));
     o.save();
@@ -314,28 +234,23 @@ export function drawShadow(f: Frame, L: number, rivals = true) {
       o.closePath();
       o.clip();
     }
-    if (!real && rivals) {
-      // one small fill each (a single 900-part path is slower to rasterise); the layer is opaque, so overlaps don't stack
-      for (const tri of tris) {
-        const a = onWall(Lp, tri[0]), b = onWall(Lp, tri[1]), c = onWall(Lp, tri[2]);
-        if (!a || !b || !c) continue;
-        const A = project(cam, a), Bq = project(cam, b), C = project(cam, c);
-        if (!A || !Bq || !C) continue;
-        o.beginPath();
-        o.moveTo(A[0], A[1]);
-        o.lineTo(Bq[0], Bq[1]);
-        o.lineTo(C[0], C[1]);
-        o.fill();
-      }
-    }
-    // the rivals' own silhouette takes over (the same picture), and stays when the paper falls
-    const realK = rivals ? seg(L, SH.real - 0.12, SH.real) : 0;
-    if (realK > 0) {
-      const img = getShapes()[2].img;
-      const tl = project(cam, [-MW / 2 * WU, MW * WU, 0]), br2 = project(cam, [MW / 2 * WU, 0, 0]);
+    if (rivals) {
+      const sh = getShapes();
+      const m1 = ease.inOut3(seg(L, SH.shapes[0][0], SH.shapes[0][1]));
+      const m2 = ease.inOut3(seg(L, SH.shapes[1][0], SH.shapes[1][1]));
+      const melt = Math.sin(m1 * Math.PI) + Math.sin(m2 * Math.PI);
+      // the swing throws the shadow the other way, and stretches it a touch
+      const dx = -Math.sin(swing(L)) * ROPE * 0.45 * (1 - sun);
+      const grow = 1 + melt * 0.06;
+      const layers: [HTMLCanvasElement, number][] = m2 > 0 ? [[sh[1], 1 - m2], [sh[2], m2]] : [[sh[0], 1 - m1], [sh[1], m1]];
+      const tl = project(cam, [dx - (MW / 2) * WU * grow, MW * WU * grow, 0]), br2 = project(cam, [dx + (MW / 2) * WU * grow, 0, 0]);
       if (tl && br2) {
-        o.globalAlpha = realK;
-        o.drawImage(img, tl[0], tl[1], br2[0] - tl[0], br2[1] - tl[1]);
+        o.imageSmoothingEnabled = true;
+        layers.forEach(([img, a], i) => {
+          if (a <= 0.001) return;
+          o.globalAlpha = a;
+          o.drawImage(soft(img, melt, i), tl[0], tl[1], br2[0] - tl[0], br2[1] - tl[1]);
+        });
         o.globalAlpha = 1;
       }
     }
@@ -346,7 +261,7 @@ export function drawShadow(f: Frame, L: number, rivals = true) {
     ctx.restore();
     // and the silhouettes harden into figures: a crisp pass over the soft one
     if (sun > 0 && rivals) {
-      const img = getShapes()[2].img;
+      const img = getShapes()[2];
       const tl = project(cam, [-MW / 2 * WU, MW * WU, 0]), br2 = project(cam, [MW / 2 * WU, 0, 0]);
       if (tl && br2) {
         ctx.save();
@@ -355,39 +270,11 @@ export function drawShadow(f: Frame, L: number, rivals = true) {
         ctx.restore();
       }
     }
-
-    // ---- the shards themselves, catching the bulb
-    // grouped by tone so the fill colour changes ten times, not nine hundred
-    const TONES = 10;
-    const groups: number[][][] = Array.from({ length: TONES }, () => []);
-    for (const [i, s] of shards.entries()) {
-      const tri = tris[i];
-      const A = project(cam, tri[0]), Bq = project(cam, tri[1]), C = project(cam, tri[2]);
-      if (!A || !Bq || !C) continue;
-      const n = norm(crossV(sub(tri[1], tri[0]), sub(tri[2], tri[0])));
-      const toL = norm(sub(Lp, s.c));
-      const dist = Math.hypot(...sub(Lp, s.c));
-      const lit = Math.abs(n[0] * toL[0] + n[1] * toL[1] + n[2] * toL[2]) * clamp(900 / dist, 0, 1.4) * (1 - sun * 0.7);
-      groups[Math.min(TONES - 1, Math.floor(clamp(lit) * TONES))].push([A[0], A[1], Bq[0], Bq[1], C[0], C[1]]);
-    }
-    groups.forEach((g, i) => {
-      const k = 0.1 + 0.55 * ((i + 0.5) / TONES);
-      ctx.fillStyle = `rgb(${(246 * k) | 0},${(232 * k) | 0},${(204 * k) | 0})`;
-      for (const q of g) {
-        ctx.beginPath();
-        ctx.moveTo(q[0], q[1]);
-        ctx.lineTo(q[2], q[3]);
-        ctx.lineTo(q[4], q[5]);
-        ctx.fill();
-      }
-    });
   }
 
   // ---- the bulb on its cord
   drawBulb(ctx, cam, Lp, on ? 1 : pre, L, w, h, sun);
 }
-
-const crossV = (a: V3, b: V3): V3 => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
 
 function drawBulb(ctx: CanvasRenderingContext2D, cam: ReturnType<typeof lookAt>, Lp: V3, power: number, L: number, w: number, h: number, sun: number) {
   const b = project(cam, Lp);
@@ -432,7 +319,7 @@ function mix(a: string, b: string, k: number) {
   return `rgb(${pa.map((v, i) => Math.round(lerp(v, pb[i], clamp(k)))).join(',')})`;
 }
 
-/** where the rivals stand at the end of the chapter, on screen: chapter VI starts from this */
+/** where the rivals stand at the end of the chapter, on screen: chapter IV starts from this */
 export function rivalsOnScreen(w: number, h: number) {
   const cam = camera(SH.end, w, h);
   const p = (x: number, y: number) => project(cam, [x, y, 0])!;

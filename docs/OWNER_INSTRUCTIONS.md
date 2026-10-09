@@ -36,6 +36,9 @@ themselves, not to the docs: *"you report to me and not the docs"*.
 - **The bar is the absolute best.** *"dedication and passion… clean
   transitions crazy animation crazy motion graphics… think out of the box"*;
   *"i want the absolute best"*; *"a clean and good looking but awesome one"*.
+- **No clusters of many small things.** *"i hate multiple small things
+  together its yuck for me"* (round 17). No flocks, swarms, shard clouds or
+  dense fields of tiny repeated pieces; one strong shape beats many small.
 - **Phone first.** The owner watches on an iPhone (390×844). Touch only;
   nothing may depend on hover. Screenshot every change at phone size before
   calling it done.
@@ -62,7 +65,22 @@ themselves, not to the docs: *"you report to me and not the docs"*.
 
 ## 3. Decisions (most recent first)
 
-**Round 16 — the Reel (current, built):**
+**Round 17 — trimming the Reel (current, built):**
+- Cut **II Flock** (the murmuration) and the little painted birds on the
+  scroll: many small things together are "yuck" for the owner, and the birds
+  didn't match the aesthetic.
+- Cut **IV Neon**: *"the neon city looks so bad with the buildings from my
+  name"*.
+- Cut **Shadow's cloud of paper shards** (*"the flock is in shadow as well
+  please remove that as well"*). Shadow keeps the bulb and the shadow
+  pictures, which now melt from one to the next.
+- New seams: the scroll closes in to the square (Ink → Fold); the crane
+  flies off into the dark and becomes the bulb (Fold → Shadow).
+- The Reel is now **I Ink → II Fold → III Shadow → IV Impact → V Page**.
+- Next: talk with the owner about what to add (*"then we talk what to
+  add"*).
+
+**Round 16 — the Reel (built; trimmed in round 17):**
 - Fresh ideas using the three references → story-led pitches → rejected:
   *"we are saying a story and not showing our skills"*. Back to the first
   film's showreel format.
@@ -165,3 +183,12 @@ Light & shadow; dismissed the picker and wrote:)*
 
 > push it to branch with all instruictionas i gave and related references or
 > websites or context i gave
+
+> so i want you to go through the latest branch and the thing i didnt
+> actually like is the birds personally i have that thing where i hate
+> multiple small things together its yuck for me. so lets remove birds kr
+> anything also it doesnt match aesthetic as well. also the neon city looks
+> so bad with the buildings from my name. so yeah kets remove those thrn we
+> talk what to add
+
+> tye flock is in shadow as well please remove that ws well

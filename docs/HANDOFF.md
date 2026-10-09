@@ -15,36 +15,34 @@ the owner's taste and decisions; this file is the technical side.
 ---
 
 
-## Current film: the Reel (round 16) — read this first
+## Current film: the Reel (rounds 16–17) — read this first
 
-The site is a showreel in the first film's format: seven chapters, each a
+The site is a showreel in the first film's format: five chapters, each a
 different craft at full strength, each flowing into the next with no hard
 cut. `main.ts` draws `drawReel` (`src/reel/reel.ts`). Everything is a pure
 function of the film beat `B` plus the clock `t`, so scrolling back plays it
-backwards.
+backwards. Round 17 cut Flock (the murmuration), Neon (the letter city) and
+Shadow's shard cloud; see `docs/OWNER_INSTRUCTIONS.md`.
 
 | Chapter | Beats | Craft | File |
 |---|---|---|---|
 | I Ink | 0 – 9.6 | brush animation: the duel paints a hanging scroll | `reel/ink.ts`, `painting.ts`, `duel.ts` |
-| II Flock | 9.6 – 17.2 | simulation: 3000 birds become a wave, a whale, a twister, a sheet | `reel/murmur.ts` |
-| III Fold | 17.2 – 24.6 | 3D geometry: the sheet folds into a crane that flies off | `reel/fold.ts`, `v3.ts` |
-| IV Neon | 24.6 – 31.4 | kinetic type: a city of extruded letters, a dive through an O | `reel/neon.ts` |
-| V Shadow | 31.4 – 37.6 | light: 900 shards whose shadow snaps into pictures | `reel/shadow.ts` |
-| VI Impact | 37.6 – 43.6 | anime set piece in silhouette, beam clash, white-out | `reel/impact.ts` |
-| VII Page | 43.6 – 49.6 | the finale: every chapter live in a brushed circle, seal, contact | `reel/page.ts` |
+| II Fold | 9.6 – 17.6 | 3D geometry: the scroll becomes a sheet that folds into a crane that flies off | `reel/fold.ts`, `v3.ts` |
+| III Shadow | 17.6 – 23.8 | light: one swinging bulb, a shadow that melts from picture to picture | `reel/shadow.ts` |
+| IV Impact | 23.8 – 29.8 | anime set piece in silhouette, beam clash, white-out | `reel/impact.ts` |
+| V Page | 29.8 – 35.8 | the finale: every chapter live in a brushed circle, seal, contact | `reel/page.ts` |
 
 - `reel/reel.ts` — the conductor. `CHAPTERS` (mirrored in `core/frame.ts`
   `CHAPTERS` for the HUD) gives each chapter `[from, to)` and a `draw(f, L)`
   with its local beat `L = B - from`. A chapter's opening owns its seam: it
   starts on the previous chapter's last frame (often by literally drawing it).
   `reelHud` says whether the HUD sits on paper and when the contact card shows.
-- **The seams.** Ink → Flock: the painted birds lift off the scroll and
-  become the flock. Flock → Fold: the flock packs into a square sheet of
-  paper. Fold → Neon: the crane flies into the letter skyline on the horizon
-  (the same world coordinates continue; `cranePose`). Neon → Shadow: the
-  camera dives through the O's counter into black, and one bulb is left.
-  Shadow → Impact: the shards fall but the rivals' shadow stays, and the
-  bulb sinks into a sunset (`rivalsOnScreen` hands the layout over). Impact →
+- **The seams.** Ink → Fold: the scroll's paper closes in to a square on a
+  dusk sky while the ink washes off it (`drawLetGo`, the first `PRE` beats of
+  Fold). Fold → Shadow: the camera lets the crane go (`camBeat`), it flies
+  on into the dark and ends as one warm point dead centre, which is where
+  Shadow's bulb hangs. Shadow → Impact: the bulb sinks into a sunset and the
+  rivals' shadow hardens (`rivalsOnScreen` hands the layout over). Impact →
   Page: the beams' meeting point swells to white, and the white is the
   inside of the page's centre circle.
 - **I Ink** (`ink.ts`): the brushed title, two drops, the duel (`duel.ts`:
@@ -53,42 +51,32 @@ backwards.
   (`painting.ts` `ELEMENTS`: the cross → ridge, the leap → cliff, the
   thunder → gold river, the spinning guard → moon, the spray → pine), the
   seal, the pull back to the whole scroll. Landscape cached after `SETTLED`.
-- **II Flock** (`murmur.ts`): `N = 3000` 3D points, shapes ranked by a
-  diagonal key so every change sweeps across the flock; drawn in 3 depth
-  bands as batched paths. Beats in `M`.
-- **III Fold** (`fold.ts`, kit in `v3.ts`): an 8-triangle fan sheet folded
-  rigidly (Rodrigues `rotAbout`), crease lines drawing on, the snap into a
-  bird base, the crane mesh (`V`, `FACES`) rising, then flight over paper
-  hills that fold up, night, the letter city on the horizon. Beats in `FD`.
-  Exports the crane and the night for IV.
-- **IV Neon** (`neon.ts`): glyph sprites per letter/colour (dark glass face
-  with windows, a silhouette for extrusion slices, a tube whose bloom stays
-  outside the letter), towers in three rows that grow out of the street,
-  gate letters that fall across it (A, H, X — the camera passes under their
-  crossbars, measured gaps), wet reflections, rain, the crane turning into a
-  neon sign of itself, lights-out, the O and the dive. Camera distance is a
-  hermite over `CAMD` ([beat, distance, speed]).
-- **V Shadow** (`shadow.ts`): anamorphic shadow art. Each shape (crane,
-  peaks and moon, the two rivals drawn by `drawRivalsFlat`) is rasterised to
-  a mask and sampled to exactly 900 points; shard *i* sits on the ray from
-  the bulb's rest position to point *i*, at a random depth, so only the bulb
-  sees the picture. The swing (`swing`) dies to exact rest on each shape's
-  beat. Shadows go into a half-res layer (soft edge), shards are filled one
-  by one grouped by tone (one big path rasterises slower).
-- **VI Impact** (`impact.ts`): fighters keyed per beat (`BK`, `GK`: beat,
+- **II Fold** (`fold.ts`, kit in `v3.ts`): `drawLetGo` (the scroll closes in
+  to the square, `PRE` beats), then an 8-triangle fan sheet folded rigidly
+  (Rodrigues `rotAbout`), crease lines drawing on, the snap into a bird base,
+  the crane mesh (`V`, `FACES`) rising, flight over paper hills that fold up,
+  night, the camera slowing (`camBeat`) while the crane flies on, the dark.
+  Beats in `FD` (local to after `PRE`). Also owns the dusk sky (`drawSky`).
+- **III Shadow** (`shadow.ts`): each shape (crane, peaks and moon, the two
+  rivals drawn by `drawRivalsFlat`) is rasterised to a mask; the shadow is
+  that mask on the paper, thrown against the bulb's swing, and each change
+  melts it soft (drawn small and scaled up: `soft`, no canvas filter on iOS)
+  while it crossfades to the next. The swing (`swing`) dies to exact rest on
+  each shape's beat. Half-res layer for the soft edge, a crisp pass at sunset.
+- **IV Impact** (`impact.ts`): fighters keyed per beat (`BK`, `GK`: beat,
   hilt, blade angle, facing, snap), shots as views (`viewAt`), the glint
   cut-in panel, speed lines, two-frame impact frames ('difference' then
   white spikes), sparks on the lock, the beam clash, the white-out.
-- **VII Page** (`page.ts`): the circles replay a loop of each chapter into
+- **V Page** (`page.ts`): the circles replay a loop of each chapter into
   small canvases with a fake `Frame` (one per frame, round robin, so each
   runs at about 10 fps); the rings, seal and signature wreath are painted
   live, then cached to a layer once done.
 - No on-screen words in the set pieces (owner's rule); the only words are
   the title, the seal and the contact card.
 - Website only: the owner doesn't want a video format, ever.
-- Perf (headless, software raster, JS ms/frame): Ink 1–7, Flock 2–3, Fold
-  0.3–5, Neon 3–13, Shadow 5–8, Impact 2.5–7, Page ~10 (peaks ~24 while
-  the rings are being brushed).
+- Perf (headless, software raster, JS ms/frame, round 16): Ink 1–7, Fold
+  0.3–5, Impact 2.5–7, Page ~10 (peaks ~24 while the rings are being
+  brushed). Shadow is lighter than it was now the 900 shards are gone.
 - The old acts (machine, titan, alter…) are still in `src/acts` but not
   wired; Machine and TITAN were cut by the owner in round 16.
 
