@@ -200,7 +200,7 @@ function live(sh: Shape, which: string, i: number, t: number) {
 
 let reeds: { x: number; h: number; ph: number }[] = [];
 
-function drawSky(f: Frame) {
+export function drawSky(f: Frame) {
   const { ctx, w, h, t } = f;
   const S = Math.min(w, h);
   const g = ctx.createLinearGradient(0, 0, 0, h);
