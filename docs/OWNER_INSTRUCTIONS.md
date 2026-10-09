@@ -75,6 +75,13 @@ themselves, not to the docs: *"you report to me and not the docs"*.
 
 ## 3. Decisions (most recent first)
 
+**Round 26 — the polish pack, done:** *"fix these"* (the 13.4 MB preview and the
+polish pack still to do). Faster loading (page ~160 KB, drawings stream in
+story order, 8 MB total instead of 13.4 MB inlined), in-between drawings for
+the five hardest pose switches, layered painted backgrounds (near swell, near
+ribs, near clouds), a link preview card. Preview:
+https://claude.ai/artifact/2e3qybKHWFwd824v6ZoD2u
+
 **Round 25:** *"the starting cat and paint brush looks weird. remove the cat
 entirely"* → the ink cat is gone (Run and Home, code and drawings), and so is
 the visible paint brush laying the line in Run; the line still draws itself

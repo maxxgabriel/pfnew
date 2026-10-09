@@ -3,8 +3,9 @@
 Everything a new agent needs to pick this up. Read `docs/BRIEF.md` first for
 the owner's taste and decisions; this file is the technical side.
 
-- **Live preview:** https://claude.ai/artifact/9d3GKN33rB1VSTR2jGoDnV (the main branch;
-  v12 on `claude/sketch-v12`: https://claude.ai/artifact/2e3qybKHWFwd824v6ZoD2u;
+- **Live preview:** https://claude.ai/artifact/2e3qybKHWFwd824v6ZoD2u (the main branch from round 26,
+  multi-file: the page plus its drawings as supporting files; the earlier
+  https://claude.ai/artifact/9d3GKN33rB1VSTR2jGoDnV is no longer reachable from new sessions;
   an older preview lives at https://claude.ai/artifact/PcwGzT9y7tqBXqoo9EXsgD)
   (a private claude.ai artifact owned by the user; only Claude sessions with
   the Artifact tool can republish it. See "Shipping" below.)
@@ -64,6 +65,25 @@ seam.
 - **Sizes.** `SIZE` in `sketch/art.ts` corrects each sheet so his head is
   the same size in every drawing; tune it on `scripts/pose-lineup.html`.
 - `scripts/defringe.py` despills magenta from all cut-outs.
+- **Loading (round 26 polish pack).** Drawings and paintings are separate
+  files (`import.meta.glob(... '?url')`), fetched six at a time in the order
+  the film first needs them (`src/sketch/load.ts`; order in `FIRST_USE`,
+  `art.ts`, and `PRIO`, `bg.ts`); anything drawn before it has loaded jumps
+  the queue. `npm run artifact` writes `artifact/maxgabriel.html` (~160 KB)
+  with the images beside it; publish them as the page's supporting files
+  (`files` with `root: artifact`). `SINGLE=1 npm run artifact` makes one
+  self-contained file instead (~11 MB). WebP quality 80 (paintings 78).
+- **In-betweens.** `ib(pose, to, L, at, key)` in `art.ts` swaps in two drawn
+  in-betweens for 0.16 beats after a hard pose switch: `ib_wake` (still →
+  curious), `ib_rise` (hero landing → standing, also Light), `ib_stand`,
+  `ib_turn`, `ib_offer` (Home). Made by `scripts/gen-polish.sh` from the two
+  key drawings.
+- **Layered paintings.** `drawLayer` in `bg.ts` draws a keyed foreground
+  layer (`fg_inksea` in Wave, `fg_belly` in Light, `fg_sunset` in Chase)
+  moved further than its painting, for parallax.
+- **Link preview.** Open Graph and Twitter tags in `index.html`, image
+  `public/og.jpg` (made with `scripts/og-card.mjs`). Build with
+  `SITE_URL=https://… npm run build` so the image URL is absolute.
 - **Perf** (headless, JS ms/frame): 0.3 – 3.4 everywhere.
 - Codex image calls: use `--image=a.png --image=b.png` (a bare `-i` swallows
   the prompt as another file), `< /dev/null`.

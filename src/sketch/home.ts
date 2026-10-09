@@ -3,7 +3,7 @@ import { brush } from '../core/brush';
 import type { Frame } from '../core/frame';
 import { type Pt, TAU, clamp, ease, lerp, seg } from '../core/math';
 import { drawSprite, glow } from '../core/sprites';
-import { artSize, drawArt, drawArtFoot, drawPose } from './art';
+import { artSize, drawArt, drawArtFoot, drawPose, ib } from './art';
 import { drawVfx, vfxAspect } from './bg';
 import { INK, RED, cycle, drawGround, drawPaper, drawSpark, drawTitle, faceOf, idlePose , titleFit } from './common';
 import { dryStreak, flash, impactFrame, letterbox, shockRing } from './fx';
@@ -348,6 +348,11 @@ export function drawHome(f0: Frame, L: number) {
   if (L > HM.stand) pose = 'home_1';
   if (L > HM.turn) pose = 'home_2';
   if (L > HM.offer) pose = 'home_3';
+  // the in-betweens: rising from the landing, standing up from the kick, turning to you, lifting the brush
+  pose = ib(pose, 'home_1', L, HM.drop, 'ib_rise');
+  pose = ib(pose, 'home_1', L, HM.stand, 'ib_stand');
+  pose = ib(pose, 'home_2', L, HM.turn, 'ib_turn');
+  pose = ib(pose, 'home_3', L, HM.offer, 'ib_offer');
   // you sign: he leans in to watch, cheers when you lift the brush, then a thumbs-up
   const drawing = sig.length > 0 && signedAt < 0;
   if (L > HM.offer && L < HM.wave[0]) {

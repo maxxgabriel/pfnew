@@ -1,7 +1,7 @@
 import type { Frame } from '../core/frame';
 import { type Pt, clamp, ease, lerp, seg } from '../core/math';
 import { artSize, drawArtFoot, drawPose } from './art';
-import { drawBgXY } from './bg';
+import { drawBgXY, drawLayer } from './bg';
 import { drawSpark, drawSparkStreak, faceOf } from './common';
 import { drawDeep } from './deep';
 import { flash, shockRing } from './fx';
@@ -97,6 +97,9 @@ export function drawSea(f: Frame, L: number) {
     ctx.restore();
   }
   drawPose(ctx, pose, x, y, face, { rot });
+  // the near swell rolling past in front of him, faster than the sea behind (gone in the tube)
+  const near = seg(L, SE.dive[0] + 0.3, SE.land) * (1 - seg(L, SE.tube[0] - 0.2, SE.tube[0] + 0.3));
+  if (near > 0) drawLayer(ctx, 'fg_inksea', w, h, lerp(w * 0.35, -w * 0.35, seg(L, SE.dive[0], SE.tube[0])), h * 0.1 + Math.sin(t * 1.4) * face * 0.25, near, 1.3);
 
   // ---- the Spark: skimming the water ahead of him, then out through the end of the tube
   let sp: Pt = [x + face * 3, y - face * 1.6 + Math.sin(t * 5) * face * 0.2];

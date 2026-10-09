@@ -19,7 +19,7 @@ import { hurry, queue } from './load';
 
 const files = import.meta.glob('../assets/sketch/*.webp', { query: '?url', import: 'default', eager: true }) as Record<string, string>;
 /** the order the film first needs each sheet (scripts: grep the chapters in reel order); others load last */
-const FIRST_USE = ['still', 'curious', 'firststep', 'idle', 'walk8', 'run8', 'sprint8', 'moonwalk6', 'chase', 'eraser', 'popup', 'roto', 'rubberhose', 'runoff', 'style_chalk', 'style_clay', 'style_comic', 'style_pixel', 'style_water', 'acro', 'fall', 'hero', 'home', 'leap', 'ride', 'brushprop', 'surf', 'wave', 'swim', 'whale', 'bye', 'comedy', 'escape', 'saber', 'saberdraw', 'saberlock', 'swing', 'broom', 'broom_wink', 'closeup', 'hat', 'paint', 'extra', 'firetornado', 'ftkick', 'powerup', 'sign', 'turnA', 'turnB'];
+const FIRST_USE = ['still', 'ib_wake', 'curious', 'firststep', 'idle', 'walk8', 'run8', 'sprint8', 'moonwalk6', 'chase', 'eraser', 'popup', 'roto', 'rubberhose', 'runoff', 'style_chalk', 'style_clay', 'style_comic', 'style_pixel', 'style_water', 'acro', 'fall', 'hero', 'ib_rise', 'home', 'leap', 'ride', 'brushprop', 'surf', 'wave', 'swim', 'whale', 'bye', 'comedy', 'escape', 'saber', 'saberdraw', 'saberlock', 'swing', 'broom', 'broom_wink', 'closeup', 'hat', 'paint', 'extra', 'firetornado', 'ftkick', 'powerup', 'ib_stand', 'ib_turn', 'ib_offer', 'sign', 'turnA', 'turnB'];
 const prioOf = (k: string) => { const i = FIRST_USE.indexOf(k.replace(/_\d+$/, '')); return i < 0 ? 100 : i; };
 const SRC: Record<string, string> = {};
 for (const [path, url] of Object.entries(files)) SRC[path.split('/').pop()!.replace('.webp', '')] = url;
@@ -263,3 +263,14 @@ export function figPoint(k: string, p: [number, number], x: number, y: number, s
 
 /** a drawing's raw manifest entry (for the extra points some sheets carry: blade) */
 export const meta = (k: string) => M[k] as (Meta & { blade?: [number, number, number, number] }) | undefined;
+
+/**
+ * In-betweens: where a scene cuts from one key drawing straight to another at beat `at`,
+ * `ib(pose, to, L, at, key)` swaps in the two drawn in-betweens (key_0, key_1) for the first
+ * `span` beats after the switch, so he moves through the change instead of popping.
+ */
+export function ib(pose: string, to: string, L: number, at: number, key: string, span = 0.16): string {
+  if (pose !== to || L < at || L >= at + span) return pose;
+  const k = `${key}_${L < at + span / 2 ? 0 : 1}`;
+  return hasPose(k) ? k : pose;
+}

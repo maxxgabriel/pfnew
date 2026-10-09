@@ -69,3 +69,20 @@ export function drawBgXY(ctx: CanvasRenderingContext2D, name: string, w: number,
   ctx.restore();
   return true;
 }
+
+/**
+ * A painted foreground layer (fg_*), keyed to transparency at the painting's full size: drawn
+ * cover-fit like its painting, then shifted by (dx, dy) screen px and scaled about the centre —
+ * moved further than the painting behind it, it gives the shot depth.
+ */
+export function drawLayer(ctx: CanvasRenderingContext2D, name: string, w: number, h: number, dx: number, dy: number, alpha = 1, zoom = 1.2) {
+  const im = ready(name);
+  if (!im || alpha <= 0) return false;
+  const s = Math.max(w / im.naturalWidth, h / im.naturalHeight) * zoom;
+  const dw = im.naturalWidth * s, dh = im.naturalHeight * s;
+  ctx.save();
+  ctx.globalAlpha *= alpha;
+  ctx.drawImage(im, (w - dw) / 2 + dx, (h - dh) / 2 + dy, dw, dh);
+  ctx.restore();
+  return true;
+}

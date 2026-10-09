@@ -3,7 +3,7 @@ import type { Frame } from '../core/frame';
 import { type Pt, TAU, clamp, ease, lerp, seg, spline } from '../core/math';
 import { drawSprite, glow } from '../core/sprites';
 import { drawArt, drawArtFoot, drawPose } from './art';
-import { drawBg } from './bg';
+import { drawBg, drawLayer } from './bg';
 import { INK, PAPER, drawPaper, drawSpark, drawSparkStreak, faceOf } from './common';
 import { dryStreak, flash, shockRing, speedWedges } from './fx';
 
@@ -89,6 +89,8 @@ export function drawChase(f: Frame, L: number) {
   ctx.fillRect(0, 0, w, h);
   const dive = ease.inOut2(seg(L, CH.dive[0], CH.pull[1]));
   drawBg(ctx, 'bg_sunset', w, h, lerp(0.25, 0.85, dive) - seg(L, CH.sprint[0], CH.toss[1]) * 0.2, 1, 1.18);
+  // the near clouds: the same painting's nearer layer, moving further than the sky behind it
+  drawLayer(ctx, 'fg_sunset', w, h, Math.sin(L * 0.9) * w * 0.12, lerp(h * 0.12, -h * 0.32, dive) + seg(L, CH.sprint[0], CH.toss[1]) * h * 0.18, 1 - seg(L, CH.paper[0], CH.paper[1]), 1.3);
 
   // ---- where he is and how he sits
   let x = w * 0.5, y = h * 0.4, pose = 'fall_0', rot = 0, onBroom = false, slideFlip = false;

@@ -1,8 +1,8 @@
 import type { Frame } from '../core/frame';
 import { type Pt, TAU, clamp, ease, hash, lerp, seg } from '../core/math';
 import { drawSprite, glow } from '../core/sprites';
-import { bladeOf, drawFig, drawPose, figHeight, figPoint, meta } from './art';
-import { drawBg } from './bg';
+import { bladeOf, drawFig, drawPose, figHeight, figPoint, ib, meta } from './art';
+import { drawBg, drawLayer } from './bg';
 import { BLUE, RED_BLADE, bladeLight, drawBlade } from './saber';
 import { drawSpark, faceOf } from './common';
 import { impactFrame, letterbox, shockRing } from './fx';
@@ -195,7 +195,7 @@ export function drawLight(f: Frame, L: number, withHero = true, inner = false) {
     rot = Math.PI;
   } else if (L < LT.land + 0.3) pose = 'hero_0';
   if (L >= LT.land && f.crossedFwd(f.B - L + LT.land)) f.shake(face * 0.35);
-  if (L > LT.copy[0]) { pose = 'curious'; shPose = 'curious'; }
+  if (L > LT.copy[0]) { pose = ib('curious', 'curious', L, LT.copy[0], 'ib_rise'); shPose = pose; }
   if (L > LT.copy[0] + 0.5) { pose = 'curious'; flip = true; shPose = 'curious'; shFlip = true; }
   if (L > LT.wave) { pose = 'curious'; flip = false; shPose = 'bye_0'; shFlip = false; }
   if (L > LT.jump) { pose = 'comedy_3'; hy = floorY - Math.sin(seg(L, LT.jump, LT.jump + 0.3) * Math.PI) * face * 1.4; }
@@ -323,6 +323,12 @@ export function drawLight(f: Frame, L: number, withHero = true, inner = false) {
 
     if (L > LT.fly[0]) sp = [lerp(sp[0], w * 0.5, seg(L, LT.fly[0], LT.sunset[1])), lerp(sp[1], h * 0.2, seg(L, LT.fly[0], LT.sunset[1]))];
     drawSpark(ctx, sp[0], sp[1], face * 0.17);
+  }
+
+  // ---- the whale's near ribs, in front of everything: they sway against the bulb's swing (depth)
+  if (on) {
+    const lit = ease.out2(seg(L, 0, 0.45));
+    drawLayer(ctx, 'fg_belly', w, h, -Math.sin(sw) * w * 0.07, Math.cos(sw) * h * 0.01, lit * 0.96, 1.18);
   }
 
   // ---- every clash is a frame of negative
