@@ -85,7 +85,8 @@ function drawBullet(f: Frame, L: number, p: number) {
   if (k <= 0) return;
   ctx.save();
   ctx.globalAlpha = k;
-  ctx.fillStyle = 'rgba(8,4,6,0.86)';
+  // the room drops away completely: only the two of them and the blades, no second, frozen him behind
+  ctx.fillStyle = '#080406';
   ctx.fillRect(0, 0, w, h);
   // the orbit: hero and shadow swing round the clash point, the near one bigger and in front
   const S = Math.min(h * 0.38, w * 0.5);

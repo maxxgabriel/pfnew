@@ -244,6 +244,14 @@ export function figHeight(k: string) {
 
 /** draw drawing `k` at a fixed pixel scale, its local point `anchor` (default: the foot) at (x, y) */
 export function drawFig(ctx: CanvasRenderingContext2D, k: string, x: number, y: number, scale: number, o: { anchor?: [number, number]; flip?: boolean; rot?: number; tint?: string; alpha?: number } = {}) {
+  // in a styled act, its twin, scaled to the same height and sharing its anchor point proportionally
+  const st = styledTwin(k);
+  if (st) {
+    const a = M[k], b = M[st];
+    const r = (a.foot[1] - a.top) / Math.max(1, b.foot[1] - b.top);
+    const anchor: [number, number] | undefined = o.anchor ? [b.foot[0] + (o.anchor[0] - a.foot[0]) / r, b.foot[1] + (o.anchor[1] - a.foot[1]) / r] : undefined;
+    return drawFig(ctx, st, x, y, scale * r, { ...o, anchor });
+  }
   const m = M[k];
   const im = m && img(k);
   if (!m || !im) return;

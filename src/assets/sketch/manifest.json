@@ -3608,5 +3608,45 @@
   ],
   "face": 151,
   "top": 8
+ },
+ "comic-saberlock_0": {
+  "w": 286,
+  "h": 403,
+  "foot": [
+   167,
+   392
+  ],
+  "face": 139,
+  "top": 7
+ },
+ "comic-saberlock_1": {
+  "w": 299,
+  "h": 403,
+  "foot": [
+   176,
+   394
+  ],
+  "face": 140,
+  "top": 6
+ },
+ "comic-saberlock_2": {
+  "w": 317,
+  "h": 403,
+  "foot": [
+   180,
+   396
+  ],
+  "face": 140,
+  "top": 8
+ },
+ "comic-saberlock_3": {
+  "w": 323,
+  "h": 403,
+  "foot": [
+   175,
+   396
+  ],
+  "face": 140,
+  "top": 6
  }
 }

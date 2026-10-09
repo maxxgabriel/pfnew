@@ -21,7 +21,7 @@ run() { # name, prompt, images...
 while IFS=$'\t' read -r name style n blade; do
   ref=$(python3 -c "import json;print(json.load(open('$SPEC'))['styles']['$style']['ref'])")
   desc=$(python3 -c "import json;print(json.load(open('$SPEC'))['styles']['$style']['desc'])")
-  B=""; [ "$blade" = "1" ] && B="Where a figure holds a sword, keep its blade as ONE long straight flat pure cyan #00FFFF bar exactly where the cyan bar is in the third image (no glow, constant width, not restyled)."
+  B="If a figure holds only a sword HILT (a short silver cylinder), keep just the hilt in his hands: no blade."; [ "$blade" = "1" ] && B="Where a figure holds a sword, keep its blade as ONE long straight flat pure cyan #00FFFF bar exactly where the cyan bar is in the third image (no glow, constant width, not restyled)."
   CYC=""; case "$name" in *_walk|*_run) CYC="This is a WALK/RUN CYCLE: every frame is the SAME action (walking or running to the right, side view) at a different moment of the stride. Copy each frame's leg and arm positions exactly; do not invent any other pose (no waving, no sitting, no facing the viewer).";; esac
   run "$name" "$CYC The first attached image is the character sheet of an ORIGINAL character, the Wanderer (chibi, messy black hair with icy pale-blue highlights and an antenna strand, blue eyes, frayed scarf, long coat, boots). The second attached image shows him drawn in a particular art style. The third attached image shows $n drawings of him in his usual ink style. Redraw EACH of those $n drawings, in the same order, the same pose, the same facing and the same proportions, as $desc — matching the second image's style exactly. $B" ref_wanderer.png "$ref" "strips/$name.png"
 done < <(python3 -c "
