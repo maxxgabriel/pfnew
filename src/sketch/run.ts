@@ -4,7 +4,7 @@ import { type Pt, TAU, clamp, ease, hash, lerp, seg } from '../core/math';
 import { paperTile } from '../core/sprites';
 import { artSize, drawArtFoot, drawPose } from './art';
 import { drawBg } from './bg';
-import { INK, PAPER, drawSpark, drawSparkStreak } from './common';
+import { INK, PAPER, drawSpark, drawSparkStreak, idlePose } from './common';
 import { smear } from './fx';
 import { stage, stageAhead } from './still';
 
@@ -308,6 +308,9 @@ export function drawRun(f: Frame, L: number) {
   else if (L < RN.drop) pose = 'rubberhose_2';
   else { pose = 'rubberhose_3'; y = fy; }
   if (L >= RN.hose[1] && L > RN.drop) pose = 'runoff_3';
+  // stop scrolling on the open page (before the Eraser comes) and he passes the time
+  const idle = L > 0.3 && L < RN.eraser - 0.3 ? idlePose(f) : null;
+  if (idle) { pose = idle; rot = 0; y = gy; }
   if (!back && (L > RN.run[0] && L < RN.flip[0] || L > RN.land[1] && L < RN.edge)) smear(ctx, [X - face * (fast ? 3.4 : 2.4), gy - face * 1.3], [X - face * 0.4, gy - face * 1.3], face * 0.5, INK, fast ? 0.2 : 0.12);
   drawPose(ctx, pose, X, y, face, { rot });
 

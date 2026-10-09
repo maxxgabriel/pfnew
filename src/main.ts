@@ -1,6 +1,7 @@
 import './style.css';
 import { drawReel, reelHud, reelTap } from './reel/reel';
 import { preloadPoses } from './sketch/art';
+import { signEnd, signMove, signStart } from './sketch/home';
 preloadPoses();
 import { CHAPTERS, type Frame } from './core/frame';
 import { clamp, damp } from './core/math';
@@ -81,6 +82,17 @@ const chapterEl = chName.parentElement!;
 const fill = document.getElementById('reel-fill')!;
 const marks = document.getElementById('reel-marks')!;
 const hello = document.getElementById('hello')!;
+// the signing pad: over the page while he holds out the brush, so a swipe there signs instead of scrolling
+const pad = document.createElement('div');
+pad.id = 'sign';
+document.body.appendChild(pad);
+pad.addEventListener('pointerdown', (e) => {
+  pad.setPointerCapture(e.pointerId);
+  signStart(e.clientX, e.clientY, w, h);
+});
+pad.addEventListener('pointermove', (e) => { if (pad.hasPointerCapture(e.pointerId)) signMove(e.clientX, e.clientY, w, h); });
+pad.addEventListener('pointerup', () => signEnd());
+pad.addEventListener('pointercancel', () => signEnd());
 const seek = (b: number) => window.scrollTo({ top: toRaw(b) * beatPx, behavior: reduced ? 'auto' : 'smooth' });
 
 CHAPTERS.forEach((c, i) => {
@@ -126,6 +138,7 @@ function hud() {
   const st = reelHud(B);
   document.documentElement.classList.toggle('on-paper', st.paper);
   hello.classList.toggle('on', st.hello);
+  pad.classList.toggle('on', st.sign);
 }
 
 /* ---------------------------------------------------------------- loop */

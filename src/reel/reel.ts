@@ -3,7 +3,7 @@ import { drawRun } from '../sketch/run';
 import { drawRide } from '../sketch/ride';
 import { drawLight } from '../sketch/light';
 import { drawChase } from '../sketch/chase';
-import { drawHome } from '../sketch/home';
+import { HM, SIGN_WINDOW, drawHome } from '../sketch/home';
 import { setPoseClock } from '../sketch/art';
 import { drawStill } from '../sketch/still';
 import { drawSea } from '../sketch/sea';
@@ -68,7 +68,13 @@ export function drawReel(f: Frame) {
 /** HUD state: dark type over light chapters; the contact card at the very end */
 export function reelHud(B: number) {
   const c = CHAPTERS[chapterAt(B)];
-  return { paper: c.paper, hello: B > CHAPTERS[CHAPTERS.length - 1].from + 4.1 };
+  const home = CHAPTERS[CHAPTERS.length - 1].from;
+  return {
+    paper: c.paper,
+    hello: B > home + HM.offer,
+    /** the page waits for your signature (a pad over the page takes the touch there) */
+    sign: B > home + SIGN_WINDOW[0] && B < home + SIGN_WINDOW[1],
+  };
 }
 
 /** a tap drops ink onto whatever is under the finger (a quiet answer, never blocks scrolling) */

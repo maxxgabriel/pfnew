@@ -127,3 +127,10 @@ html:not(.on-paper) .hello-again { background: var(--paper); color: var(--ink); 
 
 /* the feature chapter wears red on the reel */
 .reel-marks button.feature { color: #ff1f3d; opacity: 1; text-shadow: 0 0 8px rgba(255,31,61,.8); }
+
+/* ---- the signing pad: the page band he offers the brush over (touch draws there, nowhere else) */
+#sign {
+  position: fixed; left: 0; right: 0; top: 22vh; height: 34vh;
+  z-index: 1; touch-action: none; display: none; cursor: crosshair;
+}
+#sign.on { display: block; }

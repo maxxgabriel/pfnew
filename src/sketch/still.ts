@@ -4,7 +4,7 @@ import { wordWidth } from '../core/glyphs';
 import { type Pt, ease, lerp, seg } from '../core/math';
 import { drawPose, poseHeight } from './art';
 import { ONE_HEIGHT, ONE_START, drawOneLine } from './oneline';
-import { INK, drawGround, drawPaper, drawSpark, drawSparkStreak, drawTitle, faceOf, hop } from './common';
+import { INK, drawGround, drawPaper, drawSpark, drawSparkStreak, drawTitle, faceOf, hop, idlePose } from './common';
 import { shockRing } from './fx';
 
 /*
@@ -92,6 +92,9 @@ export function drawStill(f: Frame, L: number) {
   const boil = L < ST.wake[1] ? 0.03 * (1 - seg(L, ST.wake[0], ST.wake[1])) + 0.006 : 0.006;
   if (L >= ST.look) pose = 'curious';
   if (L >= ST.step) { pose = 'firststep_0'; rot = Math.sin(t * 5) * 0.04; }
+  // stop scrolling and he passes the time
+  const idle = L > ST.look ? idlePose(f) : null;
+  if (idle) { pose = idle; rot = 0; }
   const sc = poseHeight('still_0', face) / ONE_HEIGHT;
   if (fill > 0) drawPose(ctx, pose, gx, gy, face, { boil, t, rot, reveal: fill < 1 ? fill : undefined });
   let pen: Pt | null = null;

@@ -147,3 +147,15 @@ export function hop(a: Pt, b: Pt, hgt: number, k: number): Pt {
 
 /** pick the frame of a cycle: name_0..name_{n-1} at `fps`, on clock t */
 export const cycle = (name: string, n: number, t: number, fps = 12) => `${name}_${Math.floor(t * fps) % n}`;
+
+/**
+ * Idle life: when the reader stops scrolling and he is standing on the page, he passes the time —
+ * a stretch, a doodle with the brush, a sit with his chin on his knees, a nap — `after` seconds in.
+ * Returns the pose, or null while the page is still moving.
+ */
+export function idlePose(f: Frame, after = 3): string | null {
+  const s = f.idle - after;
+  if (s < 0) return null;
+  const order = ['idle_3', 'idle_0', 'idle_0', 'idle_1', 'idle_2', 'idle_2'];
+  return order[Math.floor(s / 2.6) % order.length];
+}
