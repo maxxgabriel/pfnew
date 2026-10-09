@@ -19,18 +19,19 @@ import { shockRing } from './fx';
  */
 
 export const ST = {
-  drop: [1.15, 1.85] as const,
+  /** the Spark drops on its own once the title is written (intro clock, seconds); a first scroll drops it at once */
+  drop: [2.3, 3.0] as const,
   /** the Spark's ink leaps to the top of his head; one line loops him into being; the ink floods in */
-  leap: [1.95, 2.15] as const,
-  line: [2.1, 2.95] as const,
-  fill: [2.85, 3.25] as const,
+  leap: [0.15, 0.35] as const,
+  line: [0.3, 1.15] as const,
+  fill: [1.05, 1.45] as const,
   /** his ink settles, then he notices the Spark */
-  wake: [3.2, 3.7] as const,
-  look: 3.7,
+  wake: [1.4, 1.9] as const,
+  look: 1.9,
   /** the Spark hops away along the line; he lifts one foot — his very first step (chapter II carries on in the same shot) */
-  away: [4.05, 4.55] as const,
-  step: 4.75,
-  end: 5.6,
+  away: [2.25, 2.75] as const,
+  step: 2.95,
+  end: 3.8,
 };
 
 /** where the hero stands and the ground, for this screen */
@@ -79,7 +80,7 @@ export function drawStill(f: Frame, L: number) {
 
   // ---- the title, high on the page, fading as the page is about to turn
   const tw = wordWidth('MAX', 300, 0.16);
-  drawTitle(f, w / 2, h * 0.1, (w * 0.56) / tw, 1 - seg(L, 4.4, 5.6));
+  drawTitle(f, w / 2, h * 0.1, (w * 0.56) / tw, 1 - seg(L, 2.6, 3.8));
 
   // ---- the ground he'll stand on, brushed under him as he is drawn
   drawGround(ctx, w * 0.12, w * 0.88, gy + face * 0.05, face * 0.07, ease.out2(seg(L, ST.line[0] - 0.2, ST.line[0] + 0.5)));
@@ -156,27 +157,29 @@ export function drawStill(f: Frame, L: number) {
   const rest: Pt = restAt;
   const ahead: Pt = [stageAhead(f), gy - r];
   let sp: Pt = rest, sq2 = 1, prev: Pt | null = null;
-  if (L < ST.drop[1]) {
-    const k = ease.in2(seg(L, ST.drop[0], ST.drop[1]));
+  // the drop runs on the clock (it never waits for a scroll); a scroll before it lands finishes it
+  const dropT = Math.max(seg(f.intro, ST.drop[0], ST.drop[1]), seg(L, 0, 0.12));
+  const bounceT = Math.max(seg(f.intro, ST.drop[1], ST.drop[1] + 0.35), seg(L, 0.1, 0.2));
+  if (dropT < 1) {
+    const k = ease.in2(dropT);
     sp = [rest[0], lerp(-r * 4, rest[1], k)];
-    prev = [rest[0], lerp(-r * 4, rest[1], ease.in2(seg(L - 0.08, ST.drop[0], ST.drop[1])))];
+    prev = [rest[0], lerp(-r * 4, rest[1], ease.in2(Math.max(0, dropT - 0.12)))];
     sq2 = 1 + k * 0.4;
-  } else if (L < ST.drop[1] + 0.25) {
-    const k = seg(L, ST.drop[1], ST.drop[1] + 0.25);
-    sq2 = 1 - Math.sin(k * Math.PI) * 0.45;
-    sp = [rest[0], rest[1] + Math.sin(k * Math.PI) * r * 0.3];
+  } else if (bounceT < 1) {
+    sq2 = 1 - Math.sin(bounceT * Math.PI) * 0.45;
+    sp = [rest[0], rest[1] + Math.sin(bounceT * Math.PI) * r * 0.3];
   } else if (L < ST.away[0]) {
     sp = [rest[0], rest[1] - Math.abs(Math.sin(t * 3)) * face * 0.25 * seg(L, ST.wake[1], ST.look)];
   } else if (L < ST.away[1]) {
     sp = hop(rest, ahead, face * 1.2, ease.inOut2(seg(L, ST.away[0], ST.away[1])));
     prev = hop(rest, ahead, face * 1.2, ease.inOut2(seg(L - 0.06, ST.away[0], ST.away[1])));
   } else sp = sparkWaiting(f, t);
-  if (L >= ST.drop[0]) {
+  if (dropT > 0) {
     if (prev) drawSparkStreak(ctx, prev, sp, r);
     drawSpark(ctx, sp[0], sp[1], r, sq2);
   }
   // the splash ring where it lands
-  const ring = seg(L, ST.drop[1], ST.drop[1] + 0.5);
+  const ring = Math.max(seg(f.intro, ST.drop[1], ST.drop[1] + 0.6), dropT >= 1 && L > 0.1 ? seg(L, 0.12, 0.4) : 0);
   if (ring > 0 && ring < 1) {
     // flat on the paper: a ring seen at a low angle
     ctx.save();

@@ -5,7 +5,7 @@ import { paperTile } from '../core/sprites';
 import { artSize, drawArtFoot, drawPose } from './art';
 import { drawBg } from './bg';
 import { INK, PAPER, drawSpark, drawSparkStreak, idlePose } from './common';
-import { smear } from './fx';
+import { dryStreak } from './fx';
 import { stage, stageAhead } from './still';
 
 /*
@@ -311,7 +311,7 @@ export function drawRun(f: Frame, L: number) {
   // stop scrolling on the open page (before the Eraser comes) and he passes the time
   const idle = L > 0.3 && L < RN.eraser - 0.3 ? idlePose(f) : null;
   if (idle) { pose = idle; rot = 0; y = gy; }
-  if (!back && (L > RN.run[0] && L < RN.flip[0] || L > RN.land[1] && L < RN.edge)) smear(ctx, [X - face * (fast ? 3.4 : 2.4), gy - face * 1.3], [X - face * 0.4, gy - face * 1.3], face * 0.5, INK, fast ? 0.2 : 0.12);
+  if (!back && (L > RN.run[0] && L < RN.flip[0] || L > RN.land[1] && L < RN.edge)) dryStreak(ctx, [X - face * 0.6, gy - face * 1.25], [X - face * (fast ? 3.8 : 2.8), gy - face * 1.2], face * 0.3, INK, fast ? 0.35 : 0.22, 5);
   drawPose(ctx, pose, X, y, face, { rot });
 
   // ---- the Eraser

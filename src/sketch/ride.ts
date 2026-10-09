@@ -1,6 +1,7 @@
 import type { Frame } from '../core/frame';
 import { type Pt, clamp, ease, lerp, seg } from '../core/math';
-import { FD, drawFolding, foldAnchor, sheetRect } from '../reel/fold';
+import { FD, drawFolding, foldAnchor, setSketchSea, sheetRect } from '../reel/fold';
+setSketchSea(true);
 import { drawPose } from './art';
 import { drawBg, drawBgXY } from './bg';
 import { INK, PAPER, drawPaper, drawSpark, drawSparkStreak, faceOf } from './common';
@@ -137,7 +138,7 @@ export function drawRide(f: Frame, L: number) {
     shockRing(ctx, 0, 0, face * 1.6, ring, INK, face * 0.06);
     ctx.restore();
   }
-  const dark = ease.inOut2(seg(fd, FD.dark[0], FD.dark[1]));
+  const dark = 0; // (over the painted sea the night never goes black: he leaps off into it)
   // he leaps up off the crane after the Spark, out of the top of the frame (chapter IV: he comes down on the sea)
   const jump = seg(L, 8.15, 8.75);
   if (jump > 0) {

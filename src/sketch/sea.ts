@@ -4,7 +4,7 @@ import { artSize, drawArtFoot, drawPose } from './art';
 import { drawBgXY } from './bg';
 import { drawSpark, drawSparkStreak, faceOf } from './common';
 import { drawDeep } from './deep';
-import { flash, shockRing, smear } from './fx';
+import { flash, shockRing } from './fx';
 
 /*
  * IV · WAVE.
@@ -96,8 +96,6 @@ export function drawSea(f: Frame, L: number) {
     shockRing(ctx, 0, 0, face * 2.6, splash, 'rgba(240,236,226,0.9)', face * 0.1);
     ctx.restore();
   }
-  // the wake: one pale stroke cut in the water behind him
-  if (L > SE.land && L < SE.close[0]) smear(ctx, [x - face * 4.5, y + face * 0.05], [x - face * 0.4, y - face * 0.05], face * 0.35, 'rgba(236,230,214,0.7)', 0.6);
   drawPose(ctx, pose, x, y, face, { rot });
 
   // ---- the Spark: skimming the water ahead of him, then out through the end of the tube

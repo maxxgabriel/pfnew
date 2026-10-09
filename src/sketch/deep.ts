@@ -4,7 +4,6 @@ import { drawSprite, glow } from '../core/sprites';
 import { artSize, drawArt, drawPose } from './art';
 import { drawBg } from './bg';
 import { drawSpark, faceOf } from './common';
-import { shockRing } from './fx';
 
 /*
  * V · DEEP.
@@ -93,8 +92,6 @@ export function drawDeep(f: Frame, L: number, pre = 1) {
     pose = 'swim_3';
     x = lerp(w * 0.42, w * 0.3, seg(L, DP.turn[0], DP.swallow[0]));
   }
-  const sink = seg(L, DP.arrive[0], 0);
-  if (sink > 0 && sink < 1) shockRing(ctx, w * 0.42, face * 0.6, face * 3, sink, 'rgba(255,255,255,0.7)', face * 0.08);
   if (swallow < 1) drawPose(ctx, pose, x, y, face * lerp(1, 0.4, swallow), { rot, alpha: 1 - swallow });
 
   // ---- inside: dark, and the Spark rising in it and swelling warm — the bulb (chapter VI)

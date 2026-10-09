@@ -5,7 +5,7 @@ import { drawSprite, glow } from '../core/sprites';
 import { drawArt, drawArtFoot, drawPose } from './art';
 import { drawBg } from './bg';
 import { INK, PAPER, drawPaper, drawSpark, drawSparkStreak, faceOf } from './common';
-import { flash, shockRing, smear, speedWedges } from './fx';
+import { dryStreak, flash, shockRing, speedWedges } from './fx';
 
 /*
  * V · CHASE.
@@ -40,25 +40,6 @@ export const CH = {
   paper: [7.7, 8.7] as const,
   end: 9.0,
 };
-
-/** the clouds racing past: a few big dry-brush streaks, parallax by depth */
-const CLOUDS: [number, number, number, number][] = [
-  // [y fraction, length (w), speed, width (face)]
-  [0.2, 0.7, 1.3, 0.14], [0.55, 1.0, 2.2, 0.2], [0.82, 0.9, 3.0, 0.26],
-];
-
-function drawClouds(ctx: CanvasRenderingContext2D, w: number, h: number, face: number, travel: number, alpha: number) {
-  if (alpha <= 0) return;
-  ctx.save();
-  ctx.globalAlpha = alpha;
-  CLOUDS.forEach(([fy, len, sp, wd], i) => {
-    const span = w * (1 + len) * 1.2;
-    const x = w - ((travel * sp * w * 0.35 + i * span * 0.37) % span);
-    const y = fy * h;
-    brush(ctx, [[x, y], [x + len * w * 0.5, y - face * 0.08], [x + len * w, y + face * 0.03]], { width: face * wd, color: 'rgba(40,16,20,0.45)', seed: 50 + i, dry: 0.8, press: 0.9, tail: 0.15, halo: 0 });
-  });
-  ctx.restore();
-}
 
 /** the Spark with two little wings, beating */
 function drawWingedSpark(ctx: CanvasRenderingContext2D, x: number, y: number, r: number, t: number) {
@@ -102,12 +83,10 @@ export function drawChase(f: Frame, L: number) {
   const face = faceOf(f);
 
   // ---- the sky: the painted sunset, drifting as they fly; the clouds race past
-  const travel = L;
   ctx.fillStyle = '#2a0c14';
   ctx.fillRect(0, 0, w, h);
   const dive = ease.inOut2(seg(L, CH.dive[0], CH.pull[1]));
   drawBg(ctx, 'bg_sunset', w, h, lerp(0.25, 0.85, dive) - seg(L, CH.sprint[0], CH.toss[1]) * 0.2, 1, 1.18);
-  drawClouds(ctx, w, h, face, travel, 1 - seg(L, CH.hand[0], CH.hand[0] + 0.2) + seg(L, CH.toss[0], CH.toss[1]) * 0.6);
 
   // ---- where he is and how he sits
   let x = w * 0.5, y = h * 0.4, pose = 'fall_0', rot = 0, onBroom = false, slideFlip = false;
@@ -189,7 +168,7 @@ export function drawChase(f: Frame, L: number) {
   const fast = onBroom && L > CH.take[0] + 0.3 ? (L > CH.dive[0] && L < CH.pull[1] || L > CH.sprint[0] ? 1 : 0.5) : 0;
   if (fast > 0 && L < CH.hand[0]) {
     speedWedges(ctx, w, h, x, y - face * 1.2, 0.55 * fast, t, 'rgba(255,236,210,0.5)', 7);
-    smear(ctx, [x - Math.cos(rot) * face * 3, y - face * 0.9 - Math.sin(rot) * face * 3], [x - face * 0.6, y - face * 0.9], face * 0.6, '#2a0c14', 0.25);
+    dryStreak(ctx, [x - face * 0.8, y - face * 0.7], [x - Math.cos(rot) * face * 3.6, y - face * 0.7 - Math.sin(rot) * face * 3.6], face * 0.4, '#2a0c14', 0.35, 21);
   }
   // the dive's splash: a long streak cut in the water as he pulls up
   const sk = seg(L, CH.pull[0], CH.pull[1] + 0.3);

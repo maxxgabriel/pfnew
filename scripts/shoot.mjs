@@ -26,6 +26,7 @@ for (const b of beats) {
   await page.waitForFunction(() => window.__film);
   await page.evaluate(([b, i]) => {
     window.__film.intro(i);
+    window.__film.autoplay?.(false);
     if (b.startsWith('alter:')) { const [, n, q] = b.split(':'); window.__film.alter(n, Number(q ?? 0.5)); }
     else if (b.startsWith('titan:')) { const [, n, q] = b.split(':'); window.__film.titan(n, Number(q ?? 0.5)); }
     else if (b.startsWith('f:')) window.__film.seekFilm(Number(b.slice(2)));

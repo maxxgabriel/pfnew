@@ -4,8 +4,8 @@ import { drawSprite, glow } from '../core/sprites';
 import { bladeOf, drawPose } from './art';
 import { drawBg } from './bg';
 import { BLUE, RED_BLADE, bladeLight, drawBlade } from './saber';
-import { INK, drawSpark, faceOf } from './common';
-import { impactFrame, shockRing, smear } from './fx';
+import { drawSpark, faceOf } from './common';
+import { impactFrame, shockRing } from './fx';
 
 /*
  * IV · LIGHT.
@@ -234,7 +234,6 @@ export function drawLight(f: Frame, L: number, withHero = true, inner = false) {
 
   // ---- the hero
   if (withHero && L > LT.drop[0]) {
-    if (L < LT.land) smear(ctx, [hx, hy - face * 4], [hx, hy - face * 1.2], face * 0.5, INK, 0.5);
     drawPose(ctx, pose, hx, hy, face, { flip, rot });
     const bl = bladeOf(pose, hx, hy, face, { flip, rot });
     if (bl) {

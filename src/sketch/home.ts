@@ -6,7 +6,7 @@ import { type Pt, TAU, clamp, ease, lerp, seg } from '../core/math';
 import { drawSprite, glow } from '../core/sprites';
 import { artSize, drawArt, drawArtFoot, drawPose } from './art';
 import { INK, RED, cycle, drawGround, drawPaper, drawSpark, drawTitle, faceOf, idlePose } from './common';
-import { flash, shockRing, smear } from './fx';
+import { dryStreak, flash, shockRing, smear } from './fx';
 import { drawStill } from './still';
 
 /*
@@ -171,7 +171,7 @@ export function drawHome(f: Frame, L: number) {
   const sealAt: Pt = [w * 0.74, gy - face * 0.45];
   if (lk >= 0.5) {
     // the first page again (before the Spark drops): the red shrinks into the Spark, hanging over it, about to fall
-    drawStill({ ...f, intro: Math.max(6, f.intro) }, 1.0);
+    drawStill({ ...f, intro: 2.28 }, 0);
     const u = ease.out3(seg(lk, 0.5, 1));
     const hang: Pt = [w * 0.66, h * 0.3 + Math.sin(t * 2.4) * face * 0.06 * u];
     const R = lerp(Math.hypot(w, h), face * 0.17, u);
@@ -238,7 +238,7 @@ export function drawHome(f: Frame, L: number) {
     drawGround(ctx, w * 0.1, w * 0.9, gy + face * 0.05, face * 0.07, ease.out2(seg(L, HM.land - 0.1, HM.land + 0.4)), 9);
     ctx.restore();
     // the ink stroke he rode in on, staying on the page
-    brush(ctx, rideIn(w, h, gx, gy), { width: face * 0.3, color: INK, progress: 1, seed: 77, dry: 0.45, press: 1.2, tail: 0.3, halo: 0, alpha: 1 - seg(L, HM.orbit[0] - 0.3, HM.orbit[0]) * 0.75 });
+    brush(ctx, rideIn(w, h, gx, gy), { width: face * 0.3, color: INK, progress: 1, seed: 77, dry: 0.45, press: 1.2, tail: 0.3, halo: 0, alpha: 1 - seg(L, HM.brace, HM.orbit[0]) });
   } else {
     // round him, the ground is a ring of ink that the camera's walk swings round
     ctx.save();
@@ -368,7 +368,7 @@ export function drawHome(f: Frame, L: number) {
     for (let i = 0; i < 4; i++) {
       const sx = gx + Math.cos(th * 1.3 + i * 1.6) * face * 1.8;
       const y0 = gy - ((t * 3 + i * 0.27) % 1) * face * 5;
-      smear(ctx, [sx, y0 + face * 1.6], [sx, y0], face * 0.18, '#7fb4e0', 0.35);
+      dryStreak(ctx, [sx, y0], [sx, y0 + face * 1.8], face * 0.16, '#6aa6d6', 0.3, 40 + i);
     }
   }
   drawPose(ctx, pose, x, y, face * scale, { alpha, rot, flip });
