@@ -3,7 +3,7 @@
 Everything a new agent needs to pick this up. Read `docs/BRIEF.md` first for
 the owner's taste and decisions; this file is the technical side.
 
-- **Live preview:** https://claude.ai/artifact/2e3qybKHWFwd824v6ZoD2u (the Reel, round 16;
+- **Live preview:** https://claude.ai/artifact/9d3GKN33rB1VSTR2jGoDnV (the Reel, round 16;
   an older preview lives at https://claude.ai/artifact/PcwGzT9y7tqBXqoo9EXsgD)
   (a private claude.ai artifact owned by the user; only Claude sessions with
   the Artifact tool can republish it. See "Shipping" below.)

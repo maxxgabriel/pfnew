@@ -44,7 +44,7 @@ themselves, not to the docs: *"you report to me and not the docs"*.
   calling it done.
 - **Previews:** publish the single-file build as a claude.ai artifact and
   share the link (*"you can create a new link to show artifact"*). Current:
-  https://claude.ai/artifact/2e3qybKHWFwd824v6ZoD2u
+  https://claude.ai/artifact/9d3GKN33rB1VSTR2jGoDnV
 - **Git:** commit to the working branch and push; no PR unless asked; no
   model names in commits.
 - **Originality:** references are for energy and technique; never copy their
