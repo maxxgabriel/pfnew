@@ -148,7 +148,7 @@ const V: Record<string, [V3, V3]> = {
   WRf: [[3, 48, 1], [10, 76, 112]],
   WRb: [[-3, 48, 1], [-42, 62, 92]],
 };
-const FACES: [string, string, string][] = [
+export const FACES: [string, string, string][] = [
   ['F', 'Tp', 'Lb'], ['Tp', 'K', 'Lb'], ['F', 'Lb', 'Bt'], ['K', 'Bt', 'Lb'],
   ['F', 'Rb', 'Tp'], ['Tp', 'Rb', 'K'], ['F', 'Bt', 'Rb'], ['K', 'Rb', 'Bt'],
   ['F', 'N', 'NL'], ['F', 'NR', 'N'], ['N', 'HL', 'Ht'], ['N', 'Ht', 'HR'],
@@ -162,7 +162,7 @@ const WING = new Set(['WF', 'WB', 'WLf', 'WLb', 'WRf', 'WRb']);
 const HEAD_STRAIGHT: Record<string, V3> = { HL: [104, 84, -3], HR: [104, 84, 3], Ht: [112, 96, 0] };
 
 /** the crane's vertices in its own frame at local beat L, with the wings flapping by `flap` */
-function craneShape(L: number, flap: number): Record<string, V3> {
+export function craneShape(L: number, flap: number): Record<string, V3> {
   const kr = ease.outBack(seg(L, FD.rise[0], FD.rise[1]), 1.3);
   const kh = ease.inOut3(seg(L, FD.head[0], FD.head[1]));
   const kw = ease.outBack(seg(L, FD.wings[0], FD.wings[1]), 1.2);
@@ -188,7 +188,7 @@ function craneShape(L: number, flap: number): Record<string, V3> {
   return out;
 }
 
-function craneTris(verts: Record<string, V3>, place: (p: V3) => V3, tint = 0): Tri[] {
+export function craneTris(verts: Record<string, V3>, place: (p: V3) => V3, tint = 0): Tri[] {
   // folded from the red side of the paper: the outside is vermilion, the inside paper
   const col = mixHex(BACK, '#8a2f3a', tint);
   const back = mixHex('#a8382a', '#6a2633', tint);
@@ -280,7 +280,7 @@ function drawWindows(ctx: CanvasRenderingContext2D, cam: Cam3, zc: number, night
   ctx.restore();
 }
 
-function drawGround(ctx: CanvasRenderingContext2D, cam: Cam3, w: number, h: number, a: number, night: number, zc: number) {
+export function drawGround(ctx: CanvasRenderingContext2D, cam: Cam3, w: number, h: number, a: number, night: number, zc: number) {
   if (a <= 0) return;
   const far = project(cam, [cam.pos[0], 0, cam.pos[2] - 1e6]);
   const hy = far ? far[1] : h * 0.4;
@@ -306,6 +306,54 @@ function drawGround(ctx: CanvasRenderingContext2D, cam: Cam3, w: number, h: numb
     if (A && Bq) { ctx.moveTo(A[0], A[1]); ctx.lineTo(Bq[0], Bq[1]); }
   }
   ctx.stroke();
+  ctx.restore();
+}
+
+/* ------------------------------------------------- the night (shared with IV) */
+
+/** night falls over the dusk: a deep gradient and a field of stars */
+export function drawNight(ctx: CanvasRenderingContext2D, w: number, h: number, t: number, a: number) {
+  if (a <= 0) return;
+  ctx.save();
+  ctx.globalAlpha = a;
+  const g = ctx.createLinearGradient(0, 0, 0, h);
+  g.addColorStop(0, '#05060f');
+  g.addColorStop(0.6, '#10142a');
+  g.addColorStop(1, '#1d1b38');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, w, h);
+  const r = rng(5);
+  ctx.fillStyle = '#e8ecff';
+  for (let i = 0; i < 90; i++) {
+    const x = r() * w, y = r() * h * 0.55, tw = 0.5 + 0.5 * Math.sin(t * (1 + r() * 2) + i);
+    ctx.globalAlpha = a * (0.3 + 0.7 * tw) * r();
+    ctx.fillRect(x, y, 1.6, 1.6);
+  }
+  ctx.restore();
+}
+
+/** the city on the horizon: a glow, and a skyline made of letters */
+export function drawHorizonCity(ctx: CanvasRenderingContext2D, w: number, h: number, hy: number, a: number) {
+  if (a <= 0) return;
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  ctx.globalAlpha = a * 0.8;
+  drawSprite(ctx, glow('#ff3fa4', 128), w * 0.55, hy, w * 1.5, h * 0.16);
+  drawSprite(ctx, glow('#2fd6ff', 128), w * 0.38, hy, w * 0.8, h * 0.1);
+  ctx.restore();
+  ctx.save();
+  ctx.globalAlpha = a;
+  ctx.fillStyle = '#0b0c1a';
+  ctx.textBaseline = 'alphabetic';
+  ctx.textAlign = 'center';
+  const r = rng(31);
+  const S = Math.min(w, h);
+  for (let i = 0; i < 16; i++) {
+    const x = (i + 0.5) * (w / 16) + (r() - 0.5) * S * 0.03;
+    const px = Math.round(S * (0.04 + r() * 0.05));
+    ctx.font = `${px}px "Dela Gothic One", "Arial Black", sans-serif`;
+    ctx.fillText('MAXGABRIELMOTION'[i], x, hy + 1);
+  }
   ctx.restore();
 }
 
@@ -355,24 +403,7 @@ export function drawFold(f: Frame, L: number) {
 
   // ---- the sky: the same dusk, then night falls and a city lights the horizon
   drawSky(f);
-  if (night > 0) {
-    ctx.save();
-    ctx.globalAlpha = night;
-    const g = ctx.createLinearGradient(0, 0, 0, h);
-    g.addColorStop(0, '#05060f');
-    g.addColorStop(0.6, '#10142a');
-    g.addColorStop(1, '#1d1b38');
-    ctx.fillStyle = g;
-    ctx.fillRect(0, 0, w, h);
-    const r = rng(5);
-    ctx.fillStyle = '#e8ecff';
-    for (let i = 0; i < 90; i++) {
-      const x = r() * w, y = r() * h * 0.55, tw = 0.5 + 0.5 * Math.sin(t * (1 + r() * 2) + i);
-      ctx.globalAlpha = night * (0.3 + 0.7 * tw) * r();
-      ctx.fillRect(x, y, 1.6, 1.6);
-    }
-    ctx.restore();
-  }
+  drawNight(ctx, w, h, t, night);
 
   // ---- the camera: over the paper while it folds, then behind the crane
   const pose = cranePose(L, t);
@@ -394,28 +425,7 @@ export function drawFold(f: Frame, L: number) {
   const city = seg(L, FD.city[0], FD.city[1]);
   if (city > 0) {
     const far = project(cam, [0, 0, cam.pos[2] - 1e6]);
-    const hy = far ? far[1] : h * 0.4;
-    ctx.save();
-    ctx.globalCompositeOperation = 'lighter';
-    ctx.globalAlpha = city * 0.8;
-    drawSprite(ctx, glow('#ff3fa4', 128), w * 0.55, hy, w * 1.5, h * 0.16);
-    drawSprite(ctx, glow('#2fd6ff', 128), w * 0.38, hy, w * 0.8, h * 0.1);
-    ctx.restore();
-    // the city on the horizon is made of letters
-    ctx.save();
-    ctx.globalAlpha = city;
-    ctx.fillStyle = '#0b0c1a';
-    ctx.textBaseline = 'alphabetic';
-    ctx.textAlign = 'center';
-    const r = rng(31);
-    const S = Math.min(w, h);
-    for (let i = 0; i < 16; i++) {
-      const x = (i + 0.5) * (w / 16) + (r() - 0.5) * S * 0.03;
-      const px = Math.round(S * (0.04 + r() * 0.05));
-      ctx.font = `${px}px "Dela Gothic One", "Arial Black", sans-serif`;
-      ctx.fillText('MAXGABRIELMOTION'[i], x, hy + 1);
-    }
-    ctx.restore();
+    drawHorizonCity(ctx, w, h, far ? far[1] : h * 0.4, city);
   }
 
   // the paper ground unrolls under the take-off

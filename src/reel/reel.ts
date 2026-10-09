@@ -2,6 +2,7 @@ import type { Frame } from '../core/frame';
 import { drawInk } from './ink';
 import { drawFold } from './fold';
 import { drawMurmur } from './murmur';
+import { drawNeon } from './neon';
 
 /*
  * THE REEL.
@@ -36,7 +37,7 @@ export const CHAPTERS: Chapter[] = [
   { n: 'I', name: 'Ink', from: 0, to: 9.6, paper: true, draw: (f) => drawInk(f) },
   { n: 'II', name: 'Flock', from: 9.6, to: 17.2, paper: false, draw: drawMurmur },
   { n: 'III', name: 'Fold', from: 17.2, to: 24.6, paper: false, draw: drawFold },
-  { n: 'IV', name: 'Neon', from: 24.6, to: 31.4, paper: false },
+  { n: 'IV', name: 'Neon', from: 24.6, to: 31.4, paper: false, draw: drawNeon },
   { n: 'V', name: 'Shadow', from: 31.4, to: 37.6, paper: false },
   { n: 'VI', name: 'Impact', from: 37.6, to: 43.6, paper: false },
   { n: 'VII', name: 'Page', from: 43.6, to: 49.2, paper: true },
