@@ -75,6 +75,11 @@ themselves, not to the docs: *"you report to me and not the docs"*.
 
 ## 3. Decisions (most recent first)
 
+**Round 22 — the swinger, redone:** *"come on man spiderman looks too weird not
+at all spiderman lol not even the slings"* → picked a **Spider-Verse-style
+silhouette** drawn in code (white lenses, red/blue print offset, white webs,
+pendulum swings) over plain silhouettes from ChatGPT. The Slinger is removed.
+
 **Round 21 — the web-slinger cameo:** *"lets also get spiderman in here… while
 falling on the paper from act 3 i want spiderman to fly by and help me land on
 the paper. then he swings through out of the screen… make it like i also thank

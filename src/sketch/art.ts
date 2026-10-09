@@ -235,3 +235,31 @@ export function figHeight(k: string) {
   const m = M[k];
   return m ? Math.max(1, m.foot[1] - m.top) : 1;
 }
+
+/** draw drawing `k` at a fixed pixel scale, with its local point `anchor` (default: the foot) at (x, y) */
+export function drawFig(ctx: CanvasRenderingContext2D, k: string, x: number, y: number, scale: number, o: { anchor?: [number, number]; flip?: boolean; rot?: number; tint?: string; alpha?: number } = {}) {
+  const m = M[k];
+  const im = m && img(k);
+  if (!m || !im) return;
+  const [ax, ay] = o.anchor ?? m.foot;
+  ctx.save();
+  ctx.translate(x, y);
+  if (o.rot) ctx.rotate(o.rot);
+  ctx.scale(o.flip ? -scale : scale, scale);
+  ctx.globalAlpha *= o.alpha ?? 1;
+  ctx.drawImage(o.tint ? tinted(k, o.tint, im) : im, -ax, -ay);
+  ctx.restore();
+}
+
+/** where drawing `k`'s local point p lands on screen when drawn with drawFig(.., x, y, scale, o) */
+export function figPoint(k: string, p: [number, number], x: number, y: number, scale: number, o: { anchor?: [number, number]; flip?: boolean; rot?: number } = {}): [number, number] {
+  const m = M[k];
+  if (!m) return [x, y];
+  const [ax, ay] = o.anchor ?? m.foot;
+  const lx = (p[0] - ax) * scale * (o.flip ? -1 : 1), ly = (p[1] - ay) * scale;
+  const c = Math.cos(o.rot ?? 0), s = Math.sin(o.rot ?? 0);
+  return [x + lx * c - ly * s, y + lx * s + ly * c];
+}
+
+/** a drawing's raw manifest entry (for the extra points some sheets carry: hand, head) */
+export const meta = (k: string) => M[k] as (Meta & { hand?: [number, number]; head?: [number, number] }) | undefined;
