@@ -17,9 +17,10 @@ the transitions are the plot. No words but the title, the seal and the
 contact card. No clusters of small things. Phone first.
 
 0–1. **Still** (line animation) — the page opens, MAX GABRIEL is brushed in,
-   the Spark drops on like seal ink, a brush draws him; he can only
-   tremble; cross-eyed when it lands on his nose; strain, faceplant, dazed;
-   the Spark hops away along the line and he lifts one foot — his first step.
+   the Spark drops on like seal ink, a brush draws him; his wet lines
+   tremble and settle; he notices the Spark; it hops away along the line and
+   he lifts one foot — his first step. (No comedy emotes: the owner found
+   them senseless.)
 2. **Run** (frame-by-frame, one unbroken shot) — wobbly first steps, a walk,
    a run (8-frame cycles locked to the ground he covers); the brush lays the
    line just ahead of his feet; he waves at you; a cartwheel into a backflip
@@ -32,8 +33,9 @@ contact card. No clusters of small things. Phone first.
    into the moonlit night; the Spark dives into a far light and he leaps
    off the crane after it; the light swells into a bulb.
 4. **Light** (light and silhouette) — he drops into the bulb's room; his
-   shadow copies him, then waves at him; it ignites a red light-blade, the
-   Spark drops him a hilt and his ignites blue; the duel, blades lighting
+   shadow copies him, then waves at him; it draws a hilt and a red blade
+   rises; he reaches to his belt, pulls his hilt, holds it out, and the blue
+   blade comes up slowly from it, stuttering as it catches; the duel, blades lighting
    the paper, impact frames; the cord swing; the room melts into the
    painted sunset and he falls through it.
 5. **Chase** (Quidditch-style) — poof: a broom and a wizard's hat under him
@@ -41,14 +43,19 @@ contact card. No clusters of small things. Phone first.
    loop-the-loop, a dive at the sea and up again; his hand closes round it;
    he leaps off the broom and flings the hat into the sky; the sunset drains
    back into paper as he falls.
-6. **Home** — he lands on the page, slams the Spark down as the seal; the
-   hat floats down onto his head; he turns to you and holds out the brush
+6. **Home** — he lands on the page; the Spark becomes a ball; a FIRE TORNADO
+   shot: toe flick, crouch, leap, spinning inside a rising cone of fire, an
+   overhead bicycle kick at the top — the blazing ball burns into the page
+   as the seal; he lands; turns to you and holds out the brush
    (the contact card); waves and walks off; after the credits he peeks back
    in from the edge of the page.
 
 Round 18b (owner): no page-turning — smooth runs; transitions that make
 sense in the story; no samurai fights — one Quidditch-style chase (wizard
-hat, thrown at the end) and one lightsaber-style duel.
+hat, thrown at the end) and one lightsaber-style duel. Round 18c: no hat
+at the end; no emotes at the start; the saber is drawn from the belt and
+ignites gradually; the finale is a fire-tornado shot (Inazuma-style
+technique, original character).
 
 ---
 

@@ -11,28 +11,22 @@ import { shockRing } from './fx';
  *
  * The page opens: MAX GABRIEL is brushed in, and the Spark drops onto the
  * paper like a fresh drop of seal ink. A brush draws the hero beside it —
- * and he is only a drawing. The Spark bounces in front of him; all he can
- * do is tremble (his lines boil). His eyes follow it; it lands on his nose
- * and he goes cross-eyed; he strains with everything he has, lunges, and
- * falls flat on his face. Dazed, he sits up; the Spark hops away along the
- * line; he jumps up — and lifts one foot, arms out: his very first step
- * (chapter II carries straight on in the same shot).
+ * and he is only a drawing, his lines still trembling wet. They settle; he
+ * notices the Spark. It hops away along the line, and he lifts one foot,
+ * arms out: his very first step (chapter II carries straight on in the
+ * same shot).
  */
 
 export const ST = {
   drop: [1.15, 1.85] as const,
   draw: [2.0, 3.2] as const,
-  bounce: [3.3, 4.1] as const,
-  look: 4.1,
-  nose: [4.75, 5.15] as const,
-  strain: [5.55, 6.25] as const,
-  plant: 6.35,
-  dazed: 6.95,
-  /** the Spark hops away along the line; he pops up, and tries his very first step (chapter II carries on in the same shot) */
-  away: [7.55, 8.05] as const,
-  jump: 7.55,
-  step: 8.25,
-  end: 9.0,
+  /** his ink settles, then he notices the Spark */
+  wake: [3.2, 3.7] as const,
+  look: 3.7,
+  /** the Spark hops away along the line; he lifts one foot — his very first step (chapter II carries on in the same shot) */
+  away: [4.05, 4.55] as const,
+  step: 4.75,
+  end: 5.6,
 };
 
 /** where the hero stands and the ground, for this screen */
@@ -81,39 +75,18 @@ export function drawStill(f: Frame, L: number) {
 
   // ---- the title, high on the page, fading as the page is about to turn
   const tw = wordWidth('MAX', 300, 0.16);
-  drawTitle(f, w / 2, h * 0.1, (w * 0.56) / tw, 1 - seg(L, 7.6, 8.8) * 0.85);
+  drawTitle(f, w / 2, h * 0.1, (w * 0.56) / tw, 1 - seg(L, 4.4, 5.6));
 
   // ---- the ground he'll stand on, brushed under him as he is drawn
   drawGround(ctx, w * 0.12, w * 0.88, gy + face * 0.05, face * 0.07, ease.out2(seg(L, ST.draw[0] - 0.2, ST.draw[0] + 0.5)));
 
-  // ---- the hero
-  const nose: Pt = [gx + face * 0.35, gy - face * 2.45];
-  let pose = 'still_0', px = gx, flip = false, boil = 0, sq = 1, rot = 0;
+  // ---- the hero: drawn in, the wet ink trembling and settling, a look at the Spark, a first step
+  let pose = 'still_0', rot = 0;
   const reveal = ease.inOut2(seg(L, ST.draw[0], ST.draw[1]));
-  if (L >= ST.bounce[0]) boil = 0.012 + 0.02 * seg(L, ST.bounce[0], ST.look);
+  const boil = L < ST.wake[1] ? 0.03 * (1 - seg(L, ST.wake[0], ST.wake[1])) + 0.006 : 0.006;
   if (L >= ST.look) pose = 'curious';
-  if (L >= ST.nose[0] + 0.15) pose = 'comedy_0';
-  if (L >= ST.strain[0]) {
-    pose = 'still_1';
-    boil = 0.03 + 0.05 * seg(L, ST.strain[0], ST.strain[1]);
-    sq = 1 - 0.05 * seg(L, ST.strain[0], ST.strain[1]);
-  }
-  if (L >= ST.plant - 0.1) {
-    // the lunge: he tips over and lands flat on his face
-    pose = 'comedy_1';
-    boil = 0;
-    sq = 1;
-    px = gx + face * 0.5;
-    if (f.crossedFwd(f.B - L + ST.plant)) f.shake(face * 0.25);
-  }
-  if (L >= ST.dazed) pose = 'comedy_2';
-  if (L >= ST.jump) { pose = 'comedy_3'; px = gx + face * 0.4; }
-  if (L >= ST.step) { pose = 'firststep_0'; px = gx; rot = Math.sin(t * 5) * 0.04; }
-  // the lunge's arc: a little hop forward as he tips
-  let py = gy;
-  if (L >= ST.plant - 0.25 && L < ST.plant) py = gy - Math.sin(seg(L, ST.plant - 0.25, ST.plant) * Math.PI) * face * 0.6;
-  if (L >= ST.jump && L < ST.step) py = gy - Math.sin(seg(L, ST.jump, ST.step) * Math.PI) * face * 0.9;
-  drawPose(ctx, pose, px, py, face, { flip, boil, t, squash: sq, rot, reveal: L < ST.draw[1] ? reveal : undefined });
+  if (L >= ST.step) { pose = 'firststep_0'; rot = Math.sin(t * 5) * 0.04; }
+  drawPose(ctx, pose, gx, gy, face, { boil, t, rot, reveal: L < ST.draw[1] ? reveal : undefined });
 
   // the brush that draws him: its wet tip travels down the drawing
   if (L > ST.draw[0] - 0.1 && L < ST.draw[1] + 0.2) {
@@ -134,11 +107,8 @@ export function drawStill(f: Frame, L: number) {
     ctx.restore();
   }
 
-  // ---- the Spark
+  // ---- the Spark: drops, rests, bobs in front of him; hops away along the line and waits
   const rest: Pt = [w * 0.66, gy - r];
-  const left: Pt = [gx + face * 1.1, gy - r];
-  const right: Pt = [gx + face * 2.4, gy - r];
-  const far: Pt = [w * 0.8, gy - r];
   const ahead: Pt = [stageAhead(f), gy - r];
   let sp: Pt = rest, sq2 = 1, prev: Pt | null = null;
   if (L < ST.drop[1]) {
@@ -150,39 +120,12 @@ export function drawStill(f: Frame, L: number) {
     const k = seg(L, ST.drop[1], ST.drop[1] + 0.25);
     sq2 = 1 - Math.sin(k * Math.PI) * 0.45;
     sp = [rest[0], rest[1] + Math.sin(k * Math.PI) * r * 0.3];
-  } else if (L < ST.bounce[0]) {
-    sp = rest;
-  } else if (L < ST.look) {
-    // bouncing back and forth in front of him, teasing
-    const k = seg(L, ST.bounce[0], ST.look) * 3;
-    const i = Math.floor(Math.min(2.999, k)), u = k - i;
-    const pts = [rest, left, right, left];
-    sp = hop(pts[i], pts[i + 1], face * 0.9, ease.inOut2(u));
-  } else if (L < ST.nose[0]) {
-    sp = hop(left, right, face * 0.4, 0.5 + 0.5 * Math.sin((L - ST.look) * 9));
-    sp = left;
-  } else if (L < ST.nose[1]) {
-    sp = hop(left, nose, face * 1.2, ease.inOut2(seg(L, ST.nose[0], ST.nose[1])));
-  } else if (L < ST.strain[0]) {
-    sp = [nose[0], nose[1] + Math.sin(t * 6) * face * 0.02];
-  } else if (L < ST.strain[0] + 0.35) {
-    sp = hop(nose, far, face * 1.4, ease.inOut2(seg(L, ST.strain[0], ST.strain[0] + 0.35)));
-  } else if (L < ST.dazed) {
-    sp = far;
-    if (L > ST.plant - 0.3 && L < ST.plant) sp = hop(far, [w * 0.86, gy - r], face * 1.1, seg(L, ST.plant - 0.3, ST.plant));
-    if (L >= ST.plant) sp = [w * 0.86, gy - r];
   } else if (L < ST.away[0]) {
-    // circling over his dazed head
-    const a = (L - ST.dazed) * 12;
-    const c: Pt = [gx + face * 0.6, gy - face * 2.2];
-    sp = [c[0] + Math.cos(a) * face * 0.6, c[1] + Math.sin(a) * face * 0.18];
+    sp = [rest[0], rest[1] - Math.abs(Math.sin(t * 3)) * face * 0.25 * seg(L, ST.wake[1], ST.look)];
   } else if (L < ST.away[1]) {
-    const c: Pt = [gx + face * 0.6, gy - face * 2.2];
-    sp = hop(c, ahead, face * 1.6, ease.inOut2(seg(L, ST.away[0], ST.away[1])));
-    prev = hop(c, ahead, face * 1.6, ease.inOut2(seg(L - 0.06, ST.away[0], ST.away[1])));
-  } else {
-    sp = sparkWaiting(f, t);
-  }
+    sp = hop(rest, ahead, face * 1.2, ease.inOut2(seg(L, ST.away[0], ST.away[1])));
+    prev = hop(rest, ahead, face * 1.2, ease.inOut2(seg(L - 0.06, ST.away[0], ST.away[1])));
+  } else sp = sparkWaiting(f, t);
   if (L >= ST.drop[0]) {
     if (prev) drawSparkStreak(ctx, prev, sp, r);
     drawSpark(ctx, sp[0], sp[1], r, sq2);

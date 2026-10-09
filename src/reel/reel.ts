@@ -35,15 +35,15 @@ export interface Chapter {
 }
 
 export const CHAPTERS: Chapter[] = [
-  { n: 'I', name: 'Still', from: 0, to: 9, paper: true, draw: drawStill },
-  { n: 'II', name: 'Run', from: 9, to: 18, paper: true, draw: drawRun },
-  { n: 'III', name: 'Fold', from: 18, to: 27, paper: false, draw: drawRide },
-  { n: 'IV', name: 'Light', from: 27, to: 35, paper: false, draw: (f, L) => drawLight(f, L) },
-  { n: 'V', name: 'Chase', from: 35, to: 43, paper: false, draw: drawChase },
-  { n: 'VI', name: 'Home', from: 43, to: 50, paper: true, draw: drawHome },
+  { n: 'I', name: 'Still', from: 0, to: 5.6, paper: true, draw: drawStill },
+  { n: 'II', name: 'Run', from: 5.6, to: 14.6, paper: true, draw: drawRun },
+  { n: 'III', name: 'Fold', from: 14.6, to: 23.6, paper: false, draw: drawRide },
+  { n: 'IV', name: 'Light', from: 23.6, to: 31.6, paper: false, draw: (f, L) => drawLight(f, L) },
+  { n: 'V', name: 'Chase', from: 31.6, to: 39.6, paper: false, draw: drawChase },
+  { n: 'VI', name: 'Home', from: 39.6, to: 48.6, paper: true, draw: drawHome },
 ];
 
-export const REEL_END = 50.4;
+export const REEL_END = 49.0;
 
 export function chapterAt(B: number) {
   let i = 0;
@@ -64,7 +64,7 @@ export function drawReel(f: Frame) {
 /** HUD state: dark type over light chapters; the contact card at the very end */
 export function reelHud(B: number) {
   const c = CHAPTERS[chapterAt(B)];
-  return { paper: c.paper, hello: B > CHAPTERS[CHAPTERS.length - 1].from + 3.2 };
+  return { paper: c.paper, hello: B > CHAPTERS[CHAPTERS.length - 1].from + 4.1 };
 }
 
 /** a tap drops ink onto whatever is under the finger (a quiet answer, never blocks scrolling) */

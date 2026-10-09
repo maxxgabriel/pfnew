@@ -25,12 +25,12 @@ local beat `L = B - from` and owns its seam.
 
 | Chapter | Beats | What happens | File |
 |---|---|---|---|
-| I Still | 0 – 9 | title brushed in, the Spark drops, a brush draws him; he can only tremble; cross-eyed, strain, faceplant, dazed; grabs the page corner | `sketch/still.ts` |
-| II Run | 9 – 18 | one shot: first steps, 8-frame walk/run locked to distance, the brush laying the line ahead, cartwheel+backflip over a gap, pull back to the floating page, runs off its edge | `sketch/run.ts` |
-| III Fold | 18 – 27 | the fall; his page tumbles after him and catches him (superhero landing); it folds under him (old `reel/fold.ts` `drawFolding`), snap tosses him onto the crane; the ride under the painted moon; one warm point | `sketch/ride.ts` |
-| IV Light | 27 – 35 | he dives into the light: the bulb room; his shadow waves at him; a light-blade duel (red vs blue, `sketch/saber.ts`, blades measured from the drawings' cyan); the cord swing; the room melts into the painted sunset | `sketch/light.ts` |
-| V Chase | 35 – 43 | Quidditch-style: a broom and wizard hat appear mid-fall; the winged Spark across the sunset, banking, a loop, a dive and pull-up; the catch; he flings the hat; the sunset drains to paper | `sketch/chase.ts` |
-| VI Home | 43 – 50 | lands on the page; slams the Spark down as the seal; the hat floats down onto his head; offers the brush (contact card); waves, walks off; after-credits peek | `sketch/home.ts` |
+| I Still | 0 – 5.6 | title brushed in, the Spark drops, a brush draws him; his ink settles; he notices the Spark; first step | `sketch/still.ts` |
+| II Run | 5.6 – 14.6 | one shot: first steps, 8-frame walk/run locked to distance, the brush laying the line ahead, cartwheel+backflip over a gap, pull back to the floating page, runs off its edge | `sketch/run.ts` |
+| III Fold | 14.6 – 23.6 | the fall; his page tumbles after him and catches him (superhero landing); it folds under him (old `reel/fold.ts` `drawFolding`), snap tosses him onto the crane; the ride under the painted moon; one warm point | `sketch/ride.ts` |
+| IV Light | 23.6 – 31.6 | he dives into the light: the bulb room; his shadow waves at him; a light-blade duel (red vs blue, `sketch/saber.ts`, blades measured from the drawings' cyan); the cord swing; the room melts into the painted sunset | `sketch/light.ts` |
+| V Chase | 31.6 – 39.6 | Quidditch-style: a broom and wizard hat appear mid-fall; the winged Spark across the sunset, banking, a loop, a dive and pull-up; the catch; he flings the hat; the sunset drains to paper | `sketch/chase.ts` |
+| VI Home | 39.6 – 48.6 | lands on the page; fire-tornado shot (code-painted flame cone + swirl bands, fireball comet) burns the Spark in as the seal; offers the brush (contact card); waves, walks off; after-credits peek | `sketch/home.ts` |
 
 - **The drawings** (`src/sketch/art.ts`): every pose is a cut-out made with
   the image tool from the owner's sheet (`art/raw/ref_wanderer.png`;

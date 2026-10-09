@@ -14,8 +14,9 @@ import { impactFrame, shockRing, smear } from './fx';
  * drops out of the night into its light — a superhero landing on a bare
  * floor in front of a paper wall. His shadow lands with him, huge on the
  * wall. He looks round; the shadow copies. Then it doesn't: it waves at
- * him. He jumps out of his skin. The shadow ignites a red light-blade; the
- * Spark drops a hilt into his hand and his blade ignites blue; they duel —
+ * him. He jumps out of his skin. The shadow draws a hilt and a red blade
+ * rises from it; he draws his own from his belt and the blue blade comes up
+ * slowly in his hands; they duel —
  * him on the floor, his shadow twice his size on the wall, the blades
  * lighting the paper — every clash a frame of negative. He leaps for the
  * bulb's cord and swings; the light swings with him and the shadows sweep
@@ -31,13 +32,19 @@ export const LT = {
   copy: [1.4, 2.5] as const,
   wave: 2.55,
   jump: 2.85,
-  draw: 3.15,
-  brush: 3.45,
-  clashes: [3.85, 4.25, 4.65, 5.0] as const,
-  leap: [5.3, 5.65] as const,
-  swing: [5.65, 6.6] as const,
-  fly: [6.6, 7.1] as const,
-  sunset: [6.6, 7.8] as const,
+  /** the shadow draws its hilt first; its red blade rises */
+  draw: 3.0,
+  redOn: [3.3, 3.75] as const,
+  /** then him: reach to the belt, pull the hilt, hold it out — and the blade comes up, slowly */
+  reach: 3.5,
+  pull: 3.7,
+  hold: 3.9,
+  blueOn: [4.1, 4.65] as const,
+  clashes: [4.9, 5.2, 5.48, 5.72] as const,
+  leap: [5.95, 6.25] as const,
+  swing: [6.25, 6.95] as const,
+  fly: [6.95, 7.35] as const,
+  sunset: [6.95, 7.85] as const,
   end: 8.0,
 };
 
@@ -106,14 +113,21 @@ export function drawLight(f: Frame, L: number, withHero = true) {
   if (L > LT.copy[0] + 0.5) { pose = 'curious'; flip = true; shPose = 'curious'; shFlip = true; }
   if (L > LT.wave) { pose = 'curious'; flip = false; shPose = 'bye_0'; shFlip = false; }
   if (L > LT.jump) { pose = 'comedy_3'; hy = floorY - Math.sin(seg(L, LT.jump, LT.jump + 0.3) * Math.PI) * face * 1.4; }
-  if (L > LT.draw) { pose = 'still_2'; hy = floorY; shPose = 'saber_0'; shFlip = true; shDx = face * 1.5; }
-  if (L > LT.brush) { pose = 'saber_0'; }
-  if (L > LT.brush + 0.18) pose = 'saber_1';
-  if (L > LT.draw + 0.2) shPose = 'saber_1';
+  // the shadow draws first: reach, pull, hold out, and the red blade rises
+  if (L > LT.draw) { pose = 'still_2'; hy = floorY; shFlip = true; shDx = face * 1.5; shPose = 'saberdraw_0'; }
+  if (L > LT.draw + 0.12) shPose = 'saberdraw_1';
+  if (L > LT.draw + 0.22) shPose = 'saberdraw_3';
+  if (L > LT.redOn[1] + 0.15) shPose = 'saber_1';
+  // then him: the same draw, and his blade comes up slowly from the hilt
+  if (L > LT.reach) pose = 'saberdraw_0';
+  if (L > LT.pull) pose = 'saberdraw_1';
+  if (L > LT.hold) pose = 'saberdraw_2';
+  if (L > LT.blueOn[0]) pose = 'saberdraw_3';
+  if (L > LT.blueOn[1] + 0.1) pose = 'saber_1';
   // the duel: him on the floor, his shadow on the wall, trading blows
-  const fight: [number, string, string][] = [[3.75, 'saber_2', 'saber_4'], [4.15, 'saber_4', 'saber_3'], [4.55, 'saber_3', 'saber_2'], [4.92, 'saber_5', 'saber_4']];
+  const fight: [number, string, string][] = [[4.82, 'saber_2', 'saber_4'], [5.12, 'saber_4', 'saber_3'], [5.4, 'saber_3', 'saber_2'], [5.64, 'saber_5', 'saber_4']];
   for (const [b, me, it] of fight) if (L > b) { pose = me; shPose = it; }
-  if (L > 5.15) { pose = 'saber_1'; shPose = 'saber_1'; }
+  if (L > 5.85) { pose = 'saber_1'; shPose = 'saber_1'; }
   // the leap for the cord, the swing, the let-go
   if (L > LT.leap[0]) {
     const u = ease.out2(seg(L, LT.leap[0], LT.leap[1]));
@@ -161,9 +175,9 @@ export function drawLight(f: Frame, L: number, withHero = true) {
     // its blade, red, thrown big on the wall (it ignites first)
     const bl = !mine ? bladeOf(shKey, sx, sy, face * k, { flip: shF, rot: shR }) : null;
     if (bl && L < LT.sunset[0]) {
-      const ig = shKey === 'saber_0' ? ease.out3(seg(L, LT.draw, LT.draw + 0.25)) : 1;
+      const ig = shKey === 'saberdraw_3' ? ease.inOut2(seg(L, LT.redOn[0], LT.redOn[1])) : shKey.startsWith('saberdraw') ? 0 : 1;
       bladeLight(ctx, bl[0], bl[1], RED_BLADE, face * 4 * k, 0.3);
-      drawBlade(ctx, bl[0], bl[1], RED_BLADE, face * 0.09 * k, ig, t);
+      drawBlade(ctx, bl[0], bl[1], RED_BLADE, face * 0.09 * k, ig, t, true);
     }
   }
 
@@ -199,7 +213,10 @@ export function drawLight(f: Frame, L: number, withHero = true) {
     drawPose(ctx, pose, hx, hy, face, { flip, rot });
     const bl = bladeOf(pose, hx, hy, face, { flip, rot });
     if (bl) {
-      const ig = pose === 'saber_0' ? ease.out3(seg(L, LT.brush, LT.brush + 0.18)) : 1;
+      // the blade comes up slowly from the hilt, stuttering as it catches
+      const raw = seg(L, LT.blueOn[0], LT.blueOn[1]);
+      const ig = pose === 'saberdraw_3' ? ease.inOut2(raw) * (raw < 0.25 ? 0.7 + 0.3 * Math.sin(t * 60) : 1) : pose.startsWith('saberdraw') ? 0 : 1;
+      if (pose === 'saberdraw_3' && f.crossedFwd(f.B - L + LT.blueOn[0])) f.flash(0.15, '#bfe4ff');
       bladeLight(ctx, bl[0], bl[1], BLUE, face * 3.5, 0.35);
       drawBlade(ctx, bl[0], bl[1], BLUE, face * 0.11, ig, t + 1);
     }
@@ -216,10 +233,7 @@ export function drawLight(f: Frame, L: number, withHero = true) {
   // ---- the Spark: circling the bulb, then dropping the hilt into his hand, then fleeing into the sunset
   if (on && withHero) {
     let sp: Pt = [bulb[0] + Math.cos(t * 2.2) * face * 1.1, bulb[1] + Math.sin(t * 2.2) * face * 0.5];
-    if (L > LT.draw - 0.1 && L < LT.brush + 0.2) {
-      const u = ease.inOut2(seg(L, LT.draw - 0.1, LT.brush));
-      sp = [lerp(sp[0], hx + face * 0.6, u), lerp(sp[1], hy - face * 1.4, u)];
-    }
+
     if (L > LT.fly[0]) sp = [lerp(sp[0], w * 0.5, seg(L, LT.fly[0], LT.sunset[1])), lerp(sp[1], h * 0.2, seg(L, LT.fly[0], LT.sunset[1]))];
     drawSpark(ctx, sp[0], sp[1], face * 0.17);
   }

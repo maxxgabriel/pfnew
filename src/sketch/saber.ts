@@ -9,14 +9,15 @@ import { clamp, lerp } from '../core/math';
 export const BLUE = '#3aa7ff';
 export const RED_BLADE = '#ff2e3a';
 
-export function drawBlade(ctx: CanvasRenderingContext2D, a: [number, number], b: [number, number], color: string, width: number, ignite = 1, flicker = 0) {
+export function drawBlade(ctx: CanvasRenderingContext2D, a: [number, number], b: [number, number], color: string, width: number, ignite = 1, flicker = 0, onBright = false) {
   const k = clamp(ignite);
   if (k <= 0) return;
   const e: [number, number] = [lerp(a[0], b[0], k), lerp(a[1], b[1], k)];
   const fl = 1 + Math.sin(flicker * 90) * 0.04 + Math.sin(flicker * 37) * 0.03;
   ctx.save();
   ctx.lineCap = 'round';
-  ctx.globalCompositeOperation = 'lighter';
+  // on a bright wall an additive glow just whitens: paint it on instead
+  ctx.globalCompositeOperation = onBright ? 'source-over' : 'lighter';
   for (const [wd, al] of [[5.5, 0.12], [3, 0.28], [1.7, 0.55]] as const) {
     ctx.strokeStyle = color;
     ctx.globalAlpha = al;
@@ -28,7 +29,7 @@ export function drawBlade(ctx: CanvasRenderingContext2D, a: [number, number], b:
   }
   ctx.globalCompositeOperation = 'source-over';
   ctx.globalAlpha = 1;
-  ctx.strokeStyle = '#ffffff';
+  ctx.strokeStyle = onBright ? '#ffe2e2' : '#ffffff';
   ctx.lineWidth = width * 0.75;
   ctx.beginPath();
   ctx.moveTo(a[0], a[1]);
