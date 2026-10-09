@@ -5,6 +5,7 @@ import { drawMurmur } from './murmur';
 import { drawNeon } from './neon';
 import { drawShadow } from './shadow';
 import { drawImpact } from './impact';
+import { drawPage } from './page';
 
 /*
  * THE REEL.
@@ -42,7 +43,7 @@ export const CHAPTERS: Chapter[] = [
   { n: 'IV', name: 'Neon', from: 24.6, to: 31.4, paper: false, draw: drawNeon },
   { n: 'V', name: 'Shadow', from: 31.4, to: 37.6, paper: false, draw: drawShadow },
   { n: 'VI', name: 'Impact', from: 37.6, to: 43.6, paper: false, draw: drawImpact },
-  { n: 'VII', name: 'Page', from: 43.6, to: 49.2, paper: true },
+  { n: 'VII', name: 'Page', from: 43.6, to: 49.2, paper: true, draw: drawPage },
 ];
 
 export const REEL_END = 49.6;
