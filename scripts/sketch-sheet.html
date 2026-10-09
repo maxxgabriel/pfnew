@@ -1,0 +1,51 @@
+<!doctype html><html><body style="margin:0;background:#ece6d6">
+<canvas id="c" style="width:1200px;height:1560px"></canvas>
+<script type="module">
+import { drawChibi, drawSpark, INK } from '/scripts/sketch/chibi.ts';
+import { paperTile } from '/src/core/sprites.ts';
+const W = 1200, H = 1560, dpr = 2;
+const c = document.getElementById('c'); c.width = W * dpr; c.height = H * dpr;
+const ctx = c.getContext('2d'); ctx.scale(dpr, dpr);
+ctx.fillStyle = '#efe9dc'; ctx.fillRect(0, 0, W, H);
+ctx.globalAlpha = 0.5; ctx.fillStyle = ctx.createPattern(paperTile(512, '#efe9dc'), 'repeat'); ctx.fillRect(0, 0, W, H); ctx.globalAlpha = 1;
+const label = (t, x, y, size = 13, col = '#6b6156') => { ctx.font = `${size}px ui-monospace, Menlo, monospace`; ctx.fillStyle = col; ctx.textAlign = 'center'; ctx.fillText(t, x, y); };
+const line = (y) => { ctx.fillStyle = 'rgba(27,23,20,0.12)'; ctx.fillRect(60, y, W - 120, 1); };
+ctx.font = '600 30px "Shippori Mincho", Georgia, serif'; ctx.fillStyle = INK; ctx.textAlign = 'left'; ctx.fillText('The Sketch & the Spark', 60, 70);
+label('CHARACTER STUDY · ROUND VERSION', 1010, 66, 13);
+line(96);
+
+const base = { lean: 0, tilt: 0, armL: -0.3, armR: 0.3, legL: -0.1, legR: 0.1, look: [0, 0], face: 'calm', stream: 0, wave: 0 };
+// hero, big, and the spark
+drawChibi(ctx, 300, 590, 122, { ...base, look: [0.5, -0.2], tilt: 0.06 }, 3);
+drawSpark(ctx, 640, 300, 30);
+drawChibi(ctx, 880, 590, 60, { ...base, look: [0.7, -0.7], tilt: 0.12, face: 'wow', armR: 2.2, armL: -0.6 }, 4);
+drawSpark(ctx, 1000, 360, 12);
+label('THE SKETCH', 300, 625); label('THE SPARK', 640, 370); label('SIZE ON A PHONE', 920, 625);
+line(650);
+
+// story poses
+const poses = [
+  ['I · STILL', 'straining at a drawing\u2019s limits', { ...base, lean: 0.15, tilt: 0.12, face: 'strain', armR: 2.2, armL: -0.7, legL: -0.4, legR: 0.25, stream: 0.05, wave: 1 }, [1.05, -1.6]],
+  ['II · FLIP', 'the first wobbly step', { ...base, lean: -0.06, tilt: -0.14, face: 'wow', armR: 1.2, armL: -1.25, legL: -0.1, legR: 0.65, look: [0.4, 0.7], stream: 0.2, wave: 2, squash: 0.95 }, null],
+  ['III · RUN', 'chasing it', { ...base, lean: 0.38, tilt: 0.05, face: 'focus', armR: -1.0, armL: 1.25, legL: -0.95, legR: 0.95, look: [1, 0], stream: 1, wave: 3, squash: 0.97 }, [0.85, -0.85]],
+  ['V · LEAP', 'the catch', { ...base, lean: 0.2, tilt: -0.25, face: 'wow', armR: 2.35, armL: -2.1, legL: -0.7, legR: 1.0, look: [0.6, -1], stream: 0.8, wave: 4.5, squash: 1.1 }, [0.62, -0.88]],
+  ['VI · HOME', 'holding out the brush', { ...base, lean: -0.05, face: 'grin', armR: 1.5, armL: -0.3, stream: 0.25, wave: 5, prop: 'brush' }, null],
+];
+poses.forEach(([n, sub, p, sp], i) => {
+  const x = 140 + i * 230, y = 960, s = 60;
+  drawChibi(ctx, x, y, s, p, 10 + i);
+  if (sp) drawSpark(ctx, x + sp[0] * s * 2.2, y + sp[1] * s * 2.2, 11);
+  label(n, x, y + 46, 13, INK); label(sub, x, y + 66, 12);
+});
+line(1060);
+
+// faces
+const faces = ['calm', 'wow', 'strain', 'focus', 'grin', 'blink'];
+faces.forEach((f, i) => {
+  const x = 140 + i * 184, y = 1430;
+  drawChibi(ctx, x, y, 72, { ...base, face: f, look: f === 'focus' ? [0.6, 0] : [0, 0], tilt: [0, -0.1, 0.08, 0.05, -0.06, 0][i] }, 30 + i);
+  label(f.toUpperCase(), x, y + 42);
+});
+label('EXPRESSIONS', 600, 1100, 13, INK);
+window.done = true;
+</script></body></html>

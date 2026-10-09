@@ -7,5 +7,6 @@ p.on('console', (m) => { if (m.type() === 'error' || m.type() === 'warning') con
 await p.goto('http://localhost:5199/' + (process.argv[3] || 'scripts/hero-sheet.html'));
 await p.waitForFunction(() => window.done, null, { timeout: 60000 });
 await p.waitForTimeout(300);
-await p.screenshot({ path: process.argv[2] });
+const box = await p.$eval('canvas', (c) => { const r = c.getBoundingClientRect(); return { x: r.x, y: r.y, width: r.width, height: r.height }; });
+await p.screenshot({ path: process.argv[2], clip: box });
 await b.close();
