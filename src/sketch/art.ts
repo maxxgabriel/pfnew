@@ -210,3 +210,9 @@ export function poseTop(k: string, face: number) {
   const m = M[k];
   return m ? (m.foot[1] - m.top) * poseScale(k, face) : 0;
 }
+
+/** a drawing's size in its own pixels (for props that have no face to scale by) */
+export function artSize(k: string): [number, number] {
+  const m = M[k];
+  return m ? [m.w, m.h] : [1, 1];
+}

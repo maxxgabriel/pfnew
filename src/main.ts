@@ -66,7 +66,7 @@ window.addEventListener('scroll', readScroll, { passive: true });
 let shakeAmt = 0, flashAmt = 0, flashColor = '#ffffff';
 
 const frame: Frame = {
-  ctx, w, h, u: 1, portrait: true, B, vB, t: 0, dt: 0, intro: 0, hold: null, reduced,
+  ctx, w, h, u: 1, portrait: true, B, vB, t: 0, dt: 0, intro: 0, idle: 0, hold: null, reduced,
   crossed: (b) => (prevB < b) !== (B < b),
   crossedFwd: (b) => prevB < b && B >= b,
   shake: (a) => { if (!reduced) shakeAmt = Math.max(shakeAmt, a); },
@@ -132,6 +132,8 @@ function hud() {
 
 let ready = false, readyAt = 0, last = performance.now(), t0 = last;
 let introOverride: number | null = null;
+let idleOverride: number | null = null;
+let stillFor = 0;
 let velOverride: number | null = null;
 
 let cost = 0;
@@ -154,6 +156,8 @@ function loop(now: number) {
   frame.portrait = h > w;
   frame.u = Math.min(w, h * 0.62) / 100;
   frame.B = B; frame.vB = velOverride ?? vB; frame.t = t; frame.dt = dt;
+  stillFor = Math.abs(vB) > 0.02 ? 0 : stillFor + dt;
+  frame.idle = idleOverride ?? stillFor;
   frame.intro = introOverride ?? (ready ? (now - readyAt) / 1000 : 0);
   // landing mid-film skips the title sequence
   if (B > 1.2 && frame.intro < 6) frame.intro = 6;
@@ -242,6 +246,8 @@ function jumpRaw(b: number) {
   intro(s: number | null) { introOverride = s; },
   /** dev: pretend the reader is scrolling at v raw beats/s (null to stop) */
   vel(v: number | null) { velOverride = v; },
+  /** dev: pretend the reader stopped scrolling s seconds ago (null to stop) */
+  idle(s: number | null) { idleOverride = s; },
   /** jump into a hold (thunder, alter, dash, powers…) at its progress p */
   hold(kind: string, p = 0.5) {
     const h = HOLDS.find((k) => k.kind === kind)!;
