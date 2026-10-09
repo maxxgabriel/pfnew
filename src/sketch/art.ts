@@ -19,7 +19,7 @@ import { hurry, queue } from './load';
 
 const files = import.meta.glob('../assets/sketch/*.webp', { query: '?url', import: 'default', eager: true }) as Record<string, string>;
 /** the order the film first needs each sheet (scripts: grep the chapters in reel order); others load last */
-const FIRST_USE = ['still', 'ib_wake', 'curious', 'firststep', 'idle', 'walk8', 'run8', 'sprint8', 'moonwalk6', 'chase', 'eraser', 'popup', 'roto', 'rubberhose', 'runoff', 'style_chalk', 'style_clay', 'style_comic', 'style_pixel', 'style_water', 'acro', 'fall', 'hero', 'ib_rise', 'home', 'leap', 'ride', 'brushprop', 'surf', 'wave', 'swim', 'whale', 'bye', 'comedy', 'escape', 'saber', 'saberdraw', 'saberlock', 'swing', 'broom', 'broom_wink', 'closeup', 'hat', 'paint', 'extra', 'firetornado', 'ftkick', 'powerup', 'ib_stand', 'ib_turn', 'ib_offer', 'sign', 'turnA', 'turnB'];
+const FIRST_USE = ['still', 'ib_wake', 'curious', 'firststep', 'idle', 'walk8', 'run8', 'sprint8', 'moonwalk6', 'chase', 'eraser', 'pow1', 'pow2', 'popup', 'roto', 'rubberhose', 'runoff', 'style_chalk', 'style_clay', 'style_comic', 'style_pixel', 'style_water', 'acro', 'fall', 'hero', 'ib_rise', 'home', 'leap', 'ride', 'brushprop', 'surf', 'wave', 'swim', 'whale', 'bye', 'comedy', 'escape', 'saber', 'saberdraw', 'saberlock', 'swing', 'broom', 'broom_wink', 'closeup', 'hat', 'paint', 'extra', 'firetornado', 'ftkick', 'powerup', 'ib_stand', 'ib_turn', 'ib_offer', 'sign', 'turnA', 'turnB'];
 // a restyled twin (style-key) loads just after its ink drawing
 const prioOf = (k: string) => { const tw = /^[a-z]+-/.test(k); const i = FIRST_USE.indexOf(k.replace(/^[a-z]+-/, '').replace(/_\d+$/, '')); return (i < 0 ? 100 : i) + (tw ? 0.5 : 0); };
 const SRC: Record<string, string> = {};
@@ -46,14 +46,20 @@ export type PoseKey = string;
 let clock = 0;
 export const setPoseClock = (t: number) => { clock = t; };
 const imgs = new Map<string, HTMLImageElement>();
+/** the desk's drawings (wide screens only: src/desk) are queued by the desk itself, never on a phone */
+const DESK = /^(scrap|stick|pencil)\d_/;
 export function preloadPoses() {
-  for (const k of Object.keys(SRC)) if (!imgs.has(k)) imgs.set(k, queue(SRC[k], prioOf(k)));
+  for (const k of Object.keys(SRC)) if (!imgs.has(k) && !DESK.test(k)) imgs.set(k, queue(SRC[k], prioOf(k)));
+}
+/** queue one drawing at a given priority (lower loads sooner) */
+export function queueArt(k: string, prio: number) {
+  if (k in SRC && !imgs.has(k)) imgs.set(k, queue(SRC[k], prio));
 }
 export function hasPose(k: string) {
   return k in SRC && k in M;
 }
 function img(k: string) {
-  if (!imgs.has(k)) preloadPoses();
+  if (!imgs.has(k)) { preloadPoses(); queueArt(k, 100); }
   const im = imgs.get(k);
   if (im && im.complete && im.naturalWidth) return im;
   if (k in SRC) hurry(SRC[k]);
@@ -175,6 +181,9 @@ export function headOf(k: string, face: number): [number, number] {
   const s = poseScale(k, face);
   return [0, -(m.foot[1] - m.top) * s * 0.78];
 }
+
+/** a drawing's image once it has loaded (null until then; asking moves it up the queue) */
+export const artImage = (k: string) => (M[k] ? img(k) : null);
 
 /** draw a drawing by its own box (close-ups): centred at (cx, cy), `width` pixels wide */
 export function drawArt(ctx: CanvasRenderingContext2D, k: string, cx: number, cy: number, width: number, o: { alpha?: number; rot?: number; flip?: boolean } = {}) {

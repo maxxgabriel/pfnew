@@ -94,6 +94,35 @@ seam.
   `scripts/cut-act-styles.py`. The last screen (Home, holding out the brush)
   cycles ink → pixel → watercolour → clay → chalk (on a blackboard silhouette)
   → comic → rubber hose every 2 s, glitching on each change.
+- **Comic impact words (round 28, phone and PC).** `src/sketch/pow.ts`:
+  `HITS` lists every big impact as [chapter, local beat, word, x, y, tilt];
+  each pops a painted pop-art burst (`pow1_*` POW BAM WHAM KRAK ZAP BOOM,
+  `pow2_*` SPLASH GULP SWOOSH VMMM CHOMP SNAP) with an overshoot, a shudder and
+  a shrink. Life is 0.55 beats, but at least 0.7 s of wall clock once passed
+  going forward; hidden during holds. On the desk it is bigger and sits on the
+  edge of the picture. Positions are first guesses: check each at phone size.
+- **The desk (round 28, wide screens with a mouse only: `src/desk/`).**
+  `layout.ts deskOf(w, h)` is null unless pointer is fine, w ≥ 1000 and
+  w/h ≥ 1.3; the margins are each side of an h·0.7 column. `desk.ts`:
+  - left: two taped sketchbook scraps per act (`scrap1-4_*`, slap in at the
+    act's start, red-pencil cross-out and slide away at its end; Home's leave
+    at `HM.offer` for the title); a flipbook whose pencil test (`pencil1-3_*`,
+    24 frames) turns pages with the playhead and riffles by itself when idle.
+  - right: an exposure sheet whose rows scroll under a highlighted playhead
+    row (8 rows a beat); `NOTES` (plus every pow hit) are handwritten in
+    (Caveat, added to the Google Fonts link) as their frames come up.
+  - stickers (`stick1_*`, `stick2_*`): one slaps on per finished act; drag and
+    flick them (simple physics); scrolling back before the slap resets one.
+  - the mouse is a brush: drag paints (thick slow, thin fast), click splats;
+    ink dries away after ~5 s; ink on paper acts, red on painted ones.
+  - the right side slides off while the contact card is up (`cleared`).
+  - desk drawings are never queued on phones (`DESK` in `art.ts`,
+    `queueArt`); shadows are baked once per size (`bake`).
+  Art: `scripts/gen-desk.sh` (Codex) → `scripts/cut-grid.py` (grids on
+  magenta keyed only from the outside so purple letters survive; `--white`
+  for pencil on white; `--split` for a touching row).
+  Still to do: check every pow position at phone size, the desk at
+  1280×800 / 1920×1080 / ultrawide, perf, then the preview.
 - **Perf** (headless, JS ms/frame): 0.3 – 3.4 everywhere.
 - Codex image calls: use `--image=a.png --image=b.png` (a bare `-i` swallows
   the prompt as another file), `< /dev/null`.

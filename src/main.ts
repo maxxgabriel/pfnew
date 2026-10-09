@@ -2,6 +2,8 @@ import './style.css';
 import { autoAt, drawReel, reelHud, reelTap } from './reel/reel';
 import { preloadPoses } from './sketch/art';
 import { signEnd, signMove, signStart } from './sketch/home';
+import { drawPows } from './sketch/pow';
+import { drawDesk, drawInk, initDesk } from './desk/desk';
 preloadPoses();
 import { CHAPTERS, type Frame } from './core/frame';
 import { clamp, damp } from './core/math';
@@ -204,7 +206,10 @@ function loop(now: number) {
 
   // the film (src/reel/reel.ts conducts the chapters)
   drawReel(frame);
-
+  // on a wide screen, the animator's desk round the picture (src/desk); the comic words over both; your ink over all
+  drawDesk(frame);
+  drawPows(frame);
+  drawInk(frame);
 
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   post(t, dt);
@@ -260,6 +265,7 @@ fontsReady.then(() => {
   readyAt = performance.now();
 });
 requestAnimationFrame(loop);
+initDesk();
 
 // dev hook: jump the playhead (used by the screenshot scripts)
 function jumpRaw(b: number) {

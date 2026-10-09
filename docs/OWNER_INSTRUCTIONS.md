@@ -75,6 +75,22 @@ themselves, not to the docs: *"you report to me and not the docs"*.
 
 ## 3. Decisions (most recent first)
 
+**Round 28 — the desk round the picture (PC), and comic impact words
+(everywhere):** *"now okay great we are at a great point and i want now to
+focua specifically on pc screen because there are a lot of blank spaves we can
+otherwise utliise. i want you to think creativity. we can have things around
+for pc only. for more immersion im sure we have chatgpt to generate us a huge
+ton of things. so we will harmess rhat and think creatively if we want to use
+sketches around doodles creative stickers minatures handwrittem styles scrible
+comic or any other immersive or interactive things. be bold since we have been
+already bold and inconvential in tedms of whole design"*. Picked all four:
+sketchbook margins, corner flipbook, animator's x-sheet, cursor brush and
+stickers; and "Live with the film" (the desk reacts to the playhead). Then
+*"use this as well. Comic Book Onomatopoeia VFX, specifically a Pop Art
+Impact Effect."* Picked: every big impact, everywhere (phone and PC, bigger on
+PC, spilling into the margins); real words (POW!, BAM!, WHAM!, KRAK!,
+SWOOSH!, VMMM, CHOMP!…). Then *"push the instructions and eveything to git"*.
+
 **Round 27 — a different art style per act:** *"lets use the other art styles
 frequently as well not just in first act"* → *"how about we have different art
 style for different acts and at end in the last screen while hes standing still
