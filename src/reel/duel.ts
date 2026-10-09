@@ -366,3 +366,12 @@ export function drawDuel(f: Frame, ctx: CanvasRenderingContext2D, B: number, t: 
   void f;
   void solve;
 }
+
+/** the two fighters as plain silhouettes (painting units), for the chapters that show them as shadows */
+export function drawRivalsFlat(ctx: CanvasRenderingContext2D, B: number, t: number, col: string) {
+  const [b, g] = poses(B);
+  for (const [p, foe, seed] of [[b, g, 1], [g, b, 2]] as const) {
+    drawWarrior(ctx, { hilt: [p.x, p.y], a: p.a, foeX: foe.x, s: S, groundY: p.gy, color: col, t, vx: 0, vy: 0, seed, alpha: 1 });
+    drawBlade(ctx, p.x, p.y, p.a, col, seed);
+  }
+}
