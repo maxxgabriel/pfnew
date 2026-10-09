@@ -226,7 +226,7 @@ function camera(L: number, w: number, h: number) {
 
 const off = { c: null as HTMLCanvasElement | null, ctx: null as CanvasRenderingContext2D | null };
 
-export function drawShadow(f: Frame, L: number) {
+export function drawShadow(f: Frame, L: number, rivals = true) {
   const { ctx, w, h, t } = f;
   const cam = camera(L, w, h);
   const Lp = lightAt(L);
@@ -314,7 +314,7 @@ export function drawShadow(f: Frame, L: number) {
       o.closePath();
       o.clip();
     }
-    if (!real) {
+    if (!real && rivals) {
       // one small fill each (a single 900-part path is slower to rasterise); the layer is opaque, so overlaps don't stack
       for (const tri of tris) {
         const a = onWall(Lp, tri[0]), b = onWall(Lp, tri[1]), c = onWall(Lp, tri[2]);
@@ -329,7 +329,7 @@ export function drawShadow(f: Frame, L: number) {
       }
     }
     // the rivals' own silhouette takes over (the same picture), and stays when the paper falls
-    const realK = seg(L, SH.real - 0.12, SH.real);
+    const realK = rivals ? seg(L, SH.real - 0.12, SH.real) : 0;
     if (realK > 0) {
       const img = getShapes()[2].img;
       const tl = project(cam, [-MW / 2 * WU, MW * WU, 0]), br2 = project(cam, [MW / 2 * WU, 0, 0]);
@@ -345,7 +345,7 @@ export function drawShadow(f: Frame, L: number) {
     ctx.drawImage(off.c!, 0, 0, w, h);
     ctx.restore();
     // and the silhouettes harden into figures: a crisp pass over the soft one
-    if (sun > 0) {
+    if (sun > 0 && rivals) {
       const img = getShapes()[2].img;
       const tl = project(cam, [-MW / 2 * WU, MW * WU, 0]), br2 = project(cam, [MW / 2 * WU, 0, 0]);
       if (tl && br2) {
