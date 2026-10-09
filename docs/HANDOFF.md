@@ -95,13 +95,8 @@ seam.
   `scripts/cut-act-styles.py`. The last screen (Home, holding out the brush)
   cycles ink → pixel → watercolour → clay → chalk (on a blackboard silhouette)
   → comic → rubber hose every 2 s, glitching on each change.
-- **Comic impact words (round 28, phone and PC).** `src/sketch/pow.ts`:
-  `HITS` lists every big impact as [chapter, local beat, word, x, y, tilt];
-  each pops a painted pop-art burst (`pow1_*` POW BAM WHAM KRAK ZAP BOOM,
-  `pow2_*` SPLASH GULP SWOOSH VMMM CHOMP SNAP) with an overshoot, a shudder and
-  a shrink. Life is 0.55 beats, but at least 0.7 s of wall clock once passed
-  going forward; hidden during holds. On the desk it is bigger and sits on the
-  edge of the picture. Positions are first guesses: check each at phone size.
+- **Comic impact words: removed in round 29** ("remove the boom pow things. isnt
+  matching art style"): `pow.ts` and the `pow1_*`/`pow2_*` drawings are gone.
 - **The desk as a camera set (round 29, wide screens with a mouse only: `src/desk/`).**
   Round 28's always-on margins were rejected ("deletes the whole immersion").
   Now the film fills the screen, and the desk is only seen when a camera
@@ -118,7 +113,7 @@ seam.
     the desk at tilt 58°, focus pull on the desk canvas, crane up, push in;
     the film's intro clock waits `INTRO_DELAY` 1.8 s; HUD hidden by
     `html.cine-open`; a scroll hurries it; landing mid-film skips it);
-    **peek** (idle > 2.2 s: eases back to s ≥ 1.55 with a 15° tilt and a slow
+    **peek** (idle > `PEEK_AFTER` 5 s: eases back to s ≥ 1.55 with a 15° tilt and a slow
     drift, snaps back in 0.35 s on scroll); **end** (`endShot`: from
     `HM.stand − 0.35` to `HM.offer`, the sheet on the left, the contact card
     a taped paper card on the desk at the right via `html.cine` CSS; back in

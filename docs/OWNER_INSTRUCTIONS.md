@@ -88,7 +88,14 @@ artist would usually do… lets also use funky style or messy for desk"*, *"so
 like desk wouldnt say loneliness but would say lively active and fun"*; then
 *"no i meant real desk lol not cartoonish. funky as in should look like that
 but real sorry."*; picked the green cutting mat — *"b but remove the girly
-things"*.
+things"*. Then *"what i want you to make sure it that desk is not seen each and
+everytime. at the start zoom in after showing desk. zoom out during idle. zoom
+in zoom out when you wanna show something in desk in accordance to what's
+happening in story… pc has desk but it doesnt have to be the lifr of it. i
+added desk so that we can have some immersive things around when needed and
+remive tye boom pow things. isnt matching art style. if you have some
+immersion and interactive idea for this tell me. even if its unconventional
+or something thats veey crazy"*.
 
 **Round 28 — the desk round the picture (PC), and comic impact words
 (everywhere):** *"now okay great we are at a great point and i want now to

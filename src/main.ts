@@ -2,7 +2,6 @@ import './style.css';
 import { autoAt, drawReel, reelHud, reelTap } from './reel/reel';
 import { preloadPoses } from './sketch/art';
 import { signEnd, signMove, signStart } from './sketch/home';
-import { drawPows } from './sketch/pow';
 import { INTRO_DELAY, drawDesk, drawInk, initDesk, screenToSheet, setDeskClock } from './desk/desk';
 import { deskOn } from './desk/layout';
 preloadPoses();
@@ -210,9 +209,8 @@ function loop(now: number) {
 
   // the film (src/reel/reel.ts conducts the chapters)
   drawReel(frame);
-  // on a wide screen, the animator's desk round the picture (src/desk); the comic words over both; your ink over all
+  // on a wide screen, the camera over the animator's desk (src/desk); your ink over all
   drawDesk(frame);
-  drawPows(frame);
   drawInk(frame);
 
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);

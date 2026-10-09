@@ -5,7 +5,6 @@ import { bgImage } from '../sketch/bg';
 import { INK, RED } from '../sketch/common';
 import { CHAPTERS, chapterAt } from '../reel/reel';
 import { HM } from '../sketch/home';
-import { POW_AT, POW_WORDS } from '../sketch/pow';
 import { type Shot, isRest, matrix, mix, rest, unproject } from './camera';
 import { deskOn } from './layout';
 
@@ -290,7 +289,6 @@ const NOTES: [number, string, boolean][] = [];
   add('Home', 6.7, 'offer the brush. HOLD');
   add('Home', 9.9, 'walk off… peek');
   add('Home', 12.2, 'loop → sc. I', true);
-  POW_AT.forEach((b, i) => NOTES.push([b, `hit! ${POW_WORDS[i]}`, true]));
   NOTES.sort((a, b) => a[0] - b[0]);
 }
 /** rows of the sheet per beat (one row a frame; the heavy line every beat) */
@@ -644,6 +642,8 @@ function drawBase(w: number, h: number) {
 
 /* ------------------------------------------------------------ the shots */
 
+/** seconds of stillness before the camera eases back over the desk (it is a treat, not the frame) */
+const PEEK_AFTER = 5;
 /** seconds the film's intro clock waits while the opening shot pushes in */
 export const INTRO_DELAY = 1.8;
 const OPEN = 3.8;
@@ -704,7 +704,7 @@ function shotFor(f: Frame): Shot {
     }
   }
   const ek = endK(f.B);
-  const want = f.idle > 2.2 && ek < 0.01 && f.hold?.kind !== 'wall' ? 1 : 0;
+  const want = f.idle > PEEK_AFTER && ek < 0.01 && f.hold?.kind !== 'wall' ? 1 : 0;
   peekK = want ? Math.min(1, peekK + f.dt / 1.6) : Math.max(0, peekK - f.dt / 0.35);
   let s = rest(w, h);
   if (peekK > 0) s = mix(s, peekShot(w, h, f.t), want ? ease.inOut2(peekK) : ease.out2(peekK));

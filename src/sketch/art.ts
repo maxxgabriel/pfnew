@@ -19,7 +19,7 @@ import { hurry, queue } from './load';
 
 const files = import.meta.glob('../assets/sketch/*.webp', { query: '?url', import: 'default', eager: true }) as Record<string, string>;
 /** the order the film first needs each sheet (scripts: grep the chapters in reel order); others load last */
-const FIRST_USE = ['still', 'ib_wake', 'curious', 'firststep', 'idle', 'walk8', 'run8', 'sprint8', 'moonwalk6', 'chase', 'eraser', 'pow1', 'pow2', 'popup', 'roto', 'rubberhose', 'runoff', 'style_chalk', 'style_clay', 'style_comic', 'style_pixel', 'style_water', 'acro', 'fall', 'hero', 'ib_rise', 'home', 'leap', 'ride', 'brushprop', 'surf', 'wave', 'swim', 'whale', 'bye', 'comedy', 'escape', 'saber', 'saberdraw', 'saberlock', 'swing', 'broom', 'broom_wink', 'closeup', 'hat', 'paint', 'extra', 'firetornado', 'ftkick', 'powerup', 'ib_stand', 'ib_turn', 'ib_offer', 'sign', 'turnA', 'turnB'];
+const FIRST_USE = ['still', 'ib_wake', 'curious', 'firststep', 'idle', 'walk8', 'run8', 'sprint8', 'moonwalk6', 'chase', 'eraser', 'popup', 'roto', 'rubberhose', 'runoff', 'style_chalk', 'style_clay', 'style_comic', 'style_pixel', 'style_water', 'acro', 'fall', 'hero', 'ib_rise', 'home', 'leap', 'ride', 'brushprop', 'surf', 'wave', 'swim', 'whale', 'bye', 'comedy', 'escape', 'saber', 'saberdraw', 'saberlock', 'swing', 'broom', 'broom_wink', 'closeup', 'hat', 'paint', 'extra', 'firetornado', 'ftkick', 'powerup', 'ib_stand', 'ib_turn', 'ib_offer', 'sign', 'turnA', 'turnB'];
 // a restyled twin (style-key) loads just after its ink drawing
 const prioOf = (k: string) => { const tw = /^[a-z]+-/.test(k); const i = FIRST_USE.indexOf(k.replace(/^[a-z]+-/, '').replace(/_\d+$/, '')); return (i < 0 ? 100 : i) + (tw ? 0.5 : 0); };
 const SRC: Record<string, string> = {};

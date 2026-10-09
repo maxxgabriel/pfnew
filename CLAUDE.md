@@ -36,6 +36,7 @@ Before changing anything, read:
   Round 29: the desk always round the picture (it kills the immersion: the desk
   is only seen when the camera moves over it), the dark night-lamp desk and
   cartoon desks are out; the desk is a real photo, nothing "girly" on it.
+  The comic POW/BOOM words are cut ("isnt matching art style").
 - **No clusters of small things.** The owner finds many small things
   together "yuck" (flocks, swarms, shard clouds, dense particle fields).
   Prefer one strong shape over many small ones.
