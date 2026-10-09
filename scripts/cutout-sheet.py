@@ -63,6 +63,44 @@ for i, (x0, x1) in enumerate(runs):
     pad = 6 if len(sys.argv) <= 4 else 0
     x0, x1 = max(0, x0 - pad), min(a.shape[1], x1 + pad)
     rgba = np.dstack([fg, a * 255]).astype(np.uint8)[y0:y1, x0:x1]
+    # a light-blade drawn as flat cyan: find its line (hilt end first) and erase it, so code can draw it glowing
+    blade = None
+    cr, cg, cb = rgba[..., 0].astype(int), rgba[..., 1].astype(int), rgba[..., 2].astype(int)
+    cyan = (rgba[..., 3] > 100) & (cg > 190) & (cb > 190) & (cr < 70)
+    if cyan.sum() > 150:
+        # keep only the biggest connected streak (the blade), not stray cyan in the hair
+        lab = np.zeros(cyan.shape, np.int32); best, bestn, nl = 0, 0, 0
+        H_, W_ = cyan.shape
+        for sy_, sx_ in zip(*np.nonzero(cyan)):
+            if lab[sy_, sx_]: continue
+            nl += 1; st = [(sy_, sx_)]; lab[sy_, sx_] = nl; n = 0
+            while st:
+                yy, xx = st.pop(); n += 1
+                for dy_, dx_ in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                    a_, b_ = yy + dy_, xx + dx_
+                    if 0 <= a_ < H_ and 0 <= b_ < W_ and cyan[a_, b_] and not lab[a_, b_]:
+                        lab[a_, b_] = nl; st.append((a_, b_))
+            if n > bestn: best, bestn = nl, n
+        cyan = lab == best
+    if cyan.sum() > 150:
+        ys_, xs_ = np.nonzero(cyan)
+        pts = np.stack([xs_, ys_], 1).astype(float)
+        c = pts.mean(0)
+        u, sv, vt = np.linalg.svd(pts - c, full_matrices=False)
+        d = vt[0]
+        proj = (pts - c) @ d
+        e0, e1 = c + d * proj.min(), c + d * proj.max()
+        # the hilt end is the one nearer the figure's ink
+        body = (rgba[..., 3] > 100) & ~cyan
+        by_, bx_ = np.nonzero(body)
+        bc = np.array([bx_.mean(), by_.mean()])
+        if np.linalg.norm(e1 - bc) < np.linalg.norm(e0 - bc): e0, e1 = e1, e0
+        blade = [round(float(e0[0])), round(float(e0[1])), round(float(e1[0])), round(float(e1[1]))]
+        grow = cyan.copy()
+        for _ in range(3):
+            g2 = grow.copy(); g2[1:] |= grow[:-1]; g2[:-1] |= grow[1:]; g2[:, 1:] |= grow[:, :-1]; g2[:, :-1] |= grow[:, 1:]; grow = g2
+        soft = grow & (rgba[..., 3] > 0) & (cg > 150) & (cb > 150) & (cr < 140)
+        rgba[soft | cyan, 3] = 0
     img = Image.fromarray(rgba, 'RGBA')
     if SCALE != 1: img = img.resize((round(img.width * SCALE), round(img.height * SCALE)), Image.LANCZOS)
     # the anchor: under the middle of the head (steadier than the feet in a stride), on the lowest ink
@@ -73,6 +111,7 @@ for i, (x0, x1) in enumerate(runs):
     key = f'{name}_{i}'
     img.save(os.path.join(out, key + '.webp'), 'WEBP', quality=88, method=6)
     man[key] = {'w': img.width, 'h': img.height, 'foot': [round(float(xs.mean()) * SCALE), round(float(ys.max()) * SCALE)]}
+    if blade: man[key]['blade'] = blade
     print(key, man[key])
 json.dump(man, open(man_path, 'w'), indent=1)
 

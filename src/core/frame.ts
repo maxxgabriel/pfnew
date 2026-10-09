@@ -43,9 +43,9 @@ export const ACT = {
 /** the reel's chapters (mirrors src/reel/reel.ts CHAPTERS, which draws them) */
 export const CHAPTERS = [
   { at: 0, n: 'I', name: 'Still' },
-  { at: 9, n: 'II', name: 'Flip' },
+  { at: 9, n: 'II', name: 'Run' },
   { at: 18, n: 'III', name: 'Fold' },
   { at: 27, n: 'IV', name: 'Light' },
-  { at: 35, n: 'V', name: 'Burst' },
+  { at: 35, n: 'V', name: 'Chase' },
   { at: 43, n: 'VI', name: 'Home' },
 ]

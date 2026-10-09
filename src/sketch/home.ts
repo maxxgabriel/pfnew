@@ -2,7 +2,7 @@ import { drawSeal } from '../acts/ink';
 import type { Frame } from '../core/frame';
 import { wordWidth } from '../core/glyphs';
 import { type Pt, clamp, ease, lerp, seg } from '../core/math';
-import { drawArt, drawPose } from './art';
+import { drawArt, drawArtFoot, drawPose, poseTop } from './art';
 import { INK, RED, cycle, drawGround, drawPaper, drawTitle, faceOf } from './common';
 import { shockRing, smear } from './fx';
 
@@ -24,6 +24,8 @@ export const HM = {
   cheer: [1.15, 1.6] as const,
   slam: 1.95,
   stand: 2.5,
+  /** the hat he flung into the sky comes floating down onto his head */
+  hat: [2.15, 2.75] as const,
   turn: 2.9,
   offer: 3.3,
   wave: [4.6, 5.3] as const,
@@ -85,6 +87,19 @@ export function drawHome(f: Frame, L: number) {
     alpha = 1 - seg(u, 0.8, 1);
   }
   drawPose(ctx, pose, x, y, face * scale, { alpha, flip });
+  // the hat: down out of the sky, a wobble, and onto his head
+  if (L > HM.hat[0]) {
+    const u = seg(L, HM.hat[0], HM.hat[1]);
+    const head = y - poseTop(pose, face * scale) + face * scale * 0.78;
+    const land: Pt = [x + face * scale * 0.05, head];
+    const hx = lerp(x + face * 2.2, land[0], ease.inOut2(u)) + Math.sin(u * 9) * face * 0.5 * (1 - u);
+    const hy = lerp(-face * 2, land[1], ease.in2(u));
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    drawArtFoot(ctx, 'hat_2', hx, hy, face * scale * 1.75, (1 - u) * Math.sin(u * 7) * 0.6 - 0.08);
+    ctx.restore();
+    if (f.crossedFwd(f.B - L + HM.hat[1])) f.shake(face * 0.08);
+  }
 
   // ---- after the credits: a head round the edge of the page, a grin and a wave
   const pk = seg(L, HM.peek[0], HM.peek[1]);

@@ -1,9 +1,9 @@
 import { brush } from '../core/brush';
 import type { Frame } from '../core/frame';
 import { wordWidth } from '../core/glyphs';
-import { type Pt, clamp, ease, lerp, seg } from '../core/math';
+import { type Pt, ease, lerp, seg } from '../core/math';
 import { drawPose } from './art';
-import { INK, cycle, drawGround, drawPaper, drawSpark, drawSparkStreak, drawTitle, faceOf, hop } from './common';
+import { INK, drawGround, drawPaper, drawSpark, drawSparkStreak, drawTitle, faceOf, hop } from './common';
 import { shockRing } from './fx';
 
 /*
@@ -14,9 +14,9 @@ import { shockRing } from './fx';
  * and he is only a drawing. The Spark bounces in front of him; all he can
  * do is tremble (his lines boil). His eyes follow it; it lands on his nose
  * and he goes cross-eyed; he strains with everything he has, lunges, and
- * falls flat on his face. Dazed, he sits up; the Spark hops to the corner
- * of the page; he jumps, runs after it and grabs the corner — and the page
- * lifts (chapter II is the flip book).
+ * falls flat on his face. Dazed, he sits up; the Spark hops away along the
+ * line; he jumps up — and lifts one foot, arms out: his very first step
+ * (chapter II carries straight on in the same shot).
  */
 
 export const ST = {
@@ -28,10 +28,10 @@ export const ST = {
   strain: [5.55, 6.25] as const,
   plant: 6.35,
   dazed: 6.95,
-  corner: [7.55, 8.05] as const,
+  /** the Spark hops away along the line; he pops up, and tries his very first step (chapter II carries on in the same shot) */
+  away: [7.55, 8.05] as const,
   jump: 7.55,
-  run: [7.95, 8.55] as const,
-  grab: 8.55,
+  step: 8.25,
   end: 9.0,
 };
 
@@ -41,7 +41,14 @@ export function stage(f: Frame) {
   return { face, gx: f.w * 0.4, gy: f.h * 0.7, r: face * 0.17 };
 }
 
-/** the page's corner curling up, k 0..1 (chapter II starts from k = 1) */
+/** where the Spark waits ahead of him at the end of chapter I (chapter II starts from exactly this) */
+export const stageAhead = (f: Frame) => f.w * 0.78;
+export function sparkWaiting(f: Frame, t: number): Pt {
+  const { face, gy, r } = stage(f);
+  return [stageAhead(f), gy - r - Math.abs(Math.sin(t * 4)) * face * 0.35];
+}
+
+/** the page's corner curling up, k 0..1 (no longer used) */
 export function drawCorner(ctx: CanvasRenderingContext2D, w: number, h: number, k: number) {
   if (k <= 0) return;
   const s = Math.min(w, h) * (0.12 + 0.2 * k);
@@ -81,7 +88,7 @@ export function drawStill(f: Frame, L: number) {
 
   // ---- the hero
   const nose: Pt = [gx + face * 0.35, gy - face * 2.45];
-  let pose = 'still_0', px = gx, flip = false, boil = 0, sq = 1;
+  let pose = 'still_0', px = gx, flip = false, boil = 0, sq = 1, rot = 0;
   const reveal = ease.inOut2(seg(L, ST.draw[0], ST.draw[1]));
   if (L >= ST.bounce[0]) boil = 0.012 + 0.02 * seg(L, ST.bounce[0], ST.look);
   if (L >= ST.look) pose = 'curious';
@@ -101,17 +108,12 @@ export function drawStill(f: Frame, L: number) {
   }
   if (L >= ST.dazed) pose = 'comedy_2';
   if (L >= ST.jump) { pose = 'comedy_3'; px = gx + face * 0.4; }
-  if (L >= ST.run[0]) {
-    const k = seg(L, ST.run[0], ST.run[1]);
-    pose = cycle('run', 6, t, 14);
-    px = lerp(gx + face * 0.4, w * 0.72, ease.inOut2(k));
-  }
-  if (L >= ST.grab) { pose = 'still_3'; px = w * 0.74; }
+  if (L >= ST.step) { pose = 'firststep_0'; px = gx; rot = Math.sin(t * 5) * 0.04; }
   // the lunge's arc: a little hop forward as he tips
   let py = gy;
   if (L >= ST.plant - 0.25 && L < ST.plant) py = gy - Math.sin(seg(L, ST.plant - 0.25, ST.plant) * Math.PI) * face * 0.6;
-  if (L >= ST.jump && L < ST.run[0]) py = gy - Math.sin(seg(L, ST.jump, ST.run[0]) * Math.PI) * face * 0.9;
-  drawPose(ctx, pose, px, py, face, { flip, boil, t, squash: sq, reveal: L < ST.draw[1] ? reveal : undefined });
+  if (L >= ST.jump && L < ST.step) py = gy - Math.sin(seg(L, ST.jump, ST.step) * Math.PI) * face * 0.9;
+  drawPose(ctx, pose, px, py, face, { flip, boil, t, squash: sq, rot, reveal: L < ST.draw[1] ? reveal : undefined });
 
   // the brush that draws him: its wet tip travels down the drawing
   if (L > ST.draw[0] - 0.1 && L < ST.draw[1] + 0.2) {
@@ -137,7 +139,7 @@ export function drawStill(f: Frame, L: number) {
   const left: Pt = [gx + face * 1.1, gy - r];
   const right: Pt = [gx + face * 2.4, gy - r];
   const far: Pt = [w * 0.8, gy - r];
-  const corner: Pt = [w * 0.92, h * 0.94];
+  const ahead: Pt = [stageAhead(f), gy - r];
   let sp: Pt = rest, sq2 = 1, prev: Pt | null = null;
   if (L < ST.drop[1]) {
     const k = ease.in2(seg(L, ST.drop[0], ST.drop[1]));
@@ -169,17 +171,17 @@ export function drawStill(f: Frame, L: number) {
     sp = far;
     if (L > ST.plant - 0.3 && L < ST.plant) sp = hop(far, [w * 0.86, gy - r], face * 1.1, seg(L, ST.plant - 0.3, ST.plant));
     if (L >= ST.plant) sp = [w * 0.86, gy - r];
-  } else if (L < ST.corner[0]) {
+  } else if (L < ST.away[0]) {
     // circling over his dazed head
     const a = (L - ST.dazed) * 12;
     const c: Pt = [gx + face * 0.6, gy - face * 2.2];
     sp = [c[0] + Math.cos(a) * face * 0.6, c[1] + Math.sin(a) * face * 0.18];
-  } else if (L < ST.corner[1]) {
+  } else if (L < ST.away[1]) {
     const c: Pt = [gx + face * 0.6, gy - face * 2.2];
-    sp = hop(c, corner, face * 1.6, ease.inOut2(seg(L, ST.corner[0], ST.corner[1])));
-    prev = hop(c, corner, face * 1.6, ease.inOut2(seg(L - 0.06, ST.corner[0], ST.corner[1])));
+    sp = hop(c, ahead, face * 1.6, ease.inOut2(seg(L, ST.away[0], ST.away[1])));
+    prev = hop(c, ahead, face * 1.6, ease.inOut2(seg(L - 0.06, ST.away[0], ST.away[1])));
   } else {
-    sp = [corner[0], corner[1] + Math.sin(t * 5) * face * 0.04];
+    sp = sparkWaiting(f, t);
   }
   if (L >= ST.drop[0]) {
     if (prev) drawSparkStreak(ctx, prev, sp, r);
@@ -207,6 +209,4 @@ export function drawStill(f: Frame, L: number) {
     ctx.restore();
   }
 
-  // ---- the corner lifting under his hands
-  drawCorner(ctx, w, h, clamp(seg(L, ST.grab, ST.end)));
 }

@@ -173,3 +173,40 @@ export function drawArt(ctx: CanvasRenderingContext2D, k: string, cx: number, cy
   ctx.drawImage(im, -m.w / 2, -m.h / 2);
   ctx.restore();
 }
+
+/** where pose `k`'s light-blade runs (hilt end first), on screen, drawn like drawPose(ctx, k, x, y, face, o) */
+export function bladeOf(k: string, x: number, y: number, face: number, o: PoseOpts = {}): [[number, number], [number, number]] | null {
+  const m = M[k] as Meta & { blade?: [number, number, number, number] };
+  if (!m?.blade) return null;
+  const s = poseScale(k, face), sq = o.squash ?? 1;
+  const sx = (o.flip ? -1 : 1) * s / Math.sqrt(sq), sy = s * sq;
+  const c = Math.cos(o.rot ?? 0), sn = Math.sin(o.rot ?? 0);
+  const at = (px: number, py: number): [number, number] => {
+    const lx = (px - m.foot[0]) * sx, ly = (py - m.foot[1]) * sy;
+    return [x + lx * c - ly * sn, y + lx * sn + ly * c];
+  };
+  // every blade is the same length (the drawings' cyan can be clipped where a sheet was split): run it from the hilt along its line
+  const dx = m.blade[2] - m.blade[0], dy = m.blade[3] - m.blade[1], l = Math.hypot(dx, dy) || 1;
+  const BL = 1.6 * faceOf(k);
+  return [at(m.blade[0], m.blade[1]), at(m.blade[0] + (dx / l) * BL, m.blade[1] + (dy / l) * BL)];
+}
+
+/** draw a drawing (a prop like the hat) with its foot point at (x, y), `width` pixels wide */
+export function drawArtFoot(ctx: CanvasRenderingContext2D, k: string, x: number, y: number, width: number, rot = 0) {
+  const m = M[k];
+  const im = m && img(k);
+  if (!m || !im) return;
+  const s = width / m.w;
+  ctx.save();
+  ctx.translate(x, y);
+  if (rot) ctx.rotate(rot);
+  ctx.scale(s, s);
+  ctx.drawImage(im, -m.foot[0], -m.foot[1]);
+  ctx.restore();
+}
+
+/** the top of a pose's drawing above its foot point, in screen pixels (for putting things on his head) */
+export function poseTop(k: string, face: number) {
+  const m = M[k];
+  return m ? (m.foot[1] - m.top) * poseScale(k, face) : 0;
+}

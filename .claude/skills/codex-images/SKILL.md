@@ -13,7 +13,7 @@ supported way to use a subscription from a terminal.
 ## Rules
 - **Never ask for or accept the owner's password, API key or tokens in chat.**
   The owner signs in themselves with the device code.
-- Log out when the batch is done (`codex logout`), unless the owner says to stay signed in.
+- Stay signed in: the owner said *"dont log out till i ask"* (round 18). Log out only when they ask.
 - Generated images use the owner's plan limits: generate what's needed, don't spray retries.
 - Original art only: no copyrighted characters, no logos, no text in images.
 

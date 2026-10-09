@@ -16,27 +16,39 @@ boots. Poses are drawn with the Codex image tool from that sheet
 the transitions are the plot. No words but the title, the seal and the
 contact card. No clusters of small things. Phone first.
 
-0. **The Page** — blank paper; the brush paints MAX GABRIEL; the Spark drops
-   on like seal ink; the brush sketches the figure; it's frozen.
-1. **Still** (line animation) — the Spark bounces in front of it; it can only
-   tremble (line boil, a twitch, a two-drawing head turn); it strains; the
-   Spark hops onto the page's corner.
-2. **Flip** (frame-by-frame) — it grabs the corner; your scroll flips the
-   pages; first wobbly steps, a walk, a run (smears, one onion-skin ghost).
-   **Cameo:** one page holds the blue and green rivals mid-duel and the
-   Sketch ducks under their crossed blades. The Spark shoots off the page.
-3. **Fold** (3D paper) — it peels off the page and folds into the paper crane;
-   flies after the Spark over the paper countryside; night; the Spark dives
-   into one light.
-4. **Light** (light and silhouette) — the light is a bulb; the Sketch steps
-   into its beam and becomes a shadow on a paper wall that can stretch and
-   leap; it reaches, the bulb swings, it misses; sunset.
-5. **Burst** (anime) — everything it learned: full anime motion, speed
-   lines, impact frames, a dash across the sunset, one huge leap; freeze on
-   the hand closing round the Spark; white.
-6. **Home** — it lands on the page and stamps the Spark down as the seal;
-   pull back over every world it passed through; it turns to you and holds
-   out the brush (the contact card); it waves and walks off the paper.
+0–1. **Still** (line animation) — the page opens, MAX GABRIEL is brushed in,
+   the Spark drops on like seal ink, a brush draws him; he can only
+   tremble; cross-eyed when it lands on his nose; strain, faceplant, dazed;
+   the Spark hops away along the line and he lifts one foot — his first step.
+2. **Run** (frame-by-frame, one unbroken shot) — wobbly first steps, a walk,
+   a run (8-frame cycles locked to the ground he covers); the brush lays the
+   line just ahead of his feet; he waves at you; a cartwheel into a backflip
+   over a gap; the camera pulls back: the page floats in empty space; the
+   Spark dives off the edge and he runs straight off it — legs still going,
+   a look down, a gulp at you — and falls.
+3. **Fold** (3D paper) — he tumbles through the void; his page falls after
+   him and swoops underneath to catch him (superhero landing); it folds
+   into the crane under his feet and tosses him onto its back; the ride
+   into the moonlit night; the Spark dives into a far light and he leaps
+   off the crane after it; the light swells into a bulb.
+4. **Light** (light and silhouette) — he drops into the bulb's room; his
+   shadow copies him, then waves at him; it ignites a red light-blade, the
+   Spark drops him a hilt and his ignites blue; the duel, blades lighting
+   the paper, impact frames; the cord swing; the room melts into the
+   painted sunset and he falls through it.
+5. **Chase** (Quidditch-style) — poof: a broom and a wizard's hat under him
+   mid-fall; he chases the winged Spark across the sunset — banking, a
+   loop-the-loop, a dive at the sea and up again; his hand closes round it;
+   he leaps off the broom and flings the hat into the sky; the sunset drains
+   back into paper as he falls.
+6. **Home** — he lands on the page, slams the Spark down as the seal; the
+   hat floats down onto his head; he turns to you and holds out the brush
+   (the contact card); waves and walks off; after the credits he peeks back
+   in from the edge of the page.
+
+Round 18b (owner): no page-turning — smooth runs; transitions that make
+sense in the story; no samurai fights — one Quidditch-style chase (wizard
+hat, thrown at the end) and one lightsaber-style duel.
 
 ---
 

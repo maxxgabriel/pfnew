@@ -1,7 +1,7 @@
 import type { Frame } from '../core/frame';
 import { type Pt, clamp, ease, lerp, seg } from '../core/math';
 import { glow, drawSprite } from '../core/sprites';
-import { FD, drawFolding, foldAnchor } from '../reel/fold';
+import { FD, drawFolding, foldAnchor, sheetRect } from '../reel/fold';
 import { drawPose } from './art';
 import { drawBg } from './bg';
 import { INK, PAPER, drawPaper, drawSpark, drawSparkStreak, faceOf } from './common';
@@ -10,10 +10,11 @@ import { shockRing, speedWedges } from './fx';
 /*
  * III · FOLD.
  *
- * He runs off the edge of the flip book and falls — through empty paper,
- * tumbling, flailing, then diving like an arrow after the Spark. Below,
- * the evening opens and a square of paper rushes up: he crash-lands on it
- * in a superhero crouch. The square folds under his feet (he balances,
+ * He runs off the edge of the page and falls — through empty space,
+ * tumbling, flailing, then diving like an arrow after the Spark. His page
+ * falls after him, fluttering, and swoops underneath him as the evening
+ * opens: he crash-lands on it in a superhero crouch — the page has caught
+ * him. It folds under his feet (he balances,
  * wobbling), snaps into a bird base and tosses him into the air — and he
  * lands on the back of the paper crane rising out of it. Then the ride:
  * crouched and holding on, a whoop with a fist in the air, surfing upright
@@ -61,6 +62,24 @@ export function drawRide(f: Frame, L: number) {
   // ---- the void he falls through, giving way to the evening
   const voidA = 1 - ease.inOut2(seg(L, RD.open[0], RD.open[1]));
   drawVoid(f, L, voidA);
+
+  // ---- his page, falling after him: it tumbles down and swoops underneath to catch him
+  if (L < RD.land) {
+    const k = ease.inOut2(seg(L, 0.2, RD.land));
+    const sr = sheetRect(w, h);
+    const c: Pt = [lerp(w * 0.1, foldAnchor.x || sr.cx, k), lerp(-h * 0.25, (foldAnchor.y || sr.cy), ease.inOut3(k))];
+    const side = lerp(w * 1.3, sr.side, ease.out2(k));
+    const spin = (1 - k) * 5.5;
+    ctx.save();
+    ctx.translate(c[0], c[1]);
+    ctx.rotate((1 - k) * 0.9);
+    ctx.scale(Math.max(0.08, Math.abs(Math.cos(spin))), 1);
+    ctx.fillStyle = 'rgba(10,6,4,0.18)';
+    ctx.fillRect(-side / 2 + side * 0.03, -side / 2 + side * 0.04, side, side);
+    ctx.fillStyle = Math.cos(spin) > 0 ? PAPER : '#e2d9c6';
+    ctx.fillRect(-side / 2, -side / 2, side, side);
+    ctx.restore();
+  }
 
   // ---- the fall
   if (L < RD.land) {
@@ -120,7 +139,27 @@ export function drawRide(f: Frame, L: number) {
     ctx.restore();
   }
   const dark = ease.inOut2(seg(fd, FD.dark[0], FD.dark[1]));
-  drawPose(ctx, pose, x, y, fc, { rot, flip, alpha: 1 - dark });
+  // he leaps off the crane after the Spark, diving into the light ahead
+  const jump = seg(L, 8.15, 8.75);
+  if (jump > 0) {
+    const u = ease.in2(jump);
+    pose = 'fall_3';
+    x = lerp(x, w * 0.5, u);
+    y = lerp(y, h * 0.36, u);
+    rot = lerp(0, -Math.PI / 2, ease.inOut2(jump));
+  }
+  drawPose(ctx, pose, x, y, jump > 0 ? lerp(fc, face * 0.25, ease.in2(jump)) : fc, { rot, flip, alpha: jump > 0 ? 1 - seg(jump, 0.8, 1) : 1 - dark });
+  // the light he dives into swells into chapter IV's bulb
+  const swell = ease.in2(seg(L, 8.3, RD.end));
+  if (swell > 0) {
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.globalAlpha = 0.25 + swell * 0.6;
+    drawSprite(ctx, glow('#ffcf7a', 128), w * 0.5, h * 0.35, lerp(face * 0.8, face * 6, swell));
+    ctx.globalAlpha = swell;
+    drawSprite(ctx, glow('#fff6e0', 64, 0.35), w * 0.5, h * 0.35, lerp(4, face * 0.9, swell));
+    ctx.restore();
+  }
 
   // ---- the Spark, ahead in the sky; at the end it shoots off toward the dark
   if (!onSheet) {
@@ -134,7 +173,4 @@ export function drawRide(f: Frame, L: number) {
     const sp: Pt = [x + face * 2.4, y - face * 2.2 - Math.sin(t * 3) * face * 0.2];
     drawSpark(ctx, sp[0], sp[1], face * 0.17);
   }
-  // (in the dark the fold draws the crane and its rider as one warm point: chapter IV's bulb clicks on from it)
-  void glow;
-  void drawSprite;
 }

@@ -36,6 +36,8 @@ themselves, not to the docs: *"you report to me and not the docs"*.
 - **The bar is the absolute best.** *"dedication and passion… clean
   transitions crazy animation crazy motion graphics… think out of the box"*;
   *"i want the absolute best"*; *"a clean and good looking but awesome one"*.
+- **Stay signed in to Codex/ChatGPT until the owner asks to log out**
+  (*"dont log out till i ask"*, round 18).
 - **No clusters of many small things.** *"i hate multiple small things
   together its yuck for me"* (round 17). No flocks, swarms, shard clouds or
   dense fields of tiny repeated pieces; one strong shape beats many small.
