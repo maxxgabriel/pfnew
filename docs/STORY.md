@@ -1,22 +1,44 @@
 # STORY — The Reel (v9, round 16, current)
 
-A showreel in the first film's format: a few chapters, each a different
-craft at full strength, joined by a thread and clean seams. Planned:
-**I Ink** (brush animation), **II Machine** (cartoon timing and physics),
-**III Impact** (one short anime set piece), **IV The Page** (pull back:
-every chapter still playing in its circle; the name; contact). Kinetic type
-slams between worlds and the camera dives through the letters.
+A showreel in the first film's format: seven chapters, each a different
+craft at full strength, each flowing into the next with no hard cut. One
+art direction (paper, ink, a few strong colours) and one thread: a pair of
+rivals and a piece of paper that keeps changing what it is.
 
-**Chapter I, built (the vertical slice):** MAX GABRIEL brushed on white
-paper → two drops of pigment (azurite blue, malachite green) fall down the
-sheet as the camera tilts after them, land, and bloom into two fighters on a
-bank of ink → five exchanges, each cut staying on the paper and flowing into
-the landscape: the cross becomes the far ridge, the leap the cliff they run
-up, the parries' spray the pine, the spinning guard the moon, the thunder
-(gold leaf) the river → Green's blade snaps; the broken half flies to the
-corner and stamps the red seal; the inscription writes itself → pull back:
-the fight painted a whole hanging scroll → MACHINE slams on in poster
-colours and the camera dives through the A into the machine.
+1. **I · Ink** (brush animation) — MAX GABRIEL brushed on white paper; two
+   drops of pigment fall and bloom into two fighters; every cut of the duel
+   stays on the paper and flows into the landscape; the seal; pull back to
+   the whole hanging scroll.
+2. **II · Flock** (simulation) — the scroll's painted birds lift off into a
+   dusk sky and become a murmuration of 3000: a cloud, a rolling wave, a
+   whale, a twister — and then they pack into a flat square of paper.
+3. **III · Fold** (3D geometry) — the square tilts back, its crease pattern
+   draws on, it folds (the vermilion back turns over), snaps into a bird
+   base and a crane rises out of it and flies over a paper countryside that
+   folds up as it passes. Night; a city of letters on the horizon.
+4. **IV · Neon** (kinetic type) — the city is type: towers of letters grow
+   out of a wet street, tubes stutter on, the crane becomes a neon sign of
+   itself, gate letters drop across the avenue and the camera threads under
+   them; an O rises like a moon, the city goes dark, the crane and the
+   camera dive through the counter.
+5. **V · Shadow** (light) — in the dark, one bulb. It clicks on, swinging,
+   over a sheet of paper; between them floats a cloud of paper shards whose
+   shadow is noise until the swing dies — then it snaps into the crane,
+   mountains under a moon, the two rivals. The camera walks round to show
+   the trick; the shards fall; the shadow stays; the light sinks into sunset.
+6. **VI · Impact** (anime) — the silhouettes fight at sunset: standoff,
+   glint cut-in, dash, impact frames, blade lock, a pass across the sun,
+   back to back, a beam clash whose meeting point swells to white.
+7. **VII · The Page** — the white is the inside of a brushed circle; the
+   camera pulls out to a page of seven circles, six of them still playing
+   their chapters; the seal stamps the centre; one stroke wreathes them all;
+   the contact card.
+
+Round 16 history: the plan began as Ink → Machine → Impact → Page; the owner
+cut Machine and TITAN ("very weird") and approved four new chapters (Flock,
+Fold, Neon, Shadow). Shadow was built as anamorphic shadow art rather than
+hand puppets (hand shadows are on the rejected list, and code-drawn hands
+read as weird).
 
 ---
 

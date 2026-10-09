@@ -195,6 +195,15 @@ for quality (HyperFrames' seam law, animate's craft and review rules), and a
 the phone before the rest. **Website only, never a video format.** Built:
 src/reel — on white paper, the fight paints a hanging scroll (each cut flows
 into the landscape), then MACHINE slams on and the camera dives through it.
+The owner approved the slice (*"yup looks greate. complete whole website
+then"*), then cut Machine and TITAN (*"get the machine part taken out its
+very weird. even the titan. think of something else"*) and approved all four
+replacements (*"all sounds good. do all of it"*). The full reel: I Ink, II
+Flock (murmuration), III Fold (origami crane), IV Neon (type city), V Shadow
+(anamorphic shadow art: one bulb, shards, a shadow that snaps into
+pictures), VI Impact (the rivals in silhouette at sunset, beam clash,
+white-out), VII the Page (every chapter live in a brushed circle, the seal,
+a signature, contact). See `docs/STORY.md` v9.
 
 **What the owner responds to.** Big, cinematic, anime-like set pieces;
 continuity jokes (Blot); hard cuts, impact frames, speed lines. Proposals

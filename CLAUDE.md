@@ -6,8 +6,8 @@ product; projects are deliberately absent.
 
 Before changing anything, read:
 
-0. `docs/STORY.md` — the story (v4, The Signature, at the top), the stroke
-   each act secretly writes, and the build order. Start here.
+0. `docs/STORY.md` — the story at the top (v9, the Reel: seven chapters,
+   each a different craft, seamless). Start here.
 1. `docs/BRIEF.md` — the owner's creative brief and every decision they've
    made since (what they asked for, what they approved, **what they rejected**).
 2. `docs/HANDOFF.md` — architecture, the beat timeline, how holds work, every
@@ -25,7 +25,8 @@ Before changing anything, read:
   the owner asks. Also out: the ink-blob beast and its tentacles (round 8);
   the Ink Dragon, the Night Ride, the hand-shadow bridge and the X-Ray
   blueprint (round 10). ALTER
-  stays, but cut to about a third (round 10).
+  stays, but cut to about a third (round 10). Round 16: Machine and TITAN
+  are cut from the Reel ("very weird").
 - **Original, not copied.** References (Mat Voyce, Demon Slayer, Fate/HF) are
   for energy and technique. Don't reproduce their characters, logos or text.
 - **Never re-time existing acts casually.** Everything is authored in *film
