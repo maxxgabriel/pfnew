@@ -23,6 +23,9 @@ function ready(name: string) {
   return null;
 }
 
+/** the painting itself, once it has arrived (the desk draws its own) */
+export const bgImage = (name: string) => ready(name);
+
 /** cover the screen with background `name`; `pan` 0..1 slides a tall image from its top to its bottom */
 export function drawBg(ctx: CanvasRenderingContext2D, name: string, w: number, h: number, pan = 0.5, alpha = 1, zoom = 1) {
   const im = ready(name);

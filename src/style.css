@@ -173,3 +173,23 @@ html:not(.on-paper) .hello-again { background: var(--paper); color: var(--ink); 
 @media (min-aspect-ratio: 5/4) and (min-width: 700px) {
   #sign { right: 42vw; top: 18vh; height: 52vh; }
 }
+
+/* the desk's opening shot (PC, src/desk): the HUD waits until the camera has pushed into the sheet */
+.hud, .reel { transition: opacity .6s ease; }
+html.cine-open .hud, html.cine-open .reel { opacity: 0; }
+
+/* on the desk (PC) the contact card is a real card lying beside the sheet, and the signing pad sits over the sheet */
+html.cine .hello {
+  right: max(3.5vw, 24px); width: min(400px, 29vw);
+  padding: 30px 30px 26px; background: #f7f2e6; border-radius: 3px;
+  box-shadow: 0 22px 44px rgba(20, 10, 0, .32), 0 3px 8px rgba(20, 10, 0, .18);
+  rotate: 1.6deg;
+}
+html.cine .hello::before {
+  content: ""; position: absolute; top: -12px; left: 50%; width: 110px; height: 26px; translate: -50% 0; rotate: -4deg;
+  background: rgba(255, 214, 92, .82); box-shadow: 0 1px 2px rgba(0, 0, 0, .12);
+}
+html.cine .hello-title, html.cine .hello-mail, html.cine .hello-links a { color: var(--ink); }
+html.cine .hello-kicker { color: #5b5449; }
+html.cine .hello-again { background: var(--ink); color: var(--paper); }
+html.cine #sign { left: 2vw; right: 44vw; top: 16vh; height: 60vh; }

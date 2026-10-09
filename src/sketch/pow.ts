@@ -1,7 +1,7 @@
 import type { Frame } from '../core/frame';
 import { clamp, ease } from '../core/math';
 import { drawArt } from './art';
-import { deskOf } from '../desk/layout';
+import { deskOn } from '../desk/layout';
 import { CHAPTERS } from '../reel/reel';
 
 /*
@@ -52,7 +52,7 @@ const LIFE = 0.55, SECS = 0.7;
 
 export function drawPows(f: Frame) {
   const { ctx, w, h, B, t } = f;
-  const desk = deskOf(w, h);
+  const desk = deskOn(w, h);
   HITS.forEach(([, , word, fx, fy, tilt], i) => {
     const b = at[i];
     if (f.crossedFwd(b)) fired[i] = t;
@@ -66,10 +66,9 @@ export function drawPows(f: Frame) {
     const key = ART[word];
     let x = fx * w, y = fy * h, size = Math.min(w * 0.46, h * 0.24);
     if (desk) {
-      // bigger, and out over the desk at the edge of the picture
-      size = Math.min(desk.mw * 0.86, h * 0.38);
-      x = fx < 0.5 ? desk.colL - size * 0.08 : desk.colR + size * 0.08;
-      x = clamp(x, size * 0.55, w - size * 0.55);
+      // bigger on a big screen, out toward the edge of the picture
+      size = Math.min(w * 0.3, h * 0.38);
+      x = clamp(fx < 0.5 ? w * 0.2 : w * 0.8, size * 0.55, w - size * 0.55);
     }
     // slam in past full size, shudder, hold, shrink away
     const pop = k < 0.16 ? ease.outBack(k / 0.16) : 1;

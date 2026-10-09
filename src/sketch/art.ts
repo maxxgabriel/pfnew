@@ -47,7 +47,7 @@ let clock = 0;
 export const setPoseClock = (t: number) => { clock = t; };
 const imgs = new Map<string, HTMLImageElement>();
 /** the desk's drawings (wide screens only: src/desk) are queued by the desk itself, never on a phone */
-const DESK = /^(scrap|stick|pencil)\d_/;
+const DESK = /^(scrap|stick|pencil|prop)\d_/;
 export function preloadPoses() {
   for (const k of Object.keys(SRC)) if (!imgs.has(k) && !DESK.test(k)) imgs.set(k, queue(SRC[k], prioOf(k)));
 }

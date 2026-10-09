@@ -1,0 +1,29 @@
+#!/bin/bash
+# Round 29: the cinematic desk (PC): the desk the film lies on, its props, and ink doodles for the paper's margins.
+#   scripts/gen-cine.sh [only-name ...]   → art/raw/<name>.png
+cd "$(dirname "$0")/../art/raw" || exit 1
+JOBS=${JOBS:-5}
+ONLY=" $* "
+want() { [ "$ONLY" = "  " ] || [[ "$ONLY" == *" $1 "* ]]; }
+go() { local name=$1 prompt=$2; shift 2
+  want "$name" || return; [ -f "$name.png" ] && return
+  while [ "$(jobs -rp | wc -l)" -ge "$JOBS" ]; do sleep 2; done
+  local imgs=(); for i in "$@"; do imgs+=("--image=$i"); done
+  ( echo "== $name"
+    timeout 1500 codex exec --skip-git-repo-check -s workspace-write --color never "${imgs[@]}" \
+      "Use your image generation tool to create ONE image, then save the generated PNG into the current directory as $name.png. $prompt" > "$name.log" 2>&1 < /dev/null
+    [ -f "$name.png" ] && echo "   ok $name" || echo "   FAILED $name" ) & }
+PAINT="Hand-painted look, like background art from a hand-drawn animated film: soft gouache brushwork, warm and atmospheric, NOT a photograph, NOT 3D render."
+PROP="$PAINT Seen from DIRECTLY ABOVE (top-down, flat lay), lit by a warm lamp from the upper left with a soft short shadow painted under each object. On flat solid pure magenta #FF00FF everywhere around the objects (no shadow on the magenta, no table). Big, evenly spaced in ONE horizontal row, not overlapping, not touching. No text, no logos, no labels. Landscape 3:2 (1536x1024)."
+go desk_top "$PAINT A wide TOP-DOWN view (camera directly above) of an animator's old wooden drawing desk at night: rich dark walnut planks with grain, worn edges, faint old ink stains and pencil marks, a pool of warm golden lamp light in the middle fading to deep warm shadow at the edges and corners. The middle of the desk is EMPTY and clear (a sheet of paper will be placed there later). NO objects at all on the desk: no paper, no pencils, no cups, nothing. No text. Landscape 3:2 (1536x1024)."
+go props_1 "$PROP THREE long objects, each lying VERTICALLY (pointing up and down) side by side: (1) a long hexagonal wooden pencil painted red with a black tip end and a sharpened graphite point; (2) a Japanese bamboo calligraphy brush with a soft black-wet bristle tip and a little hanging loop; (3) an animator's aluminium PEG BAR: a flat metal strip with one round peg in the middle and two flat pegs near its ends."
+go props_2 "$PROP THREE objects: (1) a round black inkstone dish with a pool of wet glossy black ink and an ink stick resting on it; (2) a worn, chunky PINK rubber eraser block, its corners rubbed round, grey smudges on it; (3) a white ceramic coffee mug seen from directly above, half full of dark coffee, a brown coffee ring stain beside it."
+go doodles "Art style: rough dry-brush black sumi ink on paper, confident and expressive, like an ink master's quick sketch in a sketchbook margin, with ONE small vermilion red accent in each. FOUR separate LARGE ink doodles in ONE horizontal row, evenly spaced, not overlapping, each a single strong shape (no small repeated things, no flocks, no crowds): (1) a tall wind-bent pine tree; (2) a far mountain ridge with a red sun circle above it; (3) a single paper crane in flight drawn in a few strokes; (4) a big curling wave crest. Flat solid pure magenta #FF00FF everywhere around them (no paper texture, no shadow). No text. Landscape 3:2 (1536x1024)."
+wait; echo "== all done"
+
+# ---- the desk, take two: lively, messy, funky (the owner: "not lonely dark brown… lively, active and fun")
+FUNK="A wide TOP-DOWN view (camera directly above, flat lay) of a joyful, messy, lived-in ARTIST'S DESK in bright daylight, hand-painted illustration style with bold confident shapes and saturated colour, fun and full of energy. The MIDDLE of the desk is EMPTY and clear (a sheet of paper will be placed there later) and the mess lives round the edges. Use a FEW BIG BOLD shapes, not lots of tiny objects: no clusters of small things, no rows of little items, no tiny scattered dots. No paper sheets, no text, no letters, no logos, no people. Landscape 3:2 (1536x1024)."
+go desk_funk_a "$FUNK The desk top is a bright TEAL self-healing cutting mat with a faint grid, with a few HUGE splashes and drips of paint in vermilion red, sunny yellow and cobalt blue, two long strips of patterned washi tape stuck across the corners, a big dried coffee ring, a fat swoosh of black ink from a brush."
+go desk_funk_b "$FUNK The desk itself is old wood PAINTED in bold colour blocks (mustard yellow, coral pink, teal) that have been chipped and painted over, covered in big confident paint splatters, a giant painted red circle (a sun) in one corner, a few big black marker doodles of stars and squiggles drawn straight on the desk, a large rainbow smear where a brush was wiped."
+go desk_funk_c "$FUNK A pop-art comic DESK: the surface is cream paper-white desk covered in bold black marker doodles and cartoon squiggles drawn straight onto it, BIG Ben-Day halftone dot patches in red and cyan, a couple of huge yellow and red paint splats with thick black outlines, a big pink sticky-note shape, and one enormous cartoon ink splash, like a comic book page come to life."
+wait; echo "== all done (take two)"

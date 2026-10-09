@@ -1,3 +1,4 @@
+import { deskOn } from '../desk/layout';
 import { drawSeal } from '../acts/ink';
 import { brush } from '../core/brush';
 import type { Frame } from '../core/frame';
@@ -130,7 +131,8 @@ function rideIn(w: number, h: number, gx: number, gy: number): Pt[] {
 
 /** on a wide screen, how far the scene has slid into the left of the screen to make room for the contact card (0..1) */
 export function homeSide(f: Frame, L: number) {
-  if (f.w < f.h * 1.25 || f.w < 700) return 0;
+  // on the desk the camera pulls back instead, and the card lies beside the sheet
+  if (f.w < f.h * 1.25 || f.w < 700 || deskOn(f.w, f.h)) return 0;
   return ease.inOut2(seg(L, HM.stand - 0.2, HM.offer)) * (1 - ease.inOut2(seg(L, HM.loop[0] - 0.08, HM.loop[0] + 0.25)));
 }
 

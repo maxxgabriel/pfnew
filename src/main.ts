@@ -3,7 +3,8 @@ import { autoAt, drawReel, reelHud, reelTap } from './reel/reel';
 import { preloadPoses } from './sketch/art';
 import { signEnd, signMove, signStart } from './sketch/home';
 import { drawPows } from './sketch/pow';
-import { drawDesk, drawInk, initDesk } from './desk/desk';
+import { INTRO_DELAY, drawDesk, drawInk, initDesk, screenToSheet, setDeskClock } from './desk/desk';
+import { deskOn } from './desk/layout';
 preloadPoses();
 import { CHAPTERS, type Frame } from './core/frame';
 import { clamp, damp } from './core/math';
@@ -98,9 +99,9 @@ pad.id = 'sign';
 document.body.appendChild(pad);
 pad.addEventListener('pointerdown', (e) => {
   pad.setPointerCapture(e.pointerId);
-  signStart(e.clientX, e.clientY);
+  signStart(...screenToSheet(e.clientX, e.clientY));
 });
-pad.addEventListener('pointermove', (e) => { if (pad.hasPointerCapture(e.pointerId)) signMove(e.clientX, e.clientY); });
+pad.addEventListener('pointermove', (e) => { if (pad.hasPointerCapture(e.pointerId)) signMove(...screenToSheet(e.clientX, e.clientY)); });
 pad.addEventListener('pointerup', () => signEnd());
 pad.addEventListener('pointercancel', () => signEnd());
 const seek = (b: number) => window.scrollTo({ top: toRaw(b) * beatPx, behavior: reduced ? 'auto' : 'smooth' });
@@ -192,7 +193,10 @@ function loop(now: number) {
   frame.B = B; frame.vB = velOverride ?? vB; frame.t = t; frame.dt = dt;
   stillFor = Math.abs(vB) > 0.02 ? 0 : stillFor + dt;
   frame.idle = idleOverride ?? stillFor;
-  frame.intro = introOverride ?? (ready ? (now - readyAt) / 1000 : 0);
+  // on the desk (wide screens) the opening shot pushes in first; the title starts as it arrives
+  const clock0 = introOverride ?? (ready ? (now - readyAt) / 1000 : 0);
+  setDeskClock(clock0, introOverride !== null);
+  frame.intro = Math.max(0, clock0 - (deskOn(w, h) ? INTRO_DELAY : 0));
   // landing mid-film skips the title sequence
   if (B > 1.2 && frame.intro < 6) frame.intro = 6;
 
