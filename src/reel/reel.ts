@@ -40,10 +40,10 @@ export const CHAPTERS: Chapter[] = [
   { n: 'III', name: 'Fold', from: 14.6, to: 23.6, paper: false, draw: drawRide },
   { n: 'IV', name: 'Light', from: 23.6, to: 31.6, paper: false, draw: (f, L) => drawLight(f, L) },
   { n: 'V', name: 'Chase', from: 31.6, to: 39.6, paper: false, draw: drawChase },
-  { n: 'VI', name: 'Home', from: 39.6, to: 48.6, paper: true, draw: drawHome },
+  { n: 'VI', name: 'Home', from: 39.6, to: 50.6, paper: true, draw: drawHome },
 ];
 
-export const REEL_END = 49.0;
+export const REEL_END = 51.0;
 
 export function chapterAt(B: number) {
   let i = 0;
@@ -64,7 +64,7 @@ export function drawReel(f: Frame) {
 /** HUD state: dark type over light chapters; the contact card at the very end */
 export function reelHud(B: number) {
   const c = CHAPTERS[chapterAt(B)];
-  return { paper: c.paper, hello: B > CHAPTERS[CHAPTERS.length - 1].from + 4.1 };
+  return { paper: c.paper, hello: B > CHAPTERS[CHAPTERS.length - 1].from + 5.9 };
 }
 
 /** a tap drops ink onto whatever is under the finger (a quiet answer, never blocks scrolling) */
