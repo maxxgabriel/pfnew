@@ -2,6 +2,7 @@ import type { Frame } from '../core/frame';
 import { type Pt, TAU, clamp, ease, hash, lerp, rng, seg } from '../core/math';
 import { drawSprite, glow } from '../core/sprites';
 import { drawInk } from './ink';
+import { drawBg } from '../sketch/bg';
 import { PIG, mixHex } from './painting';
 import { type Cam3, type Tri, type V3, add, cross, drawTris, lerp3, lookAt, norm, project, rotAbout, rotX, rotY, rotZ, sub } from './v3';
 
@@ -32,10 +33,10 @@ export const FD = {
   wings: [3.55, 4.05] as const,
   turn: [4.05, 4.6] as const,
   fly: 4.5,
-  night: [4.8, 6.4] as const,
+  night: [4.7, 5.8] as const,
   /** the camera slows and lets the crane fly on alone */
-  away: [5.3, 6.5] as const,
-  dark: [5.9, 6.7] as const,
+  away: [5.8, 6.5] as const,
+  dark: [6.1, 6.7] as const,
   end: 6.8,
 };
 
@@ -406,25 +407,21 @@ export function drawGround(ctx: CanvasRenderingContext2D, cam: Cam3, w: number, 
 
 /* ------------------------------------------------------------ the night */
 
-/** night falls over the dusk: a deep gradient and a field of stars */
+/** night falls over the dusk: the ink-wash night painting (no field of stars: the owner dislikes clusters of small things) */
 export function drawNight(ctx: CanvasRenderingContext2D, w: number, h: number, t: number, a: number) {
   if (a <= 0) return;
   ctx.save();
   ctx.globalAlpha = a;
-  const g = ctx.createLinearGradient(0, 0, 0, h);
-  g.addColorStop(0, '#05060f');
-  g.addColorStop(0.6, '#10142a');
-  g.addColorStop(1, '#1d1b38');
-  ctx.fillStyle = g;
-  ctx.fillRect(0, 0, w, h);
-  const r = rng(5);
-  ctx.fillStyle = '#e8ecff';
-  for (let i = 0; i < 90; i++) {
-    const x = r() * w, y = r() * h * 0.55, tw = 0.5 + 0.5 * Math.sin(t * (1 + r() * 2) + i);
-    ctx.globalAlpha = a * (0.3 + 0.7 * tw) * r();
-    ctx.fillRect(x, y, 1.6, 1.6);
+  if (!drawBg(ctx, 'bg_night', w, h, 0.15)) {
+    const g = ctx.createLinearGradient(0, 0, 0, h);
+    g.addColorStop(0, '#05060f');
+    g.addColorStop(0.6, '#10142a');
+    g.addColorStop(1, '#1d1b38');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, w, h);
   }
   ctx.restore();
+  void t;
 }
 
 /* ---------------------------------------------------------- the chapter */
@@ -513,7 +510,10 @@ export function drawFold(f: Frame, L: number) {
   else drawFolding(f, L - PRE);
 }
 
-function drawFolding(f: Frame, L: number) {
+/** where a rider sits, on screen, as of the last frame drawn: the sheet's centre, then the crane's back; k = pixels per world unit */
+export const foldAnchor = { x: 0, y: 0, k: 1, on: 'sheet' as 'sheet' | 'crane' };
+
+export function drawFolding(f: Frame, L: number) {
   const { ctx, w, h, t } = f;
   const sr = sheetRect(w, h);
   const night = ease.inOut2(seg(L, FD.night[0], FD.night[1]));
@@ -570,6 +570,12 @@ function drawFolding(f: Frame, L: number) {
   // facing the viewer the sheet is exactly the square the scroll became; the light comes in as it tilts
   drawTris(ctx, cam, tris, lerp(1, 0.6, ease.inOut2(seg(L, FD.tilt[0], FD.tilt[1]))));
   if (L < FD.fold1[0] + 0.2) drawCreases(ctx, cam, L);
+  {
+    const onCrane = L >= FD.snap[1];
+    const at: V3 = !onCrane ? [0, 2, 0] : L < FD.turn[0] ? [0, 62, 0] : [0, pose.alt + 30, pose.zc];
+    const a = project(cam, at), b = project(cam, [at[0] + 50, at[1], at[2]]);
+    if (a && b) Object.assign(foldAnchor, { x: a[0], y: a[1], k: Math.hypot(b[0] - a[0], b[1] - a[1]) / 50, on: onCrane ? 'crane' : 'sheet' });
+  }
   drawWindows(ctx, cam, pose.zc, night, t);
 
   // the snap's whoosh: a few air lines round the paper

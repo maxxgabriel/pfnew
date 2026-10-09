@@ -1,25 +1,26 @@
 import type { Frame } from '../core/frame';
-import { drawInk } from './ink';
-import { drawFold } from './fold';
-import { drawShadow } from './shadow';
-import { drawImpact } from './impact';
-import { drawPage } from './page';
+import { drawFlip } from '../sketch/flip';
+import { drawRide } from '../sketch/ride';
+import { drawLight } from '../sketch/light';
+import { drawBurst } from '../sketch/burst';
+import { drawHome } from '../sketch/home';
+import { drawStill } from '../sketch/still';
 
 /*
- * THE REEL.
+ * THE SKETCH (round 18; docs/STORY.md v11).
  *
- * A showreel in one scroll: five chapters, each a different craft at full
- * strength, each flowing into the next with no hard cut.
+ * A little ink drawing wants to move; a red spark keeps teasing it forward,
+ * and every time it chases the spark it breaks into a new kind of animation.
  *
- *   I    Ink         brush animation — the fight paints a hanging scroll
- *   II   Fold        3D geometry — the scroll becomes a sheet that folds into a crane
- *   III  Shadow      light and silhouette — one bulb, shadows that morph
- *   IV   Impact      an anime set piece — the shadows tear off the wall
- *   V    Page        the finale — every chapter still playing on one page
+ *   I    Still   a drawing that can only tremble, and a spark on its nose
+ *   II   Flip    a flip book: first steps, a run, a duel it slides under
+ *   III  Fold    off the edge, a fall, a paper crane to ride
+ *   IV   Light   one bulb, and a shadow with a mind of its own
+ *   V    Burst   the anime fight at sunset, the leap, the catch
+ *   VI   Home    the spark stamped down as the seal; the brush held out to you
  *
  * Each chapter owns [from, to) in film beats and draws itself from its own
- * local beat L = B - from. Its opening is responsible for the seam: it may
- * draw the previous chapter's last frame underneath its own entrance.
+ * local beat L = B - from. Its opening is responsible for the seam.
  */
 
 export interface Chapter {
@@ -33,14 +34,15 @@ export interface Chapter {
 }
 
 export const CHAPTERS: Chapter[] = [
-  { n: 'I', name: 'Ink', from: 0, to: 9.6, paper: true, draw: (f) => drawInk(f) },
-  { n: 'II', name: 'Fold', from: 9.6, to: 17.6, paper: false, draw: drawFold },
-  { n: 'III', name: 'Shadow', from: 17.6, to: 23.8, paper: false, draw: drawShadow },
-  { n: 'IV', name: 'Impact', from: 23.8, to: 29.8, paper: false, draw: drawImpact },
-  { n: 'V', name: 'Page', from: 29.8, to: 35.4, paper: true, draw: drawPage },
+  { n: 'I', name: 'Still', from: 0, to: 9, paper: true, draw: drawStill },
+  { n: 'II', name: 'Flip', from: 9, to: 18, paper: true, draw: drawFlip },
+  { n: 'III', name: 'Fold', from: 18, to: 27, paper: false, draw: drawRide },
+  { n: 'IV', name: 'Light', from: 27, to: 35, paper: false, draw: (f, L) => drawLight(f, L) },
+  { n: 'V', name: 'Burst', from: 35, to: 43, paper: false, draw: drawBurst },
+  { n: 'VI', name: 'Home', from: 43, to: 50, paper: true, draw: drawHome },
 ];
 
-export const REEL_END = 35.8;
+export const REEL_END = 50.4;
 
 export function chapterAt(B: number) {
   let i = 0;

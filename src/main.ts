@@ -1,5 +1,7 @@
 import './style.css';
 import { drawReel, reelHud, reelTap } from './reel/reel';
+import { preloadPoses } from './sketch/art';
+preloadPoses();
 import { CHAPTERS, type Frame } from './core/frame';
 import { clamp, damp } from './core/math';
 import { canvas, grainTiles } from './core/sprites';

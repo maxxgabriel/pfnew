@@ -42,8 +42,7 @@ for name, (x0, y0, x1, y1) in BOX.items():
     d = np.clip((blum - lum) / blum, 0, 1)
     red = dilate((c[..., 0] - c[..., 1] > 18) & (c[..., 0] - c[..., 2] > 18), 3)
     a = np.clip((d - 0.05) / 0.3, 0, 1)
-    a[red] = 0
-    ink = a > 0.35
+    ink = (a > 0.35) & ~red
     # close the outline, then everything the outside can't reach is the figure (the white face stays opaque)
     R = 5
     closed = dilate(ink, R)
@@ -53,7 +52,8 @@ for name, (x0, y0, x1, y1) in BOX.items():
     rows = np.nonzero(ink.any(axis=1))[0]
     inside[rows.max() - (22 if name == 'hero' else 14):] = False
     alpha = np.maximum(a, inside.astype(float))
-    alpha[red] = 0
+    # the spark (outside the figure) goes; the blush on the cheeks stays
+    alpha[red & ~inside] = 0
     # colour: un-mix the paper at soft edges, keep the face's paper as it is
     a3 = np.maximum(alpha, 1e-3)[..., None]
     fg = np.where(inside[..., None], c, np.clip((c - (1 - a3) * bg) / a3, 0, 255))

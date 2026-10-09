@@ -37,14 +37,15 @@ export const ACT = {
   finaleStart: 18.7,
   creditsStart: 22.55,
   /** the reel (round 16): src/reel/reel.ts REEL_END */
-  END: 35.8,
+  END: 50.4,
 };
 
 /** the reel's chapters (mirrors src/reel/reel.ts CHAPTERS, which draws them) */
 export const CHAPTERS = [
-  { at: 0, n: 'I', name: 'Ink' },
-  { at: 9.6, n: 'II', name: 'Fold' },
-  { at: 17.6, n: 'III', name: 'Shadow' },
-  { at: 23.8, n: 'IV', name: 'Impact' },
-  { at: 29.8, n: 'V', name: 'Page' },
-];
+  { at: 0, n: 'I', name: 'Still' },
+  { at: 9, n: 'II', name: 'Flip' },
+  { at: 18, n: 'III', name: 'Fold' },
+  { at: 27, n: 'IV', name: 'Light' },
+  { at: 35, n: 'V', name: 'Burst' },
+  { at: 43, n: 'VI', name: 'Home' },
+]
