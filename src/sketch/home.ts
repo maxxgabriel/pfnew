@@ -131,6 +131,12 @@ function rideIn(w: number, h: number, gx: number, gy: number): Pt[] {
 }
 
 /** on a wide screen, how far the scene has slid into the left of the screen to make room for the contact card (0..1) */
+/** where the fire kick lands and the seal is burnt in (no card column), for the desk's burn (src/desk/story.ts) */
+export function homeSeal(f: Frame): [number, number, number] {
+  const face = faceOf(f);
+  return [f.w * 0.74, f.h * 0.5 - face * 0.45, face];
+}
+
 export function homeSide(f: Frame, L: number) {
   // on the desk the camera pulls back instead, and the card lies beside the sheet
   if (f.w < f.h * 1.25 || f.w < 700 || deskOn(f.w, f.h)) return 0;

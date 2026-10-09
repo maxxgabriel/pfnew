@@ -1,6 +1,7 @@
 import type { Frame } from '../core/frame';
 import { type Pt, clamp, ease, lerp, seg } from '../core/math';
 import { RED } from './common';
+import { deskOn } from '../desk/layout';
 
 /*
  * RED-CIRCLE MATCH CUTS (round 24).
@@ -14,13 +15,13 @@ import { RED } from './common';
  * screen is covered, so every seam is clean.
  */
 
-interface Cut { at: number; p0: Pt; r0: number; p1: Pt; r1: number; d: number }
+interface Cut { at: number; p0: Pt; r0: number; p1: Pt; r1: number; d: number; desk?: false }
 const CUTS: Cut[] = [];
 /** register the cuts once the chapter table is known (src/reel/reel.ts) */
 export function setCuts(seam: (name: string) => number) {
   CUTS.length = 0;
   // III → IV: he leaps after the Spark; it fills the night and is the Spark over the ink sea
-  CUTS.push({ at: seam('Wave'), p0: [0.6, 0.3], r0: 0.025, p1: [0.6, 0.31], r1: 0.025, d: 0.35 });
+  CUTS.push({ at: seam('Wave'), p0: [0.6, 0.3], r0: 0.025, p1: [0.6, 0.31], r1: 0.025, d: 0.35, desk: false }); // (a page turn on the desk: src/desk/story.ts)
   // V → VI: the Spark in the deep becomes the bulb inside the whale
   CUTS.push({ at: seam('Light'), p0: [0.5, 0.535], r0: 0.02, p1: [0.5, 0.3], r1: 0.03, d: 0.3 });
   // VI → VII: the Spark swells and settles as the sun he bursts out over
@@ -31,7 +32,9 @@ export function drawCircleCuts(f: Frame) {
   const { ctx, w, h, B } = f;
   const S = Math.min(w, h);
   const full = Math.hypot(w, h) * 0.75;
+  const onDesk = deskOn(w, h);
   for (const c of CUTS) {
+    if (onDesk && c.desk === false) continue;
     if (B < c.at - c.d || B > c.at + c.d) continue;
     let x: number, y: number, r: number, a = 1;
     if (B < c.at) {

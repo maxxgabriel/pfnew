@@ -194,3 +194,8 @@ html.cine .hello-kicker { color: #5b5449; }
 html.cine .hello-again { background: var(--ink); color: var(--paper); }
 html.cine, html.cine body { background: #e2ddd4; }
 html.cine #sign { left: 2vw; right: 44vw; top: 16vh; height: 60vh; }
+
+/* (PC) the red pencil from the desk is the pointer: src/desk/desk.ts draws it; the real one returns over controls */
+html.pencil body, html.pencil #sign { cursor: none; }
+html.pencil a, html.pencil button, html.pencil .hello, html.pencil .reel-marks { cursor: auto; }
+html.pencil button, html.pencil a { cursor: pointer; }

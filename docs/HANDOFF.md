@@ -136,6 +136,54 @@ seam.
     `node scripts/shoot-desk.mjs <raw beats> [WxH] [idle s]` (peek / end;
     `WAIT=ms` for slow big screens), `?desk=<name>` tries another desk top.
   Art: `scripts/gen-cine.sh` (desk, props, doodles).
+- **The story on the desk (round 30, PC only: `src/desk/story.ts`).** The desk
+  is not the frame; the camera goes out to it only when the story spills off
+  the paper (cues are pure functions of the playhead / hold progress, mixed
+  in `shotFor` after the idle peek, which now waits 5 s and never runs during
+  a cue or a hold):
+  - **Eraser** (Run L 2.4–3.6): the real eraser (`prop2_1`) wakes, wriggles
+    and hops onto the line behind him (on `#over`, landing where the villain
+    appears; on the desk the villain no longer drops out of the sky); its
+    dusty outline stays. After the fire kick it hops home from the seal,
+    scorched and worn to 72 %.
+  - **Tumble** (hold `tumble` at Run 8.78, 2.8 raw beats, self-plays inside
+    the Run AUTO window): he runs right out of the drawing (`offSheet` in
+    run.ts hides him; no iris on the desk), over the sheet's edge, bounces on
+    the mat, splashes into the blue of the watercolour tin; the camera
+    plunges in and a blue wash (`drawScreen`, on `#ink`) fills the screen and
+    thins into Fold's fall.
+  - **Page turn** (Fold → Wave seam, no hold): the film's last Fold frames are
+    copied (`leafCapture`), and after the seam that copy, on `#leaf` (same
+    matrix, `rotate(angle, 0, 0)` about its top edge), lifts off the peg bar
+    and over (its back is plain paper past 90°). The red-circle cut there is
+    skipped on the desk (`desk: false` in cuts.ts).
+  - **Escape** (hold `escape` at Chase 2.32, 3.6 raw beats, self-plays: AUTO
+    Chase 2.3–2.4): a startled look, three knocks on the inside of the page
+    (`knock_*`, `KNOCK` in chase.ts; the page bulges at his fist), then he
+    flies out (`ESC_OUT`), loops round the coffee and past the plant with a
+    shadow on the desk, and dives back to where he was.
+  - **Burn** (Home from `HM.hit`): a ragged hole burns through the sheet at
+    the seal (the desk shows through, the edge glows, three smoke puffs),
+    closes under the seal by L 6.5, and leaves a scorch.
+  - **Light** (`drawLight`): morning → day (Wave) → the lamp off with the
+    sheet glowing blue (Light) → low sunset (Chase) → night with the lamp
+    (Home); crossfades at the seams.
+  - **Crumpled drafts** (`crumple_*`): one lands for every chapter begun,
+    tossed in with a bounce, at seven spread-out `SPOTS`.
+  - **Hits** (`jolt`): Run's Eraser slam, the whale's swallow, the first
+    clash, the Eraser's return, the fire kick — the camera jolts (s +7.5 %,
+    a roll) so the desk shows and the drafts jump.
+  - **Pencil cursor**: on a mouse screen the pointer is the red pencil from
+    the desk (drawn on `#ink`, tip on the pointer; the real cursor comes back
+    over controls); it left the desk. `live.pointer` lets him glance at it
+    (Still, after he wakes).
+  - The holds exist only when the desk is on at load (`DESK_HOLDS`,
+    holds.ts; HOLDS are sorted by beat); phones have neither. Film modules
+    write where things are into `desk/live.ts` (hero, villain, pointer) for
+    the desk to pick up. The desk photo is mirrored (the tin bottom right,
+    where he runs off) and `PHOTO_W` 2.6 screens wide; photo points via
+    `photo(u, v)`.
+  - Dev: `node scripts/shoot.mjs hold:tumble:0.5,hold:escape:0.6,f:22.0 desktop`.
 - **Living margins (round 29, any wide screen: `sketch/margins.ts`).** Big
   ink doodles brush themselves in (left to right under a soft ragged edge)
   in the paper chapters' empty sheet: a pine at the far end of Still's line

@@ -63,6 +63,7 @@ const AUTO_LOCAL: [string, number, number, number][] = [
   ['Deep', 2.4, 5.0, 1.0], // the whale turns and swallows; the bulb
   ['Light', 4.75, 5.95, 0.9], // the clashes (and the bullet-time hold inside them)
   ['Light', 6.9, 8.0, 0.8], // the cut and the escape
+  ['Chase', 2.3, 2.4, 1.0], // (on the desk) the knock and the escape round the mug: a hold inside
   ['Chase', 5.0, 5.7, 0.8], // the catch
   ['Chase', 7.45, 9.0, 1.1], // the slide home
   ['Home', 2.15, 5.9, 1.0], // the orbit, the eyes, the fire kick

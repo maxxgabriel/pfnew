@@ -282,3 +282,11 @@ fills the screen. The desk must feel "lively active and fun", real (not
 cartoon), and not "girly": a green cutting mat on a white desk with a plant,
 markers, swatches, a watercolour tin. Wide paper chapters also get big ink
 doodles that draw themselves into the empty margins.
+
+**Round 30: the story spills onto the desk.** The desk is "not the life of
+it": the camera visits it at the opening, the end, a long pause, and when
+the story leaves the paper — the Eraser is the real eraser, he tumbles off
+the page into the paint, the night sheet is lifted off to show the sea, he
+knocks on the page and flies round the coffee, the fire kick burns through
+the sheet. The light changes with the story and the scrapped drafts pile up.
+The comic POW words are gone.

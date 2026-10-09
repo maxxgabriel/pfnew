@@ -75,6 +75,16 @@ themselves, not to the docs: *"you report to me and not the docs"*.
 
 ## 3. Decisions (most recent first)
 
+**Round 30 — the story spills onto the desk (PC):** from a list of 12 ideas
+the owner picked *"1,2,4,5 but only for any 1 chapter. 6 and also scratcg
+ideas increase like scrambled papers around. 7,8,11,12"*: the Eraser is the
+real one on the desk; he falls off the page into the watercolour tin; the
+broom escape round the coffee; one real page turn (Fold → Wave); the light
+follows the story, with crumpled drafts piling up; big hits shake the desk;
+the pencil is the pointer; the knock on the inside of the page at the wink;
+the fire kick burns a hole in the sheet. Earlier the same day: *"desk is not
+seen each and everytime… zoom out during idle… remove the boom pow things"*.
+
 **Round 29 — the desk becomes a camera set (PC):** *"stop this and get tge
 latest pull i asked to fill up for destkop but it kind of deletes the whole
 immersion of the websiye. so i want yoy to think more"*. Picked all four:

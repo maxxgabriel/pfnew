@@ -7,6 +7,8 @@ import { CHAPTERS, chapterAt } from '../reel/reel';
 import { HM } from '../sketch/home';
 import { type Shot, isRest, matrix, mix, rest, unproject } from './camera';
 import { deskOn } from './layout';
+import { live } from './live';
+import { PHOTO_W, drawLight, drawOver, drawScreen, drawUnder, jolt, leafAngle, leafCapture, queueStory, storyCues } from './story';
 
 /** the margins beside the sheet where the act's things lie (desk units: CSS pixels) */
 interface Desk { mw: number }
@@ -569,7 +571,7 @@ const ROOM = '#e2ddd4';
 /** which painted desk top (dev: ?desk=desk_a to try another) */
 const DESK_TOP = (typeof location === 'object' && new URLSearchParams(location.search).get('desk')) || 'desk_top';
 /** how far the desk reaches round the sheet, as multiples of the screen (the dark takes over past it) */
-const EXT = { x0: -1.25, y0: -1.4, x1: 2.25, y1: 2.2 };
+const EXT = { x0: -1.25, y0: -2.0, x1: 2.25, y1: 2.2 };
 /** the desk canvas' resolution per CSS pixel (it is only ever seen pulled back) */
 const RES = 0.55;
 
@@ -597,7 +599,7 @@ function drawBase(w: number, h: number) {
   g.fillRect(X0, Y0, DW, DH);
   // the desk top, centred under the sheet, mirrored out on every side so it never runs out
   const wood = bgImage(DESK_TOP);
-  const ww = w * 3.2, wh = ww / 1.5;
+  const ww = w * PHOTO_W, wh = ww / 1.5;
   const ox = w / 2 - ww / 2, oy = h * 0.5 - wh / 2;
   if (wood) {
     for (let j = -1; j <= 1; j++) for (let i = -1; i <= 1; i++) {
@@ -610,7 +612,7 @@ function drawBase(w: number, h: number) {
   } else { g.fillStyle = ROOM; g.fillRect(X0, Y0, DW, DH); }
   // daylight: a soft bright pool on the sheet, the far desk falling gently into shade
   const lx = w * 0.45, ly = h * 0.35;
-  const pool = g.createRadialGradient(lx, ly, h * 0.3, lx, ly, w * 1.7);
+  const pool = g.createRadialGradient(lx, ly, h * 0.3, lx, ly, w * 2.5);
   pool.addColorStop(0, 'rgba(255,250,235,0.10)');
   pool.addColorStop(0.55, 'rgba(255,250,235,0)');
   pool.addColorStop(0.8, 'rgba(226,221,212,0.5)');
@@ -635,8 +637,8 @@ function drawBase(w: number, h: number) {
   prop('prop1_2', w / 2, -h * 0.05, h * 0.75, Math.PI / 2); // the peg bar the sheet hangs on
   prop('prop2_0', -h * 0.46, -h * 0.2, h * 0.36, 0.2); // the inkstone
   prop('prop1_1', -h * 0.16, -h * 0.15, h * 0.62, -0.95); // the brush, wet from it
-  prop('prop2_1', w * 0.16, h * 1.17, h * 0.3, 0.22); // the eraser (the villain, off duty)
-  prop('prop1_0', w + h * 0.18, h * 1.08, h * 0.62, 1.15); // the red pencil
+  // (the eraser, the villain off duty, is drawn by src/desk/story.ts: it wakes up and leaves)
+  // (the red pencil is in your hand: it is the mouse pointer)
   return base;
 }
 
@@ -704,11 +706,21 @@ function shotFor(f: Frame): Shot {
     }
   }
   const ek = endK(f.B);
-  const want = f.idle > PEEK_AFTER && ek < 0.01 && f.hold?.kind !== 'wall' ? 1 : 0;
+  const cues = storyCues(f);
+  const busy = cues.some((c) => c.k > 0.01) || (f.hold !== null && f.hold.kind !== 'bullet');
+  const want = f.idle > PEEK_AFTER && ek < 0.01 && !busy ? 1 : 0;
   peekK = want ? Math.min(1, peekK + f.dt / 1.6) : Math.max(0, peekK - f.dt / 0.35);
   let s = rest(w, h);
   if (peekK > 0) s = mix(s, peekShot(w, h, f.t), want ? ease.inOut2(peekK) : ease.out2(peekK));
+  // the story's own trips out to the desk (src/desk/story.ts)
+  for (const c of cues) if (c.k > 0) s = mix(s, c.shot, c.k);
   if (ek > 0) s = mix(s, endShot(w, h, f.t), ek);
+  // the biggest hits jolt the camera (and the desk jumps)
+  const j = jolt(f.B);
+  if (j > 0.001) {
+    const r = Math.sin(f.B * 977);
+    s = { ...s, s: s.s * (1 + 0.075 * j), roll: s.roll + 1.4 * j * r, cx: s.cx + w * 0.008 * j * r, cy: s.cy + h * 0.01 * j * Math.cos(f.B * 613) };
+  }
   return s;
 }
 
@@ -733,6 +745,24 @@ export function initDesk() {
   deskC.style.cssText = 'position:fixed;left:0;top:0;transform-origin:0 0;pointer-events:none;display:none';
   deskG = deskC.getContext('2d', { alpha: false });
   filmC.before(deskC);
+  overC = document.createElement('canvas');
+  overC.id = 'over';
+  overC.setAttribute('aria-hidden', 'true');
+  overC.style.cssText = 'position:fixed;left:0;top:0;transform-origin:0 0;pointer-events:none;display:none';
+  overG = overC.getContext('2d');
+  filmC.after(overC);
+  leafC = document.createElement('canvas');
+  leafC.id = 'leaf';
+  leafC.setAttribute('aria-hidden', 'true');
+  leafC.style.cssText = 'position:fixed;left:0;top:0;transform-origin:0 0;pointer-events:none;display:none';
+  leafG = leafC.getContext('2d');
+  overC.after(leafC);
+  document.documentElement.classList.toggle('pencil', fine);
+  window.addEventListener('pointermove', (e) => {
+    if (e.pointerType !== 'mouse') return;
+    pointer = { x: e.clientX, y: e.clientY, at: performance.now(), ui: !!(e.target as Element | null)?.closest?.('a, button, input, #hello, .reel-marks') };
+  });
+  document.documentElement.addEventListener('pointerleave', () => { pointer = null; });
   inkC = document.createElement('canvas');
   inkC.id = 'ink';
   inkC.setAttribute('aria-hidden', 'true');
@@ -780,7 +810,8 @@ export function initDesk() {
     // a hand over a sticker you can pick up
     if (f && e.pointerType === 'mouse') {
       const p = deskOn(f.w, f.h) ? onDesk(e) : null;
-      document.documentElement.style.cursor = p && stickerUnder(f, deskMargins(f), p[0], p[1]) ? 'grab' : '';
+      grabbing = !!(p && stickerUnder(f, deskMargins(f), p[0], p[1]));
+      document.body.style.cursor = grabbing ? 'grab' : '';
     }
   });
   const up = (e: PointerEvent) => {
@@ -807,6 +838,8 @@ const deskMargins = (f: Frame): Desk => ({ mw: f.h * 0.45 });
 function park() {
   if (filmC && filmC.style.transform) filmC.style.transform = '';
   if (deskC && deskC.style.display !== 'none') deskC.style.display = 'none';
+  if (overC && overC.style.display !== 'none') overC.style.display = 'none';
+  if (leafC && leafC.style.display !== 'none') leafC.style.display = 'none';
   document.documentElement.classList.remove('cine', 'cine-open');
   lastShot = lastM = null;
 }
@@ -814,10 +847,21 @@ function park() {
 /** the camera over the desk, and the desk under the sheet (wide screens with a mouse) */
 export function drawDesk(f: Frame) {
   lastFrame = f;
+  live.pointer = pointerSheet();
   const { w, h } = f;
   if (!deskOn(w, h) || !filmC || !deskC || !deskG) { park(); return; }
   queueDesk();
+  queueStory();
   PROPS.forEach((k, i) => queueArt(k, 1 + i * 0.1));
+  // the page turn: keep a copy of the night sheet's last frames, to lift off the peg bar after the seam
+  if (leafCapture(f.B)) {
+    leafFront ??= document.createElement('canvas');
+    if (leafFront.width !== filmC.width || leafFront.height !== filmC.height) { leafFront.width = filmC.width; leafFront.height = filmC.height; }
+    const lg = leafFront.getContext('2d')!;
+    lg.drawImage(filmC, 0, 0);
+    leafOk = true;
+    leafShown = '';
+  }
   const shot = shotFor(f);
   if (isRest(shot, w, h)) { park(); return; }
   const m = matrix(shot, w, h);
@@ -858,6 +902,76 @@ export function drawDesk(f: Frame) {
   const fr = { ...fd, w: w + d.mw };
   drawXSheet(fr, d, ci);
   drawStickers(fr, d);
+  // the story's things on the desk, then the light of the moment over all of it
+  drawUnder(g, f);
+  drawLight(g, f, X0, Y0, DW, DH);
+  // above the sheet: whatever leaves the paper (same matrix, its own transparent canvas)
+  if (overC && overG) {
+    if (overC.width !== pw || overC.height !== ph) {
+      overC.width = pw;
+      overC.height = ph;
+      overC.style.width = `${DW}px`;
+      overC.style.height = `${DH}px`;
+    }
+    overG.setTransform(1, 0, 0, 1, 0, 0);
+    overG.clearRect(0, 0, pw, ph);
+    overG.setTransform(RES, 0, 0, RES, -X0 * RES, -Y0 * RES);
+    const any = drawOver(overG, f, deskC, { x: X0, y: Y0, w: DW, h: DH });
+    overC.style.display = any ? '' : 'none';
+    if (any) overC.style.transform = m.translate(X0, Y0).toString();
+  }
+  // the page turn: the night sheet, hinged at its top under the peg bar, lifts up and over
+  const ang = leafAngle(f.B);
+  if (leafC && leafG && leafFront && ang !== null && leafOk) {
+    const side = ang > 90 ? 'back' : 'front';
+    if (side !== leafShown) {
+      if (leafC.width !== leafFront.width || leafC.height !== leafFront.height) { leafC.width = leafFront.width; leafC.height = leafFront.height; }
+      leafG.setTransform(1, 0, 0, 1, 0, 0);
+      leafG.globalAlpha = 1;
+      leafG.drawImage(leafFront, 0, 0);
+      // past upright we see its back: plain paper, the drawing faintly through it
+      if (side === 'back') {
+        leafG.fillStyle = 'rgba(240,233,218,0.9)';
+        leafG.fillRect(0, 0, leafC.width, leafC.height);
+      }
+      leafShown = side;
+    }
+    leafC.style.width = `${w}px`;
+    leafC.style.height = `${h}px`;
+    leafC.style.display = '';
+    leafC.style.transform = m.rotate(ang, 0, 0).toString();
+  } else if (leafC) leafC.style.display = 'none';
+}
+let overC: HTMLCanvasElement | null = null, overG: CanvasRenderingContext2D | null = null;
+let leafC: HTMLCanvasElement | null = null, leafG: CanvasRenderingContext2D | null = null, leafFront: HTMLCanvasElement | null = null, leafOk = false, leafShown = '';
+let pointer: { x: number; y: number; at: number; ui: boolean } | null = null;
+let grabbing = false;
+const fine = typeof matchMedia === 'function' && matchMedia('(pointer: fine)').matches;
+/** the mouse on the sheet, in the film's pixels, while it is being moved (for him to glance at: live.pointer) */
+function pointerSheet(): [number, number] | null {
+  if (!pointer || performance.now() - pointer.at > 4000) return null;
+  return screenToSheet(pointer.x, pointer.y);
+}
+
+/** the red pencil from the desk, as the mouse pointer: its point on the pointer */
+function drawPencil(g: CanvasRenderingContext2D, h: number) {
+  if (!pointer || pointer.ui || grabbing || performance.now() - pointer.at > 6000) return;
+  const im = artImage('prop1_0');
+  if (!im) return;
+  const [, ah] = artSize('prop1_0');
+  const s = (h * 0.24) / ah;
+  const down = painting ? 0.12 : 0;
+  g.save();
+  g.translate(pointer.x, pointer.y);
+  g.rotate(0.5 + down);
+  g.scale(s, s);
+  g.shadowColor = 'rgba(20,14,8,0.35)';
+  g.shadowBlur = 10;
+  g.shadowOffsetX = 6;
+  g.shadowOffsetY = 8;
+  // (the drawing's frame holds a little stray ink beside the pencil: draw only its column)
+  g.drawImage(im, 0, 0, 70, ah, -33.5, -940, 70, ah);
+  g.restore();
 }
 
 /** the reader's own ink, over everything (its own screen-space layer) */
@@ -866,11 +980,16 @@ export function drawInk(f: Frame) {
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
   const W = Math.round(f.w * dpr), H = Math.round(f.h * dpr);
   if (inkC.width !== W || inkC.height !== H) { inkC.width = W; inkC.height = H; }
-  if (!strokes.length && !inkDirty) return;
+  const pen = fine && deskOn(f.w, f.h);
+  if (!strokes.length && !inkDirty && !pen) return;
   inkG.setTransform(1, 0, 0, 1, 0, 0);
   inkG.clearRect(0, 0, W, H);
   inkG.setTransform(dpr, 0, 0, dpr, 0, 0);
   inkDirty = strokes.length > 0;
   if (strokes.length) drawBrush({ ...f, ctx: inkG });
+  if (pen) {
+    drawScreen(inkG, f);
+    drawPencil(inkG, f.h);
+  }
 }
 let inkDirty = false;

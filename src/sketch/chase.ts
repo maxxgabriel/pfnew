@@ -1,3 +1,4 @@
+import { live } from '../desk/live';
 import { brush } from '../core/brush';
 import type { Frame } from '../core/frame';
 import { type Pt, TAU, clamp, ease, lerp, seg, spline } from '../core/math';
@@ -42,6 +43,10 @@ export const CH = {
   paper: [7.7, 8.7] as const,
   end: 9.0,
 };
+
+/** the escape hold (PC): when each knock lands on the page, and when he is out of the sheet (src/desk/story.ts reads these too) */
+export const KNOCK: [number, number][] = [[0.18, 0.21], [0.24, 0.27], [0.3, 0.33]];
+export const ESC_OUT: [number, number] = [0.37, 0.87];
 
 /** the Spark with two little wings, beating */
 function drawWingedSpark(ctx: CanvasRenderingContext2D, x: number, y: number, r: number, t: number) {
@@ -116,6 +121,12 @@ export function drawChase(f: Frame, L: number) {
       pose = u < 0.3 ? 'broom_wink_0' : u < 0.78 ? 'broom_wink_1' : 'broom_wink_2';
     }
     rot = vy * 1.5 * (L > CH.wink[0] && L < CH.wink[1] ? 0.2 : 1);
+    // on the desk (PC, the 'escape' hold): he has seen the desk past the paper — a startled look round, a knock on the page
+    if (f.hold?.kind === 'escape') {
+      const p = f.hold.p;
+      pose = p < 0.1 ? 'broom_wink_0' : p < 0.16 ? 'knock_0' : KNOCK.some(([a, b]) => p > a && p < b) ? 'knock_1' : 'knock_2';
+      rot = 0;
+    }
   } else if (L < CH.loop[1]) {
     // one loop-the-loop: the broom follows the circle, nose along the tangent
     onBroom = true;
@@ -195,7 +206,11 @@ export function drawChase(f: Frame, L: number) {
     shockRing(ctx, x, y - face * 1.2, face * 2.6, pf, '#fff1dc', face * 0.12);
     if (pf < 0.25) flash(ctx, w, h, 0.5 * (1 - pf * 4), '#fff1dc');
   }
-  if (L < CH.hand[0] + 0.05) drawPose(ctx, pose, x, y, face, { rot });
+  live.chaseHero = { x, y, size: face };
+  // (out of the sheet, flying round the desk: src/desk/story.ts draws him there)
+  const gone = f.hold?.kind === 'escape' && f.hold.p > ESC_OUT[0] && f.hold.p < ESC_OUT[1];
+  if (gone) { /* off the page */ }
+  else if (L < CH.hand[0] + 0.05) drawPose(ctx, pose, x, y, face, { rot });
   else if (L > CH.toss[0]) drawPose(ctx, pose, x, y, face, { rot });
 
   // ---- the hat, flung up into the sky; the broom flying off without him

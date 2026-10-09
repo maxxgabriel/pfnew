@@ -5,6 +5,9 @@ import { paperTile } from '../core/sprites';
 import { artSize, drawArtFoot, drawFig, figHeight, hasPose, meta, poseHeight, poseScale, drawPose } from './art';
 import { drawBg } from './bg';
 import { DOODLE, drawDoodle, wideSheet } from './margins';
+import { live } from '../desk/live';
+import { deskOn } from '../desk/layout';
+import { DESK_HOLDS } from '../core/holds';
 import { INK, PAPER, drawSpark, drawSparkStreak, idlePose } from './common';
 import { dryStreak } from './fx';
 import { stage, stageAhead } from './still';
@@ -143,10 +146,14 @@ export function drawRun(f: Frame, L: number) {
   const edgeX = xAt(RN.edge, f) + face * 0.25;
   const gap: [number, number] = [xAt(RN.flip[0], f) + face * 0.9, xAt(RN.flip[1], f) - face * 0.6];
   const hoseK = L >= RN.hose[0] && L < RN.hose[1] ? 1 : 0;
+  // on the desk (PC) he runs right out of the drawing at the edge and tumbles across the desk (src/desk/story.ts)
+  const onDesk = DESK_HOLDS && deskOn(w, h);
+  const offSheet = onDesk && L > RN.drop - 0.03 && (f.hold?.kind !== 'tumble' || f.hold.p >= 0.2);
   if (f.crossedFwd(f.B - L + RN.hose[0])) f.shake(face * 0.15);
 
   // ---- the Eraser: where it is, how it moves
-  const eraserOn = L >= RN.eraser - 0.15;
+  // (on the desk the real eraser hops onto the page and becomes it, so it does not drop out of the sky)
+  const eraserOn = L >= RN.eraser - (DESK_HOLDS && deskOn(w, h) ? 0.005 : 0.15);
   const drop = ease.in3(seg(L, RN.eraser - 0.15, RN.eraser));
   let EX = Math.min(X - eraserGap(L) * face, edgeX - face * 1.1);
   const EH = face * 3.4;
@@ -351,7 +358,8 @@ export function drawRun(f: Frame, L: number) {
   } else if (pose.startsWith('roto_')) {
     // the traced frames carry their own rise and fall: anchor them all on the sheet's shared ground line
     drawFig(ctx, pose, X, y, poseScale('roto_0', face), { anchor: [meta(pose)?.foot[0] ?? 0, 208] });
-  } else drawPose(ctx, pose, X, y, face, { rot });
+  } else if (!offSheet) drawPose(ctx, pose, X, y, face, { rot });
+  { const p = toS([X, y]); live.runHero = { x: p[0], y: p[1], size: face * z }; }
 
   // ---- the Eraser
   if (eraserOn) {
@@ -385,7 +393,9 @@ export function drawRun(f: Frame, L: number) {
     ctx.scale(1 / Math.sqrt(sq), sq);
     drawArtFoot(ctx, k, 0, 0, ew);
     ctx.restore();
-  }
+    const p = toS([EX, ey]);
+    live.runEraser = { x: p[0], y: p[1], size: EH * z };
+  } else live.runEraser = null;
 
   // ---- the Spark: hopping ahead along the line, then diving off the edge of the page
   const ahead0 = stageAhead(f);
@@ -406,7 +416,7 @@ export function drawRun(f: Frame, L: number) {
   // ---- the gag plays as an old cartoon, and an iris closes on him as he drops (it opens again on the void)
   oldFilm(ctx, w, h, hoseK, t);
   const ik = seg(L, RN.iris[0], RN.iris[1]);
-  if (ik > 0 && L < RN.end) {
+  if (ik > 0 && L < RN.end && !onDesk) {
     const c = toS([X, y - face * 1.1]);
     const R0 = Math.hypot(w, h);
     const close = ease.inOut3(seg(ik, 0, 0.55)), open = ease.in3(seg(ik, 0.75, 1));

@@ -110,7 +110,7 @@ const SIZE: Record<string, number> = {
   curious: 1.25, calm: 1.25, wink: 1.25, confident: 1.25, serious: 1.25,
   stand: 1.15, reach: 1.15, rest: 1.15,
   walk8: 0.95, run8: 0.87, sprint8: 0.76, moonwalk6: 0.9,
-  idle: 1.1, saberdraw: 1.12, saber: 0.9, firetornado: 0.86, powerup: 0.95,
+  idle: 1.1, saberdraw: 1.12, saber: 0.9, firetornado: 0.86, powerup: 0.95, knock: 1.14,
 };
 const sizeOf = (k: string) => SIZE[k.replace(/_\d+$/, '')] ?? 1;
 

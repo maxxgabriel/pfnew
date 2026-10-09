@@ -1,4 +1,5 @@
 import { ACT, CHAPTERS } from './frame';
+import { deskOn } from '../desk/layout';
 
 /**
  * HOLDS.
@@ -8,7 +9,7 @@ import { ACT, CHAPTERS } from './frame';
  * hold's own progress runs 0→1. Everything authored in film beats keeps its
  * timing; the scroll track just gets longer.
  */
-export type HoldKind = 'play' | 'thunder' | 'titan' | 'dash' | 'alter' | 'dive' | 'meteor' | 'powers' | 'sign' | 'bullet' | 'wall';
+export type HoldKind = 'play' | 'thunder' | 'titan' | 'dash' | 'alter' | 'dive' | 'meteor' | 'powers' | 'sign' | 'bullet' | 'wall' | 'tumble' | 'escape';
 export interface Hold { at: number; len: number; kind: HoldKind }
 
 /** film beat where the machine's letters become TITAN (the ball is in the cannon) */
@@ -31,10 +32,21 @@ export const BULLET_AT = at('Light', 5.2);
 /** after the peek, the camera pulls back from the page onto the storyboard wall (src/sketch/home.ts) */
 export const WALL_AT = at('Home', 12.05);
 
+/** on the desk (PC): he runs off the drawing, tumbles across the desk and into the paint (src/desk/story.ts) */
+export const TUMBLE_AT = at('Run', 8.78);
+/** on the desk: at the wink he notices the desk, knocks on the page and flies out round the mug */
+export const ESCAPE_AT = at('Chase', 2.32);
+
+/** the desk's two set pieces exist only where the desk does (decided once, at load) */
+const desk = typeof window === 'object' && deskOn(window.innerWidth, window.innerHeight);
 export const HOLDS: Hold[] = [
-  { at: BULLET_AT, len: 2.6, kind: 'bullet' },
-  { at: WALL_AT, len: 3.4, kind: 'wall' },
-];
+  ...(desk ? [{ at: TUMBLE_AT, len: 2.8, kind: 'tumble' as const }] : []),
+  ...(desk ? [{ at: ESCAPE_AT, len: 3.6, kind: 'escape' as const }] : []),
+  { at: BULLET_AT, len: 2.6, kind: 'bullet' as const },
+  { at: WALL_AT, len: 3.4, kind: 'wall' as const },
+].sort((a, b) => a.at - b.at); // (toFilm walks them in film order)
+/** whether the desk's holds are in the film (fixed at load) */
+export const DESK_HOLDS = desk;
 /** (INK v5: the holds below belonged to the worlds that were cut; kept for reference) */
 export const OLD_HOLDS: Hold[] = [
   // the letters assemble into Green's robot, which punches the ball out of the page

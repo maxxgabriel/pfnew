@@ -6,6 +6,7 @@ import { ONE_HEIGHT, ONE_START, drawOneLine } from './oneline';
 import { INK, drawGround, drawPaper, drawSpark, drawSparkStreak, drawTitle, faceOf, hop, idlePose , titleFit } from './common';
 import { shockRing } from './fx';
 import { DOODLE, drawDoodle, wideSheet } from './margins';
+import { live } from '../desk/live';
 
 /*
  * I · STILL.
@@ -100,7 +101,10 @@ export function drawStill(f: Frame, L: number) {
   const idle = L > ST.look ? idlePose(f) : null;
   if (idle) { pose = idle; rot = 0; }
   const sc = poseHeight('still_0', face) / ONE_HEIGHT;
-  if (fill > 0) drawPose(ctx, pose, gx, gy, face, { boil, t, rot, reveal: fill < 1 ? fill : undefined });
+  // (PC) once he is awake he glances toward the pencil in your hand when it is behind him
+  const mouse = L > ST.look - 0.2 && L < ST.step ? live.pointer : null;
+  const flip = !!mouse && mouse[0] < gx - face * 1.5;
+  if (fill > 0) drawPose(ctx, pose, gx, gy, face, { boil, t, rot, flip, reveal: fill < 1 ? fill : undefined });
   let pen: Pt | null = null;
   const lineA = 1 - seg(L, ST.fill[0] + 0.15, ST.fill[1]);
   if (lineK > 0 && lineA > 0) {
