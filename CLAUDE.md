@@ -6,6 +6,8 @@ product; projects are deliberately absent.
 
 Before changing anything, read:
 
+-1. `docs/OWNER_INSTRUCTIONS.md` — every instruction, reference and website the
+   owner has given, their messages word for word, and the standing rules.
 0. `docs/STORY.md` — the story at the top (v9, the Reel: seven chapters,
    each a different craft, seamless). Start here.
 1. `docs/BRIEF.md` — the owner's creative brief and every decision they've
