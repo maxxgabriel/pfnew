@@ -290,3 +290,10 @@ the page into the paint, the night sheet is lifted off to show the sea, he
 knocks on the page and flies round the coffee, the fire kick burns through
 the sheet. The light changes with the story and the scrapped drafts pile up.
 The comic POW words are gone.
+
+**Round 31: pop culture.** The owner wants iconic, instantly recognised
+moments woven into the story (like the light-blade duel, the broom chase and
+the fire tornado): memes and movie/game beats, read from a pose or a camera
+move, never a costume. Built: this is fine, distracted, a surprised cut-in,
+imma head out, the 45° lean, the snap with "and i am maxx.", red light green
+light (a real scroll game), and the Toy Story freeze on the desk.

@@ -184,6 +184,36 @@ seam.
     where he runs off) and `PHOTO_W` 2.6 screens wide; photo points via
     `photo(u, v)`.
   - Dev: `node scripts/shoot.mjs hold:tumble:0.5,hold:escape:0.6,f:22.0 desktop`.
+- **Pop-culture moments (round 31, every screen).** The owner's picks, done
+  as poses and staging in the film's own ink (no characters or logos copied):
+  - **Distracted** (Run L 1.62–2.65, `DB` in run.ts): a gold star (`goldStar`)
+    drifts past behind him; he walks on looking back at it (`lookback_0`,
+    then the sheepish `lookback_1`); the Spark stops dead and frowns.
+  - **Red light, green light** (hold `redlight` at Run 3.42, 4.2 raw beats,
+    scroll-driven, not auto): the Eraser lands with its back to him; he
+    sneaks off (`sneak_0/1`, a step per scroll); on a wall-clock cycle (`RL`)
+    it turns (a squash) and stares with painted eyes (`eraserEyes`); scroll
+    while it stares and it zips at him and scrubs his legs (`sneak_3`), stay
+    still and he holds a statue pose (`sneak_2`). His sneak distance folds
+    back into the chase afterwards (`sneakX`).
+  - **The Smooth Criminal lean** (Run lunge): stiff at 45° (`curious`,
+    rotated about his feet), in front of the lunging Eraser.
+  - **Surprised** (Deep L 2.96–3.24, `CLOSEUP`): a cut-in on his blank face
+    (`stunned_*`) as the jaws close from above and below.
+  - **The finale** (hold `finale` at Home 5.8, 5 raw beats, self-plays in the
+    Home AUTO window; `FIN_POSE`, `finaleEraser` in home.ts): this is fine —
+    he sips tea on the burning page (`fine_*`, fire VFX); the smashed Eraser,
+    scorched, pulls itself together and hops back at him; he raises his hand
+    (`snap_0`) while "and i am maxx." is written in (Caveat, fitted to the
+    screen); the snap (`snap_1`, a ring, a shake) and the Eraser crumbles
+    from the top into a few big crumbs. On the desk the camera goes back in
+    for the snap and out again after it; the worn eraser re-forms on the desk.
+  - **Ight, imma head out** (Home `HM.wave`): down on the page for a moment
+    (`headout_0`), up with hands on knees, hands in pockets, and off.
+  - **The Toy Story rule** (PC): while the idle peek has the camera out on
+    the desk, the film's clock and idle counter stop (`deskWatching`, main.ts),
+    so the drawing holds dead still until you scroll back in.
+  Art: `scripts/gen-cine.sh` (round 31 section).
 - **Living margins (round 29, any wide screen: `sketch/margins.ts`).** Big
   ink doodles brush themselves in (left to right under a soft ragged edge)
   in the paper chapters' empty sheet: a pine at the far end of Still's line

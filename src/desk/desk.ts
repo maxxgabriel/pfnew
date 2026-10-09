@@ -686,6 +686,9 @@ function endK(B: number) {
   return ease.inOut3(seg(L, HM.stand - 0.35, HM.offer)) * (1 - ease.inOut3(seg(L, HM.loop[0] - 0.1, HM.loop[0] + 0.35)));
 }
 
+/** the Toy Story rule: while the camera has pulled out to look at the desk, the drawing freezes (main stops the film's clock) */
+export const deskWatching = () => peekK > 0.12;
+
 /** the raw intro clock (seconds since the film was ready), from main */
 let rawClock = 0;
 export function setDeskClock(s: number, forced = false) {
@@ -716,7 +719,7 @@ function shotFor(f: Frame): Shot {
   for (const c of cues) if (c.k > 0) s = mix(s, c.shot, c.k);
   if (ek > 0) s = mix(s, endShot(w, h, f.t), ek);
   // the biggest hits jolt the camera (and the desk jumps)
-  const j = jolt(f.B);
+  const j = jolt(f.B, f.hold !== null);
   if (j > 0.001) {
     const r = Math.sin(f.B * 977);
     s = { ...s, s: s.s * (1 + 0.075 * j), roll: s.roll + 1.4 * j * r, cx: s.cx + w * 0.008 * j * r, cy: s.cy + h * 0.01 * j * Math.cos(f.B * 613) };

@@ -5,7 +5,7 @@ import { brush } from '../core/brush';
 import type { Frame } from '../core/frame';
 import { type Pt, TAU, clamp, ease, lerp, seg } from '../core/math';
 import { drawSprite, glow } from '../core/sprites';
-import { artSize, drawArt, drawArtFoot, drawPose, ib, poseHeight, setActStyle } from './art';
+import { artSize, drawArt, drawArtFoot, drawFig, drawPose, ib, poseHeight, setActStyle } from './art';
 import { drawVfx, vfxAspect } from './bg';
 import { INK, RED, cycle, drawGround, drawPaper, drawSpark, drawTitle, faceOf, titleFit } from './common';
 import { dryStreak, flash, impactFrame, letterbox, shockRing } from './fx';
@@ -57,6 +57,63 @@ export const HM = {
   loop: [12.2, 13.6] as const,
   end: 14.0,
 };
+
+/** the 'finale' hold (src/core/holds.ts FINALE_AT): its local beat, and his poses through it */
+const FIN_L = 5.802;
+const FIN_POSE: [number, string][] = [[0.06, 'firetornado_7'], [0.24, 'fine_0'], [0.36, 'fine_1'], [0.5, 'fine_2'], [0.79, 'snap_0']];
+
+/**
+ * The Eraser in the finale: smashed to pieces and smoking while he has his tea; it pulls itself together
+ * and hops back at him; it stares him down; he snaps, and it crumbles away to dust, from its top down.
+ */
+function finaleEraser(ctx: CanvasRenderingContext2D, p: number, ex: number, gx: number, gy: number, face: number, t: number) {
+  const EH = face * 3.4;
+  const lie: Pt = [ex + face * 3, gy + face * 0.06], front: Pt = [gx + face * 3.0, gy + face * 0.06];
+  let k = 'eraser_4', x = lie[0], y = lie[1], r = 0.1, dust = 0;
+  if (p < 0.08) { y = lerp(gy - face * 1.8, lie[1], ease.in2(p / 0.08)); r = lerp(2.2, 0.1, p / 0.08); }
+  else if (p < 0.38) r = 0.1 + Math.sin(t * 2) * 0.02;
+  else if (p < 0.52) {
+    // back together, and three angry hops toward him
+    const u = seg(p, 0.38, 0.52);
+    k = u < 0.2 ? 'eraser_4' : 'eraser_3';
+    x = lerp(lie[0], front[0], ease.inOut2(u));
+    y = front[1] - Math.abs(Math.sin(u * Math.PI * 3)) * face * 1.2;
+    r = -0.25 + Math.sin(u * 20) * 0.08;
+  } else { k = 'eraser_0'; x = front[0]; r = Math.sin(t * 4) * 0.04; dust = seg(p, 0.82, 0.98); }
+  const [aw, ah] = artSize(k);
+  const ew = EH * (aw / ah);
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(r);
+  if (dust > 0) {
+    // the snap: it crumbles away from the top, a few big crumbs drifting off on the air
+    ctx.beginPath();
+    const edge = -EH * (1 - dust);
+    ctx.moveTo(-ew, 0);
+    for (let i = 0; i <= 8; i++) ctx.lineTo(-ew + (i / 8) * ew * 2, edge + Math.sin(i * 2.1 + dust * 6) * EH * 0.05);
+    ctx.lineTo(ew, 0);
+    ctx.closePath();
+    ctx.clip();
+  }
+  drawArtFoot(ctx, k, 0, 0, ew);
+  // scorched: its own silhouette, darkened, over it
+  drawFig(ctx, k, 0, 0, ew / aw, { tint: '#2a180e', alpha: 0.42 });
+  ctx.restore();
+  if (dust > 0) {
+    ctx.save();
+    for (let i = 0; i < 14; i++) {
+      const born = (i % 7) / 7, u = seg(dust, born * 0.8, born * 0.8 + 0.45);
+      if (u <= 0 || u >= 1) continue;
+      const sx = x + (((i * 37) % 11) / 11 - 0.5) * ew * 0.9, sy = y - EH * (1 - born);
+      ctx.globalAlpha = 1 - u;
+      ctx.fillStyle = i % 3 ? '#e2a59c' : '#7d7470';
+      ctx.beginPath();
+      ctx.ellipse(sx + u * face * (2.5 + (i % 4)), sy - u * face * (1.5 + (i % 3)), face * 0.12, face * 0.08, i, 0, TAU);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+}
 
 const TURN = ['turnA_0', 'turnA_1', 'turnA_2', 'turnA_3', 'turnB_0', 'turnB_1', 'turnB_2', 'turnB_3'];
 
@@ -162,6 +219,8 @@ export function drawHome(f0: Frame, L: number) {
   if (side > 0) drawPaper(f0.ctx, f0.w, f0.h);
   const f: Frame = side > 0 ? { ...f0, w: f0.w * lerp(1, 0.58, side) } : f0;
   const { ctx, w, h, t } = f;
+  // (the 'finale' hold's progress, or -1)
+  const fin = f0.hold?.kind === 'finale' ? f0.hold.p : -1;
   clockNow = t;
   const face = faceOf(f);
   // with the card beside him (wide screens) he has the whole height: the page settles lower, the name gets room
@@ -288,6 +347,8 @@ export function drawHome(f0: Frame, L: number) {
 
   // the Eraser (behind him while the camera walks round to its far side)
   const drawEraser = () => {
+    if (fin >= 0) { finaleEraser(ctx, fin, ex, gx, gy, face, t); return; }
+    if (L > FIN_L) return; // (dust: it was snapped away)
     if (!eraserOn) return;
     let k = 'eraser_0', ey = gy + face * 0.06, er = 0, sq = 1, x = ex, sc = 1;
     if (L < HM.slam) { ey = lerp(-h * 0.2, ey, ease.in3(eIn)); sq = 1.15; }
@@ -360,6 +421,8 @@ export function drawHome(f0: Frame, L: number) {
     y = gy - air * face * 2.7;
   }
   if (L > HM.landing[0] + 0.2) { pose = 'firetornado_7'; y = gy; }
+  // (the 'finale' hold) this is fine; up and dusted off; the hand raised; the snap
+  if (fin >= 0) { pose = FIN_POSE.find(([a]) => fin < a)?.[1] ?? 'snap_1'; y = gy; flip = false; }
   if (L > HM.stand) pose = 'home_1';
   if (L > HM.turn) pose = 'home_2';
   if (L > HM.offer) pose = 'home_3';
@@ -379,7 +442,8 @@ export function drawHome(f0: Frame, L: number) {
   const CYC = [null, 'pixel', 'water', 'clay', 'chalk', 'comic', 'hose'] as const;
   const cyc = cycling ? CYC[Math.floor(t / 2) % CYC.length] : null;
   const switchGlitch = cycling ? Math.max(0, 1 - (t % 2) / 0.14) : 0;
-  if (L > HM.wave[0]) pose = L < HM.wave[0] + 0.35 ? 'bye_0' : 'bye_1';
+  // ight, imma head out: down on the page for a second, then up, hands in pockets, and off
+  if (L > HM.wave[0]) pose = L < HM.wave[0] + 0.22 ? 'headout_0' : L < HM.wave[0] + 0.44 ? 'headout_1' : 'headout_2';
   if (L > HM.walk[0]) {
     const u = seg(L, HM.walk[0], HM.walk[1]);
     pose = u < 0.25 ? 'bye_2' : cycle('bye', 2, t, 4) === 'bye_0' ? 'bye_2' : 'bye_3';
@@ -394,6 +458,14 @@ export function drawHome(f0: Frame, L: number) {
   // a ring of fire opens at his feet as he gathers to jump
   const ring = L > HM.crouch ? ease.out2(seg(L, HM.crouch, HM.leap[0])) * (1 - seg(L, HM.spin[0], HM.spin[0] + 0.35)) : 0;
   if (ring > 0) drawVfx(ctx, 'vfx_fire_2', x, gy - face * 0.05, face * lerp(1.2, 3.4, ring), 0, ring);
+  // this is fine: the page burning round him while he has his tea
+  const burn = fin >= 0 ? 1 - seg(fin, 0.36, 0.5) : 0;
+  if (burn > 0) {
+    const fl = 0.85 + 0.15 * Math.sin(t * 13);
+    drawVfx(ctx, 'vfx_fire_2', x, gy + face * 0.1, face * 7.5 * fl, 0, burn);
+    drawVfx(ctx, 'vfx_fire_2', ex + face * 1.5, gy + face * 0.1, face * 5 * (1.7 - fl), 0, burn * 0.9);
+    drawVfx(ctx, 'vfx_fire_1', x - face * 3.2, gy - face * 0.6, face * 3.2 * fl, 0, burn * 0.7);
+  }
   drawTornado(ctx, x, gy + face * 0.2, torW, t, fire);
   // the fire lights him: a warm rim while it roars and while the foot charges
   const lit = Math.max(fire, L > HM.spin[1] && L < HM.shot[1] ? 1 : 0);
@@ -498,6 +570,32 @@ export function drawHome(f0: Frame, L: number) {
     ctx.globalAlpha = 0.25 + 0.2 * Math.sin(t * 3);
     drawSprite(ctx, glow('#ffd59a', 64), x + face * 0.9, y - face * 1.2, face * 1.6);
     ctx.restore();
+  }
+
+  // ---- "and i am maxx." — written in as he raises his hand; the snap
+  if (fin >= 0) {
+    const k = seg(fin, 0.54, 0.74), gone = 1 - seg(fin, 0.93, 1);
+    if (k > 0 && gone > 0) {
+      const text = 'and i am maxx.';
+      ctx.save();
+      // (as big as fits: a phone is narrow)
+      ctx.font = `700 ${Math.round(face * 1.05)}px "Caveat", "Segoe Print", cursive`;
+      const fit = Math.min(1, (w * 0.86) / ctx.measureText(text).width);
+      ctx.font = `700 ${Math.round(face * 1.05 * fit)}px "Caveat", "Segoe Print", cursive`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'alphabetic';
+      const tw = ctx.measureText(text).width, tx = clamp((x + ex) / 2, w * 0.07 + tw / 2, w * 0.93 - tw / 2), ty = gy - face * 4.3;
+      ctx.beginPath();
+      ctx.rect(tx - tw / 2 - face, ty - face * 1.6, (tw + face * 2) * k, face * 2.4);
+      ctx.clip();
+      ctx.globalAlpha = gone;
+      ctx.fillStyle = INK;
+      ctx.fillText(text, tx, ty);
+      ctx.restore();
+    }
+    const sn = seg(fin, 0.79, 0.86);
+    if (sn > 0 && sn < 1) shockRing(ctx, x + face * 0.95, gy - face * 2.55, face * 1.6, sn, INK, face * 0.06, 6);
+    if (fin > 0.79 && fin < 0.81) f0.shake(face * 0.12);
   }
 
   // ---- after the credits: a head round the edge of the page, a grin and a wave

@@ -2,7 +2,7 @@ import './style.css';
 import { autoAt, drawReel, reelHud, reelTap } from './reel/reel';
 import { preloadPoses } from './sketch/art';
 import { signEnd, signMove, signStart } from './sketch/home';
-import { INTRO_DELAY, drawDesk, drawInk, initDesk, screenToSheet, setDeskClock } from './desk/desk';
+import { INTRO_DELAY, deskWatching, drawDesk, drawInk, initDesk, screenToSheet, setDeskClock } from './desk/desk';
 import { deskOn } from './desk/layout';
 preloadPoses();
 import { CHAPTERS, type Frame } from './core/frame';
@@ -160,6 +160,7 @@ let stillFor = 0;
 let velOverride: number | null = null;
 
 let cost = 0;
+let filmT = 0, filmIdle = 0;
 function loop(now: number) {
   requestAnimationFrame(loop);
   const c0 = performance.now();
@@ -189,9 +190,13 @@ function loop(now: number) {
   frame.w = w; frame.h = h;
   frame.portrait = h > w;
   frame.u = Math.min(w, h * 0.62) / 100;
-  frame.B = B; frame.vB = velOverride ?? vB; frame.t = t; frame.dt = dt;
+  // (PC) the Toy Story rule: while the camera is out looking at the desk, the drawing holds dead still
+  const watched = deskWatching();
+  if (!watched) filmT += dt;
+  frame.B = B; frame.vB = velOverride ?? vB; frame.t = filmT; frame.dt = dt;
   stillFor = Math.abs(vB) > 0.02 ? 0 : stillFor + dt;
-  frame.idle = idleOverride ?? stillFor;
+  if (!watched) filmIdle = idleOverride ?? stillFor;
+  frame.idle = watched ? Math.max(filmIdle, 5.01) : filmIdle;
   // on the desk (wide screens) the opening shot pushes in first; the title starts as it arrives
   const clock0 = introOverride ?? (ready ? (now - readyAt) / 1000 : 0);
   setDeskClock(clock0, introOverride !== null);

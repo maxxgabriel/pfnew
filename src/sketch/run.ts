@@ -55,6 +55,23 @@ export const RN = {
   iris: [8.6, 8.95] as const,
 };
 
+/** distracted: a gold star drifts past and he can't help looking back at it; the Spark stops dead, unimpressed */
+const DB = [1.95, 2.3, 2.45] as const;
+/** red light, green light (the 'redlight' hold): seconds the Eraser keeps its back to him, turns, and stares */
+const RL = { green: 2.0, turn: 0.28, red: 0.95, back: 0.22 };
+const RL_CYCLE = RL.green + RL.turn + RL.red + RL.back;
+/** the hold's local beat (src/core/holds.ts REDLIGHT_AT) */
+const RL_AT = 3.422;
+let rlT0 = -1, caughtAt = -9, caughtIn = -1;
+/** where the Eraser is looking in the game: 0 its back to him, 1 staring at him; and whether it's a red light */
+function redLight(t: number): { look: number; red: boolean; n: number } {
+  const q = t - rlT0, n = Math.floor(q / RL_CYCLE), ph = q - n * RL_CYCLE;
+  if (ph < RL.green) return { look: 0, red: false, n };
+  if (ph < RL.green + RL.turn) return { look: ease.inOut2((ph - RL.green) / RL.turn), red: false, n };
+  if (ph < RL.green + RL.turn + RL.red) return { look: 1, red: true, n };
+  return { look: 1 - ease.inOut2((ph - RL.green - RL.turn - RL.red) / RL.back), red: false, n };
+}
+
 /** the pop-up cut-outs along the page: [distance from the start in faces, drawing, height in faces] */
 const POPS: [number, string, number][] = [
   [7.2, 'popup_0', 3.4], [9.6, 'popup_2', 2.4], [12.2, 'popup_1', 3.8], [14.4, 'popup_4', 3.0], [21.0, 'popup_3', 2.2], [23.0, 'popup_5', 3.2],
@@ -150,6 +167,16 @@ export function drawRun(f: Frame, L: number) {
   const onDesk = DESK_HOLDS && deskOn(w, h);
   const offSheet = onDesk && L > RN.drop - 0.03 && (f.hold?.kind !== 'tumble' || f.hold.p >= 0.2);
   if (f.crossedFwd(f.B - L + RN.hose[0])) f.shake(face * 0.15);
+
+  // ---- red light, green light: it lands with its back to him; he sneaks off while it isn't looking; scroll while it stares and you're caught
+  const rl = f.hold?.kind === 'redlight' ? f.hold.p : -1;
+  if (rl >= 0 && rlT0 < 0) { rlT0 = t; caughtAt = -9; caughtIn = -1; }
+  if (rl < 0) rlT0 = -1;
+  const game = rl >= 0 ? redLight(t) : { look: 0, red: false, n: 0 };
+  if (game.red && Math.abs(f.vB) > 0.03 && caughtIn !== game.n) { caughtAt = t; caughtIn = game.n; }
+  const caught = rl >= 0 ? seg(t, caughtAt, caughtAt + 1.1) : 1;
+  // (how far he sneaked; after the hold it folds back into his run as the chase starts)
+  const sneakX = face * 2.2 * (rl >= 0 ? ease.inOut2(rl) : L > RL_AT ? 1 - ease.inOut2(seg(L, RL_AT, RN.spot[1] + 0.1)) : 0);
 
   // ---- the Eraser: where it is, how it moves
   // (on the desk the real eraser hops onto the page and becomes it, so it does not drop out of the sky)
@@ -275,7 +302,9 @@ export function drawRun(f: Frame, L: number) {
     if (fast) return `sprint8_${((Math.floor(d / (face * 4.6) * 8) % 8) + 8) % 8}`;
     return `run8_${((Math.floor(d / (face * len) * 8) % 8) + 8) % 8}`;
   };
-  let pose = 'firststep_1', y = gy, rot = 0;
+  let pose = 'firststep_1', y = gy, rot = 0, leanX = 0;
+  // (during the lean he is drawn in front of the lunging Eraser)
+  const leaning = L > RN.lunge[0] && L < RN.lunge[1];
   if (L < RN.steps[1]) {
     const u = L / RN.steps[1];
     pose = u < 0.3 ? 'firststep_1' : u < 0.62 ? 'firststep_2' : 'firststep_3';
@@ -284,16 +313,22 @@ export function drawRun(f: Frame, L: number) {
     const d = X - xAt(RN.steps[1], f);
     pose = back ? runCycle(RN.steps[1], 2.6) : `walk8_${((Math.floor(d / (face * 2.6) * 8) % 8) + 8) % 8}`;
     if (L > RN.walk[1] && !back) pose = runCycle(RN.steps[1], 3.4);
+    // a gold star drifts past behind him and he turns to stare (the Spark is not amused)
+    if (L > DB[0] && L < DB[2] && !back) pose = L < DB[1] ? 'lookback_0' : 'lookback_1';
     // the Eraser slams down behind him: he looks back, wide-eyed
     if (L > RN.spot[0]) pose = 'chase_0';
+    // (the 'redlight' hold) sneaking while its back is turned, frozen stiff while it stares, a yelp if it catches him moving
+    if (rl >= 0) pose = caught < 1 ? 'sneak_3' : game.look > 0.5 ? 'sneak_2' : `sneak_${Math.floor(rl * 26) % 2}`;
   } else if (L < RN.flip[0]) {
     pose = runCycle(RN.run[0], 4.2);
     if (L > RN.glance[0] && L < RN.glance[1] && !back) pose = 'chase_0';
-    // it lunges; he dives
+    // it lunges; he leans clean out of the way, stiff as a board at 45° (the Smooth Criminal lean), and springs back
     if (L > RN.lunge[0] && L < RN.lunge[1]) {
       const u = seg(L, RN.lunge[0], RN.lunge[1]);
-      pose = 'chase_1';
-      y = gy - Math.sin(u * Math.PI) * face * 0.5;
+      pose = 'curious';
+      const lean = Math.sin(Math.min(1, u * 1.25) * Math.PI);
+      rot = 0.78 * lean;
+      leanX = (w > h ? face * 1.1 : -face * 0.3) * Math.sin(u * Math.PI);
     }
   } else if (L < RN.flip[1]) {
     // the rotoscope beat: a butterfly twist over the gap in eight fluid, film-traced drawings
@@ -358,8 +393,15 @@ export function drawRun(f: Frame, L: number) {
   } else if (pose.startsWith('roto_')) {
     // the traced frames carry their own rise and fall: anchor them all on the sheet's shared ground line
     drawFig(ctx, pose, X, y, poseScale('roto_0', face), { anchor: [meta(pose)?.foot[0] ?? 0, 208] });
-  } else if (!offSheet) drawPose(ctx, pose, X, y, face, { rot });
-  { const p = toS([X, y]); live.runHero = { x: p[0], y: p[1], size: face * z }; }
+  } else if (!offSheet && !leaning) drawPose(ctx, pose, X + sneakX + leanX, y, face, { rot });
+  { const p = toS([X + sneakX, y]); live.runHero = { x: p[0], y: p[1], size: face * z }; }
+  // the star he can't stop looking at (one big gold star, drifting past behind him)
+  const dbU = seg(L, DB[0] - 0.33, DB[2] - 0.1);
+  if (dbU > 0 && dbU < 1) {
+    const hp = toS([X, gy]);
+    const sxS = lerp(hp[0] + face * z * 6, hp[0] - face * z * 7, ease.inOut2(dbU)), syS = hp[1] - face * z * (3.6 + Math.sin(dbU * Math.PI * 2) * 0.4);
+    goldStar(ctx, fw[0] + (sxS - fs[0]) / z, fw[1] + (syS - fs[1]) / z, face * 0.55, t * 2);
+  }
 
   // ---- the Eraser
   if (eraserOn) {
@@ -385,14 +427,31 @@ export function drawRun(f: Frame, L: number) {
       er = -0.35 + Math.sin(t * 7) * 0.08 * (1 - seg(L, RN.skid[1], RN.end));
       EX = edgeX - face * 1.1;
     }
+    let turnX = 1;
+    if (rl >= 0) {
+      // the game: upright, rocking; it turns on the spot (a squash) to stare; caught, it zips at him and scrubs
+      k = 'eraser_0'; sq = 1; er = Math.sin(t * 3) * 0.03;
+      turnX = 1 - 0.85 * Math.sin(game.look * Math.PI);
+      if (caught < 1) EX = lerp(EX, X + sneakX - face * 1.6, Math.sin(caught * Math.PI));
+    }
     const [aw, ah] = artSize(k);
     const ew = EH * (aw / ah) * (k === 'eraser_1' ? 1.25 : 1);
     ctx.save();
     ctx.translate(EX, ey);
     ctx.rotate(er);
-    ctx.scale(1 / Math.sqrt(sq), sq);
+    ctx.scale(turnX / Math.sqrt(sq), sq);
     drawArtFoot(ctx, k, 0, 0, ew);
+    // staring: two glaring eyes on its face
+    if (rl >= 0 && game.look > 0.5) eraserEyes(ctx, ew, EH, seg(game.look, 0.5, 1));
     ctx.restore();
+    if (leaning && !offSheet) drawPose(ctx, pose, X + sneakX + leanX, y, face, { rot });
+    // caught: a grey scrub across his legs
+    if (rl >= 0 && caught > 0.3 && caught < 1) {
+      ctx.save();
+      ctx.globalAlpha = 0.5 * (1 - seg(caught, 0.6, 1));
+      brush(ctx, [[X + sneakX - face * 0.7, gy - face * 0.5], [X + sneakX, gy - face * 0.8], [X + sneakX + face * 0.6, gy - face * 0.45]], { width: face * 0.5, color: '#8a8378', seed: 71, dry: 0.8, press: 0.8, tail: 0.8, halo: 0 });
+      ctx.restore();
+    }
     const p = toS([EX, ey]);
     live.runEraser = { x: p[0], y: p[1], size: EH * z };
   } else live.runEraser = null;
@@ -409,8 +468,27 @@ export function drawRun(f: Frame, L: number) {
     sy = lerp(sy, gy + face * 9, ease.in3(dive));
     prev = [sx - face * 0.6, sy - face * 1.4 * dive];
   }
+  const glare = L > DB[0] && L < DB[2] + 0.2 ? 1 - seg(L, DB[2], DB[2] + 0.2) : 0;
+  if (glare > 0) {
+    const stop = Math.max(ahead0, xAt(DB[0], f) + face * 2.6);
+    sx = lerp(sx, stop, glare);
+    sy = lerp(sy, gy - r * 1.1 + Math.sin(t * 40) * face * 0.01, glare);
+  }
   if (prev) drawSparkStreak(ctx, prev, [sx, sy], r);
-  if (dive < 1) drawSpark(ctx, sx, sy, r);
+  if (dive < 1) drawSpark(ctx, sx, sy, r * (1 + glare * 0.08));
+  if (glare > 0.3) {
+    // two little furious brows
+    ctx.save();
+    ctx.strokeStyle = INK;
+    ctx.lineCap = 'round';
+    ctx.lineWidth = r * 0.24;
+    ctx.globalAlpha = seg(glare, 0.3, 0.6);
+    ctx.beginPath();
+    ctx.moveTo(sx - r * 0.62, sy - r * 0.62); ctx.lineTo(sx - r * 0.12, sy - r * 0.3);
+    ctx.moveTo(sx + r * 0.62, sy - r * 0.62); ctx.lineTo(sx + r * 0.12, sy - r * 0.3);
+    ctx.stroke();
+    ctx.restore();
+  }
   ctx.restore();
 
   // ---- the gag plays as an old cartoon, and an iris closes on him as he drops (it opens again on the void)
@@ -421,6 +499,59 @@ export function drawRun(f: Frame, L: number) {
     const R0 = Math.hypot(w, h);
     const close = ease.inOut3(seg(ik, 0, 0.55)), open = ease.in3(seg(ik, 0.75, 1));
     iris(ctx, w, h, c, lerp(lerp(R0, face * 1.5, close), R0, open));
+  }
+  ctx.restore();
+}
+
+/** one big gold star with an ink edge and a glint, turning slowly */
+function goldStar(ctx: CanvasRenderingContext2D, x: number, y: number, r: number, spin: number) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(Math.sin(spin) * 0.3);
+  ctx.beginPath();
+  for (let i = 0; i < 10; i++) {
+    const a = -Math.PI / 2 + (i / 10) * Math.PI * 2, rr = i % 2 ? r * 0.45 : r;
+    if (i) ctx.lineTo(Math.cos(a) * rr, Math.sin(a) * rr); else ctx.moveTo(Math.cos(a) * rr, Math.sin(a) * rr);
+  }
+  ctx.closePath();
+  ctx.fillStyle = '#f4c542';
+  ctx.fill();
+  ctx.lineWidth = r * 0.09;
+  ctx.lineJoin = 'round';
+  ctx.strokeStyle = INK;
+  ctx.stroke();
+  ctx.globalAlpha = 0.8 + 0.2 * Math.sin(spin * 3);
+  ctx.fillStyle = '#fffbe6';
+  ctx.beginPath();
+  ctx.ellipse(-r * 0.18, -r * 0.3, r * 0.14, r * 0.07, -0.6, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+}
+
+/** the Eraser's glare (drawn in its own box: foot at 0,0, ew wide, EH tall), looking to the right at him */
+function eraserEyes(ctx: CanvasRenderingContext2D, ew: number, EH: number, a: number) {
+  ctx.save();
+  ctx.globalAlpha *= a;
+  for (const dx of [-0.18, 0.16]) {
+    const ex = dx * ew, ey = -EH * 0.74, rx = ew * 0.13, ry = EH * 0.055;
+    ctx.fillStyle = '#fffaf0';
+    ctx.strokeStyle = INK;
+    ctx.lineWidth = EH * 0.012;
+    ctx.beginPath();
+    ctx.ellipse(ex, ey, rx, ry, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle = INK;
+    ctx.beginPath();
+    ctx.arc(ex + rx * 0.45, ey + ry * 0.1, ry * 0.62, 0, Math.PI * 2);
+    ctx.fill();
+    // the brow, angled down into a scowl
+    ctx.lineWidth = EH * 0.03;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(ex - rx * 1.1, ey - ry * (dx < 0 ? 1.9 : 1.2));
+    ctx.lineTo(ex + rx * 1.1, ey - ry * (dx < 0 ? 1.2 : 1.9));
+    ctx.stroke();
   }
   ctx.restore();
 }

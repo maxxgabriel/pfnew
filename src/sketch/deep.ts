@@ -28,6 +28,9 @@ export const DP = {
   end: 5.0,
 };
 
+/** the cut-in on his blank face as the jaws close (local beats) */
+const CLOSEUP = [2.96, 3.24] as const;
+
 /** the whale's mouth, as a fraction of its drawing (the open-mouthed frame) */
 const MOUTH: Pt = [0.9, 0.36];
 
@@ -94,6 +97,30 @@ export function drawDeep(f: Frame, L: number, pre = 1) {
   }
   if (swallow < 1) drawPose(ctx, pose, x, y, face * lerp(1, 0.4, swallow), { rot, alpha: 1 - swallow });
 
+  // ---- the moment the mouth closes round him: a cut-in on his face, utterly blank (surprised, and not at all ready)
+  const cu = L > CLOSEUP[0] && L < CLOSEUP[1] ? seg(L, CLOSEUP[0], CLOSEUP[1]) : -1;
+  if (cu >= 0) {
+    ctx.save();
+    ctx.fillStyle = '#2c2c2e';
+    ctx.fillRect(0, 0, w, h);
+    const cw = Math.min(w * 0.62, h * 0.85);
+    drawArt(ctx, cu < 0.55 ? 'stunned_0' : 'stunned_1', w * 0.5, h * 0.56 + Math.sin(cu * 30) * face * 0.02, cw);
+    // the jaws: from above and below, closing (one dark curve each)
+    const close = ease.in3(seg(cu, 0.3, 1));
+    ctx.fillStyle = '#060606';
+    for (const dir of [-1, 1]) {
+      const edge = h * 0.5 + dir * h * 0.5 * (1 - close * 0.92);
+      ctx.beginPath();
+      ctx.moveTo(-w * 0.1, dir < 0 ? -10 : h + 10);
+      ctx.lineTo(-w * 0.1, edge + dir * h * 0.06);
+      ctx.quadraticCurveTo(w * 0.5, edge - dir * h * 0.08, w * 1.1, edge + dir * h * 0.06);
+      ctx.lineTo(w * 1.1, dir < 0 ? -10 : h + 10);
+      ctx.closePath();
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
   // ---- inside: dark, and the Spark rising in it and swelling warm — the bulb (chapter VI)
   if (swallow > 0) {
     ctx.save();
@@ -116,5 +143,5 @@ export function drawDeep(f: Frame, L: number, pre = 1) {
     drawSprite(ctx, glow('#fff6e0', 64, 0.35), sp[0], sp[1], face * lerp(0.3, 0.9, bk));
     ctx.restore();
   }
-  if (bk < 1) drawSpark(ctx, sp[0], sp[1], face * 0.17 * (1 - bk * 0.5), 1, 1);
+  if (bk < 1 && cu < 0) drawSpark(ctx, sp[0], sp[1], face * 0.17 * (1 - bk * 0.5), 1, 1);
 }

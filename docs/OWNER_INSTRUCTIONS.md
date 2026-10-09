@@ -75,6 +75,16 @@ themselves, not to the docs: *"you report to me and not the docs"*.
 
 ## 3. Decisions (most recent first)
 
+**Round 31 — pop-culture moments:** after pushing for bolder ideas (*"think
+out of the box… like i added in star wars harry potter and inazuma"*, *"think
+about absolute iconic things or memes or pop culture things"*) the owner
+picked *"1,2,3,4.5,11(and also a text comes "and i am maxx",14"*: this is
+fine, distracted boyfriend, surprised face, ight imma head out, the Smooth
+Criminal lean, the snap (with the line "and i am maxx"), red light green
+light; and earlier *"17 sounds nice keep that in mind"* (the Toy Story rule:
+built). Rejected as a direction: real-life desk props as story (*"you took
+real life too seriously"*) and literal backstory props.
+
 **Round 30 — the story spills onto the desk (PC):** from a list of 12 ideas
 the owner picked *"1,2,4,5 but only for any 1 chapter. 6 and also scratcg
 ideas increase like scrambled papers around. 7,8,11,12"*: the Eraser is the

@@ -54,8 +54,8 @@ const ERASER_K = 'prop2_1';
 const eraserLen = (h: number) => h * 0.3;
 /** Run: it wakes, wriggles and hops onto the page as the villain slams down there */
 const EZ = { wake: [2.5, 2.8] as const, hop: [2.8, 3.36] as const };
-/** Home: after the fire kick it hops back to its place, scorched and worn down */
-const EZ_BACK = [5.62, 6.15] as const, WORN = 0.72;
+/** Home: after the snap (the 'finale' hold) it gathers itself again in its place, scorched and worn down */
+const EZ_BACK = [5.85, 6.3] as const, WORN = 0.72;
 
 function drawEraserProp(g: CanvasRenderingContext2D, x: number, y: number, len: number, rot: number, alpha = 1, sq = 1, scorch = 0, lift = 0) {
   const im = artImage(ERASER_K);
@@ -127,9 +127,11 @@ function eraserUnder(g: CanvasRenderingContext2D, f: Frame, jump: number) {
     return;
   }
   const back = B - HOME;
-  if (B < HOME || back < EZ_BACK[1]) { drawDust(g, x, y, len, 1); return; }
-  drawDust(g, x, y, len, 1 - seg(back, EZ_BACK[1], EZ_BACK[1] + 0.3));
-  drawEraserProp(g, x, y - jump * h * 0.03, len * WORN, 0.3, 1, 1, 0.8);
+  if (B < HOME || back < EZ_BACK[0]) { drawDust(g, x, y, len, 1); return; }
+  // snapped to dust on the page, it gathers itself again where it lay: back, smaller, singed
+  const k = seg(back, EZ_BACK[0], EZ_BACK[1]);
+  drawDust(g, x, y, len, 1 - k);
+  drawEraserProp(g, x, y - jump * h * 0.03, len * WORN, 0.3, k, 1 + (1 - k) * 0.3, 0.8);
 }
 
 function eraserOver(g: CanvasRenderingContext2D, f: Frame) {
@@ -148,14 +150,6 @@ function eraserOver(g: CanvasRenderingContext2D, f: Frame) {
     const lift = Math.sin(u * Math.PI) * 1.4;
     drawEraserProp(g, x, y, len, 0.22 + u * TAU * 0.75, 1 - seg(u, 0.88, 1), 1, 0, lift);
     return;
-  }
-  const back = B - HOME;
-  if (B >= HOME && back >= EZ_BACK[0] && back < EZ_BACK[1]) {
-    // home again, hopping off the page, singed
-    const u = seg(back, EZ_BACK[0], EZ_BACK[1]);
-    const [sx, sy] = homeSeal(f);
-    const k = ease.inOut2(u);
-    drawEraserProp(g, lerp(sx, home[0], k), lerp(sy, home[1], k), len * lerp(0.85, WORN, u), lerp(0, 0.3, u) - u * TAU, seg(u, 0, 0.12), 1, 0.8, Math.sin(u * Math.PI) * 1.2);
   }
 }
 
@@ -349,7 +343,7 @@ function burnOver(g: CanvasRenderingContext2D, f: Frame, deskC: HTMLCanvasElemen
   }
   // smoke: three big soft puffs rising off it
   for (let i = 0; i < 3; i++) {
-    const u = seg(L, HM.hit + 0.05 + i * 0.12, HM.hit + 1.0 + i * 0.12);
+    const u = f.hold?.kind === 'finale' ? (f.t * 0.45 + i / 3) % 1 : seg(L, HM.hit + 0.05 + i * 0.12, HM.hit + 1.0 + i * 0.12);
     if (u <= 0 || u >= 1) continue;
     const r = face * (0.8 + u * 1.8);
     g.save();
@@ -463,7 +457,9 @@ export function drawLight(g: CanvasRenderingContext2D, f: Frame, x0: number, y0:
 
 /** the biggest hits jolt the camera and make the desk jump */
 const HITS = [RUN + RN.eraser, AT('Deep') + 3.15, AT('Light') + 4.9, HOME + 1.45, HOME + HM.hit];
-export function jolt(B: number) {
+export function jolt(B: number, held = false) {
+  // (not while the film holds: a held jolt would freeze the camera half out)
+  if (held) return 0;
   let j = 0;
   for (const b of HITS) {
     const u = seg(B, b - 0.01, b + 0.3);
@@ -483,7 +479,8 @@ export function storyCues(f: Frame): Cue[] {
   const L = B - RUN;
   // the Eraser wakes: look over at it and the sheet
   {
-    const k = ease.inOut2(seg(L, 2.4, 2.72)) * (1 - ease.inOut2(seg(L, 3.32, 3.62)));
+    // (back in on the sheet as it lands: the red-light game straight after plays full screen)
+    const k = f.hold?.kind === 'redlight' ? 0 : ease.inOut2(seg(L, 2.4, 2.72)) * (1 - ease.inOut2(seg(L, 3.3, 3.42)));
     if (k > 0) out.push({ k, shot: { cx: w * 0.32, cy: h * 0.8, s: 1.75, tilt: 18, roll: -3 } });
   }
   // the tumble (a hold)
@@ -521,7 +518,9 @@ export function storyCues(f: Frame): Cue[] {
   // the burn: a look at the smoking hole (the end's pull-back takes over)
   {
     const Lh = B - HOME;
-    const k = B < HOME ? 0 : ease.inOut2(seg(Lh, HM.hit + 0.04, HM.hit + 0.35));
+    // (in the finale hold it goes back in for the snap, and out again after it)
+    const fin = f.hold?.kind === 'finale' ? f.hold.p : -1;
+    const k = B < HOME ? 0 : ease.inOut2(seg(Lh, HM.hit + 0.04, HM.hit + 0.35)) * (fin >= 0 ? 1 - ease.inOut2(seg(fin, 0.36, 0.5)) : 1);
     if (k > 0) {
       const [cx, cy] = homeSeal(f);
       out.push({ k, shot: { cx: lerp(w * 0.5, cx, 0.5), cy: lerp(h * 0.5, cy, 0.5), s: 1.45, tilt: 16, roll: 1.5 } });
@@ -547,7 +546,7 @@ export function queueStory() {
 
 /** on the desk, under the sheet: the eraser (or its dust), the drafts */
 export function drawUnder(g: CanvasRenderingContext2D, f: Frame) {
-  const j = jolt(f.B);
+  const j = jolt(f.B, f.hold !== null);
   drawCrumples(g, f, j);
   eraserUnder(g, f, j);
 }
@@ -556,7 +555,7 @@ export function drawUnder(g: CanvasRenderingContext2D, f: Frame) {
 export function drawOver(g: CanvasRenderingContext2D, f: Frame, deskC: HTMLCanvasElement, ext: { x: number; y: number; w: number; h: number }): boolean {
   let drawn = 0;
   const L = f.B - RUN;
-  if ((L > EZ.hop[0] - 0.01 && L < EZ.hop[1]) || (f.B >= HOME && f.B - HOME > EZ_BACK[0] && f.B - HOME < EZ_BACK[1])) { eraserOver(g, f); drawn++; }
+  if (L > EZ.hop[0] - 0.01 && L < EZ.hop[1]) { eraserOver(g, f); drawn++; }
   if (f.hold?.kind === 'tumble') { tumbleOver(g, f, f.hold.p); drawn++; }
   if (f.hold?.kind === 'escape') { escapeOver(g, f, f.hold.p); drawn++; }
   if (f.B >= HOME + HM.hit && f.B < HOME + 7.4) { burnOver(g, f, deskC, ext); drawn++; }
