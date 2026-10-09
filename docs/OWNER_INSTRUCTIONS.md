@@ -65,6 +65,20 @@ themselves, not to the docs: *"you report to me and not the docs"*.
 
 ## 3. Decisions (most recent first)
 
+**Round 18 — story first: The Sketch (current, being built):**
+- *"a story is main point… lets actually align on one"* → picked **The
+  Sketch That Wanted to Move + Chasing the Spark** (`docs/STORY.md` v11).
+- Interactivity: optional, parked for later (*"should optional but leave it
+  for now"*).
+- Aesthetic reference (editorial cards: SWARM / MELT / PULSE): blend with
+  the ink, **no words**, take the feeling and don't copy it.
+- Rivals: **one cameo**.
+- Character: the owner's own sheet, "The Wanderer" (chibi, dry-brush ink,
+  icy-blue hair highlights, blue eyes, scarf, coat). Code-drawn versions
+  were not good enough (*"dude i feel like you are overdoing this"*); poses
+  are now generated with the Codex CLI on the owner's ChatGPT plan from that
+  sheet (`scripts/gen-sketch.sh`, `scripts/cutout-sheet.py`).
+
 **Round 17 — trimming the Reel (current, built):**
 - Cut **II Flock** (the murmuration) and the little painted birds on the
   scroll: many small things together are "yuck" for the owner, and the birds
@@ -192,3 +206,12 @@ Light & shadow; dismissed the picker and wrote:)*
 > talk what to add
 
 > tye flock is in shadow as well please remove that ws well
+
+*(Round 18, condensed: "flood me" with design ideas → "more interactive" →
+"should optional but leave it for now" → an editorial reference image "this
+is an example of aesthetic" → "lets take a step back… a story is main
+point" → "1 with 3 sounds awesome" → character: "show me an example of how
+cute round character would look like", then the Wanderer sheet "make him
+look something like this… exactly like that", then "dude i feel like you
+are overdoing this. do yoy need any connector" → "use codex cli in your
+session. do use device code and i will login".)*

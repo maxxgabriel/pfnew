@@ -25,3 +25,4 @@ dist-ssr
 scripts/shots/
 scripts/tmp/
 artifact/
+art/raw/*.log

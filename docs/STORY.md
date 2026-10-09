@@ -1,4 +1,46 @@
-# STORY — The Reel (v10, round 17, current)
+# STORY — The Sketch (v11, round 18, agreed; being built)
+
+**Logline.** A little ink drawing wants to move. A red spark keeps teasing
+it forward, and every time it chases the spark it breaks into a new kind of
+animation. In the end it catches the spark and hands the brush to you.
+(The owner picked "the sketch that wanted to move" with "chasing the spark".)
+
+**Cast.** *The Sketch* — the Wanderer from the owner's character sheet
+(`art/raw/ref_wanderer.png`): chibi, dry-brush ink, messy black hair with icy
+blue highlights and an antenna strand, blue eyes, frayed scarf, long coat,
+boots. Poses are drawn with the Codex image tool from that sheet
+(`scripts/gen-sketch.sh`) and cut out by `scripts/cutout-sheet.py` into
+`src/assets/sketch/`. *The Spark* — one vermilion dot, the colour of the seal.
+
+**Rule.** Every chapter the Sketch breaks out of one medium into the next;
+the transitions are the plot. No words but the title, the seal and the
+contact card. No clusters of small things. Phone first.
+
+0. **The Page** — blank paper; the brush paints MAX GABRIEL; the Spark drops
+   on like seal ink; the brush sketches the figure; it's frozen.
+1. **Still** (line animation) — the Spark bounces in front of it; it can only
+   tremble (line boil, a twitch, a two-drawing head turn); it strains; the
+   Spark hops onto the page's corner.
+2. **Flip** (frame-by-frame) — it grabs the corner; your scroll flips the
+   pages; first wobbly steps, a walk, a run (smears, one onion-skin ghost).
+   **Cameo:** one page holds the blue and green rivals mid-duel and the
+   Sketch ducks under their crossed blades. The Spark shoots off the page.
+3. **Fold** (3D paper) — it peels off the page and folds into the paper crane;
+   flies after the Spark over the paper countryside; night; the Spark dives
+   into one light.
+4. **Light** (light and silhouette) — the light is a bulb; the Sketch steps
+   into its beam and becomes a shadow on a paper wall that can stretch and
+   leap; it reaches, the bulb swings, it misses; sunset.
+5. **Burst** (anime) — everything it learned: full anime motion, speed
+   lines, impact frames, a dash across the sunset, one huge leap; freeze on
+   the hand closing round the Spark; white.
+6. **Home** — it lands on the page and stamps the Spark down as the seal;
+   pull back over every world it passed through; it turns to you and holds
+   out the brush (the contact card); it waves and walks off the paper.
+
+---
+
+# STORY — The Reel (v10, round 17, superseded by v11)
 
 A showreel in the first film's format: five chapters, each a different
 craft at full strength, each flowing into the next with no hard cut. One

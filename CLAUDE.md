@@ -8,8 +8,8 @@ Before changing anything, read:
 
 -1. `docs/OWNER_INSTRUCTIONS.md` — every instruction, reference and website the
    owner has given, their messages word for word, and the standing rules.
-0. `docs/STORY.md` — the story at the top (v10, the Reel: five chapters,
-   each a different craft, seamless). Start here.
+0. `docs/STORY.md` — the story at the top (v11, The Sketch: a little ink
+   drawing chases a red spark through every kind of animation). Start here.
 1. `docs/BRIEF.md` — the owner's creative brief and every decision they've
    made since (what they asked for, what they approved, **what they rejected**).
 2. `docs/HANDOFF.md` — architecture, the beat timeline, how holds work, every
