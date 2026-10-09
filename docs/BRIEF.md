@@ -212,6 +212,14 @@ letter buildings looked bad. The reel is now I Ink, II Fold, III Shadow,
 IV Impact, V Page (`docs/STORY.md` v10). **Never build swarms, flocks,
 particle clouds or anything made of many small pieces repeated together.**
 
+**Round 19: The Sketch v12 (separate branch `claude/sketch-v12`).** An
+ideation session pitched 16 quality ideas; the owner liked all of them and
+asked for the lot, with ChatGPT (Codex, device-code login) used for every
+pose and for some code. Built on its own branch while another session kept
+working on the main one: the Eraser as a villain, the one-line birth, the
+Wave, the Deep and the whale, the duel inside it, the brush-painted slide,
+the 360° orbit, the signature, the loop, idle life. See `docs/STORY.md` v12.
+
 **What the owner responds to.** Big, cinematic, anime-like set pieces;
 continuity jokes (Blot); hard cuts, impact frames, speed lines. Proposals
 with clear options before a build.

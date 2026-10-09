@@ -296,10 +296,10 @@ function drawEscape(f: Frame, L: number) {
     c.width = W;
     c.height = H;
     split = { c, ctx: c.getContext('2d')! };
+    // the belly as it was at the moment of the cut, without him (painted once: it is frozen)
+    split.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    drawLight({ ...f, ctx: split.ctx, crossedFwd: () => false, crossed: () => false, shake: () => {}, flash: () => {} }, LT.cut[0] - 0.001, false, true);
   }
-  // the belly as it was at the moment of the cut, without him
-  split.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  drawLight({ ...f, ctx: split.ctx, crossedFwd: () => false, crossed: () => false, shake: () => {}, flash: () => {} }, LT.cut[0] - 0.001, false, true);
 
   // behind it: the sunset
   drawBg(ctx, 'bg_sunset', w, h, 0.3, 1, 1.12);

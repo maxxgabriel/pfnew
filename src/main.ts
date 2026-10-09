@@ -61,7 +61,7 @@ window.scrollTo(0, 0);
 // R is the raw scroll playhead; B is film time (R with the holds taken out)
 let R = 0, B = 0, prevB = 0, vB = 0;
 let target = 0;
-const readScroll = () => (target = clamp(window.scrollY / beatPx, 0, RAW_END));
+const readScroll = () => { target = clamp(window.scrollY / beatPx, 0, RAW_END); stillFor = 0; };
 window.addEventListener('scroll', readScroll, { passive: true });
 
 let shakeAmt = 0, flashAmt = 0, flashColor = '#ffffff';
@@ -245,6 +245,7 @@ function jumpRaw(b: number) {
   target = b;
   R = b;
   B = prevB = toFilm(b).film;
+  stillFor = 0;
 }
 (window as unknown as { __film: unknown }).__film = {
   /** jump to a raw (scroll) beat */
@@ -255,6 +256,7 @@ function jumpRaw(b: number) {
     window.scrollTo(0, raw * beatPx);
     target = R = raw;
     B = prevB = toFilm(raw).film;
+    stillFor = 0;
   },
   intro(s: number | null) { introOverride = s; },
   /** dev: pretend the reader is scrolling at v raw beats/s (null to stop) */

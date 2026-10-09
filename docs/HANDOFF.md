@@ -3,11 +3,12 @@
 Everything a new agent needs to pick this up. Read `docs/BRIEF.md` first for
 the owner's taste and decisions; this file is the technical side.
 
-- **Live preview:** https://claude.ai/artifact/9d3GKN33rB1VSTR2jGoDnV (the Reel, round 16;
+- **Live preview:** https://claude.ai/artifact/9d3GKN33rB1VSTR2jGoDnV (the main branch;
+  v12 on `claude/sketch-v12`: https://claude.ai/artifact/2e3qybKHWFwd824v6ZoD2u;
   an older preview lives at https://claude.ai/artifact/PcwGzT9y7tqBXqoo9EXsgD)
   (a private claude.ai artifact owned by the user; only Claude sessions with
   the Artifact tool can republish it. See "Shipping" below.)
-- **Branch:** `claude/confident-dijkstra-4t2ifl`
+- **Branches:** `claude/confident-dijkstra-4t2ifl` (main line), `claude/sketch-v12` (v12)
 - **Stack:** Vite 8 + TypeScript, Canvas 2D, no runtime dependencies. Fonts
   come from Google Fonts: Dela Gothic One (display) and Shippori Mincho
   (serif).
@@ -15,7 +16,40 @@ the owner's taste and decisions; this file is the technical side.
 ---
 
 
-## Current film: The Sketch (round 18) — read this first
+## Current film: The Sketch v12 (round 19, branch `claude/sketch-v12`) — read this first
+
+`docs/STORY.md` v12. Eight chapters, conducted by `src/reel/reel.ts`
+(`CHAPTERS`, mirrored in `core/frame.ts` for the HUD). Each chapter owns its
+seam.
+
+| Chapter | Beats | File | New in v12 |
+|---|---|---|---|
+| I Still | 0 – 5.6 | `sketch/still.ts`, `sketch/oneline.ts` | the Spark's ink leaps to his head; one traced line draws him (`ST.leap/line/fill`); idle life |
+| II Run | 5.6 – 14.6 | `sketch/run.ts` | scroll speed → `sprint8` / `moonwalk6`; the Eraser (`RN.eraser…skid`, `eraserGap`) rubs the page out behind him; pop-ups (`POPS`); the runoff gag as a 1930s cartoon (`oldFilm`) and an iris (`iris`) |
+| III Fold | 14.6 – 23.6 | `sketch/ride.ts` | he leaps up off the crane; the night dissolves into the ink sea |
+| IV Wave | 23.6 – 28.6 | `sketch/sea.ts` | the brush as a surfboard; the woodblock wave (`wave_0..2`, flipped) curls him in; black; the negative flip |
+| V Deep | 28.6 – 33.6 | `sketch/deep.ts` | negative world (difference + saturation + a depth gradient; he and the Spark drawn after, in colour); the whale passes, turns, swallows; the Spark rises and becomes the bulb |
+| VI Light | 33.6 – 41.6 | `sketch/light.ts` | the room is `bg_belly` lit by the bulb; the escape (`LT.slash/cut/tumble`, `drawEscape`): the belly, painted once at the cut into an offscreen canvas, splits in two over the sunset |
+| VII Chase | 41.6 – 50.6 | `sketch/chase.ts` | he grabs the brush, paints a stroke (`slidePath`) and rides it along the brush's own spline (`slideAt`) |
+| VIII Home | 50.6 – 64.6 | `sketch/home.ts` | rides in on the stroke; the Eraser returns; the orbit (`TURN`: turnA_0..3, turnB_0..3); the eye cut-in; the kick smashes the Eraser; your signature (`signStart/Move/End`, the `#sign` pad from `main.ts`, shown by `reelHud().sign`); the loop into the first page |
+
+- **Art.** `scripts/gen-v12.sh` (Codex image tool, the owner's ChatGPT
+  plan) → `art/raw/*.png` (git-ignored; compressed copies of the older
+  sheets live in `art/sheets/`) → `scripts/cutout-sheet.py` →
+  `src/assets/sketch/` + `manifest.json`; paintings → `src/assets/sketchbg/`.
+  `scripts/defringe.py` cleans magenta off soft edges (it shows on dark
+  scenes). Codex wrote `scripts/trace-oneline.py` (line drawing → one
+  ordered pen path, `src/assets/sketch/oneline.json`).
+- **Props** have no face to scale by: `artSize(k)` + `drawArtFoot` (the
+  Eraser, the brush, pop-ups, the wave).
+- **Idle life.** `Frame.idle` = seconds since the playhead last moved
+  (`main.ts`; jumps and scrolls reset it; dev: `__film.idle(s)`).
+  `idlePose(f)` in `sketch/common.ts`.
+- **Perf** (headless, JS ms/frame): 0.3 – 3.5 everywhere.
+- Codex image calls: use `--image=a.png --image=b.png` (a bare `-i` swallows
+  the prompt as another file), `< /dev/null`.
+
+## Previous: The Sketch, round 18
 
 A story told in six chapters, each a different kind of animation
 (`docs/STORY.md` v11). `main.ts` draws `drawReel` (`src/reel/reel.ts`, the
