@@ -12,6 +12,10 @@ import { type Pt, TAU } from '../../src/core/math';
 export const INK = '#1b1714';
 export const PAPER = '#f3eee3';
 export const RED = '#e8432a';
+/** the icy highlight in the hair, and the eyes */
+export const ICE = '#bfe4f0';
+export const ICE_DEEP = '#7fbcd6';
+export const IRIS = '#2b6fd6';
 
 export interface Pose {
   /** body lean, radians (+ = forward, to the right) */
@@ -101,6 +105,15 @@ export function drawChibi(ctx: CanvasRenderingContext2D, x: number, y: number, s
   }
   brush(ctx, tail, { width: s * 0.13, color: INK, seed: seed + 4, dry: 0.5, press: 1.2, tail: 0.2 });
 
+  // the hair: long locks behind the head, down past the jaw, swept back by the wind
+  const wind = (pt: Pt, k: number): Pt => [pt[0] - p.stream * k * s, pt[1] - p.stream * k * s * 0.25 + Math.sin(p.wave + k * 4) * s * 0.04 * p.stream];
+  const lock = (a: Pt, b: Pt, c: Pt, w: number, k: number, col = INK, sd = 0) =>
+    brush(ctx, [[hc[0] + a[0] * s, hc[1] + a[1] * s], wind([hc[0] + b[0] * s, hc[1] + b[1] * s], k * 0.5), wind([hc[0] + c[0] * s, hc[1] + c[1] * s], k)], { width: w * s, color: col, seed: seed + 50 + sd, dry: 0.25, press: 1.3, tail: 0.04, halo: 0 });
+  lock([-0.6, -0.55], [-1.1, -0.1], [-1.02, 0.66], 0.28, 0.5, INK, 1);
+  lock([-0.35, -0.8], [-1.1, -0.5], [-1.22, 0.18], 0.24, 0.55, INK, 2);
+  lock([0.6, -0.55], [1.08, -0.1], [0.98, 0.62], 0.28, 0.25, INK, 3);
+  lock([0.35, -0.8], [1.08, -0.5], [1.12, 0.12], 0.22, 0.25, INK, 4);
+
   // face plate
   ctx.fillStyle = PAPER;
   ctx.beginPath();
@@ -114,6 +127,32 @@ export function drawChibi(ctx: CanvasRenderingContext2D, x: number, y: number, s
     ring.push([hc[0] + Math.cos(a) * r, hc[1] + Math.sin(a) * r]);
   }
   brush(ctx, ring, { width: s * 0.11, color: INK, seed: seed + 5, dry: 0.35, press: 1.4, tail: 0.5 });
+  // the top of the hair: a dome to the brow, its edge broken into locks
+  ctx.fillStyle = INK;
+  ctx.beginPath();
+  ctx.arc(hc[0], hc[1] - s * 0.02, s * 1.02, Math.PI * 1.06, Math.PI * 1.94);
+  // a ragged brow line, not a bowl cut
+  const brow: Pt[] = [[0.9, -0.36], [0.62, -0.16], [0.42, -0.34], [0.2, -0.12], [-0.02, -0.36], [-0.25, -0.14], [-0.46, -0.36], [-0.68, -0.14], [-0.92, -0.36]];
+  for (const [bx, by] of brow) ctx.lineTo(hc[0] + bx * s, hc[1] + by * s);
+  ctx.closePath();
+  ctx.fill();
+  for (let k = 0; k < 7; k++) {
+    const th = Math.PI * (1.1 + k * 0.133);
+    const tip = 1.13 + ((k * 37) % 5) * 0.015;
+    lock([Math.cos(th) * 0.5, Math.sin(th) * 0.5 - 0.1], [Math.cos(th - 0.1) * 0.98, Math.sin(th - 0.1) * 0.98 - 0.05], [Math.cos(th + 0.1) * tip, Math.sin(th + 0.1) * tip - 0.03], 0.22, Math.cos(th) < 0 ? 0.25 : 0.06, INK, 10 + k);
+  }
+  // icy highlights: long streaks from the crown sweeping down the left side
+  lock([0.05, -0.95], [-0.62, -0.92], [-0.98, -0.12], 0.1, 0.25, ICE, 20);
+  lock([0.0, -0.85], [-0.5, -0.66], [-0.72, -0.2], 0.07, 0.22, ICE_DEEP, 21);
+  lock([0.12, -1.0], [-0.35, -1.1], [-0.82, -0.75], 0.06, 0.2, ICE, 22);
+  // side locks framing the face, down to the jaw
+  lock([-0.84, -0.42], [-0.98, 0.0], [-0.88, 0.55], 0.17, 0.22, INK, 23);
+  lock([0.84, -0.42], [0.98, 0.0], [0.86, 0.52], 0.17, 0.08, INK, 24);
+  lock([-0.84, -0.3], [-0.95, 0.02], [-0.88, 0.36], 0.045, 0.22, ICE, 25);
+  // the fringe, three locks poking out under the band, clear of the eyes
+  [[-0.5, -0.1], [-0.12, -0.13], [0.3, -0.1]].forEach(([fx, fy], i) =>
+    lock([fx + 0.08, -0.5], [fx + 0.03, -0.32], [fx - 0.05, fy], 0.15, 0.04, INK, 30 + i));
+
   // headband across the brow
   brush(ctx, [[hc[0] - s * 0.98, hc[1] - s * 0.2], [hc[0], hc[1] - s * 0.4], [hc[0] + s * 0.96, hc[1] - s * 0.28]], { width: s * 0.14, color: INK, seed: seed + 6, dry: 0.2, press: 1.1, tail: 0.9 });
   // the curl on top
@@ -147,12 +186,24 @@ export function drawChibi(ctx: CanvasRenderingContext2D, x: number, y: number, s
     }
     const big = p.face === 'wow' ? 1.25 : 1;
     ctx.beginPath();
-    ctx.ellipse(X, Y, s * 0.075 * big, s * 0.13 * big, 0, 0, TAU);
+    ctx.ellipse(X, Y, s * 0.085 * big, s * 0.135 * big, 0, 0, TAU);
+    ctx.fill();
+    // a blue iris inside the ink rim, deeper at the top
+    const ig = ctx.createLinearGradient(0, Y - s * 0.1 * big, 0, Y + s * 0.12 * big);
+    ig.addColorStop(0, '#1d3f8f');
+    ig.addColorStop(1, IRIS);
+    ctx.fillStyle = ig;
+    ctx.beginPath();
+    ctx.ellipse(X, Y + s * 0.015 * big, s * 0.062 * big, s * 0.105 * big, 0, 0, TAU);
+    ctx.fill();
+    ctx.fillStyle = INK;
+    ctx.beginPath();
+    ctx.ellipse(X, Y + s * 0.02 * big, s * 0.03 * big, s * 0.05 * big, 0, 0, TAU);
     ctx.fill();
     // the catch-light
     ctx.fillStyle = PAPER;
     ctx.beginPath();
-    ctx.arc(X - s * 0.025, Y - s * 0.05, s * 0.028 * big, 0, TAU);
+    ctx.arc(X - s * 0.025, Y - s * 0.05, s * 0.03 * big, 0, TAU);
     ctx.fill();
     if (p.face === 'focus') {
       // brows down
