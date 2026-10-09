@@ -6,7 +6,7 @@ import { drawRide } from '../sketch/ride';
 import { drawLight } from '../sketch/light';
 import { drawChase } from '../sketch/chase';
 import { HM, SIGN_WINDOW, drawHome } from '../sketch/home';
-import { setPoseClock } from '../sketch/art';
+import { type ActStyle, getActStyle, setActStyle, setPoseClock } from '../sketch/art';
 import { drawStill } from '../sketch/still';
 import { drawSea } from '../sketch/sea';
 import { drawDeep } from '../sketch/deep';
@@ -77,6 +77,9 @@ export function autoAt(B: number) {
   return AUTO.find((s) => B >= s.from && B < s.to - 0.01) ?? null;
 }
 
+/** every act between the book-ends is drawn in its own art style (only him: the scenery stays ink) */
+const ACT_STYLE: Record<string, ActStyle> = { Run: 'pixel', Fold: 'clay', Wave: 'water', Deep: 'chalk', Light: 'comic', Chase: 'hose' };
+
 export function chapterAt(B: number) {
   let i = 0;
   while (i < CHAPTERS.length - 1 && B >= CHAPTERS[i + 1].from) i++;
@@ -86,16 +89,22 @@ export function chapterAt(B: number) {
 setCuts((name) => CHAPTERS.find((c) => c.name === name)!.from);
 // the storyboard wall's panels: each chapter at its best moment (local beats)
 const WALL_AT: Record<string, number> = { Still: 2.6, Run: 5.3, Fold: 4.6, Wave: 3.3, Deep: 3.0, Light: 4.62, Chase: 2.0, Home: 4.9 };
-setWallSources(CHAPTERS.map((c) => ({ draw: c.draw!, from: c.from, at: WALL_AT[c.name] ?? 2 })));
+// (each panel in its act's own art style)
+setWallSources(CHAPTERS.map((c) => ({
+  draw: (f: Frame, L: number) => { const was = getActStyle(); setActStyle(ACT_STYLE[c.name] ?? null); c.draw!(f, L); setActStyle(was); },
+  from: c.from, at: WALL_AT[c.name] ?? 2,
+})));
 
 export function drawReel(f: Frame) {
   setPoseClock(f.t);
   const c = CHAPTERS[chapterAt(f.B)];
+  setActStyle(ACT_STYLE[c.name] ?? null);
   if (c.draw) c.draw(f, f.B - c.from);
   else {
     f.ctx.fillStyle = '#0b0a09';
     f.ctx.fillRect(0, 0, f.w, f.h);
   }
+  setActStyle(null);
   // the red circle carries the cuts between chapters
   drawCircleCuts(f);
 }

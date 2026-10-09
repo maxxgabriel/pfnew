@@ -20,7 +20,8 @@ import { hurry, queue } from './load';
 const files = import.meta.glob('../assets/sketch/*.webp', { query: '?url', import: 'default', eager: true }) as Record<string, string>;
 /** the order the film first needs each sheet (scripts: grep the chapters in reel order); others load last */
 const FIRST_USE = ['still', 'ib_wake', 'curious', 'firststep', 'idle', 'walk8', 'run8', 'sprint8', 'moonwalk6', 'chase', 'eraser', 'popup', 'roto', 'rubberhose', 'runoff', 'style_chalk', 'style_clay', 'style_comic', 'style_pixel', 'style_water', 'acro', 'fall', 'hero', 'ib_rise', 'home', 'leap', 'ride', 'brushprop', 'surf', 'wave', 'swim', 'whale', 'bye', 'comedy', 'escape', 'saber', 'saberdraw', 'saberlock', 'swing', 'broom', 'broom_wink', 'closeup', 'hat', 'paint', 'extra', 'firetornado', 'ftkick', 'powerup', 'ib_stand', 'ib_turn', 'ib_offer', 'sign', 'turnA', 'turnB'];
-const prioOf = (k: string) => { const i = FIRST_USE.indexOf(k.replace(/_\d+$/, '')); return i < 0 ? 100 : i; };
+// a restyled twin (style-key) loads just after its ink drawing
+const prioOf = (k: string) => { const tw = /^[a-z]+-/.test(k); const i = FIRST_USE.indexOf(k.replace(/^[a-z]+-/, '').replace(/_\d+$/, '')); return (i < 0 ? 100 : i) + (tw ? 0.5 : 0); };
 const SRC: Record<string, string> = {};
 for (const [path, url] of Object.entries(files)) SRC[path.split('/').pop()!.replace('.webp', '')] = url;
 
@@ -118,6 +119,9 @@ export function poseHeight(k: string, face: number) {
 
 /** draw pose `k` with its foot point at (x, y), its face `face` pixels wide */
 export function drawPose(ctx: CanvasRenderingContext2D, k: string, x: number, y: number, face: number, o: PoseOpts = {}) {
+  // in a styled act, his restyled twin of this drawing (if there is one), at the ink drawing's height
+  const st = styledTwin(k);
+  if (st) return drawPose(ctx, st, x, y, twinFace(k, st, face), { ...o, boil: o.boil ?? 0.004 });
   const m = M[k];
   const im = m && img(k);
   if (!m || !im) return;
@@ -189,6 +193,8 @@ export function drawArt(ctx: CanvasRenderingContext2D, k: string, cx: number, cy
 
 /** where pose `k`'s light-blade runs (hilt end first), on screen, drawn like drawPose(ctx, k, x, y, face, o) */
 export function bladeOf(k: string, x: number, y: number, face: number, o: PoseOpts = {}): [[number, number], [number, number]] | null {
+  const st = styledTwin(k);
+  if (st) return bladeOf(st, x, y, twinFace(k, st, face), o);
   const m = M[k] as Meta & { blade?: [number, number, number, number] };
   if (!m?.blade) return null;
   const s = poseScale(k, face), sq = o.squash ?? 1;
@@ -273,4 +279,69 @@ export function ib(pose: string, to: string, L: number, at: number, key: string,
   if (pose !== to || L < at || L >= at + span) return pose;
   const k = `${key}_${L < at + span / 2 ? 0 : 1}`;
   return hasPose(k) ? k : pose;
+}
+
+/* ------------------------------------------------------------ the other art styles */
+
+/** the five other styles he can break into, and a flash colour for each */
+export const STYLES = ['pixel', 'water', 'clay', 'chalk', 'comic'] as const;
+export type Style = (typeof STYLES)[number];
+const STYLE_FLASH: Record<Style, string> = { pixel: '#2bff88', water: '#2bd4ff', clay: '#ffd23a', chalk: '#f4f1e6', comic: '#ff2e63' };
+
+/**
+ * A style moment: for beats [from, to) he is drawn as `styleKey` (a drawing in another art style)
+ * instead of the ink drawing `inkPose`, matched to the ink drawing's height so he doesn't change size.
+ * He glitches in and out: sliced into three bands that jump sideways, with a flash of the style's
+ * colour. Returns true when it drew him (the caller skips the ink drawing then).
+ */
+export function styleMoment(
+  ctx: CanvasRenderingContext2D, w: number, h: number, L: number, from: number, to: number,
+  style: Style, styleKey: string, inkPose: string, x: number, y: number, face: number,
+  o: { flip?: boolean; rot?: number; t?: number } = {},
+): boolean {
+  if (L < from || L >= to || !hasPose(styleKey) || !img(styleKey)) return false;
+  const t = o.t ?? clock;
+  const span = Math.min(0.12, (to - from) * 0.25);
+  const edge = Math.min(L - from, to - L);
+  const glitch = edge < span ? 1 - edge / span : 0;
+  const sc = (poseHeight(inkPose, face) || face * 2.5) / figHeight(styleKey);
+  const fh = figHeight(styleKey) * sc;
+  const top = y - fh * 1.08, bandH = (y - top) / 3;
+  for (let b = 0; b < 3; b++) {
+    const jx = glitch * face * 0.5 * Math.sin(b * 2.7 + Math.floor(t * 24));
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(x - face * 5, top + b * bandH, face * 10, bandH + 1);
+    ctx.clip();
+    drawFig(ctx, styleKey, x + jx, y, sc, { flip: o.flip, rot: o.rot });
+    ctx.restore();
+  }
+  if (glitch > 0.6) {
+    ctx.save();
+    ctx.globalAlpha = (glitch - 0.6) * 0.45;
+    ctx.fillStyle = STYLE_FLASH[style];
+    ctx.fillRect(0, 0, w, h);
+    ctx.restore();
+  }
+  return true;
+}
+
+/* ------------------------------------------------------------ an art style per act */
+
+/** the acts' art styles: every drawing of him in a styled act is swapped for its twin `${style}-${key}` */
+export type ActStyle = 'pixel' | 'water' | 'clay' | 'chalk' | 'comic' | 'hose';
+let actStyle: ActStyle | null = null;
+/** set by the conductor for each act (null: his own ink) */
+export const setActStyle = (s: ActStyle | null) => { actStyle = s; };
+export const getActStyle = () => actStyle;
+function styledTwin(k: string): string | null {
+  if (!actStyle || k.includes('-')) return null;
+  const tw = `${actStyle}-${k}`;
+  return tw in M && tw in SRC ? tw : null;
+}
+/** the face width that draws the twin exactly as tall as the ink drawing would be */
+function twinFace(k: string, tw: string, face: number) {
+  const want = poseHeight(k, face);
+  const s = want / Math.max(1, M[tw].foot[1] - M[tw].top);
+  return (s * faceOf(tw)) / sizeOf(tw);
 }

@@ -75,6 +75,13 @@ themselves, not to the docs: *"you report to me and not the docs"*.
 
 ## 3. Decisions (most recent first)
 
+**Round 27 — a different art style per act:** *"lets use the other art styles
+frequently as well not just in first act"* → *"how about we have different art
+style for different acts and at end in the last screen while hes standing still
+we change per 2 secs"*. Picked: only he changes (scenery stays ink); story fit
+(Run pixel, Fold clay, Wave watercolour, Deep chalk, Light comic, Chase rubber
+hose; Still and Home ink); the last screen cycles all seven looks every 2 s.
+
 **Round 26 — the polish pack, done:** *"fix these"* (the 13.4 MB preview and the
 polish pack still to do). Faster loading (page ~160 KB, drawings stream in
 story order, 8 MB total instead of 13.4 MB inlined), in-between drawings for

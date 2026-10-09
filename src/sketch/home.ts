@@ -3,9 +3,9 @@ import { brush } from '../core/brush';
 import type { Frame } from '../core/frame';
 import { type Pt, TAU, clamp, ease, lerp, seg } from '../core/math';
 import { drawSprite, glow } from '../core/sprites';
-import { artSize, drawArt, drawArtFoot, drawPose, ib } from './art';
+import { artSize, drawArt, drawArtFoot, drawPose, ib, poseHeight, setActStyle } from './art';
 import { drawVfx, vfxAspect } from './bg';
-import { INK, RED, cycle, drawGround, drawPaper, drawSpark, drawTitle, faceOf, idlePose , titleFit } from './common';
+import { INK, RED, cycle, drawGround, drawPaper, drawSpark, drawTitle, faceOf, titleFit } from './common';
 import { dryStreak, flash, impactFrame, letterbox, shockRing } from './fx';
 import { drawStill } from './still';
 import { drawWall } from './wall';
@@ -359,7 +359,11 @@ export function drawHome(f0: Frame, L: number) {
     if (drawing) pose = 'sign_0';
     else if (signedAt >= 0) pose = t - signedAt < 1.4 ? (Math.floor(t * 6) % 2 ? 'sign_1' : 'home_2') : 'sign_3';
   }
-  if (L > HM.offer + 0.5 && L < HM.wave[0] && sig.length === 0) pose = idlePose(f, 4) ?? pose;
+  // the last screen: while he stands holding out the brush, his art style changes every 2 seconds
+  const cycling = L > HM.offer + 0.4 && L < HM.wave[0] && !drawing && pose === 'home_3';
+  const CYC = [null, 'pixel', 'water', 'clay', 'chalk', 'comic', 'hose'] as const;
+  const cyc = cycling ? CYC[Math.floor(t / 2) % CYC.length] : null;
+  const switchGlitch = cycling ? Math.max(0, 1 - (t % 2) / 0.14) : 0;
   if (L > HM.wave[0]) pose = L < HM.wave[0] + 0.35 ? 'bye_0' : 'bye_1';
   if (L > HM.walk[0]) {
     const u = seg(L, HM.walk[0], HM.walk[1]);
@@ -387,7 +391,29 @@ export function drawHome(f0: Frame, L: number) {
       dryStreak(ctx, [sx, y0], [sx, y0 + face * 1.8], face * 0.16, '#6aa6d6', 0.3, 40 + i);
     }
   }
-  drawPose(ctx, pose, x, y, face * scale, { alpha, rot, flip });
+  if (cycling) {
+    // each change glitches through: the figure sliced into bands that jump sideways, a flash of the new style
+    setActStyle(cyc);
+    const top = y - poseHeight(pose, face) * 1.1, bandH = (y - top) / 3;
+    for (let b = 0; b < 3; b++) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(x - face * 5, top + b * bandH, face * 10, bandH + 1);
+      ctx.clip();
+      // white chalk on cream paper: he stands on a little slate of blackboard (his own silhouette, grown)
+      if (cyc === 'chalk') { setActStyle(null); drawPose(ctx, pose, x, y + face * 0.04, face * scale * 1.12, { tint: '#26332e', flip }); setActStyle(cyc); }
+      drawPose(ctx, pose, x + switchGlitch * face * 0.5 * Math.sin(b * 2.7 + Math.floor(t * 24)), y, face * scale, { alpha, rot, flip });
+      ctx.restore();
+    }
+    setActStyle(null);
+    if (switchGlitch > 0.5) {
+      ctx.save();
+      ctx.globalAlpha = (switchGlitch - 0.5) * 0.3;
+      ctx.fillStyle = ['#f4efe4', '#2bff88', '#2bd4ff', '#ffd23a', '#e9ecf2', '#ff2e63', '#1b1714'][Math.floor(t / 2) % 7];
+      ctx.fillRect(0, 0, w, h);
+      ctx.restore();
+    }
+  } else drawPose(ctx, pose, x, y, face * scale, { alpha, rot, flip });
   drawTornado(ctx, x, gy + face * 0.2, torW, t + 0.13, fire * 0.22);
   // the wind-up: the fire collapses into his striking foot, a white-hot charge
   const foot: Pt = [x + face * 1.25, y - face * 0.55];

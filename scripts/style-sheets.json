@@ -1,0 +1,33 @@
+{
+  "styles": {
+    "pixel": {"ref": "ref_style_pixel.png", "desc": "crisp 32-bit PIXEL ART: chunky visible square pixels, a limited palette, hard pixel outlines, no anti-aliasing"},
+    "clay": {"ref": "ref_style_clay.png", "desc": "a CLAYMATION figure: sculpted plasticine with thumbprints, soft studio lighting, slightly lumpy stop-motion shapes"},
+    "water": {"ref": "ref_style_water.png", "desc": "a soft loose WATERCOLOUR painting: wet bleeding edges, translucent washes of indigo, black and pale blue"},
+    "chalk": {"ref": "ref_style_chalk.png", "desc": "a WHITE CHALK LINE DRAWING: rough dusty white and pale-blue chalk outlines and scribbled hatching only, no black ink, no solid fills"},
+    "comic": {"ref": "ref_style_comic.png", "desc": "a bold retro POP-ART COMIC: thick black outlines, flat saturated colours (deep royal-blue coat, bright yellow scarf, red boots, black hair with PALE blue highlights), Ben-Day halftone dots, hard cel shadows"},
+    "hose": {"ref": "ref_rubberhose.png", "desc": "a 1930s RUBBER-HOSE CARTOON: black and white only, bendy noodle arms and legs, white cartoon gloves, pie-cut eyes, a bouncy round body, the same hair shape with the antenna strand and the same scarf, slightly film-grainy"}
+  },
+  "sheets": [
+    {"name": "pixel_walk", "style": "pixel", "keys": ["walk8_0","walk8_1","walk8_2","walk8_3","walk8_4","walk8_5","walk8_6","walk8_7"]},
+    {"name": "pixel_run", "style": "pixel", "keys": ["run8_0","run8_1","run8_2","run8_3","run8_4","run8_5","run8_6","run8_7"]},
+    {"name": "pixel_misc", "style": "pixel", "keys": ["firststep_1","firststep_2","firststep_3","chase_0","chase_1"]},
+    {"name": "clay_fall", "style": "clay", "keys": ["fall_0","fall_1","fall_2","fall_3"]},
+    {"name": "clay_misc", "style": "clay", "keys": ["hero_0","home_1","acro_3","leap_2","ride_3"]},
+    {"name": "water_misc", "style": "water", "keys": ["fall_3","swim_1"]},
+    {"name": "chalk_misc", "style": "chalk", "keys": ["swim_3","surf_2"]},
+    {"name": "comic_draw", "style": "comic", "keys": ["saberdraw_0","saberdraw_1","saberdraw_2","saberdraw_3","saber_1"], "blade": true},
+    {"name": "comic_duel", "style": "comic", "keys": ["saber_2","saber_3","saber_4","saber_5"], "blade": true},
+    {"name": "comic_escape", "style": "comic", "keys": ["escape_0","escape_1","escape_2","escape_3"], "blade": true},
+    {"name": "comic_misc", "style": "comic", "keys": ["curious","hero_0","home_1","bye_0","comedy_3","still_2"]},
+    {"name": "comic_misc2", "style": "comic", "keys": ["leap_2","swing_0","swing_1","swing_2","fall_0","fall_3"]},
+    {"name": "hose_broom", "style": "hose", "keys": ["broom_0","broom_1","broom_2","broom_3","broom_5"]},
+    {"name": "hose_misc", "style": "hose", "keys": ["broom_wink_0","broom_wink_1","broom_wink_2","hat_1","leap_3"]},
+    {"name": "hose_misc2", "style": "hose", "keys": ["paint_0","paint_1","ride_0","ride_2","fall_0"]}
+  ],
+  "reuse": [
+    {"sheet": "sty_ride_clay", "style": "clay", "keys": ["ride_0","ride_1","ride_2"]},
+    {"sheet": "sty_surf_water", "style": "water", "keys": ["surf_0","surf_1","surf_2"]},
+    {"sheet": "sty_swim_chalk", "style": "chalk", "keys": ["swim_0","swim_1","swim_2"]}
+  ],
+  "final": {"name": "final_styles", "key": "home_3", "styles": ["pixel","water","clay","chalk","comic","hose"]}
+}

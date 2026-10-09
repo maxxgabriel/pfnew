@@ -84,6 +84,16 @@ seam.
 - **Link preview.** Open Graph and Twitter tags in `index.html`, image
   `public/og.jpg` (made with `scripts/og-card.mjs`). Build with
   `SITE_URL=https://… npm run build` so the image URL is absolute.
+- **An art style per act (round 27).** Only he changes, the scenery stays
+  ink: Run pixel art, Fold claymation, Wave watercolour, Deep chalk, Light
+  pop-art comic, Chase 1930s rubber hose; Still and Home stay ink. The
+  conductor sets `setActStyle` per chapter (`ACT_STYLE`, `reel/reel.ts`) and
+  `drawPose`/`bladeOf` swap any drawing for its twin `<style>-<key>` (drawn at
+  the ink drawing's height) when one exists. Twins: `scripts/style-sheets.json`
+  → reference strips → `scripts/gen-act-styles.sh` (Codex) →
+  `scripts/cut-act-styles.py`. The last screen (Home, holding out the brush)
+  cycles ink → pixel → watercolour → clay → chalk (on a blackboard silhouette)
+  → comic → rubber hose every 2 s, glitching on each change.
 - **Perf** (headless, JS ms/frame): 0.3 – 3.4 everywhere.
 - Codex image calls: use `--image=a.png --image=b.png` (a bare `-i` swallows
   the prompt as another file), `< /dev/null`.
