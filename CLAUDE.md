@@ -32,6 +32,7 @@ Before changing anything, read:
   are cut from the Reel ("very weird"). Round 17: Flock (murmuration), the
   painted birds, Neon (the letter city) and Shadow's shard cloud are cut.
   Round 23: the Spider-Man-style cameo (the Slinger, then the web-swinger) is cut.
+  Round 25: the ink cat and the visible brush laying the run's line are cut.
 - **No clusters of small things.** The owner finds many small things
   together "yuck" (flocks, swarms, shard clouds, dense particle fields).
   Prefer one strong shape over many small ones.

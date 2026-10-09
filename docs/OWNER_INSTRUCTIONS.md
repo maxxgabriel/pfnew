@@ -75,6 +75,11 @@ themselves, not to the docs: *"you report to me and not the docs"*.
 
 ## 3. Decisions (most recent first)
 
+**Round 25:** *"the starting cat and paint brush looks weird. remove the cat
+entirely"* → the ink cat is gone (Run and Home, code and drawings), and so is
+the visible paint brush laying the line in Run; the line still draws itself
+ahead of his feet.
+
 **Round 24 — ideation picks built:** from a list of 17 ideas the owner picked
 *"2,6,10,11,13,14,15"*: bullet-time duel, red-circle match cuts, the wink at
 the viewer, the ink cat, the style-shift run, the rotoscope beat, the

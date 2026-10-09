@@ -8,7 +8,6 @@ import { drawVfx, vfxAspect } from './bg';
 import { INK, RED, cycle, drawGround, drawPaper, drawSpark, drawTitle, faceOf, idlePose , titleFit } from './common';
 import { dryStreak, flash, impactFrame, letterbox, shockRing } from './fx';
 import { drawStill } from './still';
-import { catAt } from './run';
 import { drawWall } from './wall';
 
 /*
@@ -453,14 +452,6 @@ export function drawHome(f0: Frame, L: number) {
     ctx.globalAlpha = 0.25 + 0.2 * Math.sin(t * 3);
     drawSprite(ctx, glow('#ffd59a', 64), x + face * 0.9, y - face * 1.2, face * 1.6);
     ctx.restore();
-  }
-
-  // ---- the ink cat comes home too: it trots in and curls up asleep beside him
-  if (L > HM.stand) {
-    const u = seg(L, HM.stand, HM.offer);
-    const cx = lerp(-face * 2, gx + face * 1.45, ease.out2(u));
-    if (u < 1) catAt(ctx, `cat_run_${Math.floor(t * 12) % 6}`, cx, gy, face);
-    else catAt(ctx, 'cat_pose_4', cx, gy + face * 0.04, face);
   }
 
   // ---- after the credits: a head round the edge of the page, a grin and a wave

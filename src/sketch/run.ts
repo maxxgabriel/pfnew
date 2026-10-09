@@ -2,7 +2,7 @@ import { brush } from '../core/brush';
 import type { Frame } from '../core/frame';
 import { type Pt, TAU, clamp, ease, hash, lerp, seg } from '../core/math';
 import { paperTile } from '../core/sprites';
-import { artSize, drawArtFoot, drawFig, figHeight, figPoint, hasPose, meta, poseHeight, poseScale, drawPose } from './art';
+import { artSize, drawArtFoot, drawFig, figHeight, hasPose, meta, poseHeight, poseScale, drawPose } from './art';
 import { drawBg } from './bg';
 import { INK, PAPER, drawSpark, drawSparkStreak, idlePose } from './common';
 import { dryStreak } from './fx';
@@ -44,12 +44,6 @@ export const RN = {
   lunge: [5.5, 5.8] as const,
   hopGap: [6.45, 7.05] as const,
   skid: [7.95, 8.2] as const,
-  /** the ink cat: creeps in, pounces on the Spark and runs off with it; drops it at the edge and sits watching */
-  catIn: [0.9, 1.45] as const,
-  pounce: [1.45, 1.75] as const,
-  catLook: [3.0, 3.3] as const,
-  catDrop: 7.35,
-  catSit: 7.6,
   /** mid-sprint he runs through five other art styles and snaps back to ink */
   styles: [4.0, 4.7] as const,
   /** the runoff gag in 1930s rubber hose, then an iris closes on him as he drops */
@@ -70,51 +64,6 @@ function eraserGap(L: number) {
     if (L <= keys[i + 1][0]) return lerp(keys[i][1], keys[i + 1][1], ease.inOut2(seg(L, keys[i][0], keys[i + 1][0])));
   }
   return keys[keys.length - 1][1];
-}
-
-const CAT_H: Record<string, number> = { cat_run: 1.15, cat_pose_0: 1.55, cat_pose_1: 1.2, cat_pose_2: 1.2, cat_pose_3: 1.35, cat_pose_4: 0.85 };
-/** draw the ink cat, `h` faces tall, its feet at (x, y) */
-export function catAt(ctx: CanvasRenderingContext2D, k: string, x: number, y: number, face: number, o: { flip?: boolean; rot?: number } = {}) {
-  if (!hasPose(k)) return 1;
-  const sc = (face * (CAT_H[k] ?? CAT_H[k.replace(/_\d+$/, '')] ?? 1.2)) / figHeight(k);
-  drawFig(ctx, k, x, y, sc, o);
-  return sc;
-}
-
-/** the cat in chapter II; returns where the Spark is while it's in the cat's mouth (null when it isn't) */
-function drawCat(ctx: CanvasRenderingContext2D, f: Frame, L: number, sparkX: number, gy: number, edgeX: number, face: number, t: number, back: boolean): Pt | null {
-  if (L < RN.catIn[0] || L > RN.end) return null;
-  const { w } = f;
-  const r = face * 0.17;
-  // it creeps in from the right, low, eyes on the Spark
-  if (L < RN.pounce[0]) {
-    const u = ease.out2(seg(L, RN.catIn[0], RN.catIn[1]));
-    catAt(ctx, 'cat_pose_3', lerp(w + face * 2, sparkX + face * 0.9, u), gy, face, { flip: true });
-    return null;
-  }
-  // the pounce: it lands on the Spark
-  if (L < RN.pounce[1]) {
-    const u = seg(L, RN.pounce[0], RN.pounce[1]);
-    const x = lerp(sparkX + face * 0.9, sparkX - face * 0.4, ease.inOut2(u));
-    catAt(ctx, 'cat_pose_1', x, gy - Math.sin(u * Math.PI) * face * 0.9, face, { flip: true });
-    return null;
-  }
-  // off with it, ahead of him: a run cycle locked to the ground it covers, the Spark in its mouth
-  const x = Math.min(sparkX - face * 0.75, edgeX - face * 0.7);
-  if (L >= RN.catSit) {
-    catAt(ctx, 'cat_pose_0', edgeX - face * 0.7, gy, face);
-    return null;
-  }
-  let k = `cat_run_${((Math.floor(x / (face * 1.6) * 6) % 6) + 6) % 6}`;
-  if (back) k = 'cat_pose_3';
-  if (L > RN.catLook[0] && L < RN.catLook[1]) k = 'cat_pose_3';
-  const sc = catAt(ctx, k, x, gy, face);
-  if (L > RN.catDrop) return null;
-  // the Spark at its mouth (the front of its head)
-  const [aw] = artSize(k);
-  const m = figPoint(k, [aw * 0.86, (meta(k)?.top ?? 0) + figHeight(k) * 0.45], x, gy, sc);
-  void w; void r; void t;
-  return m;
 }
 
 /** where he is along the page at local beat L (world px; he starts where chapter I left him) */
@@ -302,21 +251,6 @@ export function drawRun(f: Frame, L: number) {
     ctx.restore();
   }
 
-  // the brush laying the line
-  if (reach < edgeX - 1 && L > RN.walk[0] - 0.3) {
-    const bx = reach, by = gy + face * 0.05;
-    ctx.save();
-    ctx.strokeStyle = '#8a6a44';
-    ctx.lineCap = 'round';
-    ctx.lineWidth = face * 0.09;
-    ctx.beginPath();
-    ctx.moveTo(bx + face * 0.7, by - face * 1.5);
-    ctx.lineTo(bx + face * 0.1, by - face * 0.2);
-    ctx.stroke();
-    brush(ctx, [[bx + face * 0.1, by - face * 0.2], [bx + face * 0.03, by - face * 0.08], [bx, by]], { width: face * 0.14, color: INK, seed: 4, dry: 0.2, press: 1.1, tail: 0.05, halo: 0 });
-    ctx.restore();
-  }
-
   // ---- him: the cycle follows the distance he covers; how fast you scroll is how fast he goes
   const vB = f.vB;
   const back = vB < -0.25;
@@ -451,9 +385,6 @@ export function drawRun(f: Frame, L: number) {
   let sx = Math.max(ahead0, X + face * 2.6);
   const hopPh = (sx - ahead0) / (face * 2.2);
   let sy = gy - r - Math.abs(Math.sin(hopPh * Math.PI + (L < 0.3 ? t * 4 : 0))) * face * 0.6;
-  // ---- the ink cat, and whether it has the Spark in its mouth
-  const carried = drawCat(ctx, f, L, sx, gy, edgeX, face, t, back);
-  if (carried) { sx = carried[0]; sy = carried[1]; }
   let prev: Pt | null = null;
   const dive = seg(L, 7.5, 8.3);
   if (dive > 0) {
