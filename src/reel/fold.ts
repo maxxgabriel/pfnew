@@ -526,7 +526,7 @@ export function drawFolding(f: Frame, L: number) {
   drawSky(f);
   drawNight(ctx, w, h, t, night);
   // ---- (THE SKETCH) after take-off the paper countryside gives way to the painted night sea he will fall into
-  const painted = sketchSea ? ease.inOut2(seg(L, FD.turn[0] + 0.2, FD.fly + 0.6)) : 0;
+  const painted = sketchSea ? ease.inOut2(seg(L, FD.turn[0] + 0.1, FD.fly + 0.15)) : 0;
   if (painted > 0) drawBgXY(ctx, 'bg_inksea', w, h, lerp(0.0, 0.05, seg(L, FD.fly, FD.end)), 0, painted, 1.35);
 
   // ---- the camera: over the paper while it folds, then behind the crane

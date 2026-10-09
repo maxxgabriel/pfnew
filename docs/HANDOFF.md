@@ -45,7 +45,19 @@ seam.
 - **Idle life.** `Frame.idle` = seconds since the playhead last moved
   (`main.ts`; jumps and scrolls reset it; dev: `__film.idle(s)`).
   `idlePose(f)` in `sketch/common.ts`.
-- **Perf** (headless, JS ms/frame): 0.3 – 3.5 everywhere.
+- **Self-playing moments** (round 19 polish, owner's idea): `AUTO` in
+  `reel/reel.ts` lists key moments; when the playhead is inside one and the
+  reader has let go (no wheel/touch/key for 250 ms), `main.ts` scrolls the
+  page itself at that moment's rate; any input takes control back. Dev:
+  `__film.autoplay(false)` (shoot.mjs turns it off).
+- **Desktop stage.** Wider than 0.75:1, the film renders into a centred
+  portrait column (`sw = h × 0.62`, offscreen `stage` canvas) and the sides
+  show the same frame shrunk and stretched (a cheap blur), dimmed. Scenes
+  only ever see `frame.w = sw`.
+- **Sizes.** `SIZE` in `sketch/art.ts` corrects each sheet so his head is
+  the same size in every drawing; tune it on `scripts/pose-lineup.html`.
+- `scripts/defringe.py` despills magenta from all cut-outs.
+- **Perf** (headless, JS ms/frame): 0.3 – 3.4 everywhere.
 - Codex image calls: use `--image=a.png --image=b.png` (a bare `-i` swallows
   the prompt as another file), `< /dev/null`.
 

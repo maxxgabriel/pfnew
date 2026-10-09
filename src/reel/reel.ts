@@ -97,7 +97,7 @@ export function reelHud(B: number) {
   const home = CHAPTERS[CHAPTERS.length - 1].from;
   return {
     paper: c.paper,
-    hello: B > home + HM.offer,
+    hello: B > home + HM.offer && B < home + HM.loop[0] + 0.2,
     /** the page waits for your signature (a pad over the page takes the touch there) */
     sign: B > home + SIGN_WINDOW[0] && B < home + SIGN_WINDOW[1],
   };

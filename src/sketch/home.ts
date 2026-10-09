@@ -256,7 +256,7 @@ export function drawHome(f: Frame, L: number) {
     drawSeal(ctx, sealAt[0], sealAt[1], face * 0.95 * lerp(1.6, 1, ease.out3(hit)), -0.06, Math.min(1, hit * 2));
     const rk = seg(L, HM.hit, HM.hit + 0.45);
     if (rk > 0 && rk < 1) {
-      shockRing(ctx, sealAt[0], sealAt[1], face * 3, rk, '#ff7a2a', face * 0.12);
+      shockRing(ctx, sealAt[0], sealAt[1], face * 2.2, rk, INK, face * 0.07, 5);
       ctx.save();
       ctx.globalCompositeOperation = 'multiply';
       ctx.globalAlpha = 0.35 * (1 - rk);
