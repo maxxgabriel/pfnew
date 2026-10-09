@@ -75,6 +75,12 @@ themselves, not to the docs: *"you report to me and not the docs"*.
 
 ## 3. Decisions (most recent first)
 
+**Round 24 — ideation picks built:** from a list of 17 ideas the owner picked
+*"2,6,10,11,13,14,15"*: bullet-time duel, red-circle match cuts, the wink at
+the viewer, the ink cat, the style-shift run, the rotoscope beat, the
+storyboard-wall ending. (Earlier in the round: style-shift run + polish pack;
+the polish pack is still to do.)
+
 **Round 23 — cameo removed:** *"lets get it out bro"* → the web-swinger
 cameo is taken out completely (code, hold, drawings); the page catches him on
 its own again. Don't bring a Spider-Man-style cameo back unless asked.

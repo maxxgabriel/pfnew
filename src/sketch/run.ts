@@ -2,7 +2,7 @@ import { brush } from '../core/brush';
 import type { Frame } from '../core/frame';
 import { type Pt, TAU, clamp, ease, hash, lerp, seg } from '../core/math';
 import { paperTile } from '../core/sprites';
-import { artSize, drawArtFoot, drawPose } from './art';
+import { artSize, drawArtFoot, drawFig, figHeight, figPoint, hasPose, meta, poseHeight, poseScale, drawPose } from './art';
 import { drawBg } from './bg';
 import { INK, PAPER, drawSpark, drawSparkStreak, idlePose } from './common';
 import { dryStreak } from './fx';
@@ -44,6 +44,14 @@ export const RN = {
   lunge: [5.5, 5.8] as const,
   hopGap: [6.45, 7.05] as const,
   skid: [7.95, 8.2] as const,
+  /** the ink cat: creeps in, pounces on the Spark and runs off with it; drops it at the edge and sits watching */
+  catIn: [0.9, 1.45] as const,
+  pounce: [1.45, 1.75] as const,
+  catLook: [3.0, 3.3] as const,
+  catDrop: 7.35,
+  catSit: 7.6,
+  /** mid-sprint he runs through five other art styles and snaps back to ink */
+  styles: [4.0, 4.7] as const,
   /** the runoff gag in 1930s rubber hose, then an iris closes on him as he drops */
   hose: [8.0, 8.9] as const,
   iris: [8.6, 8.95] as const,
@@ -62,6 +70,51 @@ function eraserGap(L: number) {
     if (L <= keys[i + 1][0]) return lerp(keys[i][1], keys[i + 1][1], ease.inOut2(seg(L, keys[i][0], keys[i + 1][0])));
   }
   return keys[keys.length - 1][1];
+}
+
+const CAT_H: Record<string, number> = { cat_run: 1.15, cat_pose_0: 1.55, cat_pose_1: 1.2, cat_pose_2: 1.2, cat_pose_3: 1.35, cat_pose_4: 0.85 };
+/** draw the ink cat, `h` faces tall, its feet at (x, y) */
+export function catAt(ctx: CanvasRenderingContext2D, k: string, x: number, y: number, face: number, o: { flip?: boolean; rot?: number } = {}) {
+  if (!hasPose(k)) return 1;
+  const sc = (face * (CAT_H[k] ?? CAT_H[k.replace(/_\d+$/, '')] ?? 1.2)) / figHeight(k);
+  drawFig(ctx, k, x, y, sc, o);
+  return sc;
+}
+
+/** the cat in chapter II; returns where the Spark is while it's in the cat's mouth (null when it isn't) */
+function drawCat(ctx: CanvasRenderingContext2D, f: Frame, L: number, sparkX: number, gy: number, edgeX: number, face: number, t: number, back: boolean): Pt | null {
+  if (L < RN.catIn[0] || L > RN.end) return null;
+  const { w } = f;
+  const r = face * 0.17;
+  // it creeps in from the right, low, eyes on the Spark
+  if (L < RN.pounce[0]) {
+    const u = ease.out2(seg(L, RN.catIn[0], RN.catIn[1]));
+    catAt(ctx, 'cat_pose_3', lerp(w + face * 2, sparkX + face * 0.9, u), gy, face, { flip: true });
+    return null;
+  }
+  // the pounce: it lands on the Spark
+  if (L < RN.pounce[1]) {
+    const u = seg(L, RN.pounce[0], RN.pounce[1]);
+    const x = lerp(sparkX + face * 0.9, sparkX - face * 0.4, ease.inOut2(u));
+    catAt(ctx, 'cat_pose_1', x, gy - Math.sin(u * Math.PI) * face * 0.9, face, { flip: true });
+    return null;
+  }
+  // off with it, ahead of him: a run cycle locked to the ground it covers, the Spark in its mouth
+  const x = Math.min(sparkX - face * 0.75, edgeX - face * 0.7);
+  if (L >= RN.catSit) {
+    catAt(ctx, 'cat_pose_0', edgeX - face * 0.7, gy, face);
+    return null;
+  }
+  let k = `cat_run_${((Math.floor(x / (face * 1.6) * 6) % 6) + 6) % 6}`;
+  if (back) k = 'cat_pose_3';
+  if (L > RN.catLook[0] && L < RN.catLook[1]) k = 'cat_pose_3';
+  const sc = catAt(ctx, k, x, gy, face);
+  if (L > RN.catDrop) return null;
+  // the Spark at its mouth (the front of its head)
+  const [aw] = artSize(k);
+  const m = figPoint(k, [aw * 0.86, (meta(k)?.top ?? 0) + figHeight(k) * 0.45], x, gy, sc);
+  void w; void r; void t;
+  return m;
 }
 
 /** where he is along the page at local beat L (world px; he starts where chapter I left him) */
@@ -295,12 +348,12 @@ export function drawRun(f: Frame, L: number) {
       y = gy - Math.sin(u * Math.PI) * face * 0.5;
     }
   } else if (L < RN.flip[1]) {
+    // the rotoscope beat: a butterfly twist over the gap in eight fluid, film-traced drawings
     const u = seg(L, RN.flip[0], RN.flip[1]);
-    pose = u < 0.45 ? 'acro_1' : 'acro_2';
-    rot = ease.inOut2(u) * Math.PI * 2 - (u < 0.45 ? 0 : Math.PI);
-    y = gy - Math.sin(u * Math.PI) * face * 2.2;
+    pose = `roto_${Math.min(7, Math.floor(u * 8))}`;
+    y = gy - Math.sin(u * Math.PI) * face * 1.3;
   } else if (L < RN.land[1]) {
-    pose = 'acro_3';
+    pose = 'roto_7';
   } else if (L < RN.edge) {
     pose = runCycle(RN.land[1], 4.2);
   } else if (L < RN.look) pose = 'rubberhose_0';
@@ -312,7 +365,52 @@ export function drawRun(f: Frame, L: number) {
   const idle = L > 0.3 && L < RN.eraser - 0.3 ? idlePose(f) : null;
   if (idle) { pose = idle; rot = 0; y = gy; }
   if (!back && (L > RN.run[0] && L < RN.flip[0] || L > RN.land[1] && L < RN.edge)) dryStreak(ctx, [X - face * 0.6, gy - face * 1.25], [X - face * (fast ? 3.8 : 2.8), gy - face * 1.2], face * 0.3, INK, fast ? 0.35 : 0.22, 5);
-  drawPose(ctx, pose, X, y, face, { rot });
+  // ---- the style shift: for a moment he runs as pixel art, watercolour, clay, chalk, a comic — then snaps back to ink
+  const STY = ['style_pixel', 'style_water', 'style_clay', 'style_chalk', 'style_comic'].filter((k) => hasPose(`${k}_0`));
+  const sk = seg(L, RN.styles[0], RN.styles[1]);
+  if (sk > 0 && sk < 1 && STY.length && !back) {
+    const n = STY.length;
+    const i = Math.min(n - 1, Math.floor(sk * n));
+    const d = X - xAt(RN.run[0], f);
+    const k = `${STY[i]}_${((Math.floor(d / (face * 4.2) * 6) % 6) + 6) % 6}`;
+    const sc = poseHeight(pose, face) / figHeight(k);
+    // chalk is white: for its moment the whole page is a blackboard
+    if (STY[i] === 'style_chalk') {
+      ctx.save();
+      ctx.fillStyle = '#23302b';
+      ctx.fillRect(0, 0, w, h);
+      ctx.strokeStyle = 'rgba(235,240,232,0.55)';
+      ctx.lineWidth = Math.max(1.5, face * 0.04);
+      ctx.beginPath();
+      ctx.moveTo(0, y + face * 0.06);
+      ctx.lineTo(w, y + face * 0.04);
+      ctx.stroke();
+      ctx.restore();
+    }
+    // a glitch where one style hands over to the next: the figure sliced into bands that jump sideways
+    const edge = Math.abs(sk * n - Math.round(sk * n));
+    const glitch = edge < 0.12 ? 1 - edge / 0.12 : 0;
+    const top = y - figHeight(k) * sc * 1.05, bandH = (y - top) / 3;
+    for (let b = 0; b < 3; b++) {
+      const jx = glitch * face * 0.5 * Math.sin(b * 2.7 + Math.floor(t * 24));
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(X - face * 4, top + b * bandH, face * 8, bandH + 1);
+      ctx.clip();
+      drawFig(ctx, k, X + jx, y, sc);
+      ctx.restore();
+    }
+    if (glitch > 0.6) {
+      ctx.save();
+      ctx.globalAlpha = (glitch - 0.6) * 0.5;
+      ctx.fillStyle = ['#ff2e63', '#2bd4ff', '#ffd23a', '#7a5cff', '#2bff88'][i % 5];
+      ctx.fillRect(0, 0, w, h);
+      ctx.restore();
+    }
+  } else if (pose.startsWith('roto_')) {
+    // the traced frames carry their own rise and fall: anchor them all on the sheet's shared ground line
+    drawFig(ctx, pose, X, y, poseScale('roto_0', face), { anchor: [meta(pose)?.foot[0] ?? 0, 208] });
+  } else drawPose(ctx, pose, X, y, face, { rot });
 
   // ---- the Eraser
   if (eraserOn) {
@@ -353,6 +451,9 @@ export function drawRun(f: Frame, L: number) {
   let sx = Math.max(ahead0, X + face * 2.6);
   const hopPh = (sx - ahead0) / (face * 2.2);
   let sy = gy - r - Math.abs(Math.sin(hopPh * Math.PI + (L < 0.3 ? t * 4 : 0))) * face * 0.6;
+  // ---- the ink cat, and whether it has the Spark in its mouth
+  const carried = drawCat(ctx, f, L, sx, gy, edgeX, face, t, back);
+  if (carried) { sx = carried[0]; sy = carried[1]; }
   let prev: Pt | null = null;
   const dive = seg(L, 7.5, 8.3);
   if (dive > 0) {

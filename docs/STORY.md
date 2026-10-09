@@ -39,6 +39,18 @@ block, one heavy shape, no face).
    swipe and he cheers; a wave, a walk off, a peek; then the camera falls
    into the seal and its red becomes the Spark over the first page.
 
+Round 24 additions: a small **ink cat** steals the Spark in Run, runs ahead
+with it, drops it at the page edge and sits watching him fall; it trots in
+and curls up asleep beside him at Home. Mid-sprint a **style shift**: two
+seconds as pixel art, watercolour, claymation, chalk on a blackboard and a
+pop-art comic, glitching between them. The gap jump is a **rotoscoped**
+butterfly twist. On the broom he looks out at you and **winks**. The duel's
+second clash freezes in **bullet time**: the camera walks round the locked
+blades. **Red-circle match cuts** carry three seams (the Spark swells to fill
+the screen and lands as the next chapter's circle: the Spark, the bulb, the
+sun). After the peek, the camera pulls back to a **storyboard wall**: every
+chapter pinned up with red pins, the page one panel among them; then back in.
+
 Throughout: one red circle carries every seam it can; stop scrolling on the
 page and he passes the time (stretch, doodle, sit, nap).
 

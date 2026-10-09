@@ -8,6 +8,8 @@ import { drawVfx, vfxAspect } from './bg';
 import { INK, RED, cycle, drawGround, drawPaper, drawSpark, drawTitle, faceOf, idlePose , titleFit } from './common';
 import { dryStreak, flash, impactFrame, letterbox, shockRing } from './fx';
 import { drawStill } from './still';
+import { catAt } from './run';
+import { drawWall } from './wall';
 
 /*
  * VIII · HOME.
@@ -130,10 +132,23 @@ function rideIn(w: number, h: number, gx: number, gy: number): Pt[] {
 /** on a wide screen, how far the scene has slid into the left of the screen to make room for the contact card (0..1) */
 export function homeSide(f: Frame, L: number) {
   if (f.w < f.h * 1.25 || f.w < 700) return 0;
-  return ease.inOut2(seg(L, HM.stand - 0.2, HM.offer)) * (1 - ease.inOut2(seg(L, HM.loop[0] - 0.5, HM.loop[0])));
+  return ease.inOut2(seg(L, HM.stand - 0.2, HM.offer)) * (1 - ease.inOut2(seg(L, HM.loop[0] - 0.08, HM.loop[0] + 0.25)));
 }
 
 export function drawHome(f0: Frame, L: number) {
+  // the storyboard wall: the page pulls back to be one panel among every chapter of the film (the 'wall' hold)
+  if (f0.hold?.kind === 'wall') {
+    const side = homeSide(f0, L);
+    const sw = f0.w * lerp(1, 0.58, side);
+    if (side > 0) drawPaper(f0.ctx, f0.w, f0.h);
+    f0.ctx.save();
+    f0.ctx.beginPath();
+    f0.ctx.rect(0, 0, sw, f0.h);
+    f0.ctx.clip();
+    drawWall({ ...f0, w: sw }, f0.hold.p, (g) => drawHome({ ...f0, ctx: g, hold: null }, L), side === 0);
+    f0.ctx.restore();
+    return;
+  }
   // on a wide screen the scene lays itself out in the left part of the screen once the card arrives
   const side = homeSide(f0, L);
   if (side > 0) drawPaper(f0.ctx, f0.w, f0.h);
@@ -438,6 +453,14 @@ export function drawHome(f0: Frame, L: number) {
     ctx.globalAlpha = 0.25 + 0.2 * Math.sin(t * 3);
     drawSprite(ctx, glow('#ffd59a', 64), x + face * 0.9, y - face * 1.2, face * 1.6);
     ctx.restore();
+  }
+
+  // ---- the ink cat comes home too: it trots in and curls up asleep beside him
+  if (L > HM.stand) {
+    const u = seg(L, HM.stand, HM.offer);
+    const cx = lerp(-face * 2, gx + face * 1.45, ease.out2(u));
+    if (u < 1) catAt(ctx, `cat_run_${Math.floor(t * 12) % 6}`, cx, gy, face);
+    else catAt(ctx, 'cat_pose_4', cx, gy + face * 0.04, face);
   }
 
   // ---- after the credits: a head round the edge of the page, a grin and a wave

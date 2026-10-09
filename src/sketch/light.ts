@@ -1,11 +1,11 @@
 import type { Frame } from '../core/frame';
 import { type Pt, TAU, clamp, ease, hash, lerp, seg } from '../core/math';
 import { drawSprite, glow } from '../core/sprites';
-import { bladeOf, drawPose } from './art';
+import { bladeOf, drawFig, drawPose, figHeight, figPoint, meta } from './art';
 import { drawBg } from './bg';
 import { BLUE, RED_BLADE, bladeLight, drawBlade } from './saber';
 import { drawSpark, faceOf } from './common';
-import { impactFrame, shockRing } from './fx';
+import { impactFrame, letterbox, shockRing } from './fx';
 
 /*
  * IV · LIGHT.
@@ -70,7 +70,70 @@ function swingOf(L: number) {
 
 let split: { c: HTMLCanvasElement; ctx: CanvasRenderingContext2D } | null = null;
 
+/* ---- bullet time: the second clash freezes and the camera walks round the locked blades (the 'bullet' hold) */
+
+// the camera's walk round him: which drawing of the lock it sees, mirrored or not
+const ORBIT: [string, boolean][] = [['saberlock_0', false], ['saberlock_1', false], ['saberlock_2', false], ['saberlock_1', true], ['saberlock_0', true], ['saberlock_3', true], ['saberlock_3', false], ['saberlock_0', false]];
+
+function drawBullet(f: Frame, L: number, p: number) {
+  const { ctx, w, h } = f;
+  // the frozen moment underneath (its flicker frozen too)
+  // (a beat before the clash itself, so it isn't the negative impact frame)
+  drawLight({ ...f, hold: null, t: 11.3 }, L - 0.09, true, false);
+  const inK = ease.out3(seg(p, 0, 0.12)), outK = ease.in3(seg(p, 0.9, 1));
+  const k = inK * (1 - outK);
+  if (k <= 0) return;
+  ctx.save();
+  ctx.globalAlpha = k;
+  ctx.fillStyle = 'rgba(8,4,6,0.86)';
+  ctx.fillRect(0, 0, w, h);
+  // the orbit: hero and shadow swing round the clash point, the near one bigger and in front
+  const S = Math.min(h * 0.38, w * 0.5);
+  const cx = w / 2, cy = h * 0.6;
+  const th = ease.inOut2(seg(p, 0.08, 0.92)) * TAU;
+  const view = ORBIT[Math.min(ORBIT.length - 1, Math.floor((th / TAU) * (ORBIT.length - 1) + 0.5))];
+  const D = S * 0.5;
+  const fig = (key: string, flip: boolean, side: number, dark: boolean) => {
+    const depth = Math.sin(th) * side;
+    const x = cx - Math.cos(th) * D * side, sc = (S / figHeight(key)) * (1 + depth * 0.12);
+    // the shadow: dark, with a red rim from its own blade
+    if (dark) drawFig(ctx, key, x + sc * 6, cy, sc * 1.025, { flip, tint: '#ff2e3a', alpha: 0.55 });
+    drawFig(ctx, key, x, cy, sc, { flip, tint: dark ? '#2a1018' : undefined });
+    const hl = meta(key) as unknown as { hilt?: [number, number] };
+    return { hilt: figPoint(key, hl?.hilt ?? [0, 0], x, cy, sc, { flip }), depth };
+  };
+  // the shadow sees him from the other side: the same drawing, mirrored, dark
+  const order = Math.sin(th) >= 0 ? [-1, 1] : [1, -1];
+  const hilts: Record<number, Pt> = {};
+  for (const side of order) {
+    const r = fig(view[0], side === 1 ? view[1] : !view[1], side, side === -1);
+    hilts[side] = r.hilt;
+  }
+  // the blades meet above and between them; the meeting point is white-hot, the sparks hang in the air
+  const meet: Pt = [(hilts[1][0] + hilts[-1][0]) / 2, Math.min(hilts[1][1], hilts[-1][1]) - S * 0.32];
+  const bw = S * 0.035;
+  bladeLight(ctx, hilts[1], meet, BLUE, S * 0.9, 0.4);
+  bladeLight(ctx, hilts[-1], meet, RED_BLADE, S * 0.9, 0.4);
+  drawBlade(ctx, hilts[-1], [meet[0] + (meet[0] - hilts[-1][0]) * 0.15, meet[1] + (meet[1] - hilts[-1][1]) * 0.15], RED_BLADE, bw, 1, 0);
+  drawBlade(ctx, hilts[1], [meet[0] + (meet[0] - hilts[1][0]) * 0.15, meet[1] + (meet[1] - hilts[1][1]) * 0.15], BLUE, bw, 1, 0);
+  ctx.globalCompositeOperation = 'lighter';
+  drawSprite(ctx, glow('#fff4e0', 128, 0.3), meet[0], meet[1], S * 0.5);
+  ctx.strokeStyle = '#ffe9c4';
+  ctx.lineCap = 'round';
+  ctx.lineWidth = bw * 0.5;
+  for (let i = 0; i < 5; i++) {
+    const a = -Math.PI / 2 + (i - 2) * 0.55 + th * 0.15, r0 = S * 0.08, r1 = S * (0.22 + (i % 2) * 0.08);
+    ctx.beginPath();
+    ctx.moveTo(meet[0] + Math.cos(a) * r0, meet[1] + Math.sin(a) * r0);
+    ctx.lineTo(meet[0] + Math.cos(a) * r1, meet[1] + Math.sin(a) * r1);
+    ctx.stroke();
+  }
+  ctx.restore();
+  letterbox(ctx, w, h, k, '#000');
+}
+
 export function drawLight(f: Frame, L: number, withHero = true, inner = false) {
+  if (f.hold?.kind === 'bullet') return drawBullet(f, L, f.hold.p);
   const { ctx, w, h, t } = f;
   const face = faceOf(f);
   // ---- the way out: the belly, frozen at the moment of the cut, splits along it; the sunset pours through

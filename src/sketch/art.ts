@@ -28,13 +28,13 @@ const sheetFace = new Map<string, number>();
 {
   const by = new Map<string, number[]>();
   for (const [k, m] of Object.entries(M)) {
-    const s = k.includes('_') ? k.split('_')[0] : k;
+    const s = k.replace(/_\d+$/, '');
     if (!by.has(s)) by.set(s, []);
     by.get(s)!.push(m.face);
   }
   for (const [s, v] of by) sheetFace.set(s, v.sort((a, b) => a - b)[Math.floor(v.length / 2)]);
 }
-const faceOf = (k: string) => sheetFace.get(k.includes('_') ? k.split('_')[0] : k) ?? M[k].face;
+const faceOf = (k: string) => sheetFace.get(k.replace(/_\d+$/, '')) ?? M[k].face;
 
 export type PoseKey = string;
 /** the film's clock, so every drawing can boil a little by default (set once a frame) */
@@ -105,7 +105,7 @@ const SIZE: Record<string, number> = {
   walk8: 0.95, run8: 0.87, sprint8: 0.76, moonwalk6: 0.9,
   idle: 1.1, saberdraw: 1.12, saber: 0.9, firetornado: 0.86, powerup: 0.95,
 };
-const sizeOf = (k: string) => SIZE[k.includes('_') ? k.split('_')[0] : k] ?? 1;
+const sizeOf = (k: string) => SIZE[k.replace(/_\d+$/, '')] ?? 1;
 
 /** the scale that makes this pose's face `face` pixels wide */
 export const poseScale = (k: string, face: number) => (face / faceOf(k)) * sizeOf(k);
@@ -229,3 +229,37 @@ export function artSize(k: string): [number, number] {
   const m = M[k];
   return m ? [m.w, m.h] : [1, 1];
 }
+
+/** a drawing's figure height (from its foot point up to its top ink), in its own pixels */
+export function figHeight(k: string) {
+  const m = M[k];
+  return m ? Math.max(1, m.foot[1] - m.top) : 1;
+}
+
+/** draw drawing `k` at a fixed pixel scale, its local point `anchor` (default: the foot) at (x, y) */
+export function drawFig(ctx: CanvasRenderingContext2D, k: string, x: number, y: number, scale: number, o: { anchor?: [number, number]; flip?: boolean; rot?: number; tint?: string; alpha?: number } = {}) {
+  const m = M[k];
+  const im = m && img(k);
+  if (!m || !im) return;
+  const [ax, ay] = o.anchor ?? m.foot;
+  ctx.save();
+  ctx.translate(x, y);
+  if (o.rot) ctx.rotate(o.rot);
+  ctx.scale(o.flip ? -scale : scale, scale);
+  ctx.globalAlpha *= o.alpha ?? 1;
+  ctx.drawImage(o.tint ? tinted(k, o.tint, im) : im, -ax, -ay);
+  ctx.restore();
+}
+
+/** where drawing `k`'s local point p lands on screen when drawn with drawFig(.., x, y, scale, o) */
+export function figPoint(k: string, p: [number, number], x: number, y: number, scale: number, o: { anchor?: [number, number]; flip?: boolean; rot?: number } = {}): [number, number] {
+  const m = M[k];
+  if (!m) return [x, y];
+  const [ax, ay] = o.anchor ?? m.foot;
+  const lx = (p[0] - ax) * scale * (o.flip ? -1 : 1), ly = (p[1] - ay) * scale;
+  const c = Math.cos(o.rot ?? 0), s = Math.sin(o.rot ?? 0);
+  return [x + lx * c - ly * s, y + lx * s + ly * c];
+}
+
+/** a drawing's raw manifest entry (for the extra points some sheets carry: blade) */
+export const meta = (k: string) => M[k] as (Meta & { blade?: [number, number, number, number] }) | undefined;

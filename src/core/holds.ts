@@ -1,4 +1,4 @@
-import { ACT } from './frame';
+import { ACT, CHAPTERS } from './frame';
 
 /**
  * HOLDS.
@@ -8,7 +8,7 @@ import { ACT } from './frame';
  * hold's own progress runs 0→1. Everything authored in film beats keeps its
  * timing; the scroll track just gets longer.
  */
-export type HoldKind = 'play' | 'thunder' | 'titan' | 'dash' | 'alter' | 'dive' | 'meteor' | 'powers' | 'sign';
+export type HoldKind = 'play' | 'thunder' | 'titan' | 'dash' | 'alter' | 'dive' | 'meteor' | 'powers' | 'sign' | 'bullet' | 'wall';
 export interface Hold { at: number; len: number; kind: HoldKind }
 
 /** film beat where the machine's letters become TITAN (the ball is in the cannon) */
@@ -25,8 +25,16 @@ export const POWERS_AT = 18.7;
 /** film beat of the signature, straight after the pull-back lands on the page */
 export const SIGN_AT = 18.72;
 
-/** (One Day has no holds: every scene is authored straight on the film beats, src/day/day.ts) */
-export const HOLDS: Hold[] = [];
+const at = (name: string, local: number) => CHAPTERS.find((c) => c.name === name)!.at + local + 0.002;
+/** the duel freezes on its second clash and the camera walks round the locked blades (src/sketch/light.ts) */
+export const BULLET_AT = at('Light', 5.2);
+/** after the peek, the camera pulls back from the page onto the storyboard wall (src/sketch/home.ts) */
+export const WALL_AT = at('Home', 12.05);
+
+export const HOLDS: Hold[] = [
+  { at: BULLET_AT, len: 2.6, kind: 'bullet' },
+  { at: WALL_AT, len: 3.4, kind: 'wall' },
+];
 /** (INK v5: the holds below belonged to the worlds that were cut; kept for reference) */
 export const OLD_HOLDS: Hold[] = [
   // the letters assemble into Green's robot, which punches the ball out of the page

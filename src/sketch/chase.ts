@@ -25,6 +25,8 @@ export const CH = {
   catch: 0.55,
   take: [0.55, 1.2] as const,
   weave: [1.2, 2.4] as const,
+  /** the fourth wall: he looks out at you and winks */
+  wink: [1.7, 2.3] as const,
   loop: [2.4, 3.3] as const,
   dive: [3.3, 4.0] as const,
   pull: [4.0, 4.35] as const,
@@ -106,7 +108,12 @@ export function drawChase(f: Frame, L: number) {
     y = lerp(a[2], b[2], k) * h;
     const vy = (b[2] - a[2]) * Math.sin(k * Math.PI);
     pose = L < CH.take[0] + 0.25 ? 'broom_0' : Math.abs(vy) > 0.08 ? 'broom_2' : 'broom_1';
-    rot = vy * 1.5;
+    // he notices you watching: a look, a wink and a salute, then he tips the broom into a dive
+    if (L > CH.wink[0] && L < CH.wink[1]) {
+      const u = seg(L, CH.wink[0], CH.wink[1]);
+      pose = u < 0.3 ? 'broom_wink_0' : u < 0.78 ? 'broom_wink_1' : 'broom_wink_2';
+    }
+    rot = vy * 1.5 * (L > CH.wink[0] && L < CH.wink[1] ? 0.2 : 1);
   } else if (L < CH.loop[1]) {
     // one loop-the-loop: the broom follows the circle, nose along the tangent
     onBroom = true;

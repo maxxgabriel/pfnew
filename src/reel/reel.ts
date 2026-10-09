@@ -1,4 +1,6 @@
 import type { Frame } from '../core/frame';
+import { drawCircleCuts, setCuts } from '../sketch/cuts';
+import { setWallSources } from '../sketch/wall';
 import { drawRun } from '../sketch/run';
 import { drawRide } from '../sketch/ride';
 import { drawLight } from '../sketch/light';
@@ -59,12 +61,12 @@ const AUTO_LOCAL: [string, number, number, number][] = [
   ['Run', 8.0, 9.0, 0.8], // the rubber-hose gag and the iris
   ['Wave', 2.0, 5.0, 1.0], // the wave stands up, the tube, the flip
   ['Deep', 2.4, 5.0, 1.0], // the whale turns and swallows; the bulb
-  ['Light', 4.75, 5.95, 0.9], // the clashes
+  ['Light', 4.75, 5.95, 0.9], // the clashes (and the bullet-time hold inside them)
   ['Light', 6.9, 8.0, 0.8], // the cut and the escape
   ['Chase', 5.0, 5.7, 0.8], // the catch
   ['Chase', 7.45, 9.0, 1.1], // the slide home
   ['Home', 2.15, 5.9, 1.0], // the orbit, the eyes, the fire kick
-  ['Home', 12.2, 13.6, 1.0], // into the seal: the loop
+  ['Home', 12.0, 13.6, 1.0], // the storyboard wall (a hold), then into the seal: the loop
 ];
 export const AUTO = AUTO_LOCAL.map(([n, a, b, rate]) => {
   const c = CHAPTERS.find((ch) => ch.name === n)!;
@@ -81,6 +83,11 @@ export function chapterAt(B: number) {
   return i;
 }
 
+setCuts((name) => CHAPTERS.find((c) => c.name === name)!.from);
+// the storyboard wall's panels: each chapter at its best moment (local beats)
+const WALL_AT: Record<string, number> = { Still: 2.6, Run: 5.3, Fold: 4.6, Wave: 3.3, Deep: 3.0, Light: 4.62, Chase: 2.0, Home: 4.9 };
+setWallSources(CHAPTERS.map((c) => ({ draw: c.draw!, from: c.from, at: WALL_AT[c.name] ?? 2 })));
+
 export function drawReel(f: Frame) {
   setPoseClock(f.t);
   const c = CHAPTERS[chapterAt(f.B)];
@@ -89,6 +96,8 @@ export function drawReel(f: Frame) {
     f.ctx.fillStyle = '#0b0a09';
     f.ctx.fillRect(0, 0, f.w, f.h);
   }
+  // the red circle carries the cuts between chapters
+  drawCircleCuts(f);
 }
 
 /** HUD state: dark type over light chapters; the contact card at the very end */
