@@ -1,6 +1,7 @@
 import './style.css';
-import { drawReel, reelHud, reelTap } from './reel/reel';
+import { autoAt, drawReel, reelHud, reelTap } from './reel/reel';
 import { preloadPoses } from './sketch/art';
+import { signEnd, signMove, signStart } from './sketch/home';
 preloadPoses();
 import { CHAPTERS, type Frame } from './core/frame';
 import { clamp, damp } from './core/math';
@@ -23,6 +24,12 @@ const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const coarse = matchMedia('(pointer: coarse)').matches;
 
 let w = 0, h = 0, dpr = 1, beatPx = 600, lastW = 0;
+/** the stage: the film is composed for a phone; on a wide screen it plays in a centred portrait column
+ *  (sw wide, from stageX) and the sides show a soft, dimmed extension of the same frame */
+let sw = 0, stageX = 0;
+let stage: { c: HTMLCanvasElement; ctx: CanvasRenderingContext2D } | null = null;
+let haze: { c: HTMLCanvasElement; ctx: CanvasRenderingContext2D } | null = null;
+let haze2: { c: HTMLCanvasElement; ctx: CanvasRenderingContext2D } | null = null;
 let vignette: HTMLCanvasElement | null = null;
 const grain = grainTiles(4, 180);
 let grainPat: CanvasPattern[] = [];
@@ -33,6 +40,13 @@ function resize() {
   dpr = Math.min(window.devicePixelRatio || 1, 2);
   cvs.width = Math.round(w * dpr);
   cvs.height = Math.round(h * dpr);
+  sw = w / h > 0.75 ? Math.round(h * 0.62) : w;
+  stageX = Math.round((w - sw) / 2);
+  if (sw < w) {
+    stage = canvas(Math.round(sw * dpr), Math.round(h * dpr));
+    haze = canvas(Math.max(8, Math.round(w / 4)), Math.max(8, Math.round(h / 4)));
+    haze2 = canvas(Math.max(4, Math.round(w / 24)), Math.max(4, Math.round(h / 24)));
+  } else stage = haze = haze2 = null;
   // the beat length only follows width changes, so the iOS toolbar
   // collapsing does not yank the playhead
   if (w !== lastW) {
@@ -60,13 +74,21 @@ window.scrollTo(0, 0);
 // R is the raw scroll playhead; B is film time (R with the holds taken out)
 let R = 0, B = 0, prevB = 0, vB = 0;
 let target = 0;
-const readScroll = () => (target = clamp(window.scrollY / beatPx, 0, RAW_END));
+// the reader's hand: any wheel, touch, key or a scroll the page didn't make itself
+let lastInput = -1e9, expectY = -1, autoplay = true;
+const userIn = () => { lastInput = performance.now(); };
+for (const ev of ['wheel', 'touchstart', 'touchmove', 'keydown', 'pointerdown']) window.addEventListener(ev, userIn, { passive: true });
+const readScroll = () => {
+  if (Math.abs(window.scrollY - expectY) > 3) lastInput = performance.now();
+  target = clamp(window.scrollY / beatPx, 0, RAW_END);
+  stillFor = 0;
+};
 window.addEventListener('scroll', readScroll, { passive: true });
 
 let shakeAmt = 0, flashAmt = 0, flashColor = '#ffffff';
 
 const frame: Frame = {
-  ctx, w, h, u: 1, portrait: true, B, vB, t: 0, dt: 0, intro: 0, hold: null, reduced,
+  ctx, w, h, u: 1, portrait: true, B, vB, t: 0, dt: 0, intro: 0, idle: 0, hold: null, reduced,
   crossed: (b) => (prevB < b) !== (B < b),
   crossedFwd: (b) => prevB < b && B >= b,
   shake: (a) => { if (!reduced) shakeAmt = Math.max(shakeAmt, a); },
@@ -81,6 +103,17 @@ const chapterEl = chName.parentElement!;
 const fill = document.getElementById('reel-fill')!;
 const marks = document.getElementById('reel-marks')!;
 const hello = document.getElementById('hello')!;
+// the signing pad: over the page while he holds out the brush, so a swipe there signs instead of scrolling
+const pad = document.createElement('div');
+pad.id = 'sign';
+document.body.appendChild(pad);
+pad.addEventListener('pointerdown', (e) => {
+  pad.setPointerCapture(e.pointerId);
+  signStart(e.clientX - stageX, e.clientY, sw, h);
+});
+pad.addEventListener('pointermove', (e) => { if (pad.hasPointerCapture(e.pointerId)) signMove(e.clientX - stageX, e.clientY, sw, h); });
+pad.addEventListener('pointerup', () => signEnd());
+pad.addEventListener('pointercancel', () => signEnd());
 const seek = (b: number) => window.scrollTo({ top: toRaw(b) * beatPx, behavior: reduced ? 'auto' : 'smooth' });
 
 CHAPTERS.forEach((c, i) => {
@@ -126,12 +159,15 @@ function hud() {
   const st = reelHud(B);
   document.documentElement.classList.toggle('on-paper', st.paper);
   hello.classList.toggle('on', st.hello);
+  pad.classList.toggle('on', st.sign);
 }
 
 /* ---------------------------------------------------------------- loop */
 
 let ready = false, readyAt = 0, last = performance.now(), t0 = last;
 let introOverride: number | null = null;
+let idleOverride: number | null = null;
+let stillFor = 0;
 let velOverride: number | null = null;
 
 let cost = 0;
@@ -142,6 +178,14 @@ function loop(now: number) {
   last = now;
   const t = (now - t0) / 1000;
 
+  // a key moment plays itself once the reader lets go of the scroll inside it (src/reel/reel.ts AUTO)
+  const auto = reduced || !autoplay ? null : autoAt(B);
+  if (auto && now - lastInput > 250 && target >= R - 0.02) {
+    target = Math.min(toRaw(auto.to), target + auto.rate * dt);
+    expectY = Math.round(target * beatPx);
+    window.scrollTo(0, expectY);
+  }
+
   const prevR = R;
   R = Math.abs(target - R) < 0.0005 ? target : damp(R, target, reduced ? 14 : 6.5, dt);
   vB = dt > 0 ? (R - prevR) / dt : 0;
@@ -150,22 +194,55 @@ function loop(now: number) {
   B = m.film;
   frame.hold = m.hold;
 
-  frame.w = w; frame.h = h;
-  frame.portrait = h > w;
-  frame.u = Math.min(w, h * 0.62) / 100;
+  const g = stage ? stage.ctx : ctx;
+  frame.ctx = g;
+  frame.w = sw; frame.h = h;
+  frame.portrait = h > sw;
+  frame.u = Math.min(sw, h * 0.62) / 100;
   frame.B = B; frame.vB = velOverride ?? vB; frame.t = t; frame.dt = dt;
+  stillFor = Math.abs(vB) > 0.02 ? 0 : stillFor + dt;
+  frame.idle = idleOverride ?? stillFor;
   frame.intro = introOverride ?? (ready ? (now - readyAt) / 1000 : 0);
   // landing mid-film skips the title sequence
   if (B > 1.2 && frame.intro < 6) frame.intro = 6;
 
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  g.globalAlpha = 1;
+  g.globalCompositeOperation = 'source-over';
   shakeAmt = damp(shakeAmt, 0, 9, dt);
   if (shakeAmt > 0.3) {
-    ctx.translate((Math.random() - 0.5) * shakeAmt, (Math.random() - 0.5) * shakeAmt);
+    g.translate((Math.random() - 0.5) * shakeAmt, (Math.random() - 0.5) * shakeAmt);
   }
 
-  // the reel: chapter I, Ink, and the cut into Machine (src/reel)
+  // the film (src/reel/reel.ts conducts the chapters)
   drawReel(frame);
+
+  if (stage && haze && haze2) {
+    // the sides: the frame shrunk in two steps and stretched back (a smooth blur that works everywhere), dimmed;
+    // the stage on top, with a soft shadow either side
+    for (const k of [haze, haze2]) { k.ctx.imageSmoothingEnabled = true; k.ctx.imageSmoothingQuality = 'high'; }
+    haze.ctx.drawImage(stage.c, 0, 0, haze.c.width, haze.c.height);
+    haze2.ctx.drawImage(haze.c, 0, 0, haze2.c.width, haze2.c.height);
+    haze.ctx.drawImage(haze2.c, 0, 0, haze.c.width, haze.c.height);
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(haze.c, 0, 0, cvs.width, cvs.height);
+    ctx.fillStyle = reelHud(B).paper ? 'rgba(40,34,28,0.18)' : 'rgba(12,10,8,0.45)';
+    ctx.fillRect(0, 0, cvs.width, cvs.height);
+    const x0 = stageX * dpr;
+    const sh = ctx.createLinearGradient(x0 - 40 * dpr, 0, x0, 0);
+    sh.addColorStop(0, 'rgba(0,0,0,0)');
+    sh.addColorStop(1, 'rgba(0,0,0,0.35)');
+    ctx.fillStyle = sh;
+    ctx.fillRect(x0 - 40 * dpr, 0, 40 * dpr, cvs.height);
+    const sh2 = ctx.createLinearGradient(x0 + stage.c.width, 0, x0 + stage.c.width + 40 * dpr, 0);
+    sh2.addColorStop(0, 'rgba(0,0,0,0.35)');
+    sh2.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = sh2;
+    ctx.fillRect(x0 + stage.c.width, 0, 40 * dpr, cvs.height);
+    ctx.drawImage(stage.c, x0, 0);
+  }
 
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   post(t, dt);
@@ -228,6 +305,7 @@ function jumpRaw(b: number) {
   target = b;
   R = b;
   B = prevB = toFilm(b).film;
+  stillFor = 0;
 }
 (window as unknown as { __film: unknown }).__film = {
   /** jump to a raw (scroll) beat */
@@ -238,10 +316,17 @@ function jumpRaw(b: number) {
     window.scrollTo(0, raw * beatPx);
     target = R = raw;
     B = prevB = toFilm(raw).film;
+    stillFor = 0;
   },
   intro(s: number | null) { introOverride = s; },
   /** dev: pretend the reader is scrolling at v raw beats/s (null to stop) */
   vel(v: number | null) { velOverride = v; },
+  /** dev: let the key moments play themselves, or not (screenshots turn it off) */
+  autoplay(on: boolean) { autoplay = on; },
+  /** dev: where the playhead is */
+  beat: () => B,
+  /** dev: pretend the reader stopped scrolling s seconds ago (null to stop) */
+  idle(s: number | null) { idleOverride = s; },
   /** jump into a hold (thunder, alter, dash, powers…) at its progress p */
   hold(kind: string, p = 0.5) {
     const h = HOLDS.find((k) => k.kind === kind)!;

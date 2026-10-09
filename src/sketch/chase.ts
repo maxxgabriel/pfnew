@@ -1,11 +1,11 @@
 import { brush } from '../core/brush';
 import type { Frame } from '../core/frame';
-import { type Pt, TAU, clamp, ease, lerp, seg } from '../core/math';
+import { type Pt, TAU, clamp, ease, lerp, seg, spline } from '../core/math';
 import { drawSprite, glow } from '../core/sprites';
-import { drawArt, drawPose } from './art';
+import { drawArt, drawArtFoot, drawPose } from './art';
 import { drawBg } from './bg';
 import { INK, PAPER, drawPaper, drawSpark, drawSparkStreak, faceOf } from './common';
-import { flash, shockRing, smear, speedWedges } from './fx';
+import { dryStreak, flash, shockRing, speedWedges } from './fx';
 
 /*
  * V · CHASE.
@@ -32,29 +32,14 @@ export const CH = {
   hand: [5.1, 5.65] as const,
   close: 5.5,
   toss: [5.75, 6.45] as const,
-  fall: [6.45, 8.0] as const,
-  paper: [6.6, 7.6] as const,
-  end: 8.0,
+  fall: [6.45, 9.0] as const,
+  /** falling, he grabs the brush out of the air, paints one huge stroke and slides down it home */
+  grab: [6.5, 6.95] as const,
+  paint: [6.95, 7.45] as const,
+  slide: [7.45, 9.0] as const,
+  paper: [7.7, 8.7] as const,
+  end: 9.0,
 };
-
-/** the clouds racing past: a few big dry-brush streaks, parallax by depth */
-const CLOUDS: [number, number, number, number][] = [
-  // [y fraction, length (w), speed, width (face)]
-  [0.2, 0.7, 1.3, 0.14], [0.55, 1.0, 2.2, 0.2], [0.82, 0.9, 3.0, 0.26],
-];
-
-function drawClouds(ctx: CanvasRenderingContext2D, w: number, h: number, face: number, travel: number, alpha: number) {
-  if (alpha <= 0) return;
-  ctx.save();
-  ctx.globalAlpha = alpha;
-  CLOUDS.forEach(([fy, len, sp, wd], i) => {
-    const span = w * (1 + len) * 1.2;
-    const x = w - ((travel * sp * w * 0.35 + i * span * 0.37) % span);
-    const y = fy * h;
-    brush(ctx, [[x, y], [x + len * w * 0.5, y - face * 0.08], [x + len * w, y + face * 0.03]], { width: face * wd, color: 'rgba(40,16,20,0.45)', seed: 50 + i, dry: 0.8, press: 0.9, tail: 0.15, halo: 0 });
-  });
-  ctx.restore();
-}
 
 /** the Spark with two little wings, beating */
 function drawWingedSpark(ctx: CanvasRenderingContext2D, x: number, y: number, r: number, t: number) {
@@ -98,15 +83,13 @@ export function drawChase(f: Frame, L: number) {
   const face = faceOf(f);
 
   // ---- the sky: the painted sunset, drifting as they fly; the clouds race past
-  const travel = L;
   ctx.fillStyle = '#2a0c14';
   ctx.fillRect(0, 0, w, h);
   const dive = ease.inOut2(seg(L, CH.dive[0], CH.pull[1]));
   drawBg(ctx, 'bg_sunset', w, h, lerp(0.25, 0.85, dive) - seg(L, CH.sprint[0], CH.toss[1]) * 0.2, 1, 1.18);
-  drawClouds(ctx, w, h, face, travel, 1 - seg(L, CH.hand[0], CH.hand[0] + 0.2) + seg(L, CH.toss[0], CH.toss[1]) * 0.6);
 
   // ---- where he is and how he sits
-  let x = w * 0.5, y = h * 0.4, pose = 'fall_0', rot = 0, onBroom = false;
+  let x = w * 0.5, y = h * 0.4, pose = 'fall_0', rot = 0, onBroom = false, slideFlip = false;
   const path: [number, number, number][] = [
     [CH.take[0], 0.5, 0.42], [CH.take[1], 0.32, 0.5], [1.6, 0.6, 0.36], [2.0, 0.35, 0.6], [CH.weave[1], 0.5, 0.62],
   ];
@@ -165,17 +148,27 @@ export function drawChase(f: Frame, L: number) {
     y = lerp(h * 0.58, h * 0.52, ease.out2(tossU));
   }
   if (L > CH.fall[0]) {
-    const u = seg(L, CH.fall[0], CH.end);
     pose = 'leap_3';
     x = w * 0.45;
-    y = lerp(h * 0.52, h * 1.35, ease.in2(u));
+    y = lerp(h * 0.52, h * 0.58, ease.in2(seg(L, CH.fall[0], CH.grab[1])));
+    if (L > CH.grab[0] + 0.25) pose = 'paint_0';
+    if (L > CH.paint[0]) pose = 'paint_1';
+    if (L > CH.slide[0]) {
+      const p = slideAt(w, h, ease.inOut2(seg(L, CH.slide[0], CH.end)));
+      x = p[0];
+      y = p[1];
+      // he leans into the slope, but never more than a little (on the steep drop he leans back and rides it)
+      rot = clamp(p[2] * 0.3, -0.35, 0.35);
+      slideFlip = p[3];
+      pose = L < CH.slide[0] + 0.5 ? 'ride_0' : 'ride_2';
+    }
   }
 
   // speed: wedges and a smear behind the broom
   const fast = onBroom && L > CH.take[0] + 0.3 ? (L > CH.dive[0] && L < CH.pull[1] || L > CH.sprint[0] ? 1 : 0.5) : 0;
   if (fast > 0 && L < CH.hand[0]) {
     speedWedges(ctx, w, h, x, y - face * 1.2, 0.55 * fast, t, 'rgba(255,236,210,0.5)', 7);
-    smear(ctx, [x - Math.cos(rot) * face * 3, y - face * 0.9 - Math.sin(rot) * face * 3], [x - face * 0.6, y - face * 0.9], face * 0.6, '#2a0c14', 0.25);
+    dryStreak(ctx, [x - face * 0.8, y - face * 0.7], [x - Math.cos(rot) * face * 3.6, y - face * 0.7 - Math.sin(rot) * face * 3.6], face * 0.4, '#2a0c14', 0.35, 21);
   }
   // the dive's splash: a long streak cut in the water as he pulls up
   const sk = seg(L, CH.pull[0], CH.pull[1] + 0.3);
@@ -235,15 +228,70 @@ export function drawChase(f: Frame, L: number) {
     }
   }
 
-  // ---- the sunset drains back into paper as he falls home
+  // ---- the brush tumbling down to him; the stroke he paints; the sunset draining into paper under it
+  if (L > CH.fall[0] && L < CH.grab[0] + 0.3) {
+    const u = seg(L, CH.fall[0], CH.grab[0] + 0.3);
+    ctx.save();
+    ctx.translate(lerp(w * 0.85, x + face * 0.6, ease.out2(u)), lerp(-face * 2, y - face * 1.6, ease.out2(u)));
+    ctx.rotate(lerp(3, 0.9, u));
+    drawArtFoot(ctx, 'brushprop_0', 0, 0, face * 3);
+    ctx.restore();
+  }
   const pk = ease.inOut2(seg(L, CH.paper[0], CH.paper[1]));
   if (pk > 0) {
     ctx.save();
     ctx.globalAlpha = pk;
     drawPaper(ctx, w, h);
     ctx.restore();
-    if (L > CH.fall[0]) drawPose(ctx, pose, x, y, face, { rot, alpha: pk });
   }
+  const stroke = ease.out2(seg(L, CH.paint[0], CH.paint[1]));
+  if (stroke > 0) brush(ctx, slidePath(w, h), { width: face * 0.34, color: INK, progress: stroke, seed: 77, dry: 0.45, press: 1.6, tail: 0.5, halo: 0 });
+  if (L > CH.fall[0]) drawPose(ctx, pose, x, y, face, { rot, flip: slideFlip });
+
   void INK;
   void PAPER;
+}
+
+/** the slide he paints: one big stroke from beside him, swinging out right and down off the bottom of the screen */
+const slideCtl = (w: number, h: number): Pt[] => [[w * 0.5, h * 0.6], [w * 0.86, h * 0.6], [w * 0.78, h * 0.98], [w * 0.22, h * 1.3]];
+function bez(c: Pt[], u: number): Pt {
+  const v = 1 - u;
+  return [
+    v * v * v * c[0][0] + 3 * v * v * u * c[1][0] + 3 * v * u * u * c[2][0] + u * u * u * c[3][0],
+    v * v * v * c[0][1] + 3 * v * v * u * c[1][1] + 3 * v * u * u * c[2][1] + u * u * u * c[3][1],
+  ];
+}
+let slideKey = '';
+let slidePts: Pt[] = [];
+/** the stroke's points (kept between frames so the brush can keep its preparation) */
+export function slidePath(w: number, h: number): Pt[] {
+  const k = `${w}|${h}`;
+  if (k !== slideKey) {
+    slideKey = k;
+    const c = slideCtl(w, h);
+    slidePts = Array.from({ length: 24 }, (_, i) => bez(c, i / 23));
+  }
+  return slidePts;
+}
+/** where he rides on the stroke at u (0..1) — along the brush's own spline, so he stays on the ink: x, y, slope, facing left */
+let rideKey = '';
+let ridePts: Pt[] = [];
+let rideLen: number[] = [];
+function slideAt(w: number, h: number, u: number): [number, number, number, boolean] {
+  const k = `${w}|${h}`;
+  if (k !== rideKey) {
+    rideKey = k;
+    ridePts = spline(slidePath(w, h), 3);
+    rideLen = [0];
+    for (let i = 1; i < ridePts.length; i++) rideLen.push(rideLen[i - 1] + Math.hypot(ridePts[i][0] - ridePts[i - 1][0], ridePts[i][1] - ridePts[i - 1][1]));
+  }
+  const want = u * rideLen[rideLen.length - 1];
+  let i = 1;
+  while (i < rideLen.length - 1 && rideLen[i] < want) i++;
+  const a = ridePts[i - 1], b = ridePts[i];
+  const kk = (want - rideLen[i - 1]) / (rideLen[i] - rideLen[i - 1] || 1);
+  const ang = Math.atan2(b[1] - a[1], b[0] - a[0]);
+  const left = Math.abs(ang) > Math.PI / 2;
+  // his boots on the top of the stroke (half its width above its middle)
+  return [a[0] + (b[0] - a[0]) * kk, a[1] + (b[1] - a[1]) * kk - w * 0.02, left ? ang - Math.PI : ang, left];
 }

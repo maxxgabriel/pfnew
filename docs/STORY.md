@@ -1,3 +1,49 @@
+# STORY — The Sketch v12 (round 19, built on `claude/sketch-v12`)
+
+**Logline.** A little ink drawing, born from a drop of red ink, chases the
+Spark through every kind of animation while an Eraser hunts the page; in
+the end he learns to paint his own way, beats the Eraser, and hands the
+brush to you — and the last frame is the first.
+
+**Cast.** The Sketch (the Wanderer, the owner's sheet). The Spark (one red
+dot: it lands, it is the bulb, the sun, the seal). The Eraser (a pink rubber
+block, one heavy shape, no face).
+
+1. **Still** — the title is brushed in; the Spark drops like seal ink; its
+   ink leaps to the page and ONE unbroken line loops him into being (traced
+   from a generated line drawing); the ink floods into the line; he notices
+   the Spark; first step.
+2. **Run** — scroll speed is his speed (sprint on a flick, moonwalk when
+   you scroll back); the Eraser slams down behind him and rubs the page out
+   as it chases him; cut-paper pop-ups spring up ahead; it lunges, he dives;
+   a cartwheel over the gap; at the edge the gag plays as a 1930s
+   rubber-hose cartoon and an iris closes on him as he drops.
+3. **Fold** — the page catches him, folds into the crane; the night ride;
+   he leaps up off the crane after the Spark.
+4. **Wave** — he falls to a night sea of ink, lands on the falling brush and
+   surfs; a woodblock Great Wave stands up behind him and curls him into its
+   tube; the lip closes — and the world flips to its negative.
+5. **Deep** — white ink on black water; only he and the Spark keep their
+   colours; a whale glides below, turns, and its mouth takes the screen.
+6. **Light** — inside the whale the Spark becomes the bulb; his shadow on
+   the ribs waves at him, draws a red blade; he draws his blue one; the
+   duel; the cord swing; he slashes up and the belly splits along the cut —
+   he bursts out into the sunset.
+7. **Chase** — the broom and the hat, the winged Spark, the catch; falling,
+   he grabs the brush and paints one huge stroke and rides it home (the
+   brush stops drawing for him — he draws for himself).
+8. **Home** — he rides the stroke onto the page; the Eraser comes back for
+   it; the camera walks all the way round him as he powers up (an 8-angle
+   turnaround) and into his eyes; the fire-tornado kick smashes the Eraser
+   and burns in the seal; he holds out the brush: sign the page with one
+   swipe and he cheers; a wave, a walk off, a peek; then the camera falls
+   into the seal and its red becomes the Spark over the first page.
+
+Throughout: one red circle carries every seam it can; stop scrolling on the
+page and he passes the time (stretch, doodle, sit, nap).
+
+---
+
 # STORY — The Sketch (v11, round 18, agreed; being built)
 
 **Logline.** A little ink drawing wants to move. A red spark keeps teasing

@@ -1,9 +1,9 @@
 import type { Frame } from '../core/frame';
 import { type Pt, clamp, ease, lerp, seg } from '../core/math';
-import { glow, drawSprite } from '../core/sprites';
-import { FD, drawFolding, foldAnchor, sheetRect } from '../reel/fold';
+import { FD, drawFolding, foldAnchor, setSketchSea, sheetRect } from '../reel/fold';
+setSketchSea(true);
 import { drawPose } from './art';
-import { drawBg } from './bg';
+import { drawBg, drawBgXY } from './bg';
 import { INK, PAPER, drawPaper, drawSpark, drawSparkStreak, faceOf } from './common';
 import { shockRing, speedWedges } from './fx';
 
@@ -138,34 +138,26 @@ export function drawRide(f: Frame, L: number) {
     shockRing(ctx, 0, 0, face * 1.6, ring, INK, face * 0.06);
     ctx.restore();
   }
-  const dark = ease.inOut2(seg(fd, FD.dark[0], FD.dark[1]));
-  // he leaps off the crane after the Spark, diving into the light ahead
+  const dark = 0; // (over the painted sea the night never goes black: he leaps off into it)
+  // he leaps up off the crane after the Spark, out of the top of the frame (chapter IV: he comes down on the sea)
   const jump = seg(L, 8.15, 8.75);
   if (jump > 0) {
     const u = ease.in2(jump);
-    pose = 'fall_3';
-    x = lerp(x, w * 0.5, u);
-    y = lerp(y, h * 0.36, u);
-    rot = lerp(0, -Math.PI / 2, ease.inOut2(jump));
+    pose = 'leap_2';
+    x = lerp(x, w * 0.5, ease.out2(jump));
+    y = lerp(y, -face * 2.5, u);
+    rot = 0;
   }
-  drawPose(ctx, pose, x, y, jump > 0 ? lerp(fc, face * 0.25, ease.in2(jump)) : fc, { rot, flip, alpha: jump > 0 ? 1 - seg(jump, 0.8, 1) : 1 - dark });
-  // the light he dives into swells into chapter IV's bulb
-  const swell = ease.in2(seg(L, 8.3, RD.end));
-  if (swell > 0) {
-    ctx.save();
-    ctx.globalCompositeOperation = 'lighter';
-    ctx.globalAlpha = 0.25 + swell * 0.6;
-    drawSprite(ctx, glow('#ffcf7a', 128), w * 0.5, h * 0.35, lerp(face * 0.8, face * 6, swell));
-    ctx.globalAlpha = swell;
-    drawSprite(ctx, glow('#fff6e0', 64, 0.35), w * 0.5, h * 0.35, lerp(4, face * 0.9, swell));
-    ctx.restore();
-  }
+  drawPose(ctx, pose, x, y, fc, { rot, flip, alpha: jump > 0 ? 1 : 1 - dark });
+  // the night gives way to the sea of ink he is about to fall into
+  const sea = ease.inOut2(seg(L, 8.35, RD.end));
+  if (sea > 0) drawBgXY(ctx, 'bg_inksea', w, h, 0.05, 0, sea, 1.35);
 
   // ---- the Spark, ahead in the sky; at the end it shoots off toward the dark
   if (!onSheet) {
     const lead = seg(L, RD.ride[1] - 0.6, RD.ride[1] + 0.4);
     const base: Pt = [x + fc * 3.2 + Math.sin(t * 1.7) * fc * 0.3, y - fc * 2.6 + Math.sin(t * 2.3) * fc * 0.25];
-    const far: Pt = [w / 2, h * 0.45];
+    const far: Pt = [w / 2, -h * 0.1];
     const sp: Pt = [lerp(base[0], far[0], ease.in2(lead)), lerp(base[1], far[1], ease.in2(lead))];
     const r = lerp(Math.max(3, fc * 0.2), 2, lead);
     if (lead < 1) drawSpark(ctx, sp[0], sp[1], r, 1, 1 - dark * 0.5);

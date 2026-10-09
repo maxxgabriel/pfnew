@@ -1,4 +1,5 @@
 /** Bold, deterministic ink effects for a scroll-driven film on cream paper. */
+import { brush } from '../core/brush';
 import { TAU, clamp, lerp, ease, hash, noise1, type Pt } from '../core/math';
 
 export function speedWedges(ctx: CanvasRenderingContext2D, w: number, h: number, fx: number, fy: number, k: number, t: number, color = '#1b1714', n = 7): void {
@@ -123,18 +124,33 @@ export function inkSplash(ctx: CanvasRenderingContext2D, x: number, y: number, r
   ctx.restore();
 }
 
-export function shockRing(ctx: CanvasRenderingContext2D, x: number, y: number, r: number, k: number, color: string, width: number): void {
-  ctx.save();
+/** a ring of ink thrown out from an impact: two brushed arcs with gaps, thinning and drying as it spreads */
+export function shockRing(ctx: CanvasRenderingContext2D, x: number, y: number, r: number, k: number, color: string, width: number, seed = 1): void {
   const progress = clamp(k);
-  if (r > 0 && width > 0 && progress < 1) {
-    ctx.globalAlpha *= 1 - progress;
-    ctx.strokeStyle = color;
-    ctx.lineWidth = width * (1 - progress);
-    ctx.beginPath();
-    ctx.arc(x, y, r * lerp(0.2, 1, progress), 0, TAU);
-    ctx.stroke();
+  if (r <= 0 || width <= 0 || progress >= 1) return;
+  const R = r * lerp(0.2, 1, ease.out3(progress));
+  const a0 = hash(seed * 7.3) * TAU;
+  ctx.save();
+  ctx.globalAlpha *= 1 - progress;
+  for (let j = 0; j < 2; j++) {
+    const from = a0 + j * Math.PI + 0.25, span = Math.PI - 0.5 - hash(seed + j) * 0.4;
+    const pts: Pt[] = [];
+    for (let i = 0; i <= 10; i++) {
+      const a = from + (span * i) / 10;
+      pts.push([x + Math.cos(a) * R, y + Math.sin(a) * R]);
+    }
+    brush(ctx, pts, { width: width * 1.5 * (1 - progress * 0.7), color, seed: seed * 3 + j, dry: 0.75, press: 1.3, tail: 0.2, halo: 0 });
   }
   ctx.restore();
+}
+
+/** a speed streak painted with a nearly dry brush: thick at `head` (behind the mover), drying out toward `tail` */
+export function dryStreak(ctx: CanvasRenderingContext2D, head: Pt, tail: Pt, width: number, color: string, alpha = 1, seed = 1): void {
+  if (alpha <= 0 || width <= 0) return;
+  const mx = (head[0] + tail[0]) / 2, my = (head[1] + tail[1]) / 2;
+  const dx = tail[0] - head[0], dy = tail[1] - head[1];
+  const bow = (hash(seed) - 0.5) * 0.12;
+  brush(ctx, [head, [mx - dy * bow, my + dx * bow], tail], { width, color, seed, dry: 0.85, press: 1.2, tail: 0.05, halo: 0, alpha });
 }
 
 export function vignette(ctx: CanvasRenderingContext2D, w: number, h: number, strength: number, color = '#000'): void {

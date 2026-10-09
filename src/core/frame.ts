@@ -16,6 +16,8 @@ export interface Frame {
   dt: number;
   /** seconds since the film was ready; drives the opening title */
   intro: number;
+  /** seconds since the playhead last moved (the hero's idle life starts after a few) */
+  idle: number;
   /** set while a hold is playing: the film is paused at B and `p` runs 0→1 */
   hold: { kind: 'play' | 'thunder' | 'titan' | 'dash' | 'alter' | 'dive' | 'meteor' | 'powers' | 'sign'; p: number } | null;
   reduced: boolean;
@@ -37,15 +39,17 @@ export const ACT = {
   finaleStart: 18.7,
   creditsStart: 22.55,
   /** the reel (round 16): src/reel/reel.ts REEL_END */
-  END: 51.0,
+  END: 63.2,
 };
 
 /** the reel's chapters (mirrors src/reel/reel.ts CHAPTERS, which draws them) */
 export const CHAPTERS = [
   { at: 0, n: 'I', name: 'Still' },
-  { at: 5.6, n: 'II', name: 'Run' },
-  { at: 14.6, n: 'III', name: 'Fold' },
-  { at: 23.6, n: 'IV', name: 'Light' },
-  { at: 31.6, n: 'V', name: 'Chase' },
-  { at: 39.6, n: 'VI', name: 'Home' },
+  { at: 3.8, n: 'II', name: 'Run' },
+  { at: 12.8, n: 'III', name: 'Fold' },
+  { at: 21.8, n: 'IV', name: 'Wave' },
+  { at: 26.8, n: 'V', name: 'Deep' },
+  { at: 31.8, n: 'VI', name: 'Light' },
+  { at: 39.8, n: 'VII', name: 'Chase' },
+  { at: 48.8, n: 'VIII', name: 'Home' },
 ]

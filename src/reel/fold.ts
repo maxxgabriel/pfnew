@@ -2,7 +2,7 @@ import type { Frame } from '../core/frame';
 import { type Pt, TAU, clamp, ease, hash, lerp, rng, seg } from '../core/math';
 import { drawSprite, glow } from '../core/sprites';
 import { drawInk } from './ink';
-import { drawBg } from '../sketch/bg';
+import { drawBg, drawBgXY } from '../sketch/bg';
 import { PIG, mixHex } from './painting';
 import { type Cam3, type Tri, type V3, add, cross, drawTris, lerp3, lookAt, norm, project, rotAbout, rotX, rotY, rotZ, sub } from './v3';
 
@@ -513,6 +513,10 @@ export function drawFold(f: Frame, L: number) {
 /** where a rider sits, on screen, as of the last frame drawn: the sheet's centre, then the crane's back; k = pixels per world unit */
 export const foldAnchor = { x: 0, y: 0, k: 1, on: 'sheet' as 'sheet' | 'crane' };
 
+/** THE SKETCH flies the crane over the painted sea instead of the paper countryside */
+let sketchSea = false;
+export const setSketchSea = (on: boolean) => { sketchSea = on; };
+
 export function drawFolding(f: Frame, L: number) {
   const { ctx, w, h, t } = f;
   const sr = sheetRect(w, h);
@@ -521,6 +525,9 @@ export function drawFolding(f: Frame, L: number) {
   // ---- the sky: the same dusk, then night falls
   drawSky(f);
   drawNight(ctx, w, h, t, night);
+  // ---- (THE SKETCH) after take-off the paper countryside gives way to the painted night sea he will fall into
+  const painted = sketchSea ? ease.inOut2(seg(L, FD.turn[0] + 0.1, FD.fly + 0.15)) : 0;
+  if (painted > 0) drawBgXY(ctx, 'bg_inksea', w, h, lerp(0.0, 0.05, seg(L, FD.fly, FD.end)), 0, painted, 1.35);
 
   // ---- the camera: over the paper while it folds, then behind the crane
   const pose = cranePose(L, t);
@@ -549,7 +556,7 @@ export function drawFolding(f: Frame, L: number) {
   }
 
   // the paper ground unrolls under the take-off
-  drawGround(ctx, cam, w, h, seg(L, FD.turn[0], FD.fly + 0.3), night, pose.zc);
+  drawGround(ctx, cam, w, h, seg(L, FD.turn[0], FD.fly + 0.3) * (1 - painted), night, pose.zc);
 
   const tris: Tri[] = [];
   if (L < FD.snap[0] + (FD.snap[1] - FD.snap[0]) * 0.5) {
@@ -566,7 +573,7 @@ export function drawFolding(f: Frame, L: number) {
       : placeCrane(L, t);
     tris.push(...craneTris(verts, place, night * 0.35));
   }
-  if (L > FD.turn[0]) tris.push(...popTris(pose.zc, night));
+  if (L > FD.turn[0] && !sketchSea) tris.push(...popTris(pose.zc, night));
   // facing the viewer the sheet is exactly the square the scroll became; the light comes in as it tilts
   drawTris(ctx, cam, tris, lerp(1, 0.6, ease.inOut2(seg(L, FD.tilt[0], FD.tilt[1]))));
   if (L < FD.fold1[0] + 0.2) drawCreases(ctx, cam, L);
@@ -576,7 +583,7 @@ export function drawFolding(f: Frame, L: number) {
     const a = project(cam, at), b = project(cam, [at[0] + 50, at[1], at[2]]);
     if (a && b) Object.assign(foldAnchor, { x: a[0], y: a[1], k: Math.hypot(b[0] - a[0], b[1] - a[1]) / 50, on: onCrane ? 'crane' : 'sheet' });
   }
-  drawWindows(ctx, cam, pose.zc, night, t);
+  if (!sketchSea) drawWindows(ctx, cam, pose.zc, night, t);
 
   // the snap's whoosh: a few air lines round the paper
   const sp = seg(L, FD.snap[0] - 0.05, FD.snap[1] + 0.05);
@@ -599,7 +606,7 @@ export function drawFolding(f: Frame, L: number) {
   }
 
   // ---- the dark: everything goes but the crane, a warm point of paper in the night
-  const dark = ease.inOut2(seg(L, FD.dark[0], FD.dark[1]));
+  const dark = sketchSea ? 0 : ease.inOut2(seg(L, FD.dark[0], FD.dark[1]));
   if (dark > 0) {
     ctx.save();
     ctx.globalAlpha = dark;

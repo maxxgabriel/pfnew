@@ -4,8 +4,8 @@ import { drawSprite, glow } from '../core/sprites';
 import { bladeOf, drawPose } from './art';
 import { drawBg } from './bg';
 import { BLUE, RED_BLADE, bladeLight, drawBlade } from './saber';
-import { INK, drawSpark, faceOf } from './common';
-import { impactFrame, shockRing, smear } from './fx';
+import { drawSpark, faceOf } from './common';
+import { impactFrame, shockRing } from './fx';
 
 /*
  * IV · LIGHT.
@@ -45,6 +45,10 @@ export const LT = {
   swing: [6.25, 6.95] as const,
   fly: [6.95, 7.35] as const,
   sunset: [6.95, 7.85] as const,
+  /** he lets go and flies up slashing; the cut; the belly splits and he bursts out into the sunset */
+  slash: [6.95, 7.1] as const,
+  cut: [7.1, 7.6] as const,
+  tumble: [7.6, 8.0] as const,
   end: 8.0,
 };
 
@@ -64,36 +68,55 @@ function swingOf(L: number) {
   return a;
 }
 
-export function drawLight(f: Frame, L: number, withHero = true) {
+let split: { c: HTMLCanvasElement; ctx: CanvasRenderingContext2D } | null = null;
+
+export function drawLight(f: Frame, L: number, withHero = true, inner = false) {
   const { ctx, w, h, t } = f;
   const face = faceOf(f);
+  // ---- the way out: the belly, frozen at the moment of the cut, splits along it; the sunset pours through
+  if (!inner && L >= LT.cut[0]) {
+    drawEscape(f, L);
+    return;
+  }
   const pivot: Pt = [w * 0.5, -h * 0.05];
   const rope = h * 0.4;
   const sw = swingOf(L);
-  const sink = ease.inOut2(seg(L, LT.sunset[0], LT.sunset[1]));
+  // (the bulb no longer sinks into a sunset: he cuts his way out of the whale)
+  const sink = 0;
   const bulb: Pt = [pivot[0] + Math.sin(sw) * rope, lerp(pivot[1] + Math.cos(sw) * rope, h * 0.6, sink)];
   const floorY = h * 0.74;
   const on = L >= LT.click;
   if (f.crossedFwd(f.B - L + LT.click)) f.flash(0.35, '#fff1d6');
 
-  // ---- the room: a paper wall lit from the bulb, a dark floor
+  // ---- the room: the inside of the whale, lit only by the bulb; its dark pool for a floor
   ctx.fillStyle = '#000';
   ctx.fillRect(0, 0, w, h);
   if (on) {
-    // the room comes up around the bulb he dived into
     ctx.save();
     ctx.globalAlpha = ease.out2(seg(L, 0, 0.45));
-    const R = Math.max(w, h) * lerp(0.75, 1.1, sink);
+    drawBg(ctx, 'bg_belly', w, h, 0.5, 1, 1.12);
+    // only what the bulb reaches is seen
+    ctx.globalCompositeOperation = 'multiply';
+    const R = Math.max(w, h) * 0.9;
     const g = ctx.createRadialGradient(bulb[0], bulb[1], 0, bulb[0], bulb[1], R);
-    g.addColorStop(0, mixC('#f6e9cc', '#ffe2a8', sink));
-    g.addColorStop(0.3, mixC('#cdb48c', '#f08a45', sink));
-    g.addColorStop(0.7, mixC('#4a3a2a', '#a0303a', sink));
-    g.addColorStop(1, mixC('#000000', '#2a0c26', sink));
+    g.addColorStop(0, '#fff3dc');
+    g.addColorStop(0.3, '#d9b98c');
+    g.addColorStop(0.65, '#4a3624');
+    g.addColorStop(1, '#000000');
     ctx.fillStyle = g;
+    ctx.fillRect(0, 0, w, h);
+    // the bulb's warm light on the belly wall, so a shadow can fall on it
+    ctx.globalCompositeOperation = 'screen';
+    const g2 = ctx.createRadialGradient(bulb[0], bulb[1] + h * 0.15, 0, bulb[0], bulb[1] + h * 0.15, Math.max(w, h) * 0.55);
+    g2.addColorStop(0, 'rgba(255,226,170,0.55)');
+    g2.addColorStop(0.6, 'rgba(200,150,90,0.18)');
+    g2.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = g2;
     ctx.fillRect(0, 0, w, floorY);
+    ctx.globalCompositeOperation = 'source-over';
     const fg = ctx.createLinearGradient(0, floorY, 0, h);
-    fg.addColorStop(0, mixC('#2a2018', '#3a1418', sink));
-    fg.addColorStop(1, '#050303');
+    fg.addColorStop(0, 'rgba(20,14,10,0.45)');
+    fg.addColorStop(1, 'rgba(4,3,2,0.9)');
     ctx.fillStyle = fg;
     ctx.fillRect(0, floorY, w, h - floorY);
     ctx.restore();
@@ -145,10 +168,12 @@ export function drawLight(f: Frame, L: number, withHero = true) {
       hy = cordAt[1] + face * 3.0;
       rot = sw * 0.8;
     } else {
-      const u2 = seg(L, LT.fly[0], LT.fly[1]);
-      pose = 'swing_3';
-      hx = lerp(bulb[0], -w * 0.25, ease.in2(u2));
-      hy = lerp(bulb[1] + face * 2.6, -face * 1.5, ease.in2(u2)) + Math.sin(u2 * Math.PI) * -face * 1.2;
+      // he lets go and flies straight up, blade first: the cut
+      const u2 = ease.out2(seg(L, LT.slash[0], LT.cut[0]));
+      pose = 'escape_0';
+      hx = w * 0.5;
+      hy = lerp(bulb[1] + face * 2.6, h * 0.42, u2);
+      rot = 0;
     }
     shPose = L < LT.fly[0] ? 'saber_4' : 'saber_1';
     shFlip = true;
@@ -164,9 +189,9 @@ export function drawLight(f: Frame, L: number, withHero = true) {
       sx = bulb[0] + (hx - bulb[0]) * 1.6;
       sy = Math.min(floorY, bulb[1] + (hy - bulb[1]) * 1.6);
     }
-    const shadowCol = mixC('#2a1c12', '#2a0a18', sink);
+    const shadowCol = mixC('#120a05', '#2a0a18', sink);
     ctx.save();
-    ctx.globalAlpha = L < LT.land ? seg(L, LT.drop[0] + 0.2, LT.land) * 0.8 : 0.8;
+    ctx.globalAlpha = L < LT.land ? seg(L, LT.drop[0] + 0.2, LT.land) * 0.9 : 0.9;
     const mine = L >= LT.leap[0] && L < LT.fly[1];
     const shKey = mine ? pose : shPose, shF = mine ? flip : shFlip, shR = mine ? rot : 0;
     ctx.globalAlpha *= 1 - seg(L, LT.sunset[0], LT.sunset[0] + 0.6);
@@ -209,7 +234,6 @@ export function drawLight(f: Frame, L: number, withHero = true) {
 
   // ---- the hero
   if (withHero && L > LT.drop[0]) {
-    if (L < LT.land) smear(ctx, [hx, hy - face * 4], [hx, hy - face * 1.2], face * 0.5, INK, 0.5);
     drawPose(ctx, pose, hx, hy, face, { flip, rot });
     const bl = bladeOf(pose, hx, hy, face, { flip, rot });
     if (bl) {
@@ -245,13 +269,81 @@ export function drawLight(f: Frame, L: number, withHero = true) {
     else if (L >= c + 0.04 && L < c + 0.07) impactFrame(ctx, w, h, 0.9, 'spikes', hx + face * 1.2, hy - face * 1.6, Math.round(c * 10));
   }
 
-  // ---- the room melts into the painted sunset sky, and he falls back down through it (chapter V's broom catches him)
-  const sky = ease.inOut2(seg(L, LT.sunset[0] + 0.3, LT.sunset[1] + 0.1));
-  if (sky > 0) drawBg(ctx, 'bg_sunset', w, h, 0.25, sky, 1.12);
-  if (withHero && L > LT.fly[1] + 0.2) {
-    const u = seg(L, LT.fly[1] + 0.2, LT.end);
-    const fy = lerp(-face * 3, h * 0.4, ease.out2(u));
-    drawPose(ctx, 'fall_0', w * 0.5 + Math.sin(L * 5) * face * 0.3, fy, face, { rot: Math.sin(L * 7) * 0.15 });
+  // ---- the cut: a white line ripping up the whole height of the frame along his blade
+  const cutK = seg(L, LT.slash[0] + 0.05, LT.cut[0]);
+  if (cutK > 0) {
+    ctx.save();
+    ctx.fillStyle = '#fff8ec';
+    const top = lerp(h, -h * 0.05, ease.in2(cutK));
+    ctx.fillRect(w * 0.5 - face * 0.04, top, face * 0.08, h - top);
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.globalAlpha = 0.6;
+    drawSprite(ctx, glow('#bfe4ff', 64), w * 0.5, top, face * 1.6);
+    ctx.restore();
   }
   void TAU;
+}
+
+/** the way out of the whale: the belly (frozen at the cut) splits along it, the sunset pours in, and he bursts out */
+function drawEscape(f: Frame, L: number) {
+  const { ctx, w, h, t } = f;
+  const face = faceOf(f);
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const W = Math.round(w * dpr), H = Math.round(h * dpr);
+  if (!split || split.c.width !== W || split.c.height !== H) {
+    const c = document.createElement('canvas');
+    c.width = W;
+    c.height = H;
+    split = { c, ctx: c.getContext('2d')! };
+    // the belly as it was at the moment of the cut, without him (painted once: it is frozen)
+    split.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    drawLight({ ...f, ctx: split.ctx, crossedFwd: () => false, crossed: () => false, shake: () => {}, flash: () => {} }, LT.cut[0] - 0.001, false, true);
+  }
+
+  // behind it: the sunset
+  drawBg(ctx, 'bg_sunset', w, h, 0.3, 1, 1.12);
+  const k = ease.out3(seg(L, LT.cut[0], LT.cut[1]));
+  const gap = k * w * 0.62;
+  // the two halves of the whale, torn apart and falling away
+  ctx.save();
+  ctx.translate(-gap, k * h * 0.08);
+  ctx.rotate(-k * 0.08);
+  ctx.drawImage(split.c, 0, 0, W / 2, H, 0, 0, w / 2, h);
+  ctx.restore();
+  ctx.save();
+  ctx.translate(gap, k * h * 0.08);
+  ctx.rotate(k * 0.08);
+  ctx.drawImage(split.c, W / 2, 0, W / 2, H, w / 2, 0, w / 2, h);
+  ctx.restore();
+  // the light pouring through the rip
+  const pour = 1 - seg(L, LT.cut[0], LT.cut[0] + 0.3);
+  if (pour > 0) {
+    ctx.save();
+    ctx.globalAlpha = pour;
+    ctx.fillStyle = '#fff3dc';
+    ctx.fillRect(w * 0.5 - gap - face * 0.1, 0, gap * 2 + face * 0.2, h);
+    ctx.restore();
+  }
+  if (f.crossedFwd(f.B - L + LT.cut[0])) { f.shake(face * 0.5); f.flash(0.5, '#fff3dc'); }
+
+  // him: bursting up through the gap, blade high; at the top, a happy tumble; then falling (chapter VII's broom)
+  let pose = 'escape_1', y = h * 0.42, rot = 0;
+  const up = ease.out2(seg(L, LT.cut[0], LT.tumble[0]));
+  y = lerp(h * 0.42, h * 0.22, up);
+  if (L > LT.cut[0] + 0.25) pose = 'escape_2';
+  if (L >= LT.tumble[0]) {
+    const u = seg(L, LT.tumble[0], LT.end);
+    pose = u < 0.5 ? 'escape_3' : 'fall_0';
+    y = lerp(h * 0.22, h * 0.4, ease.in2(u));
+    rot = u < 0.5 ? -u * 1.2 : Math.sin(L * 7) * 0.15;
+  }
+  const x = w * 0.5 + (L >= LT.tumble[0] ? Math.sin(L * 5) * face * 0.3 : 0);
+  drawPose(ctx, pose, x, y, face, { rot });
+  const bl = bladeOf(pose, x, y, face, { rot });
+  if (bl) {
+    bladeLight(ctx, bl[0], bl[1], BLUE, face * 3.5, 0.35);
+    drawBlade(ctx, bl[0], bl[1], BLUE, face * 0.11, 1, t + 1);
+  }
+  // the Spark, out ahead in the sky
+  drawSpark(ctx, w * 0.5 + Math.cos(t * 2) * face * 1.6, h * 0.12 + Math.sin(t * 3) * face * 0.3, face * 0.17);
 }

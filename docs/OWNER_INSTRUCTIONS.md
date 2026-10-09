@@ -36,6 +36,11 @@ themselves, not to the docs: *"you report to me and not the docs"*.
 - **The bar is the absolute best.** *"dedication and passion… clean
   transitions crazy animation crazy motion graphics… think out of the box"*;
   *"i want the absolute best"*; *"a clean and good looking but awesome one"*.
+- **Use ChatGPT (Codex) hard.** *"harness it for even little poses… theres
+  no usage limit so get the best outta it also you can let it handle some
+  code jobs too"* (round 19): every pose is its own generated drawing; well
+  specified code jobs (tracers, scripts) can be delegated to Codex, then
+  reviewed.
 - **Stay signed in to Codex/ChatGPT until the owner asks to log out**
   (*"dont log out till i ask"*, round 18).
 - **No clusters of many small things.** *"i hate multiple small things
@@ -67,7 +72,21 @@ themselves, not to the docs: *"you report to me and not the docs"*.
 
 ## 3. Decisions (most recent first)
 
-**Round 18 — story first: The Sketch (current, being built):**
+**Round 19 — The Sketch v12 (built on its own branch, `claude/sketch-v12`):**
+- An ideation session pitched 16 quality ideas (a villain, an arc, the
+  Spark's origin, a one-line birth, a 360° orbit, an inkwell/whale dive, a
+  Great Wave, a 1930s rubber-hose beat, a pop-up page, red-circle match
+  cuts, an eye push, ink-soak seams, idle life, scroll-speed motion, a
+  perfect loop, a signature). The owner: *"oh damn i liked all of it…
+  can you do it?"* — and asked to log in to ChatGPT first and use it for
+  every pose and some code.
+- Picked: build on a **separate branch** (another session was working on
+  the main one), and the v12 story as pitched (whale included).
+- Built: STORY v12 (eight chapters: Still, Run, Fold, Wave, Deep, Light,
+  Chase, Home); ~25 new generated sheets; Codex wrote the one-line tracer.
+  Preview: https://claude.ai/artifact/2e3qybKHWFwd824v6ZoD2u
+
+**Round 18 — story first: The Sketch (built; extended in round 19):**
 - *"a story is main point… lets actually align on one"* → picked **The
   Sketch That Wanted to Move + Chasing the Spark** (`docs/STORY.md` v11).
 - Interactivity: optional, parked for later (*"should optional but leave it
@@ -227,3 +246,14 @@ are overdoing this. do yoy need any connector" → "use codex cli in your
 session. do use device code and i will login" → "be the orchestrator…
 use chatgpt… complete whole of it… im gonna go sleep" → "dont be limiyed
 with what you plannrd… make it do crazy actuons too".)*
+
+**Round 19 (ideation session → build, condensed):** *"im gonna let thr
+other session work and use this session for ideation so pitch me"* → 16
+pitches → *"oh damn i liked all of it these arw such great qol. can you do
+it? before making a plan and matching all of up i want you to do devide code
+login for chatgpt and i want you to harness it for even little poses you can
+harness it perfectly so do it. theres no usage limit so get tye best outta
+it also you can let it handle some code jobs too. so yeah leys do it and do
+great animations and transitions everything should hit."* → network opened
+(*"done try now"*) → device-code login → chose "Separate branch" and "Yes,
+build it".

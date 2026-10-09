@@ -94,8 +94,21 @@ function tinted(k: string, col: string, im: HTMLImageElement) {
 
 let revealC: { c: HTMLCanvasElement; ctx: CanvasRenderingContext2D } | null = null;
 
+/**
+ * Per-sheet size corrections, so his head is the same size in every drawing
+ * (the face-width measure is fooled by hair across the face, profiles and
+ * the small figures on the reference sheet). Tuned on scripts/pose-lineup.html.
+ */
+const SIZE: Record<string, number> = {
+  curious: 1.25, calm: 1.25, wink: 1.25, confident: 1.25, serious: 1.25,
+  stand: 1.15, reach: 1.15, rest: 1.15,
+  walk8: 0.95, run8: 0.87, sprint8: 0.76, moonwalk6: 0.9,
+  idle: 1.1, saberdraw: 1.12, saber: 0.9, firetornado: 0.86, powerup: 0.95,
+};
+const sizeOf = (k: string) => SIZE[k.includes('_') ? k.split('_')[0] : k] ?? 1;
+
 /** the scale that makes this pose's face `face` pixels wide */
-export const poseScale = (k: string, face: number) => face / faceOf(k);
+export const poseScale = (k: string, face: number) => (face / faceOf(k)) * sizeOf(k);
 
 /** how tall the pose stands above its foot point, in screen pixels at this face width */
 export function poseHeight(k: string, face: number) {
@@ -209,4 +222,10 @@ export function drawArtFoot(ctx: CanvasRenderingContext2D, k: string, x: number,
 export function poseTop(k: string, face: number) {
   const m = M[k];
   return m ? (m.foot[1] - m.top) * poseScale(k, face) : 0;
+}
+
+/** a drawing's size in its own pixels (for props that have no face to scale by) */
+export function artSize(k: string): [number, number] {
+  const m = M[k];
+  return m ? [m.w, m.h] : [1, 1];
 }

@@ -3,9 +3,11 @@ import { drawRun } from '../sketch/run';
 import { drawRide } from '../sketch/ride';
 import { drawLight } from '../sketch/light';
 import { drawChase } from '../sketch/chase';
-import { drawHome } from '../sketch/home';
+import { HM, SIGN_WINDOW, drawHome } from '../sketch/home';
 import { setPoseClock } from '../sketch/art';
 import { drawStill } from '../sketch/still';
+import { drawSea } from '../sketch/sea';
+import { drawDeep } from '../sketch/deep';
 
 /*
  * THE SKETCH (round 18; docs/STORY.md v11).
@@ -35,15 +37,43 @@ export interface Chapter {
 }
 
 export const CHAPTERS: Chapter[] = [
-  { n: 'I', name: 'Still', from: 0, to: 5.6, paper: true, draw: drawStill },
-  { n: 'II', name: 'Run', from: 5.6, to: 14.6, paper: true, draw: drawRun },
-  { n: 'III', name: 'Fold', from: 14.6, to: 23.6, paper: false, draw: drawRide },
-  { n: 'IV', name: 'Light', from: 23.6, to: 31.6, paper: false, draw: (f, L) => drawLight(f, L) },
-  { n: 'V', name: 'Chase', from: 31.6, to: 39.6, paper: false, draw: drawChase },
-  { n: 'VI', name: 'Home', from: 39.6, to: 50.6, paper: true, draw: drawHome },
+  { n: 'I', name: 'Still', from: 0, to: 3.8, paper: true, draw: drawStill },
+  { n: 'II', name: 'Run', from: 3.8, to: 12.8, paper: true, draw: drawRun },
+  { n: 'III', name: 'Fold', from: 12.8, to: 21.8, paper: false, draw: drawRide },
+  { n: 'IV', name: 'Wave', from: 21.8, to: 26.8, paper: false, draw: drawSea },
+  { n: 'V', name: 'Deep', from: 26.8, to: 31.8, paper: false, draw: (f, L) => drawDeep(f, L) },
+  { n: 'VI', name: 'Light', from: 31.8, to: 39.8, paper: false, draw: (f, L) => drawLight(f, L) },
+  { n: 'VII', name: 'Chase', from: 39.8, to: 48.8, paper: false, draw: drawChase },
+  { n: 'VIII', name: 'Home', from: 48.8, to: 62.8, paper: true, draw: drawHome },
 ];
 
-export const REEL_END = 51.0;
+export const REEL_END = 63.2;
+
+/**
+ * Key moments that play themselves: once the playhead is inside one and the
+ * reader lets go of the scroll, the page scrolls itself through it at the speed
+ * it was made for (src/main.ts). [chapter, local from, local to, beats a second]
+ */
+const AUTO_LOCAL: [string, number, number, number][] = [
+  ['Still', 0.12, 1.5, 0.9], // the one-line birth
+  ['Run', 8.0, 9.0, 0.8], // the rubber-hose gag and the iris
+  ['Wave', 2.0, 5.0, 1.0], // the wave stands up, the tube, the flip
+  ['Deep', 2.4, 5.0, 1.0], // the whale turns and swallows; the bulb
+  ['Light', 4.75, 5.95, 0.9], // the clashes
+  ['Light', 6.9, 8.0, 0.8], // the cut and the escape
+  ['Chase', 5.0, 5.7, 0.8], // the catch
+  ['Chase', 7.45, 9.0, 1.1], // the slide home
+  ['Home', 2.15, 5.9, 1.0], // the orbit, the eyes, the fire kick
+  ['Home', 12.2, 13.6, 1.0], // into the seal: the loop
+];
+export const AUTO = AUTO_LOCAL.map(([n, a, b, rate]) => {
+  const c = CHAPTERS.find((ch) => ch.name === n)!;
+  return { from: c.from + a, to: c.from + b, rate };
+});
+/** the self-playing moment the playhead is in, if any */
+export function autoAt(B: number) {
+  return AUTO.find((s) => B >= s.from && B < s.to - 0.01) ?? null;
+}
 
 export function chapterAt(B: number) {
   let i = 0;
@@ -64,7 +94,13 @@ export function drawReel(f: Frame) {
 /** HUD state: dark type over light chapters; the contact card at the very end */
 export function reelHud(B: number) {
   const c = CHAPTERS[chapterAt(B)];
-  return { paper: c.paper, hello: B > CHAPTERS[CHAPTERS.length - 1].from + 5.9 };
+  const home = CHAPTERS[CHAPTERS.length - 1].from;
+  return {
+    paper: c.paper,
+    hello: B > home + HM.offer && B < home + HM.loop[0] + 0.2,
+    /** the page waits for your signature (a pad over the page takes the touch there) */
+    sign: B > home + SIGN_WINDOW[0] && B < home + SIGN_WINDOW[1],
+  };
 }
 
 /** a tap drops ink onto whatever is under the finger (a quiet answer, never blocks scrolling) */
