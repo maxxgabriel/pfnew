@@ -18,11 +18,7 @@ block, one heavy shape, no face).
    as it chases him; cut-paper pop-ups spring up ahead; it lunges, he dives;
    a cartwheel over the gap; at the edge the gag plays as a 1930s
    rubber-hose cartoon and an iris closes on him as he drops.
-3. **Fold** — falling, he's caught mid-air by a web-swinger (a
-   Spider-Verse-style silhouette homage: black figure, white angular lenses,
-   red/blue misregistration, white webs) who swings him down onto his page;
-   a pause: the swinger drops into the crouch, he bows and waves thank you,
-   a salute, a web shot up, and the swinger swings out of the frame; the page folds into the crane; the night ride;
+3. **Fold** — the page catches him, folds into the crane; the night ride;
    he leaps up off the crane after the Spark.
 4. **Wave** — he falls to a night sea of ink, lands on the falling brush and
    surfs; a woodblock Great Wave stands up behind him and curls him into its

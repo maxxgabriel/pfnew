@@ -2,22 +2,19 @@ import type { Frame } from '../core/frame';
 import { type Pt, clamp, ease, lerp, seg } from '../core/math';
 import { FD, drawFolding, foldAnchor, setSketchSea, sheetRect } from '../reel/fold';
 setSketchSea(true);
-import { drawPose, figPoint } from './art';
-import { CARRY, drawSpidey, handOf, swingAt, webLine, webShot } from './spidey';
+import { drawPose } from './art';
 import { drawBg, drawBgXY } from './bg';
 import { INK, PAPER, drawPaper, drawSpark, drawSparkStreak, faceOf } from './common';
-import { speedWedges } from './fx';
+import { shockRing, speedWedges } from './fx';
 
 /*
  * III · FOLD.
  *
  * He runs off the edge of the page and falls — through empty space,
- * tumbling, flailing, then diving like an arrow after the Spark. Out of
- * nowhere a web-swinger (a Spider-Verse-style homage, src/sketch/spidey.ts)
- * swings in on a web, scoops him up under one arm and swings him down onto
- * his page as it swoops underneath. A pause (the 'cameo' hold): the swinger
- * lands beside him, drops into a crouch; he bows and waves a thank-you; a
- * salute, a web shot up, and the swinger swings out of the frame. It folds under his feet (he balances,
+ * tumbling, flailing, then diving like an arrow after the Spark. His page
+ * falls after him, fluttering, and swoops underneath him as the evening
+ * opens: he crash-lands on it in a superhero crouch — the page has caught
+ * him. It folds under his feet (he balances,
  * wobbling), snaps into a bird base and tosses him into the air — and he
  * lands on the back of the paper crane rising out of it. Then the ride:
  * crouched and holding on, a whoop with a fist in the air, surfing upright
@@ -44,10 +41,6 @@ function fdOf(L: number) {
   if (L < RD.ride[1]) return lerp(FD.fly, FD.away[0], seg(L, RD.ride[0], RD.ride[1]));
   return lerp(FD.away[0], FD.end, seg(L, RD.ride[1], RD.end));
 }
-
-/** the swinger's size: his standing drawing (sil_pose_2) is this many of the hero's face widths tall */
-const SP_TALL = 4.4;
-const spScale = (fc: number) => (fc * SP_TALL) / 690;
 
 /** the fall's backdrop: empty paper with a few huge strokes rushing up past him */
 function drawVoid(f: Frame, L: number, alpha: number) {
@@ -105,53 +98,6 @@ export function drawRide(f: Frame, L: number) {
       fc = lerp(face, face * 0.9, u);
       if (u > 0.5) { pose = 'fall_3'; rot = 0; }
     }
-    // ---- the web-swinger swings in, scoops him up and swings him down onto the page (real pendulum arcs)
-    const grab = 1.3;
-    if (L > 0.85) {
-      const sc = spScale(fc);
-      const heroH = fc * 3.3;
-      const target: Pt = [foldAnchor.x || w * 0.5, foldAnchor.y || h * 0.45];
-      // where his hand (on the rope) must be for the hooked arm to hold the hero, hero's feet at `foot`
-      const handFor = (foot: Pt): Pt => {
-        const hk = handOf('sil_swing_2');
-        return [foot[0] - fc * 0.35 + (hk[0] - CARRY[0]) * sc, foot[1] - heroH * 0.92 + (hk[1] - CARRY[1]) * sc];
-      };
-      const G = handFor([w * 0.5 + Math.sin(grab * 2.3) * w * 0.06, h * 0.38]);
-      const T = handFor(target);
-      let sk: string, hand: Pt, th: number, anchor: Pt;
-      if (L < grab) {
-        // in from the upper left: a swing round an anchor high above, ending at the grab
-        const R = Math.max(h * 0.75, w * 0.45);
-        anchor = [G[0] - Math.sin(0.15) * R, G[1] - Math.cos(0.15) * R];
-        th = lerp(-1.15, 0.15, ease.inOut2(seg(L, 0.85, grab)));
-        hand = swingAt(anchor, R, th);
-        sk = th < -0.35 ? 'sil_swing_0' : 'sil_swing_1';
-      } else {
-        // carrying him: a swing round one anchor high above, the web reeling in so the arc ends over the sheet
-        anchor = [lerp(G[0], T[0], 0.5), Math.min(G[1], T[1]) - h * 0.85];
-        const u = ease.inOut2(seg(L, grab, RD.land));
-        const R0 = Math.hypot(G[0] - anchor[0], G[1] - anchor[1]), R1 = Math.hypot(T[0] - anchor[0], T[1] - anchor[1]);
-        const a0 = Math.atan2(G[0] - anchor[0], G[1] - anchor[1]), a1 = Math.atan2(T[0] - anchor[0], T[1] - anchor[1]);
-        th = lerp(a0, a1, u);
-        hand = swingAt(anchor, lerp(R0, R1, u) - Math.sin(u * Math.PI) * h * 0.05, th);
-        sk = 'sil_swing_2';
-      }
-      const so = { anchor: handOf(sk), rot: -th, t };
-      const ropeTop: Pt = [hand[0] + (anchor[0] - hand[0]) * 3, hand[1] + (anchor[1] - hand[1]) * 3];
-      webLine(ctx, hand, ropeTop, Math.max(1.5, fc * 0.045));
-      if (L < grab) {
-        speedWedges(ctx, w, h, x, y - fc * 1.2, 0.9 * Math.min(1, k * 4), t, INK, 7);
-        drawPose(ctx, pose, x, y, fc, { rot });
-        drawSpidey(ctx, sk, hand[0], hand[1], sc, so);
-      } else {
-        // he hangs from the hooked arm
-        const c = figPoint(sk, CARRY, hand[0], hand[1], sc, so);
-        drawSpidey(ctx, sk, hand[0], hand[1], sc, so);
-        drawPose(ctx, 'hero_thanks_0', c[0] + fc * 0.35, c[1] + heroH * 0.92, fc);
-      }
-      if (f.crossedFwd(f.B - L + grab)) f.shake(fc * 0.25);
-      return;
-    }
     speedWedges(ctx, w, h, x, y - fc * 1.2, 0.9 * (1 - seg(L, 1.9, RD.land)) * Math.min(1, k * 4), t, INK, 7);
     // the Spark, diving ahead of him
     const sp: Pt = [x + Math.sin(L * 3) * fc * 0.6, y + fc * 2.8 + Math.sin(t * 6) * fc * 0.1];
@@ -166,40 +112,8 @@ export function drawRide(f: Frame, L: number) {
   const k = foldAnchor.k;
   const onSheet = fd < FD.snap[1];
   const fc = onSheet ? face * 0.9 : Math.max(2, k * 24);
-  let pose = 'home_1', x = foldAnchor.x, y = foldAnchor.y, rot = 0, flip = false;
-  // ---- the cameo: the swinger beside him on the page; a thank-you; he swings away
-  const cameo = f.hold?.kind === 'cameo' ? f.hold.p : -1;
-  if (cameo >= 0) {
-    const sc = spScale(fc);
-    // beside him on the page, but always on screen (a phone is narrow)
-    const sxBase = x + Math.min(fc * 2.4, w - x - fc * 1.3), sy = y;
-    pose = 'home_1';
-    let sk = 'sil_pose_0';
-    if (cameo > 0.1) { pose = 'hero_thanks_1'; sk = 'sil_pose_1'; }
-    if (cameo > 0.38) { pose = 'hero_thanks_2'; sk = 'sil_pose_2'; }
-    if (cameo > 0.58) sk = 'sil_pose_3';
-    if (cameo > 0.72) pose = 'hero_thanks_3';
-    if (cameo <= 0.72) {
-      drawSpidey(ctx, sk, sxBase, sy, sc, { t });
-      // the 'thwip': a web shot straight up and away to the upper right
-      if (cameo > 0.6) {
-        const hp = figPoint(sk, handOf(sk), sxBase, sy, sc);
-        webShot(ctx, hp, [hp[0] + w * 0.35, -h * 0.4], Math.max(1.5, fc * 0.045), Math.min(1, (cameo - 0.6) / 0.08));
-      }
-    } else {
-      // away: a swing round the anchor up there and out of the frame
-      const hp0 = figPoint('sil_pose_3', handOf('sil_pose_3'), sxBase, sy, sc);
-      const anchor: Pt = [hp0[0] + w * 0.35, -h * 0.4];
-      const R = Math.hypot(anchor[0] - hp0[0], anchor[1] - hp0[1]);
-      const th0 = Math.atan2(hp0[0] - anchor[0], hp0[1] - anchor[1]);
-      const u = seg(cameo, 0.72, 1);
-      const th = lerp(th0, th0 + 1.9, ease.in2(u));
-      const hand = swingAt(anchor, R, th);
-      const k2 = u < 0.35 ? 'sil_swing_0' : u < 0.7 ? 'sil_swing_1' : 'sil_swing_4';
-      webLine(ctx, hand, anchor, Math.max(1.5, fc * 0.045), 1 - seg(u, 0.85, 1));
-      drawSpidey(ctx, k2, hand[0], hand[1], sc, { anchor: handOf(k2), rot: -th, t });
-    }
-  }
+  let pose = 'hero_0', x = foldAnchor.x, y = foldAnchor.y, rot = 0, flip = false;
+  if (fd > 0.6) pose = 'home_1';
   if (fd > FD.fold1[0] - 0.1) {
     // balancing as the paper folds away under his boots
     pose = 'acro_3';
@@ -215,6 +129,15 @@ export function drawRide(f: Frame, L: number) {
   if (L > RD.ride[0] + 0.5) pose = 'ride_1';
   if (L > RD.ride[0] + 1.3) pose = 'ride_2';
   if (L > RD.ride[0] + 2.1) pose = 'ride_3';
+  // landing ring on the sheet
+  const ring = seg(L, RD.land, RD.land + 0.4);
+  if (ring > 0 && ring < 1) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(1, 0.3);
+    shockRing(ctx, 0, 0, face * 1.6, ring, INK, face * 0.06);
+    ctx.restore();
+  }
   const dark = 0; // (over the painted sea the night never goes black: he leaps off into it)
   // he leaps up off the crane after the Spark, out of the top of the frame (chapter IV: he comes down on the sea)
   const jump = seg(L, 8.15, 8.75);

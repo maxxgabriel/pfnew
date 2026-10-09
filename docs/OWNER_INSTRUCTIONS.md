@@ -75,6 +75,10 @@ themselves, not to the docs: *"you report to me and not the docs"*.
 
 ## 3. Decisions (most recent first)
 
+**Round 23 — cameo removed:** *"lets get it out bro"* → the web-swinger
+cameo is taken out completely (code, hold, drawings); the page catches him on
+its own again. Don't bring a Spider-Man-style cameo back unless asked.
+
 **Round 22 — the swinger, redone:** *"come on man spiderman looks too weird not
 at all spiderman lol not even the slings"* → picked a **Spider-Verse-style
 silhouette** drawn in code (white lenses, red/blue print offset, white webs,
