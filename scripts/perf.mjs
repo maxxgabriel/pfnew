@@ -2,7 +2,7 @@
 import { chromium } from 'playwright';
 const rate = Number(process.argv[2] ?? 1);
 const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
-const page = await browser.newPage({ ignoreHTTPSErrors: true, viewport: { width: 390, height: 844 }, deviceScaleFactor: 2 });
+const page = await browser.newPage({ ignoreHTTPSErrors: true, viewport: { width: +(process.env.W ?? 390), height: +(process.env.H ?? 844) }, deviceScaleFactor: +(process.env.DPR ?? 2) });
 const cdp = await page.context().newCDPSession(page);
 await cdp.send('Emulation.setCPUThrottlingRate', { rate });
 await page.goto(process.env.URL ?? 'http://localhost:5199');

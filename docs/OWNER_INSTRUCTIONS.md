@@ -46,6 +46,9 @@ themselves, not to the docs: *"you report to me and not the docs"*.
 - **No clusters of many small things.** *"i hate multiple small things
   together its yuck for me"* (round 17). No flocks, swarms, shard clouds or
   dense fields of tiny repeated pieces; one strong shape beats many small.
+- **Fully responsive** (round 20): *"somehow it made it for mobile lol and not
+  for pc or bigger screens i need whole of this to be working perfectly
+  responsive so please do that cleanly and polish things"*.
 - **Phone first.** The owner watches on an iPhone (390×844). Touch only;
   nothing may depend on hover. Screenshot every change at phone size before
   calling it done.
@@ -71,6 +74,11 @@ themselves, not to the docs: *"you report to me and not the docs"*.
 | Anime key poses generated with ChatGPT from one character sheet | Round 11 lesson: code draws light, motion, particles and type; people come from real drawings. | Shooting star (old film) |
 
 ## 3. Decisions (most recent first)
+
+**Round 20 — responsive:** merged `claude/sketch-v12` into the main line;
+the film now fills any screen (no portrait column); a two-column ending on
+wide screens; HUD scales up; the cinematic fire tornado ported into v12's
+ending.
 
 **Round 19 — The Sketch v12 (built on its own branch, `claude/sketch-v12`):**
 - An ideation session pitched 16 quality ideas (a villain, an arc, the

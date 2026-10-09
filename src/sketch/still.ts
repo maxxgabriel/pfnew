@@ -1,10 +1,9 @@
 import { brush } from '../core/brush';
 import type { Frame } from '../core/frame';
-import { wordWidth } from '../core/glyphs';
 import { type Pt, ease, lerp, seg } from '../core/math';
 import { drawPose, poseHeight } from './art';
 import { ONE_HEIGHT, ONE_START, drawOneLine } from './oneline';
-import { INK, drawGround, drawPaper, drawSpark, drawSparkStreak, drawTitle, faceOf, hop, idlePose } from './common';
+import { INK, drawGround, drawPaper, drawSpark, drawSparkStreak, drawTitle, faceOf, hop, idlePose , titleFit } from './common';
 import { shockRing } from './fx';
 
 /*
@@ -79,8 +78,9 @@ export function drawStill(f: Frame, L: number) {
   drawPaper(ctx, w, h);
 
   // ---- the title, high on the page, fading as the page is about to turn
-  const tw = wordWidth('MAX', 300, 0.16);
-  drawTitle(f, w / 2, h * 0.1, (w * 0.56) / tw, 1 - seg(L, 2.6, 3.8));
+  // (it fits the space above his head, so on a wide screen it never runs into him)
+  const headTop = gy - face * 3.6;
+  drawTitle(f, w / 2, h * 0.09, titleFit(w * 0.56, headTop - h * 0.09 - face * 0.4), 1 - seg(L, 2.6, 3.8));
 
   // ---- the ground he'll stand on, brushed under him as he is drawn
   drawGround(ctx, w * 0.12, w * 0.88, gy + face * 0.05, face * 0.07, ease.out2(seg(L, ST.line[0] - 0.2, ST.line[0] + 0.5)));

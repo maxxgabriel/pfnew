@@ -16,6 +16,11 @@ export const RED = '#e8432a';
 /** the hero's face width on screen: everything about him scales from this */
 export const faceOf = (f: Frame) => Math.min(f.w * 0.19, f.h * 0.088);
 
+/** the title block's size in its own units (MAX at 300, GABRIEL at 118 under it) */
+const TITLE_W = wordWidth('MAX', 300, 0.16), TITLE_H = 520;
+/** the title's scale so it fits `maxW` wide and `maxH` tall, whatever the screen's shape */
+export const titleFit = (maxW: number, maxH: number) => Math.max(0.05, Math.min(maxW / TITLE_W, maxH / TITLE_H));
+
 let tile: HTMLCanvasElement | null = null;
 let pat: CanvasPattern | null = null;
 export function drawPaper(ctx: CanvasRenderingContext2D, w: number, h: number, col = PAPER) {

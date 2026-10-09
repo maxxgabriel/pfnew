@@ -31,7 +31,7 @@ seam.
 | V Deep | 28.6 – 33.6 | `sketch/deep.ts` | negative world (difference + saturation + a depth gradient; he and the Spark drawn after, in colour); the whale passes, turns, swallows; the Spark rises and becomes the bulb |
 | VI Light | 33.6 – 41.6 | `sketch/light.ts` | the room is `bg_belly` lit by the bulb; the escape (`LT.slash/cut/tumble`, `drawEscape`): the belly, painted once at the cut into an offscreen canvas, splits in two over the sunset |
 | VII Chase | 41.6 – 50.6 | `sketch/chase.ts` | he grabs the brush, paints a stroke (`slidePath`) and rides it along the brush's own spline (`slideAt`) |
-| VIII Home | 50.6 – 64.6 | `sketch/home.ts` | rides in on the stroke; the Eraser returns; the orbit (`TURN`: turnA_0..3, turnB_0..3); the eye cut-in; the kick smashes the Eraser; your signature (`signStart/Move/End`, the `#sign` pad from `main.ts`, shown by `reelHud().sign`); the loop into the first page |
+| VIII Home | 50.6 – 64.6 | `sketch/home.ts` | rides in on the stroke; the Eraser returns; the orbit (`TURN`: turnA_0..3, turnB_0..3); the eye cut-in; the cinematic fire tornado (dark special-move backdrop + bars, painted `vfx_tornado_*` on black added as light, clockwise 4-drawing spin, `ftkick_*` wind-up/strike, painted meteor and explosion; research in `docs/research/fire-tornado.md`) smashes the Eraser; your signature (`signStart/Move/End`, the `#sign` pad from `main.ts`, shown by `reelHud().sign`); the loop into the first page |
 
 - **Art.** `scripts/gen-v12.sh` (Codex image tool, the owner's ChatGPT
   plan) → `art/raw/*.png` (git-ignored; compressed copies of the older
@@ -50,10 +50,16 @@ seam.
   reader has let go (no wheel/touch/key for 250 ms), `main.ts` scrolls the
   page itself at that moment's rate; any input takes control back. Dev:
   `__film.autoplay(false)` (shoot.mjs turns it off).
-- **Desktop stage.** Wider than 0.75:1, the film renders into a centred
-  portrait column (`sw = h × 0.62`, offscreen `stage` canvas) and the sides
-  show the same frame shrunk and stretched (a cheap blur), dimmed. Scenes
-  only ever see `frame.w = sw`.
+- **Responsive (round 20).** The film fills the whole screen at every size
+  (the old portrait column with blurred sides is gone). Scenes lay out from
+  `f.w`/`f.h` with the hero sized by `faceOf(f) = min(w·0.19, h·0.088)`; the
+  title fits the space above his head (`titleFit` in `sketch/common.ts`).
+  On wide screens (≥ 5:4 and ≥ 700 px) the ending slides the scene into the
+  left 58% (`homeSide` in `sketch/home.ts`) and the contact card sits on the
+  right (`style.css`); the signing pad moves beside it. The HUD grows on
+  ≥ 1024 px and ≥ 1800 px screens. Checked at 390×844, 844×390, 820×1180,
+  1024×768, 1440×900, 1920×1080, 2560×1080 (`node scripts/shoot.mjs <beats>
+  1920x1080`).
 - **Sizes.** `SIZE` in `sketch/art.ts` corrects each sheet so his head is
   the same size in every drawing; tune it on `scripts/pose-lineup.html`.
 - `scripts/defringe.py` despills magenta from all cut-outs.

@@ -40,9 +40,12 @@ Before changing anything, read:
   beats*. To give a moment more time, add a **hold** (`src/core/holds.ts`)
   instead of shifting beats.
 - **Look at it.** Render screenshots (`scripts/shoot.mjs`) of every change at
-  phone size (390×844 @2x) and check them before you call anything done. The
-  owner watches on an iPhone.
-- **Keep it phone-first and touch-only.** Nothing may depend on hover.
+  phone size (390×844 @2x) and desktop size, and check them before you call
+  anything done.
+- **Fully responsive, touch-first.** It must work perfectly on phones (portrait
+  and landscape), tablets, laptops and big/ultrawide screens — the owner asked
+  for this in round 20. Check phone (390×844) *and* desktop (1440×900) at
+  least; `shoot.mjs` takes any `WxH`. Nothing may depend on hover.
 - Don't put model names in commits. Commit to the working branch and push. No
   PR unless asked.
 
