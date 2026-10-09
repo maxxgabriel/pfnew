@@ -6,6 +6,8 @@ import { drawChase } from '../sketch/chase';
 import { drawHome } from '../sketch/home';
 import { setPoseClock } from '../sketch/art';
 import { drawStill } from '../sketch/still';
+import { drawSea } from '../sketch/sea';
+import { drawDeep } from '../sketch/deep';
 
 /*
  * THE SKETCH (round 18; docs/STORY.md v11).
@@ -38,12 +40,14 @@ export const CHAPTERS: Chapter[] = [
   { n: 'I', name: 'Still', from: 0, to: 5.6, paper: true, draw: drawStill },
   { n: 'II', name: 'Run', from: 5.6, to: 14.6, paper: true, draw: drawRun },
   { n: 'III', name: 'Fold', from: 14.6, to: 23.6, paper: false, draw: drawRide },
-  { n: 'IV', name: 'Light', from: 23.6, to: 31.6, paper: false, draw: (f, L) => drawLight(f, L) },
-  { n: 'V', name: 'Chase', from: 31.6, to: 39.6, paper: false, draw: drawChase },
-  { n: 'VI', name: 'Home', from: 39.6, to: 48.6, paper: true, draw: drawHome },
+  { n: 'IV', name: 'Wave', from: 23.6, to: 28.6, paper: false, draw: drawSea },
+  { n: 'V', name: 'Deep', from: 28.6, to: 33.6, paper: false, draw: (f, L) => drawDeep(f, L) },
+  { n: 'VI', name: 'Light', from: 33.6, to: 41.6, paper: false, draw: (f, L) => drawLight(f, L) },
+  { n: 'VII', name: 'Chase', from: 41.6, to: 50.6, paper: false, draw: drawChase },
+  { n: 'VIII', name: 'Home', from: 50.6, to: 64.6, paper: true, draw: drawHome },
 ];
 
-export const REEL_END = 49.0;
+export const REEL_END = 65.0;
 
 export function chapterAt(B: number) {
   let i = 0;

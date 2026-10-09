@@ -45,3 +45,16 @@ export function vfxAspect(name: string) {
   const im = imgs.get(name);
   return im && im.naturalWidth ? im.naturalHeight / im.naturalWidth : 0;
 }
+
+/** like drawBg, but panning sideways too: `px` 0..1 slides a wide-enough cover from its left to its right */
+export function drawBgXY(ctx: CanvasRenderingContext2D, name: string, w: number, h: number, px: number, py: number, alpha = 1, zoom = 1.3) {
+  const im = imgs.get(name);
+  if (!im || !im.complete || !im.naturalWidth || alpha <= 0) return false;
+  const s = Math.max(w / im.naturalWidth, h / im.naturalHeight) * zoom;
+  const dw = im.naturalWidth * s, dh = im.naturalHeight * s;
+  ctx.save();
+  ctx.globalAlpha *= alpha;
+  ctx.drawImage(im, -(dw - w) * px, -(dh - h) * py, dw, dh);
+  ctx.restore();
+  return true;
+}
