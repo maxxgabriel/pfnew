@@ -229,3 +229,9 @@ export function artSize(k: string): [number, number] {
   const m = M[k];
   return m ? [m.w, m.h] : [1, 1];
 }
+
+/** a drawing's figure height (from its foot point up to its top ink), in its own pixels */
+export function figHeight(k: string) {
+  const m = M[k];
+  return m ? Math.max(1, m.foot[1] - m.top) : 1;
+}

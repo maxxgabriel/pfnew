@@ -57,6 +57,7 @@ export const REEL_END = 63.2;
 const AUTO_LOCAL: [string, number, number, number][] = [
   ['Still', 0.12, 1.5, 0.9], // the one-line birth
   ['Run', 8.0, 9.0, 0.8], // the rubber-hose gag and the iris
+  ['Fold', 0.95, 2.47, 0.9], // the web-slinger's catch, the thank-you (a hold) and his exit
   ['Wave', 2.0, 5.0, 1.0], // the wave stands up, the tube, the flip
   ['Deep', 2.4, 5.0, 1.0], // the whale turns and swallows; the bulb
   ['Light', 4.75, 5.95, 0.9], // the clashes

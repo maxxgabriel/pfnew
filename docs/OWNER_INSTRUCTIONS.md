@@ -75,6 +75,15 @@ themselves, not to the docs: *"you report to me and not the docs"*.
 
 ## 3. Decisions (most recent first)
 
+**Round 21 — the web-slinger cameo:** *"lets also get spiderman in here… while
+falling on the paper from act 3 i want spiderman to fly by and help me land on
+the paper. then he swings through out of the screen… make it like i also thank
+him… it was miles morales"*. Asked about the Marvel copyright risk → owner
+picked an **original homage**. ChatGPT's safety filter blocked a masked
+web-swinger design, so the Slinger is a street artist (hood, red spray paint,
+red goggles, bandana, red high-tops, ink-line wrist launchers) who swings on
+lines of ink.
+
 **Round 20 — responsive:** merged `claude/sketch-v12` into the main line;
 the film now fills any screen (no portrait column); a two-column ending on
 wide screens; HUD scales up; the cinematic fire tornado ported into v12's

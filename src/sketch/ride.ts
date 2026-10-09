@@ -2,19 +2,21 @@ import type { Frame } from '../core/frame';
 import { type Pt, clamp, ease, lerp, seg } from '../core/math';
 import { FD, drawFolding, foldAnchor, setSketchSea, sheetRect } from '../reel/fold';
 setSketchSea(true);
-import { drawPose } from './art';
+import { artSize, drawArtFoot, drawPose, figHeight } from './art';
 import { drawBg, drawBgXY } from './bg';
 import { INK, PAPER, drawPaper, drawSpark, drawSparkStreak, faceOf } from './common';
-import { shockRing, speedWedges } from './fx';
+import { speedWedges } from './fx';
 
 /*
  * III · FOLD.
  *
  * He runs off the edge of the page and falls — through empty space,
- * tumbling, flailing, then diving like an arrow after the Spark. His page
- * falls after him, fluttering, and swoops underneath him as the evening
- * opens: he crash-lands on it in a superhero crouch — the page has caught
- * him. It folds under his feet (he balances,
+ * tumbling, flailing, then diving like an arrow after the Spark. Out of
+ * nowhere a street-artist hero — the Slinger, an original homage — swings
+ * in on a line of ink, scoops him up under one arm and swings him down onto
+ * his page as it swoops underneath. A pause (the 'cameo' hold): the Slinger
+ * lands beside him; he bows and waves a thank-you; a thumbs-up, a salute, a
+ * line of ink shot up, and the Slinger swings out of the frame. It folds under his feet (he balances,
  * wobbling), snaps into a bird base and tosses him into the air — and he
  * lands on the back of the paper crane rising out of it. Then the ride:
  * crouched and holding on, a whoop with a fist in the air, surfing upright
@@ -40,6 +42,31 @@ function fdOf(L: number) {
   if (L < RD.fold[1]) return lerp(0, FD.fly, seg(L, RD.fold[0], RD.fold[1]));
   if (L < RD.ride[1]) return lerp(FD.fly, FD.away[0], seg(L, RD.ride[0], RD.ride[1]));
   return lerp(FD.away[0], FD.end, seg(L, RD.ride[1], RD.end));
+}
+
+/** the Slinger: drawn by height (his sheets have no face to measure), feet at (x, y) */
+function drawSlinger(ctx: CanvasRenderingContext2D, k: string, x: number, y: number, height: number, rot = 0, flip = false) {
+  const [aw] = artSize(k);
+  ctx.save();
+  ctx.translate(x, y);
+  if (flip) ctx.scale(-1, 1);
+  drawArtFoot(ctx, k, 0, 0, aw * (height / figHeight(k)), flip ? -rot : rot);
+  ctx.restore();
+}
+
+/** a line of ink from a point up out of the frame (the Slinger's swing line) */
+function inkLine(ctx: CanvasRenderingContext2D, from: Pt, to: Pt, width: number, alpha = 1) {
+  if (alpha <= 0) return;
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  ctx.strokeStyle = INK;
+  ctx.lineCap = 'round';
+  ctx.lineWidth = width;
+  ctx.beginPath();
+  ctx.moveTo(from[0], from[1]);
+  ctx.quadraticCurveTo((from[0] + to[0]) / 2 + width * 2, (from[1] + to[1]) / 2, to[0], to[1]);
+  ctx.stroke();
+  ctx.restore();
 }
 
 /** the fall's backdrop: empty paper with a few huge strokes rushing up past him */
@@ -98,6 +125,41 @@ export function drawRide(f: Frame, L: number) {
       fc = lerp(face, face * 0.9, u);
       if (u > 0.5) { pose = 'fall_3'; rot = 0; }
     }
+    // ---- the Slinger swings in on a line of ink, scoops him up and carries him down onto the page
+    const SH = fc * 3.6;
+    const grab = 1.3;
+    if (L > 0.85) {
+      const anchor: Pt = [w * 0.62, -h * 0.35];
+      let sx: number, sy: number, sk: string, srot: number;
+      if (L < grab) {
+        // swinging in from the upper left, along an arc round the anchor
+        const u = ease.inOut2(seg(L, 0.85, grab));
+        const a = lerp(-1.25, -0.25, u), R = Math.hypot(w * 0.5, h * 0.8);
+        sx = anchor[0] + Math.sin(a) * R; sy = anchor[1] + Math.cos(a) * R;
+        sk = u < 0.65 ? 'slinger_swing_0' : 'slinger_swing_1';
+        srot = a * 0.4;
+      } else {
+        // carrying him: the swing continues down onto the sheet
+        const u = ease.inOut2(seg(L, grab, RD.land));
+        const target: Pt = [foldAnchor.x || w * 0.5, foldAnchor.y || h * 0.45];
+        // the Slinger's feet ride above and behind him; he hangs from the hooked arm, feet ending on the sheet
+        sx = lerp(x - fc * 0.35, target[0] - fc * 0.35, u);
+        sy = lerp(y - fc * 1.2, target[1] - fc * 1.2, u) - Math.sin(u * Math.PI) * fc * 1.2;
+        sk = 'slinger_swing_2';
+        srot = lerp(0.1, -0.1, u);
+        pose = 'hero_thanks_0'; rot = 0;
+        x = sx + fc * 0.35; y = sy + fc * 1.2;
+      }
+      inkLine(ctx, [sx + fc * 0.5, sy - SH * 0.85], [anchor[0] + (sx - w * 0.5) * 0.15, -fc], Math.max(1.5, fc * 0.05), 1 - seg(L, RD.land - 0.2, RD.land));
+      drawSlinger(ctx, sk, sx, sy, SH, srot);
+      if (L >= grab) drawPose(ctx, pose, x, y, fc, { rot });
+      if (L < grab) {
+        speedWedges(ctx, w, h, x, y - fc * 1.2, 0.9 * Math.min(1, k * 4), t, INK, 7);
+        drawPose(ctx, pose, x, y, fc, { rot });
+      }
+      if (f.crossedFwd(f.B - L + grab)) f.shake(fc * 0.25);
+      return;
+    }
     speedWedges(ctx, w, h, x, y - fc * 1.2, 0.9 * (1 - seg(L, 1.9, RD.land)) * Math.min(1, k * 4), t, INK, 7);
     // the Spark, diving ahead of him
     const sp: Pt = [x + Math.sin(L * 3) * fc * 0.6, y + fc * 2.8 + Math.sin(t * 6) * fc * 0.1];
@@ -112,8 +174,30 @@ export function drawRide(f: Frame, L: number) {
   const k = foldAnchor.k;
   const onSheet = fd < FD.snap[1];
   const fc = onSheet ? face * 0.9 : Math.max(2, k * 24);
-  let pose = 'hero_0', x = foldAnchor.x, y = foldAnchor.y, rot = 0, flip = false;
-  if (fd > 0.6) pose = 'home_1';
+  let pose = 'home_1', x = foldAnchor.x, y = foldAnchor.y, rot = 0, flip = false;
+  // ---- the cameo: the Slinger beside him on the page; a thank-you; the Slinger swings away
+  const cameo = f.hold?.kind === 'cameo' ? f.hold.p : -1;
+  if (cameo >= 0) {
+    const SH = fc * 3.6;
+    // beside him on the page, but always on screen (a phone is narrow)
+    const sxBase = x + Math.min(fc * 2.2, w - x - fc * 1.1), sy = y;
+    let sk = 'slinger_ground_0', sx = sxBase, syy = sy, srot = 0;
+    pose = 'home_1';
+    if (cameo > 0.12) { pose = 'hero_thanks_1'; sk = 'slinger_ground_1'; }
+    if (cameo > 0.42) { pose = 'hero_thanks_2'; sk = 'slinger_ground_2'; }
+    if (cameo > 0.62) { sk = 'slinger_ground_3'; }
+    if (cameo > 0.72) {
+      // up and away on a line of ink, out of the top right of the frame
+      const u = ease.in2(seg(cameo, 0.72, 1));
+      sk = u < 0.5 ? 'slinger_swing_3' : 'slinger_swing_0';
+      sx = lerp(sxBase, w * 1.25, u);
+      syy = lerp(sy, -SH * 0.6, u) - Math.sin(u * Math.PI) * fc;
+      srot = -0.4 * u;
+      pose = 'hero_thanks_3';
+    }
+    if (cameo > 0.62) inkLine(ctx, [sx + SH * 0.12, syy - SH * 0.9], [sxBase + w * 0.25, -fc], Math.max(1.5, fc * 0.05), 1 - seg(cameo, 0.9, 1));
+    drawSlinger(ctx, sk, sx, syy, SH, srot);
+  }
   if (fd > FD.fold1[0] - 0.1) {
     // balancing as the paper folds away under his boots
     pose = 'acro_3';
@@ -129,15 +213,6 @@ export function drawRide(f: Frame, L: number) {
   if (L > RD.ride[0] + 0.5) pose = 'ride_1';
   if (L > RD.ride[0] + 1.3) pose = 'ride_2';
   if (L > RD.ride[0] + 2.1) pose = 'ride_3';
-  // landing ring on the sheet
-  const ring = seg(L, RD.land, RD.land + 0.4);
-  if (ring > 0 && ring < 1) {
-    ctx.save();
-    ctx.translate(x, y);
-    ctx.scale(1, 0.3);
-    shockRing(ctx, 0, 0, face * 1.6, ring, INK, face * 0.06);
-    ctx.restore();
-  }
   const dark = 0; // (over the painted sea the night never goes black: he leaps off into it)
   // he leaps up off the crane after the Spark, out of the top of the frame (chapter IV: he comes down on the sea)
   const jump = seg(L, 8.15, 8.75);

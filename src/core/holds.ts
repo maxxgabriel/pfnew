@@ -1,4 +1,4 @@
-import { ACT } from './frame';
+import { ACT, CHAPTERS } from './frame';
 
 /**
  * HOLDS.
@@ -8,7 +8,7 @@ import { ACT } from './frame';
  * hold's own progress runs 0→1. Everything authored in film beats keeps its
  * timing; the scroll track just gets longer.
  */
-export type HoldKind = 'play' | 'thunder' | 'titan' | 'dash' | 'alter' | 'dive' | 'meteor' | 'powers' | 'sign';
+export type HoldKind = 'play' | 'thunder' | 'titan' | 'dash' | 'alter' | 'dive' | 'meteor' | 'powers' | 'sign' | 'cameo';
 export interface Hold { at: number; len: number; kind: HoldKind }
 
 /** film beat where the machine's letters become TITAN (the ball is in the cannon) */
@@ -25,8 +25,13 @@ export const POWERS_AT = 18.7;
 /** film beat of the signature, straight after the pull-back lands on the page */
 export const SIGN_AT = 18.72;
 
-/** (One Day has no holds: every scene is authored straight on the film beats, src/day/day.ts) */
-export const HOLDS: Hold[] = [];
+/** film beat where the web-slinger sets him down on the page in chapter III (Fold's local beat RD.land = 2.45) */
+export const CAMEO_AT = CHAPTERS.find((c) => c.name === 'Fold')!.at + 2.45 + 0.002; // (just past the landing, clear of float error)
+
+export const HOLDS: Hold[] = [
+  // the web-slinger cameo: he's set down on the page, says thank you, and the slinger swings away (src/sketch/ride.ts)
+  { at: CAMEO_AT, len: 3.2, kind: 'cameo' },
+];
 /** (INK v5: the holds below belonged to the worlds that were cut; kept for reference) */
 export const OLD_HOLDS: Hold[] = [
   // the letters assemble into Green's robot, which punches the ball out of the page

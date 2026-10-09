@@ -19,7 +19,7 @@ export interface Frame {
   /** seconds since the playhead last moved (the hero's idle life starts after a few) */
   idle: number;
   /** set while a hold is playing: the film is paused at B and `p` runs 0→1 */
-  hold: { kind: 'play' | 'thunder' | 'titan' | 'dash' | 'alter' | 'dive' | 'meteor' | 'powers' | 'sign'; p: number } | null;
+  hold: { kind: 'play' | 'thunder' | 'titan' | 'dash' | 'alter' | 'dive' | 'meteor' | 'powers' | 'sign' | 'cameo'; p: number } | null;
   reduced: boolean;
   /** true on the frame the playhead passes beat `b`, in either direction */
   crossed(b: number): boolean;
