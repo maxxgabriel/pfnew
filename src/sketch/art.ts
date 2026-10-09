@@ -1,5 +1,6 @@
 import manifest from '../assets/sketch/manifest.json';
 import { canvas } from '../core/sprites';
+import { hurry, queue } from './load';
 
 /*
  * THE SKETCH'S DRAWINGS.
@@ -16,7 +17,10 @@ import { canvas } from '../core/sprites';
  * the drawing revealed under a ragged moving edge.
  */
 
-const files = import.meta.glob('../assets/sketch/*.webp', { query: '?inline', import: 'default', eager: true }) as Record<string, string>;
+const files = import.meta.glob('../assets/sketch/*.webp', { query: '?url', import: 'default', eager: true }) as Record<string, string>;
+/** the order the film first needs each sheet (scripts: grep the chapters in reel order); others load last */
+const FIRST_USE = ['still', 'curious', 'firststep', 'idle', 'walk8', 'run8', 'sprint8', 'moonwalk6', 'chase', 'eraser', 'popup', 'roto', 'rubberhose', 'runoff', 'style_chalk', 'style_clay', 'style_comic', 'style_pixel', 'style_water', 'acro', 'fall', 'hero', 'home', 'leap', 'ride', 'brushprop', 'surf', 'wave', 'swim', 'whale', 'bye', 'comedy', 'escape', 'saber', 'saberdraw', 'saberlock', 'swing', 'broom', 'broom_wink', 'closeup', 'hat', 'paint', 'extra', 'firetornado', 'ftkick', 'powerup', 'sign', 'turnA', 'turnB'];
+const prioOf = (k: string) => { const i = FIRST_USE.indexOf(k.replace(/_\d+$/, '')); return i < 0 ? 100 : i; };
 const SRC: Record<string, string> = {};
 for (const [path, url] of Object.entries(files)) SRC[path.split('/').pop()!.replace('.webp', '')] = url;
 
@@ -42,13 +46,7 @@ let clock = 0;
 export const setPoseClock = (t: number) => { clock = t; };
 const imgs = new Map<string, HTMLImageElement>();
 export function preloadPoses() {
-  for (const k of Object.keys(SRC)) {
-    if (imgs.has(k)) continue;
-    const im = new Image();
-    im.decoding = 'async';
-    im.src = SRC[k];
-    imgs.set(k, im);
-  }
+  for (const k of Object.keys(SRC)) if (!imgs.has(k)) imgs.set(k, queue(SRC[k], prioOf(k)));
 }
 export function hasPose(k: string) {
   return k in SRC && k in M;
@@ -56,7 +54,9 @@ export function hasPose(k: string) {
 function img(k: string) {
   if (!imgs.has(k)) preloadPoses();
   const im = imgs.get(k);
-  return im && im.complete && im.naturalWidth ? im : null;
+  if (im && im.complete && im.naturalWidth) return im;
+  if (k in SRC) hurry(SRC[k]);
+  return null;
 }
 
 export interface PoseOpts {
