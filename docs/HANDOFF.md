@@ -3,10 +3,11 @@
 Everything a new agent needs to pick this up. Read `docs/BRIEF.md` first for
 the owner's taste and decisions; this file is the technical side.
 
-- **Live preview:** https://claude.ai/artifact/2e3qybKHWFwd824v6ZoD2u (the main branch from round 26,
-  multi-file: the page plus its drawings as supporting files; the earlier
-  https://claude.ai/artifact/9d3GKN33rB1VSTR2jGoDnV is no longer reachable from new sessions;
-  an older preview lives at https://claude.ai/artifact/PcwGzT9y7tqBXqoo9EXsgD)
+- **Live preview:** https://claude.ai/artifact/9d3GKN33rB1VSTR2jGoDnV (round 29, multi-file: the
+  page plus its drawings as supporting files, published in two batches since
+  one publish takes at most 255 files; round 26–28 went to
+  https://claude.ai/artifact/2e3qybKHWFwd824v6ZoD2u, which this session could
+  not read; an older preview lives at https://claude.ai/artifact/PcwGzT9y7tqBXqoo9EXsgD)
   (a private claude.ai artifact owned by the user; only Claude sessions with
   the Artifact tool can republish it. See "Shipping" below.)
 - **Branches:** `claude/confident-dijkstra-4t2ifl` (main line), `claude/sketch-v12` (v12)
