@@ -34,3 +34,7 @@ go desk_real_a "$REAL The desk is old wood COVERED in years of real dried paint 
 go desk_real_b "$REAL A big green self-healing cutting mat on a white desk, with bright rolls of washi tape, a fan of colour swatch cards, chunky felt markers, a small potted plant seen from above, a colourful ceramic mug, and a few bold vinyl stickers stuck right onto the mat."
 go desk_real_c "$REAL A raw plywood workbench of a street artist: colourful spray-paint overspray clouds and stencil marks sprayed straight onto the wood, a few spray cans lying on their side, paint-marker tags and doodles drawn on the wood, a roll of gaffer tape, a splash of neon pink and electric blue."
 wait; echo "== all done (take three)"
+
+# ---- the owner picked B, "but remove the girly things": the same photo, edited
+go desk_real_b2 "Edit the attached photograph: keep it EXACTLY the same photo (same top-down camera, same green cutting mat in the middle, same white desk, same daylight and shadows, same layout and photorealism), but REMOVE the girly things: remove the flower stickers, the lemon sticker and the rainbow sticker from the mat (leave clean mat there); replace the pink and pastel washi tape rolls with plain black and kraft-brown tape rolls; replace the floral-pattern mug with a plain matte black ceramic mug of coffee; make the colour swatch fan bold primary colours (red, yellow, blue, green, black) with no pink or lilac. Keep the plant, the markers, the pencil pot, the watercolour tin and the orange scissors. No text, no logos." desk_real_b.png
+wait; echo "== all done (b2)"

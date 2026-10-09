@@ -5,6 +5,7 @@ import { drawPose, ib, poseHeight } from './art';
 import { ONE_HEIGHT, ONE_START, drawOneLine } from './oneline';
 import { INK, drawGround, drawPaper, drawSpark, drawSparkStreak, drawTitle, faceOf, hop, idlePose , titleFit } from './common';
 import { shockRing } from './fx';
+import { DOODLE, drawDoodle, wideSheet } from './margins';
 
 /*
  * I · STILL.
@@ -84,6 +85,8 @@ export function drawStill(f: Frame, L: number) {
 
   // ---- the ground he'll stand on, brushed under him as he is drawn
   drawGround(ctx, w * 0.12, w * 0.88, gy + face * 0.05, face * 0.07, ease.out2(seg(L, ST.line[0] - 0.2, ST.line[0] + 0.5)));
+  // a wide sheet: a pine brushes itself in at the far end of the line as the Spark lands (src/sketch/margins.ts)
+  if (wideSheet(f)) drawDoodle(ctx, DOODLE.pine, w * 0.87, gy + face * 0.06, h * 0.46, Math.max(seg(f.intro, ST.drop[1], ST.drop[1] + 1.3), seg(L, 0.1, 0.9)), 0.85 * (1 - seg(L, 3.0, 3.8)));
 
   // ---- the hero: the Spark's ink leaps to the page and one unbroken line loops him into being;
   // then the ink floods into the line, trembles wet and settles; a look at the Spark, a first step

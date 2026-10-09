@@ -4,6 +4,7 @@ import { type Pt, TAU, clamp, ease, hash, lerp, seg } from '../core/math';
 import { paperTile } from '../core/sprites';
 import { artSize, drawArtFoot, drawFig, figHeight, hasPose, meta, poseHeight, poseScale, drawPose } from './art';
 import { drawBg } from './bg';
+import { DOODLE, drawDoodle, wideSheet } from './margins';
 import { INK, PAPER, drawSpark, drawSparkStreak, idlePose } from './common';
 import { dryStreak } from './fx';
 import { stage, stageAhead } from './still';
@@ -198,6 +199,12 @@ export function drawRun(f: Frame, L: number) {
   ctx.strokeStyle = 'rgba(27,23,20,0.25)';
   ctx.lineWidth = 1.5 / z;
   ctx.strokeRect(left, top, edgeX - left, bot - top);
+
+  // ---- a wide sheet: a far ridge brushed into the empty top of the page, drifting slowly as he runs
+  if (wideSheet(f)) {
+    const sx = w * (0.8 - L * 0.025), sy = h * 0.42;
+    drawDoodle(ctx, DOODLE.ridge, fw[0] + (sx - fs[0]) / z, fw[1] + (sy - fs[1]) / z, (h * 0.4) / z, seg(L, 0.3, 1.4), 0.8 * (1 - Math.max(kB, kC)));
+  }
 
   // ---- what the Eraser has rubbed out: everything behind it (a grey smudge where the line was)
   const rubbed = eraserOn ? EX - face * 0.2 : left;

@@ -192,4 +192,5 @@ html.cine .hello::before {
 html.cine .hello-title, html.cine .hello-mail, html.cine .hello-links a { color: var(--ink); }
 html.cine .hello-kicker { color: #5b5449; }
 html.cine .hello-again { background: var(--ink); color: var(--paper); }
+html.cine, html.cine body { background: #e2ddd4; }
 html.cine #sign { left: 2vw; right: 44vw; top: 16vh; height: 60vh; }

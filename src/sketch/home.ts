@@ -1,4 +1,5 @@
 import { deskOn } from '../desk/layout';
+import { DOODLE, drawDoodle, wideSheet } from './margins';
 import { drawSeal } from '../acts/ink';
 import { brush } from '../core/brush';
 import type { Frame } from '../core/frame';
@@ -216,6 +217,12 @@ export function drawHome(f0: Frame, L: number) {
   const name = seg(L, HM.stand, HM.stand + 0.8);
   if (name > 0) {
     drawTitle({ ...f, intro: 0.2 + name * 2 }, w / 2, h * 0.07, titleFit(w * 0.42, gy - face * 3.6 - h * 0.07 - face * 0.3), 1);
+  }
+  // a wide sheet with no card beside it: a crane and the sea he crossed brush themselves into the margin
+  if (side === 0 && wideSheet(f) && L > HM.stand) {
+    const k = seg(L, HM.stand, HM.offer + 0.4), gone = 1 - seg(L, HM.loop[0] - 0.1, HM.loop[0] + 0.2);
+    drawDoodle(ctx, DOODLE.crane, w * 0.83, h * 0.36 + Math.sin(t * 1.3) * h * 0.008, h * 0.26, k, 0.8 * gone);
+    drawDoodle(ctx, DOODLE.wave, w * 0.87, h * 1.01, h * 0.34, seg(L, HM.stand + 0.3, HM.offer + 0.7), 0.8 * gone);
   }
 
   // ---- the Eraser: where it is, and what it has rubbed out (the ground behind it)

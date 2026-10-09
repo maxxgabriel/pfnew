@@ -75,6 +75,21 @@ themselves, not to the docs: *"you report to me and not the docs"*.
 
 ## 3. Decisions (most recent first)
 
+**Round 29 — the desk becomes a camera set (PC):** *"stop this and get tge
+latest pull i asked to fill up for destkop but it kind of deletes the whole
+immersion of the websiye. so i want yoy to think more"*. Picked all four:
+desk as bookends (open on the desk and push into the sheet, pull back at the
+end), extend the world wider, living paper margins, desk peeks in on pause;
+keep all of round 28's pieces (comic words, stickers, flipbook + exposure
+sheet, mouse brush) — *"keep some of them on thr desk make it cinematic like
+with good camera angles"*. The desk: *"uhm can we have better desk? and not
+something that would feel loneys dark brown. you can make it funky like an
+artist would usually do… lets also use funky style or messy for desk"*, *"so
+like desk wouldnt say loneliness but would say lively active and fun"*; then
+*"no i meant real desk lol not cartoonish. funky as in should look like that
+but real sorry."*; picked the green cutting mat — *"b but remove the girly
+things"*.
+
 **Round 28 — the desk round the picture (PC), and comic impact words
 (everywhere):** *"now okay great we are at a great point and i want now to
 focua specifically on pc screen because there are a lot of blank spaves we can

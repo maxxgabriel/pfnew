@@ -15,7 +15,7 @@ await p.waitForFunction(() => window.__film);
 await p.waitForTimeout(1500);
 for (const beat of beats) {
   await p.evaluate(([bt, id]) => { window.__film.intro(8); window.__film.autoplay(false); window.__film.idle(null); window.__film.seek(bt); window.__film.idle(id); }, [Number(beat), idle]);
-  await p.waitForTimeout(idle > 0 ? 2600 : 900);
+  await p.waitForTimeout(Number(process.env.WAIT ?? (idle > 0 ? 2600 : 900)));
   await p.screenshot({ path: `scripts/shots/desk/${process.env.TAG ?? ""}${W}x${H}-${beat}-i${idle}.png` });
 }
 if (errs.length) console.log(errs.join('\n'));

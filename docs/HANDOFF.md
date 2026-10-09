@@ -101,28 +101,52 @@ seam.
   a shrink. Life is 0.55 beats, but at least 0.7 s of wall clock once passed
   going forward; hidden during holds. On the desk it is bigger and sits on the
   edge of the picture. Positions are first guesses: check each at phone size.
-- **The desk (round 28, wide screens with a mouse only: `src/desk/`).**
-  `layout.ts deskOf(w, h)` is null unless pointer is fine, w ≥ 1000 and
-  w/h ≥ 1.3; the margins are each side of an h·0.7 column. `desk.ts`:
-  - left: two taped sketchbook scraps per act (`scrap1-4_*`, slap in at the
-    act's start, red-pencil cross-out and slide away at its end; Home's leave
-    at `HM.offer` for the title); a flipbook whose pencil test (`pencil1-3_*`,
-    24 frames) turns pages with the playhead and riffles by itself when idle.
-  - right: an exposure sheet whose rows scroll under a highlighted playhead
-    row (8 rows a beat); `NOTES` (plus every pow hit) are handwritten in
-    (Caveat, added to the Google Fonts link) as their frames come up.
-  - stickers (`stick1_*`, `stick2_*`): one slaps on per finished act; drag and
-    flick them (simple physics); scrolling back before the slap resets one.
-  - the mouse is a brush: drag paints (thick slow, thin fast), click splats;
-    ink dries away after ~5 s; ink on paper acts, red on painted ones.
-  - the right side slides off while the contact card is up (`cleared`).
-  - desk drawings are never queued on phones (`DESK` in `art.ts`,
-    `queueArt`); shadows are baked once per size (`bake`).
-  Art: `scripts/gen-desk.sh` (Codex) → `scripts/cut-grid.py` (grids on
-  magenta keyed only from the outside so purple letters survive; `--white`
-  for pencil on white; `--split` for a touching row).
-  Still to do: check every pow position at phone size, the desk at
-  1280×800 / 1920×1080 / ultrawide, perf, then the preview.
+- **The desk as a camera set (round 29, wide screens with a mouse only: `src/desk/`).**
+  Round 28's always-on margins were rejected ("deletes the whole immersion").
+  Now the film fills the screen, and the desk is only seen when a camera
+  moves over it. `layout.ts deskOn(w, h)`: pointer fine, not reduced motion,
+  w ≥ 1000, w/h ≥ 1.3 (phones and tablets keep the plain film).
+  - `camera.ts`: a `Shot` is {cx, cy (look point on the desk), s (1 = sheet
+    fills the screen), tilt, roll (deg)}. `matrix()` builds one perspective
+    DOMMatrix (lens = 1.15 × the longer side); it is set as CSS `matrix3d` on
+    `#film` and (offset) on the `#desk` canvas, so the GPU moves them and the
+    film's drawing code is untouched. `unproject()` maps the mouse back onto
+    the desk (homography inverse): stickers can be dragged there, and the
+    signature (`screenToSheet`, main.ts) lands on the tilted sheet.
+  - Shots (`desk.ts`): **opening** (`openShot`, 3.8 s from load: low across
+    the desk at tilt 58°, focus pull on the desk canvas, crane up, push in;
+    the film's intro clock waits `INTRO_DELAY` 1.8 s; HUD hidden by
+    `html.cine-open`; a scroll hurries it; landing mid-film skips it);
+    **peek** (idle > 2.2 s: eases back to s ≥ 1.55 with a 15° tilt and a slow
+    drift, snaps back in 0.35 s on scroll); **end** (`endShot`: from
+    `HM.stand − 0.35` to `HM.offer`, the sheet on the left, the contact card
+    a taped paper card on the desk at the right via `html.cine` CSS; back in
+    as the loop starts). At rest the transforms are cleared (`park`).
+  - `#desk` canvas covers `EXT` (−1.25…2.25 w, −1.4…2.2 h) at `RES` 0.55 per
+    CSS px; `drawBase` (once per size / when art arrives) = the desk photo
+    `desk_top` (3.2 w wide, mirrored out on every side), a daylight pool, the
+    sheet's shadow and the props (peg bar the sheet hangs on, inkstone, brush,
+    eraser, red pencil: `prop1_*`, `prop2_*`). Per frame: the act's scraps and
+    flipbook in the left margin, the exposure sheet and stickers in the right
+    (margins h·0.45). Past the desk is the daylit room `ROOM` (#e2ddd4).
+  - The mouse brush draws on its own screen-space canvas `#ink`; pow words
+    stay in the picture (bigger on PC).
+  - Desk top: the owner chose a real photo (B: green cutting mat on a white
+    desk) "but remove the girly things" → `desk_real_b2` (no flower, lemon
+    or rainbow stickers, black/kraft tape, black mug, primary swatches).
+    Rejected: the dark walnut desk under a night lamp ("lonely dark brown"),
+    and cartoon desks ("i meant real desk lol not cartoonish").
+  - Dev: `scripts/shoot-open.sh [WxH] [secs…]` (the opening),
+    `node scripts/shoot-desk.mjs <raw beats> [WxH] [idle s]` (peek / end;
+    `WAIT=ms` for slow big screens), `?desk=<name>` tries another desk top.
+  Art: `scripts/gen-cine.sh` (desk, props, doodles).
+- **Living margins (round 29, any wide screen: `sketch/margins.ts`).** Big
+  ink doodles brush themselves in (left to right under a soft ragged edge)
+  in the paper chapters' empty sheet: a pine at the far end of Still's line
+  (as the Spark lands), a far ridge in Run's empty top (drifting, in world
+  space), a crane and a wave in Home's right half when no card column is
+  there. Ink only (their red was taken out: the film's one red circle is the
+  Spark).
 - **Perf** (headless, JS ms/frame): 0.3 – 3.4 everywhere.
 - Codex image calls: use `--image=a.png --image=b.png` (a bare `-i` swallows
   the prompt as another file), `< /dev/null`.

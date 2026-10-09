@@ -565,7 +565,9 @@ function drawBrush(f: Frame) {
 /* ------------------------------------------------------------ the desk itself */
 
 /** the desk's props, lying round the sheet (scripts/gen-cine.sh props_1, props_2) */
-const PROPS = ['prop1_0', 'prop1_1', 'prop1_2', 'prop2_0', 'prop2_1', 'prop2_2'];
+const PROPS = ['prop1_0', 'prop1_1', 'prop1_2', 'prop2_0', 'prop2_1'];
+/** the daylit room past the desk's edge (also the page behind the canvases while the camera is out: src/style.css) */
+const ROOM = '#e2ddd4';
 /** which painted desk top (dev: ?desk=desk_a to try another) */
 const DESK_TOP = (typeof location === 'object' && new URLSearchParams(location.search).get('desk')) || 'desk_top';
 /** how far the desk reaches round the sheet, as multiples of the screen (the dark takes over past it) */
@@ -593,9 +595,11 @@ function drawBase(w: number, h: number) {
   base.height = Math.round(DH * RES);
   const g = base.getContext('2d')!;
   g.setTransform(RES, 0, 0, RES, -X0 * RES, -Y0 * RES);
+  g.fillStyle = ROOM;
+  g.fillRect(X0, Y0, DW, DH);
   // the desk top, centred under the sheet, mirrored out on every side so it never runs out
   const wood = bgImage(DESK_TOP);
-  const ww = w * 2.5, wh = ww / 1.5;
+  const ww = w * 3.2, wh = ww / 1.5;
   const ox = w / 2 - ww / 2, oy = h * 0.5 - wh / 2;
   if (wood) {
     for (let j = -1; j <= 1; j++) for (let i = -1; i <= 1; i++) {
@@ -605,19 +609,19 @@ function drawBase(w: number, h: number) {
       g.drawImage(wood, -ww / 2, -wh / 2, ww, wh);
       g.restore();
     }
-  } else { g.fillStyle = '#d9cbb0'; g.fillRect(X0, Y0, DW, DH); }
+  } else { g.fillStyle = ROOM; g.fillRect(X0, Y0, DW, DH); }
   // daylight: a soft bright pool on the sheet, the far desk falling gently into shade
   const lx = w * 0.45, ly = h * 0.35;
   const pool = g.createRadialGradient(lx, ly, h * 0.3, lx, ly, w * 1.7);
   pool.addColorStop(0, 'rgba(255,250,235,0.10)');
-  pool.addColorStop(0.5, 'rgba(255,250,235,0)');
-  pool.addColorStop(0.85, 'rgba(30,22,16,0.35)');
-  pool.addColorStop(1, 'rgba(20,18,15,0.9)');
+  pool.addColorStop(0.55, 'rgba(255,250,235,0)');
+  pool.addColorStop(0.8, 'rgba(226,221,212,0.5)');
+  pool.addColorStop(0.95, ROOM);
   g.fillStyle = pool;
   g.fillRect(X0, Y0, DW, DH);
   // the sheet lies a little proud of the wood: its soft shadow
   g.save();
-  g.shadowColor = 'rgba(0,0,0,0.6)';
+  g.shadowColor = 'rgba(30,24,16,0.45)';
   g.shadowBlur = h * 0.05;
   g.shadowOffsetX = h * 0.012;
   g.shadowOffsetY = h * 0.022;
@@ -635,7 +639,6 @@ function drawBase(w: number, h: number) {
   prop('prop1_1', -h * 0.16, -h * 0.15, h * 0.62, -0.95); // the brush, wet from it
   prop('prop2_1', w * 0.16, h * 1.17, h * 0.3, 0.22); // the eraser (the villain, off duty)
   prop('prop1_0', w + h * 0.18, h * 1.08, h * 0.62, 1.15); // the red pencil
-  prop('prop2_2', w + h * 0.6, -h * 0.26, h * 0.4, 0); // a coffee, gone cold
   return base;
 }
 
@@ -649,8 +652,8 @@ let openT = 0, openDone = false, peekK = 0, lastShot: Shot | null = null, lastM:
 /** the opening: low across the desk in the lamplight, craning up and pushing into the sheet */
 function openShot(w: number, h: number, t: number): Shot {
   const u = seg(t, 0.25, OPEN);
-  // close and low over the inkstone and the brush, the sheet off to the right in the lamplight
-  const a: Shot = { cx: -w * 0.1, cy: h * 0.32, s: 1.9, tilt: 64, roll: -10 };
+  // close and low across the desk, over the inkstone and the brush, the sheet off to the right in the daylight
+  const a: Shot = { cx: w * 0.12, cy: h * 0.4, s: 1.9, tilt: 58, roll: -10 };
   const r = rest(w, h);
   const kc = ease.inOut3(u);
   return {
@@ -665,7 +668,9 @@ function openShot(w: number, h: number, t: number): Shot {
 
 /** the reader stopped: ease back over the desk, a slow drift while they rest */
 function peekShot(w: number, h: number, t: number): Shot {
-  return { cx: w * 0.5 + Math.sin(t * 0.16) * w * 0.035, cy: h * 0.56, s: 1.55, tilt: 15 + Math.sin(t * 0.11) * 2, roll: -1.4 + Math.sin(t * 0.13) * 0.6 };
+  // far enough back that the margins' things fit beside the sheet on a narrower screen too
+  const s = Math.max(1.55, 1 + (2.15 * h * 0.45) / w);
+  return { cx: w * 0.5 + Math.sin(t * 0.16) * w * 0.035, cy: h * 0.56, s, tilt: 15 + Math.sin(t * 0.11) * 2, roll: -1.4 + Math.sin(t * 0.13) * 0.6 };
 }
 
 /** the end: pull back to the finished drawing on the desk, the card beside it */

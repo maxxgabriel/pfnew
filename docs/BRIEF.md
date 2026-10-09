@@ -271,3 +271,14 @@ clarified: *"not restore… do something in the current art style"*. Built a
 story in the ink-in-water style with the first film's swordsmen (Two Drops +
 The Last Stroke): src/water/story.ts. Lesson: the owner wants story and set
 pieces, not just mood.
+
+**Round 29: the desk as a camera set.** Round 28's desk round the picture
+(always on, on PC) "kind of deletes the whole immersion". Lesson: fill a big
+screen by moving a camera through a world, not by framing the film with
+panels. Now the film is a sheet on a real desk: the page opens on the desk and
+pushes in, eases back over it when the reader stops, and pulls back at the end
+(the contact card taped beside the drawing); between those moments the film
+fills the screen. The desk must feel "lively active and fun", real (not
+cartoon), and not "girly": a green cutting mat on a white desk with a plant,
+markers, swatches, a watercolour tin. Wide paper chapters also get big ink
+doodles that draw themselves into the empty margins.

@@ -33,6 +33,9 @@ Before changing anything, read:
   painted birds, Neon (the letter city) and Shadow's shard cloud are cut.
   Round 23: the Spider-Man-style cameo (the Slinger, then the web-swinger) is cut.
   Round 25: the ink cat and the visible brush laying the run's line are cut.
+  Round 29: the desk always round the picture (it kills the immersion: the desk
+  is only seen when the camera moves over it), the dark night-lamp desk and
+  cartoon desks are out; the desk is a real photo, nothing "girly" on it.
 - **No clusters of small things.** The owner finds many small things
   together "yuck" (flocks, swarms, shard clouds, dense particle fields).
   Prefer one strong shape over many small ones.
