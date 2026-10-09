@@ -15,7 +15,42 @@ the owner's taste and decisions; this file is the technical side.
 ---
 
 
-## Current film: Two Drops (round 15) — read this first
+## Current film: the Reel (round 16) — read this first
+
+The site is a showreel in the first film's format: a few chapters, each a
+different craft at full strength, joined by clean seams. Round 16 built the
+**vertical slice**: chapter I (Ink) to the final bar, and the cut into II
+(Machine). `main.ts` draws `drawReel` (`src/reel/reel.ts`).
+
+- `reel/reel.ts` — the conductor. Beats in `REEL`, chapters in
+  `REEL_CHAPTERS` (mirrored in `core/frame.ts` `CHAPTERS`), the camera path
+  `CAM` ([beat, x, y, view width, rotation] in painting units, Catmull-Rom,
+  zoom in log space), the brushed title (intro clock), the two drops, the
+  seal + inscription, and the MACHINE slam with the dive through the A's
+  counter (the machine world shows through the hole; `drawMachineWorld`
+  plays acts/machine.ts at an offset beat).
+- `reel/painting.ts` — one tall hanging scroll, `PW × PH` = 1000 × 2200
+  painting units. Each cut is an `Element` (`from` = the cut, `to` = its
+  place in the landscape, `cut` and `settle` beat ranges): the cross → the
+  ridge, the leap → the cliff, the thunder → the gold river; the spinning
+  guard → the moon (`MOON_SPIN`); the parries' spray → the pine (`SPRAY`).
+  Washes are pre-rendered (`makeWash`) and bleed down; mist bands separate
+  the planes. After `SETTLED` the landscape is cached to one image.
+  `fadeSides` dissolves it into paper on wide screens; `trimToSheet` and the
+  sheet's `edge` only appear at the reveal.
+- `reel/duel.ts` — the fighters (`drawWarrior` from acts/warrior.ts), keyed
+  per beat (`BLUE`, `GREEN`: beat, hilt x/y, blade angle, ground, mode
+  0 smooth / 1 snap / 2 hold / 3 raw-angle spin; `stand()` lifts the blocked
+  -out keys to a taller stance). Pigment blades, crescent smears on fast
+  turns, clashes measured from the blades (`CLASHES`), a frame of negative on
+  each (`impactNow`, applied in reel.ts with 'difference'), splatter that
+  stays on the ground and dries off in the air, the thunder charge, and the
+  snapped half flying to stamp the seal (`SNAP`, `SEAL`).
+- The chapter's motion runs DOWN (the drops, the camera tilting down the
+  sheet); UP is kept for the moon and the pull-back.
+- Website only: the owner doesn't want a video format, ever.
+
+## Previous: Two Drops (round 15)
 
 `main.ts` draws `drawStory` (`src/water/story.ts`): beats in `T`, the two
 fighters' choreography as keyframes (`BLUE`, `GREEN`: beat, hilt x/y, blade

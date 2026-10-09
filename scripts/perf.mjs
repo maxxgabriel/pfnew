@@ -22,7 +22,7 @@ if (process.argv[3] === 'alter') {
   process.exit(0);
 }
 // raw beats spread over the whole film (every hold included)
-for (const b of [0.2, 1.5, 2.6, 3.4, 4.0, 4.6, 5.45, 6.0, 7.0, 7.9, 8.5, 9.1, 9.6, 10.15, 10.8, 11.5, 12.0]) {
+for (const b of [0.2, 1.6, 2.84, 3.4, 4.0, 5.1, 6.1, 6.6, 7.7, 8.2, 9.2, 10.4, 10.9, 12.0]) {
   await page.evaluate((b) => { window.__film.intro(8); window.__film.seek(b); }, b);
   await page.waitForTimeout(1200);
   out.push(`${b}:${(await page.evaluate(() => window.__film.cost())).toFixed(1)}`);

@@ -1,5 +1,5 @@
 import './style.css';
-import { T, drawStory, storyMove, storyTap } from './water/story';
+import { REEL, drawReel, reelTap } from './reel/reel';
 import { CHAPTERS, type Frame } from './core/frame';
 import { clamp, damp } from './core/math';
 import { canvas, grainTiles } from './core/sprites';
@@ -121,9 +121,9 @@ function hud() {
   }
   fill.style.width = `${(R / RAW_END) * 100}%`;
   // dark type over paper, light type over everything else
-  const onPaper = B < T.night[0] + 0.3 || B > T.dawn[1];
+  const onPaper = B < REEL.slam[0] + 0.6;
   document.documentElement.classList.toggle('on-paper', onPaper);
-  hello.classList.toggle('on', B > T.enso[1] - 0.1);
+  hello.classList.toggle('on', B > REEL.machine[1] - 0.2);
 }
 
 /* ---------------------------------------------------------------- loop */
@@ -162,8 +162,8 @@ function loop(now: number) {
     ctx.translate((Math.random() - 0.5) * shakeAmt, (Math.random() - 0.5) * shakeAmt);
   }
 
-  // ink in water: the whole film (src/water)
-  drawStory(frame);
+  // the reel: chapter I, Ink, and the cut into Machine (src/reel)
+  drawReel(frame);
 
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   post(t, dt);
@@ -171,13 +171,10 @@ function loop(now: number) {
   cost = cost * 0.9 + (performance.now() - c0) * 0.1;
 }
 
-let tapT = 0;
-// the finger stirs the water (listening only: the page still scrolls); a tap drops ink
-window.addEventListener('pointermove', (e) => { if (e.pointerType !== 'mouse' || e.buttons & 1) storyMove(e.clientX, e.clientY, tapT, w, h); }, { passive: true });
-window.addEventListener('touchmove', (e) => { const p = e.touches[0]; if (p) storyMove(p.clientX, p.clientY, tapT, w, h); }, { passive: true });
+// a tap drops ink (listening only: the page still scrolls)
 window.addEventListener('click', (e) => {
   if ((e.target as Element | null)?.closest?.('a, button, #hello, .reel-marks')) return;
-  storyTap(e.clientX, e.clientY, tapT, w, h);
+  reelTap(e.clientX, e.clientY);
 });
 
 function post(t: number, dt: number) {
@@ -188,8 +185,12 @@ function post(t: number, dt: number) {
     ctx.globalAlpha = 1;
     flashAmt = damp(flashAmt, 0, 10, dt);
   }
-  tapT = t;
-  if (vignette) ctx.drawImage(vignette, 0, 0, w, h);
+  if (vignette) {
+    // on white paper a dark vignette reads as a lit blotch; keep it a whisper there
+    ctx.globalAlpha = B < REEL.slam[0] + 0.6 ? 0.25 : 1;
+    ctx.drawImage(vignette, 0, 0, w, h);
+    ctx.globalAlpha = 1;
+  }
   // grain
   const pat = grainPat[Math.floor(t * 24) % grainPat.length];
   if (pat) {

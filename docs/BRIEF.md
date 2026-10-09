@@ -181,6 +181,21 @@ signature. ALTER stays at about a third. The dragon and the Night Ride are
 removed. See `docs/STORY.md` v4. Lesson: when the owner says "shorten", don't
 replace; when unsure, ask.
 
+**Round 16: the Reel (current).** The owner asked for fresh ideas using three
+references (a pdhouse motion guide on Notion, which this environment's
+network blocks; cth9191/animate; heygen-com/hyperframes). Pitched story-led
+concepts; the owner: *"we are saying a story and not showing our skills.
+remember how we did it very well the first time?"* — the first film's
+format was right: a showreel with a thread, each act a different craft.
+Agreed plan: 4 chapters each with one "how did they do that" moment
+(Ink, Machine, Impact, the Page), kinetic type as the glue between worlds,
+one art direction (paper, ink, a few strong colours), the references used
+for quality (HyperFrames' seam law, animate's craft and review rules), and a
+**vertical slice first**: Ink built to the best bar plus its exit, judged on
+the phone before the rest. **Website only, never a video format.** Built:
+src/reel — on white paper, the fight paints a hanging scroll (each cut flows
+into the landscape), then MACHINE slams on and the camera dives through it.
+
 **What the owner responds to.** Big, cinematic, anime-like set pieces;
 continuity jokes (Blot); hard cuts, impact frames, speed lines. Proposals
 with clear options before a build.

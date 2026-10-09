@@ -1,4 +1,26 @@
-# STORY — Two Drops (v8, round 15, current)
+# STORY — The Reel (v9, round 16, current)
+
+A showreel in the first film's format: a few chapters, each a different
+craft at full strength, joined by a thread and clean seams. Planned:
+**I Ink** (brush animation), **II Machine** (cartoon timing and physics),
+**III Impact** (one short anime set piece), **IV The Page** (pull back:
+every chapter still playing in its circle; the name; contact). Kinetic type
+slams between worlds and the camera dives through the letters.
+
+**Chapter I, built (the vertical slice):** MAX GABRIEL brushed on white
+paper → two drops of pigment (azurite blue, malachite green) fall down the
+sheet as the camera tilts after them, land, and bloom into two fighters on a
+bank of ink → five exchanges, each cut staying on the paper and flowing into
+the landscape: the cross becomes the far ridge, the leap the cliff they run
+up, the parries' spray the pine, the spinning guard the moon, the thunder
+(gold leaf) the river → Green's blade snaps; the broken half flies to the
+corner and stamps the red seal; the inscription writes itself → pull back:
+the fight painted a whole hanging scroll → MACHINE slams on in poster
+colours and the camera dives through the A into the machine.
+
+---
+
+# STORY — Two Drops (v8, round 15, superseded)
 
 The owner on Ink in Water: *"there is legit no story here or animations…
 we had something in the first one"*, then: keep the current art style, but

@@ -36,16 +36,11 @@ export const ACT = {
   matchEnd: 20.0,
   finaleStart: 18.7,
   creditsStart: 22.55,
-  /** Ink in Water (round 14): src/water/water.ts W */
-  END: 11.9,
+  /** the reel (round 16): src/reel/reel.ts REEL.END */
+  END: 13.2,
 };
 
 export const CHAPTERS = [
-  { at: 0, n: 'I', name: 'Drops' },
-  { at: 1.3, n: 'II', name: 'Ridge' },
-  { at: 3.4, n: 'III', name: 'Wave' },
-  { at: 5.1, n: 'IV', name: 'Bamboo' },
-  { at: 6.9, n: 'V', name: 'Rain' },
-  { at: 8.7, n: 'VI', name: 'Reflection' },
-  { at: 10.3, n: 'VII', name: 'Ensō' },
+  { at: 0, n: 'I', name: 'Ink' },
+  { at: 11.0, n: 'II', name: 'Machine' },
 ];
