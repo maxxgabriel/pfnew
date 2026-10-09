@@ -1,5 +1,5 @@
 import './style.css';
-import { REEL, drawReel, reelTap } from './reel/reel';
+import { drawReel, reelHud, reelTap } from './reel/reel';
 import { CHAPTERS, type Frame } from './core/frame';
 import { clamp, damp } from './core/math';
 import { canvas, grainTiles } from './core/sprites';
@@ -121,9 +121,9 @@ function hud() {
   }
   fill.style.width = `${(R / RAW_END) * 100}%`;
   // dark type over paper, light type over everything else
-  const onPaper = B < REEL.slam[0] + 0.6;
-  document.documentElement.classList.toggle('on-paper', onPaper);
-  hello.classList.toggle('on', B > REEL.machine[1] - 0.2);
+  const st = reelHud(B);
+  document.documentElement.classList.toggle('on-paper', st.paper);
+  hello.classList.toggle('on', st.hello);
 }
 
 /* ---------------------------------------------------------------- loop */
@@ -187,7 +187,7 @@ function post(t: number, dt: number) {
   }
   if (vignette) {
     // on white paper a dark vignette reads as a lit blotch; keep it a whisper there
-    ctx.globalAlpha = B < REEL.slam[0] + 0.6 ? 0.25 : 1;
+    ctx.globalAlpha = reelHud(B).paper ? 0.25 : 1;
     ctx.drawImage(vignette, 0, 0, w, h);
     ctx.globalAlpha = 1;
   }
