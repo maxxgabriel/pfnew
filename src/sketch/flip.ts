@@ -33,6 +33,13 @@ const BOOK: Pg[] = [];
   for (let i = 0; i < 6; i++) add({ pose: `walk_${i % 6}`, x: 0.25 + i * 0.012, rot: (i % 2 ? 1 : -1) * 0.09, spark: 0.6 + i * 0.01 });
   // a walk
   for (let i = 0; i < 12; i++) add({ pose: `walk_${(i + 6) % 6}`, x: 0.33 + i * 0.022, spark: 0.68 + i * 0.012, sy: Math.sin(i) * 0.02 });
+  // he notices you flipping: turns to the reader, waves, and carries on
+  add({ pose: 'home_2', x: 0.58, spark: 0.84 });
+  add({ pose: 'home_2', x: 0.58, spark: 0.84 });
+  add({ pose: 'bye_0', x: 0.58, spark: 0.84 });
+  add({ pose: 'bye_1', x: 0.58, spark: 0.84 });
+  add({ pose: 'bye_0', x: 0.58, spark: 0.84 });
+  add({ pose: 'extra_1', x: 0.58, spark: 0.85 });
   // the page from another story: the rivals mid-duel, and he slides under their blades
   for (let i = 0; i < 4; i++) add({ pose: `run_${i % 6}`, x: 0.2 + i * 0.05, spark: 0.55 + i * 0.05, rivals: i });
   for (let i = 0; i < 4; i++) add({ pose: 'acro_0', x: 0.42 + i * 0.07, spark: 0.85, rivals: 4 + i });
@@ -80,6 +87,23 @@ function paintPage(g: CanvasRenderingContext2D, f: Frame, i: number) {
     g.scale(k, k);
     g.translate(-500, -1842);
     drawRivalsFlat(g, 2.55 + p.rivals * 0.028, t, INK);
+    g.restore();
+  }
+  if (p.rivals === 7 || p.rivals === 8) {
+    // their blades meet on this page: a white star burst behind the clash
+    g.save();
+    g.translate(w * 0.54, gy - face * 2.0);
+    g.fillStyle = '#ffffff';
+    g.beginPath();
+    for (let k = 0; k < 16; k++) {
+      const a = (k / 16) * Math.PI * 2, rr = k % 2 ? face * 0.35 : face * (1.4 + (k % 4) * 0.2);
+      g.lineTo(Math.cos(a) * rr, Math.sin(a) * rr);
+    }
+    g.closePath();
+    g.fill();
+    g.strokeStyle = INK;
+    g.lineWidth = face * 0.04;
+    g.stroke();
     g.restore();
   }
   drawPose(g, p.pose, p.x * w, gy + (p.dy ?? 0) * face * 4, face, { rot: p.rot });

@@ -37,6 +37,9 @@ const sheetFace = new Map<string, number>();
 const faceOf = (k: string) => sheetFace.get(k.includes('_') ? k.split('_')[0] : k) ?? M[k].face;
 
 export type PoseKey = string;
+/** the film's clock, so every drawing can boil a little by default (set once a frame) */
+let clock = 0;
+export const setPoseClock = (t: number) => { clock = t; };
 const imgs = new Map<string, HTMLImageElement>();
 export function preloadPoses() {
   for (const k of Object.keys(SRC)) {
@@ -108,12 +111,13 @@ export function drawPose(ctx: CanvasRenderingContext2D, k: string, x: number, y:
   const s = poseScale(k, face);
   ctx.save();
   let bx = 0, by = 0, br = 0;
-  if (o.boil) {
-    const step = Math.floor((o.t ?? 0) * 8);
+  const boil = o.boil ?? 0.006;
+  if (boil) {
+    const step = Math.floor((o.t ?? clock) * 8);
     const h1 = Math.sin(step * 12.9898) * 43758.5453, h2 = Math.sin(step * 78.233) * 12543.123;
-    bx = ((h1 - Math.floor(h1)) - 0.5) * o.boil * face;
-    by = ((h2 - Math.floor(h2)) - 0.5) * o.boil * face * 0.6;
-    br = ((h1 * 3 - Math.floor(h1 * 3)) - 0.5) * o.boil * 0.12;
+    bx = ((h1 - Math.floor(h1)) - 0.5) * boil * face;
+    by = ((h2 - Math.floor(h2)) - 0.5) * boil * face * 0.6;
+    br = ((h1 * 3 - Math.floor(h1 * 3)) - 0.5) * boil * 0.12;
   }
   ctx.translate(x + bx, y + by);
   if (o.rot || br) ctx.rotate((o.rot ?? 0) + br);

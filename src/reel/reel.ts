@@ -4,6 +4,7 @@ import { drawRide } from '../sketch/ride';
 import { drawLight } from '../sketch/light';
 import { drawBurst } from '../sketch/burst';
 import { drawHome } from '../sketch/home';
+import { setPoseClock } from '../sketch/art';
 import { drawStill } from '../sketch/still';
 
 /*
@@ -51,6 +52,7 @@ export function chapterAt(B: number) {
 }
 
 export function drawReel(f: Frame) {
+  setPoseClock(f.t);
   const c = CHAPTERS[chapterAt(f.B)];
   if (c.draw) c.draw(f, f.B - c.from);
   else {

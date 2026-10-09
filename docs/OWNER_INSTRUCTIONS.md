@@ -78,6 +78,14 @@ themselves, not to the docs: *"you report to me and not the docs"*.
   were not good enough (*"dude i feel like you are overdoing this"*); poses
   are now generated with the Codex CLI on the owner's ChatGPT plan from that
   sheet (`scripts/gen-sketch.sh`, `scripts/cutout-sheet.py`).
+- Then: *"be the orchestrator. use chatgpt for things that it does better
+  than you and delegate it tasks… go on a creative spree… complete whole of
+  it… im gonna go sleep so handle all of it yourself"* and *"dont be limited
+  with what you planned… make it do crazy actions too"*. Built the whole
+  story (six chapters) with ~20 generated pose sheets (comedy, acrobatics,
+  falls, riding the crane, brush-sword fight, cord swing, superhero
+  landing, power-up, close-ups, an after-credits peek) and three painted
+  backgrounds; the effects module was delegated to Codex.
 
 **Round 17 — trimming the Reel (current, built):**
 - Cut **II Flock** (the murmuration) and the little painted birds on the
@@ -214,4 +222,6 @@ point" → "1 with 3 sounds awesome" → character: "show me an example of how
 cute round character would look like", then the Wanderer sheet "make him
 look something like this… exactly like that", then "dude i feel like you
 are overdoing this. do yoy need any connector" → "use codex cli in your
-session. do use device code and i will login".)*
+session. do use device code and i will login" → "be the orchestrator…
+use chatgpt… complete whole of it… im gonna go sleep" → "dont be limiyed
+with what you plannrd… make it do crazy actuons too".)*

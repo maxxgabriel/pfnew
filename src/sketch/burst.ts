@@ -1,5 +1,6 @@
 import type { Frame } from '../core/frame';
 import { type Pt, clamp, ease, lerp, seg } from '../core/math';
+import { drawSprite, glow } from '../core/sprites';
 import { drawArt, drawPose } from './art';
 import { drawBg } from './bg';
 import { INK, RED, drawSpark, drawSparkStreak, faceOf } from './common';
@@ -28,14 +29,16 @@ export const BU = {
   trade: [1.95, 3.5] as const,
   hits: [2.35, 2.85, 3.3] as const,
   skid: [3.5, 4.0] as const,
-  charge: [4.15, 4.55] as const,
-  final: 4.6,
-  burst: [4.6, 5.2] as const,
-  crouch: [5.25, 5.55] as const,
-  leap: [5.55, 6.2] as const,
-  hand: [6.2, 6.75] as const,
-  close: 6.6,
-  white: [6.7, 7.2] as const,
+  /** stillness, then the power-up: crouch, the icy aura, the roar */
+  power: [4.05, 4.8] as const,
+  charge: [4.85, 5.25] as const,
+  final: 5.3,
+  burst: [5.3, 5.9] as const,
+  crouch: [5.95, 6.25] as const,
+  leap: [6.25, 6.9] as const,
+  hand: [6.9, 7.45] as const,
+  close: 7.3,
+  white: [7.4, 7.9] as const,
   end: 8.0,
 };
 
@@ -96,6 +99,14 @@ export function drawBurst(f: Frame, L: number) {
     mx = lerp(w * 0.42, w * 0.2, u);
     sx = lerp(w * 0.58, w * 0.8, u);
   }
+  // the power-up: he gathers it, the wind blasts his hair up, he roars
+  let aura = 0;
+  if (L > BU.power[0] && L < BU.charge[0]) {
+    const u = seg(L, BU.power[0], BU.power[1]);
+    mp = u < 0.35 ? 'powerup_0' : u < 0.7 ? 'powerup_1' : 'powerup_2';
+    aura = ease.out2(seg(u, 0.25, 0.7)) * (1 - seg(L, BU.power[1], BU.charge[0]) * 0.5);
+    if (f.crossedFwd(f.B - L + BU.power[0] + (BU.power[1] - BU.power[0]) * 0.7)) f.shake(face * 0.3);
+  }
   if (L > BU.charge[0]) {
     const u = ease.in3(seg(L, BU.charge[0], BU.charge[1]));
     mp = 'dash_1'; spose = 'dash_1';
@@ -121,6 +132,25 @@ export function drawBurst(f: Frame, L: number) {
   }
   if (L > BU.leap[0] && L < BU.hand[0]) speedWedges(ctx, w, h, mx, my - face * 1.5, 0.9, t, 'rgba(255,236,210,0.55)', 7);
 
+  if (aura > 0) {
+    // the world dims, and he burns cold: an icy rim (a pale copy of the drawing just behind him)
+    ctx.save();
+    ctx.fillStyle = `rgba(6,10,24,${0.5 * aura})`;
+    ctx.fillRect(0, 0, w, h);
+    ctx.restore();
+    for (const [d, a] of [[0.07, 0.5], [0.035, 0.9]] as const) {
+      drawPose(ctx, mp, mx, my + face * d * 0.5, face * (1 + d), { tint: '#cdeeff', alpha: aura * a, boil: 0.03, t });
+    }
+    // the icy aura: a cold glow behind him and a ring of wind
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.globalAlpha = aura * 0.85;
+    drawSprite(ctx, glow('#9fdcff', 128), mx, my - face * 1.6, face * (6 + Math.sin(t * 18) * 0.4));
+    ctx.restore();
+    const rk = (L * 3) % 1;
+    shockRing(ctx, mx, my - face * 1.4, face * 3, rk, 'rgba(190,235,255,0.8)', face * 0.08);
+    speedWedges(ctx, w, h, mx, my - face * 1.6, aura * 0.6, t, 'rgba(190,235,255,0.5)', 6);
+  }
   if (shadow > 0) drawPose(ctx, spose, sx, sy, face, { tint: '#0e0608', flip: flipIt, rot: sr, alpha: shadow });
   if (L < BU.hand[0] + 0.1) drawPose(ctx, mp, mx, my, face, { flip: flipMe, rot: mr });
 

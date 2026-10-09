@@ -133,7 +133,7 @@ export function drawLight(f: Frame, L: number, withHero = true) {
 
   // ---- the shadow on the wall: thrown from the bulb, three times his size, cast up the paper
   if (on && withHero) {
-    const k = 1.95 - sink * 0.4;
+    const k = 1.6 - sink * 0.3;
     const base: Pt = [w * 0.36, floorY];
     let sx = bulb[0] + (base[0] - bulb[0]) * 1.5 + shDx, sy = floorY - face * 0.2;
     if (L >= LT.leap[0] && L < LT.fly[1]) {

@@ -15,7 +15,51 @@ the owner's taste and decisions; this file is the technical side.
 ---
 
 
-## Current film: the Reel (rounds 16–17) — read this first
+## Current film: The Sketch (round 18) — read this first
+
+A story told in six chapters, each a different kind of animation
+(`docs/STORY.md` v11). `main.ts` draws `drawReel` (`src/reel/reel.ts`, the
+conductor), whose `CHAPTERS` now point at `src/sketch/*` (mirrored in
+`core/frame.ts` `CHAPTERS` for the HUD). Each chapter draws itself from its
+local beat `L = B - from` and owns its seam.
+
+| Chapter | Beats | What happens | File |
+|---|---|---|---|
+| I Still | 0 – 9 | title brushed in, the Spark drops, a brush draws him; he can only tremble; cross-eyed, strain, faceplant, dazed; grabs the page corner | `sketch/still.ts` |
+| II Flip | 9 – 18 | a real flip book: the scroll turns pages, each page one drawing, onion-skin ghost; walk, he waves at the reader, the rivals' cameo (he slides under their clash), cartwheel, backflip, sprint off the page | `sketch/flip.ts` |
+| III Fold | 18 – 27 | the fall through ink-brushed paper; superhero landing on the square; it folds under him (old `reel/fold.ts` `drawFolding`), snap tosses him onto the crane; the ride under the painted moon; one warm point | `sketch/ride.ts` |
+| IV Light | 27 – 35 | the point is a bulb; he lands; his wall shadow copies him, then waves; a brush-sword fight with his own shadow (negative impact frames); the cord swing; sunset; the shadow peels off the wall | `sketch/light.ts` |
+| V Burst | 35 – 43 | painted sunset, letterbox; eyes cut-in; dash, clashes, flips, skid; power-up (icy aura); final clash, the shadow bursts into ink; the leap; the hand closes round the Spark; white | `sketch/burst.ts` |
+| VI Home | 43 – 50 | lands on the page; slams the Spark down as the seal; name re-brushed; offers the brush (contact card); waves, walks off; after-credits peek | `sketch/home.ts` |
+
+- **The drawings** (`src/sketch/art.ts`): every pose is a cut-out made with
+  the image tool from the owner's sheet (`art/raw/ref_wanderer.png`;
+  `scripts/gen-sketch.sh` → `art/raw/<sheet>.png`, compressed copies in
+  `art/sheets/`; `scripts/cutout-sheet.py <png> <name> <out> <frames>` →
+  `src/assets/sketch/<name>_<i>.webp` + `manifest.json`). The manifest holds
+  each frame's foot point (under the head, on the lowest ink) and face width;
+  `drawPose(ctx, key, x, y, faceWidthPx, {flip, rot, squash, tint, reveal,
+  boil, alpha})` keeps him the same size in every pose (per-sheet median
+  face). `tint` makes shadows/silhouettes; `reveal` is the brush drawing him
+  in; every pose boils a little by default (8 fps). `drawArt` draws
+  close-ups by box. Sheets: walk, run (6), still, leap, home, dash, bye,
+  comedy, acro, fall, ride, swing, hero (4), sword (5), closeup (eyes, open
+  hand, fist), powerup, extra; plus the reference cut-outs (hero, calm,
+  wink, curious, confident, serious, stand, reach, rest; `scripts/cutout-ref.py`).
+- **Backgrounds** (`src/sketch/bg.ts`): `bg_sunset`, `bg_night`, `bg_void`
+  painted by the image tool, `drawBg(ctx, name, w, h, pan, alpha, zoom)`.
+- **Effects** (`src/sketch/fx.ts`, drafted by Codex from a spec): speed
+  wedges, impact frames (invert / spikes), smear, ink splash, shock ring,
+  vignette, shake, flash, letterbox. Rule: never clusters of small things.
+- **Shared** (`src/sketch/common.ts`): paper, brushed ground line, the
+  brushed title (`drawTitle`, on the intro clock), the Spark and its streak,
+  `faceOf(f)` (hero size), `hop`, `track`, `cycle`.
+- Perf (headless, JS ms/frame): 0.2–2.8 everywhere.
+- Codex: `codex exec ... < /dev/null` (it waits on stdin otherwise). Images
+  cost the owner's ChatGPT plan; generate what's needed.
+
+## Previous: the Reel (rounds 16–17)
+
 
 The site is a showreel in the first film's format: five chapters, each a
 different craft at full strength, each flowing into the next with no hard

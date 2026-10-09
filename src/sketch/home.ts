@@ -2,7 +2,7 @@ import { drawSeal } from '../acts/ink';
 import type { Frame } from '../core/frame';
 import { wordWidth } from '../core/glyphs';
 import { type Pt, clamp, ease, lerp, seg } from '../core/math';
-import { drawPose } from './art';
+import { drawArt, drawPose } from './art';
 import { INK, RED, cycle, drawGround, drawPaper, drawTitle, faceOf } from './common';
 import { shockRing, smear } from './fx';
 
@@ -28,7 +28,9 @@ export const HM = {
   offer: 3.3,
   wave: [4.6, 5.3] as const,
   walk: [5.3, 6.6] as const,
-  end: 7.0,
+  /** after the credits: he peeks back in from the edge of the page and waves */
+  peek: [6.8, 7.4] as const,
+  end: 7.4,
 };
 
 export function drawHome(f: Frame, L: number) {
@@ -83,6 +85,14 @@ export function drawHome(f: Frame, L: number) {
     alpha = 1 - seg(u, 0.8, 1);
   }
   drawPose(ctx, pose, x, y, face * scale, { alpha, flip });
+
+  // ---- after the credits: a head round the edge of the page, a grin and a wave
+  const pk = seg(L, HM.peek[0], HM.peek[1]);
+  if (pk > 0) {
+    const inK = ease.outBack(clamp(pk * 3), 1.4);
+    const pw = face * 2.3;
+    drawArt(ctx, 'extra_0', w + pw * 0.5 - pw * 0.95 * inK, gy - face * 2.15, pw, { rot: Math.sin(t * 6) * 0.03 });
+  }
 
   // the Spark's red glow in his fist as he lands and cheers
   if (L < HM.slam && L > HM.fall[0]) {

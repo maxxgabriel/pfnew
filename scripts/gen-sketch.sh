@@ -39,4 +39,7 @@ bg() { # name, prompt
 bg bg_sunset "A dramatic sunset sky painted in ink wash: a huge vermilion-orange setting sun low in the frame, bold dry-brush ink clouds streaking across it, a thin ink horizon line near the bottom. Warm cream, vermilion and black only."
 bg bg_night "A night sky in ink wash on paper: deep black-indigo washes, a large pale round moon upper right, a few long soft dry-brush cloud streaks. No stars clusters. Calm and vast."
 bg bg_void "An empty sheet of warm cream paper with a few huge, elegant dry-brush ink strokes sweeping diagonally across it, like the trail of a fall, lots of empty space in the middle."
+# ---- round three: the power-up and the after-credits gag
+gen powerup "Draw THREE frames of an anime POWER-UP, facing right: (1) crouched low gathering power, head down, fists clenched at its sides; (2) standing tall, fists clenched, hair and scarf blown straight UP by a rising wind, eyes glowing bright icy blue; (3) roaring with its head thrown back and arms flung wide, hair blazing upward."
+gen extra "Draw THREE frames: (1) peeking in from the RIGHT edge of the frame: only its head, one shoulder and one waving hand are visible, the rest cut off by the right edge of the image, a cheeky grin; (2) front view, a big wink and a thumbs-up, grinning; (3) front view, laughing with eyes closed, both hands behind its head."
 echo "== all done"
