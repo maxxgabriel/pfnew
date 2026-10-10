@@ -1,0 +1,377 @@
+# Owner instructions, references and context
+
+Everything Max (the owner) has told the agents working on this site, in one
+place: the standing rules, every reference and website they gave, every
+decision, and their messages word for word. The original written brief (goal,
+the Mat Voyce reference, what "animation" means to them) is at the top of
+`docs/BRIEF.md`; the decision log there has the history of rounds 1–15 in
+more detail.
+
+**Binding order:** the owner's latest message > this file > `docs/BRIEF.md`
+> `docs/STORY.md` / `docs/HANDOFF.md`. The owner said they report to
+themselves, not to the docs: *"you report to me and not the docs"*.
+
+---
+
+## 1. Standing rules (distilled from everything below)
+
+- **Website only. Never a video format.** *"im only focused on website i
+  dont want a video format afterwards or ever"*.
+- **Animation is the product.** Proper, complete, neat animated sequences;
+  crazy motion graphics; clean transitions. Projects are deliberately absent.
+- **No on-screen text in the set pieces.** *"don't write any texts or
+  anything just do the animations"*. (The title, the seal and the contact
+  card are the only words.)
+- **Show skills, not a story.** *"we are saying a story and not showing our
+  skills. remember how we did it very well on the first time?"* The format
+  that works: a showreel, each chapter a different craft at full strength,
+  joined by a thread and seamless transitions.
+- **Creative freedom, then report.** *"do it however you think would suit
+  it. i give you the creative steering. you don't have to follow any docs…
+  if you feel something will feel better just do it and report to me."*
+- **But suggest new ideas before building them.** *"if you have more ideas
+  do suggest me before creating"*. When the direction is genuinely unclear,
+  offer 2–4 concrete options (they like `AskUserQuestion` with short
+  descriptions).
+- **The bar is the absolute best.** *"dedication and passion… clean
+  transitions crazy animation crazy motion graphics… think out of the box"*;
+  *"i want the absolute best"*; *"a clean and good looking but awesome one"*.
+- **Use ChatGPT (Codex) hard.** *"harness it for even little poses… theres
+  no usage limit so get the best outta it also you can let it handle some
+  code jobs too"* (round 19): every pose is its own generated drawing; well
+  specified code jobs (tracers, scripts) can be delegated to Codex, then
+  reviewed.
+- **Stay signed in to Codex/ChatGPT until the owner asks to log out**
+  (*"dont log out till i ask"*, round 18).
+- **No clusters of many small things.** *"i hate multiple small things
+  together its yuck for me"* (round 17). No flocks, swarms, shard clouds or
+  dense fields of tiny repeated pieces; one strong shape beats many small.
+- **Fully responsive** (round 20): *"somehow it made it for mobile lol and not
+  for pc or bigger screens i need whole of this to be working perfectly
+  responsive so please do that cleanly and polish things"*.
+- **Phone first.** The owner watches on an iPhone (390×844). Touch only;
+  nothing may depend on hover. Screenshot every change at phone size before
+  calling it done.
+- **Previews:** publish the single-file build as a claude.ai artifact and
+  share the link (*"you can create a new link to show artifact"*). Current:
+  https://claude.ai/artifact/9d3GKN33rB1VSTR2jGoDnV
+- **Git:** commit to the working branch and push; no PR unless asked; no
+  model names in commits.
+- **Originality:** references are for energy and technique; never copy their
+  characters, logos or text.
+
+## 2. References and websites the owner gave
+
+| Reference | What it's for | Where it's used |
+|---|---|---|
+| **Mat Voyce** — https://matvoyce.tv/ | The original reference for ambition, motion and personality (see `docs/BRIEF.md`). Don't copy it. | The whole site's bar |
+| **pdhouse motion guide** — https://pdhouse.notion.site/motion-guide | Motion principles to harness (round 16). This environment's network blocks Notion, so it couldn't be read; try again if access opens up. | Round 16 planning |
+| **cth9191/animate** — https://github.com/cth9191/animate | Animation craft rules: shape-morph bridges, stepped boil, springs, contact-sheet review of every change. | The Reel's craft and review loop |
+| **heygen-com/hyperframes** — https://github.com/heygen-com/hyperframes | Seam rules: one current direction, cut mid-motion, carriers across cuts, stillness before a climax. | Every seam in the Reel |
+| **Fate/stay night: Heaven's Feel** — Saber Alter vs Berserker | Energy and palette (red/blue/purple/black) for the ALTER act (round 5). | ALTER (old film) |
+| **Demon Slayer** — Giyu Tomioka, Water Breathing 11th form, *Dead Calm* | A moment the owner asked to include (round 6). | Dead Calm (old film) |
+| **Jujutsu Kaisen** — Gojo Satoru's *Domain Expansion* | A moment the owner asked to include (round 6). | The Void (old film) |
+| Anime key poses generated with ChatGPT from one character sheet | Round 11 lesson: code draws light, motion, particles and type; people come from real drawings. | Shooting star (old film) |
+
+## 3. Decisions (most recent first)
+
+**Round 32 — the seams are the show:** *"removbe the poencil use to draw
+things ig. that bugging the whole scenes so yeah. and let desk be part of act
+and not interactive so that we can click chartecvyer ot click to resume…
+also the tyransitions of each act looks really bad. we would neeed to match
+them up bro. we need to have great trabnsition and i want you to focus a lot
+in transition no kinda like making them the main part of the whole website"*.
+On the first plan: *"you need to check them again pc view its weird very
+weird"*. Tapping: *"Only tap him"*.
+
+**Round 31 — pop-culture moments:** after pushing for bolder ideas (*"think
+out of the box… like i added in star wars harry potter and inazuma"*, *"think
+about absolute iconic things or memes or pop culture things"*) the owner
+picked *"1,2,3,4.5,11(and also a text comes "and i am maxx",14"*: this is
+fine, distracted boyfriend, surprised face, ight imma head out, the Smooth
+Criminal lean, the snap (with the line "and i am maxx"), red light green
+light; and earlier *"17 sounds nice keep that in mind"* (the Toy Story rule:
+built). Rejected as a direction: real-life desk props as story (*"you took
+real life too seriously"*) and literal backstory props.
+
+**Round 30 — the story spills onto the desk (PC):** from a list of 12 ideas
+the owner picked *"1,2,4,5 but only for any 1 chapter. 6 and also scratcg
+ideas increase like scrambled papers around. 7,8,11,12"*: the Eraser is the
+real one on the desk; he falls off the page into the watercolour tin; the
+broom escape round the coffee; one real page turn (Fold → Wave); the light
+follows the story, with crumpled drafts piling up; big hits shake the desk;
+the pencil is the pointer; the knock on the inside of the page at the wink;
+the fire kick burns a hole in the sheet. Earlier the same day: *"desk is not
+seen each and everytime… zoom out during idle… remove the boom pow things"*.
+
+**Round 29 — the desk becomes a camera set (PC):** *"stop this and get tge
+latest pull i asked to fill up for destkop but it kind of deletes the whole
+immersion of the websiye. so i want yoy to think more"*. Picked all four:
+desk as bookends (open on the desk and push into the sheet, pull back at the
+end), extend the world wider, living paper margins, desk peeks in on pause;
+keep all of round 28's pieces (comic words, stickers, flipbook + exposure
+sheet, mouse brush) — *"keep some of them on thr desk make it cinematic like
+with good camera angles"*. The desk: *"uhm can we have better desk? and not
+something that would feel loneys dark brown. you can make it funky like an
+artist would usually do… lets also use funky style or messy for desk"*, *"so
+like desk wouldnt say loneliness but would say lively active and fun"*; then
+*"no i meant real desk lol not cartoonish. funky as in should look like that
+but real sorry."*; picked the green cutting mat — *"b but remove the girly
+things"*. Then *"what i want you to make sure it that desk is not seen each and
+everytime. at the start zoom in after showing desk. zoom out during idle. zoom
+in zoom out when you wanna show something in desk in accordance to what's
+happening in story… pc has desk but it doesnt have to be the lifr of it. i
+added desk so that we can have some immersive things around when needed and
+remive tye boom pow things. isnt matching art style. if you have some
+immersion and interactive idea for this tell me. even if its unconventional
+or something thats veey crazy"*.
+
+**Round 28 — the desk round the picture (PC), and comic impact words
+(everywhere):** *"now okay great we are at a great point and i want now to
+focua specifically on pc screen because there are a lot of blank spaves we can
+otherwise utliise. i want you to think creativity. we can have things around
+for pc only. for more immersion im sure we have chatgpt to generate us a huge
+ton of things. so we will harmess rhat and think creatively if we want to use
+sketches around doodles creative stickers minatures handwrittem styles scrible
+comic or any other immersive or interactive things. be bold since we have been
+already bold and inconvential in tedms of whole design"*. Picked all four:
+sketchbook margins, corner flipbook, animator's x-sheet, cursor brush and
+stickers; and "Live with the film" (the desk reacts to the playhead). Then
+*"use this as well. Comic Book Onomatopoeia VFX, specifically a Pop Art
+Impact Effect."* Picked: every big impact, everywhere (phone and PC, bigger on
+PC, spilling into the margins); real words (POW!, BAM!, WHAM!, KRAK!,
+SWOOSH!, VMMM, CHOMP!…). Then *"push the instructions and eveything to git"*.
+
+**Round 27 — a different art style per act:** *"lets use the other art styles
+frequently as well not just in first act"* → *"how about we have different art
+style for different acts and at end in the last screen while hes standing still
+we change per 2 secs"*. Picked: only he changes (scenery stays ink); story fit
+(Run pixel, Fold clay, Wave watercolour, Deep chalk, Light comic, Chase rubber
+hose; Still and Home ink); the last screen cycles all seven looks every 2 s.
+
+**Round 26 — the polish pack, done:** *"fix these"* (the 13.4 MB preview and the
+polish pack still to do). Faster loading (page ~160 KB, drawings stream in
+story order, 8 MB total instead of 13.4 MB inlined), in-between drawings for
+the five hardest pose switches, layered painted backgrounds (near swell, near
+ribs, near clouds), a link preview card. Preview:
+https://claude.ai/artifact/2e3qybKHWFwd824v6ZoD2u
+
+**Round 25:** *"the starting cat and paint brush looks weird. remove the cat
+entirely"* → the ink cat is gone (Run and Home, code and drawings), and so is
+the visible paint brush laying the line in Run; the line still draws itself
+ahead of his feet.
+
+**Round 24 — ideation picks built:** from a list of 17 ideas the owner picked
+*"2,6,10,11,13,14,15"*: bullet-time duel, red-circle match cuts, the wink at
+the viewer, the ink cat, the style-shift run, the rotoscope beat, the
+storyboard-wall ending. (Earlier in the round: style-shift run + polish pack;
+the polish pack is still to do.)
+
+**Round 23 — cameo removed:** *"lets get it out bro"* → the web-swinger
+cameo is taken out completely (code, hold, drawings); the page catches him on
+its own again. Don't bring a Spider-Man-style cameo back unless asked.
+
+**Round 22 — the swinger, redone:** *"come on man spiderman looks too weird not
+at all spiderman lol not even the slings"* → picked a **Spider-Verse-style
+silhouette** drawn in code (white lenses, red/blue print offset, white webs,
+pendulum swings) over plain silhouettes from ChatGPT. The Slinger is removed.
+
+**Round 21 — the web-slinger cameo:** *"lets also get spiderman in here… while
+falling on the paper from act 3 i want spiderman to fly by and help me land on
+the paper. then he swings through out of the screen… make it like i also thank
+him… it was miles morales"*. Asked about the Marvel copyright risk → owner
+picked an **original homage**. ChatGPT's safety filter blocked a masked
+web-swinger design, so the Slinger is a street artist (hood, red spray paint,
+red goggles, bandana, red high-tops, ink-line wrist launchers) who swings on
+lines of ink.
+
+**Round 20 — responsive:** merged `claude/sketch-v12` into the main line;
+the film now fills any screen (no portrait column); a two-column ending on
+wide screens; HUD scales up; the cinematic fire tornado ported into v12's
+ending.
+
+**Round 19 — The Sketch v12 (built on its own branch, `claude/sketch-v12`):**
+- An ideation session pitched 16 quality ideas (a villain, an arc, the
+  Spark's origin, a one-line birth, a 360° orbit, an inkwell/whale dive, a
+  Great Wave, a 1930s rubber-hose beat, a pop-up page, red-circle match
+  cuts, an eye push, ink-soak seams, idle life, scroll-speed motion, a
+  perfect loop, a signature). The owner: *"oh damn i liked all of it…
+  can you do it?"* — and asked to log in to ChatGPT first and use it for
+  every pose and some code.
+- Picked: build on a **separate branch** (another session was working on
+  the main one), and the v12 story as pitched (whale included).
+- Built: STORY v12 (eight chapters: Still, Run, Fold, Wave, Deep, Light,
+  Chase, Home); ~25 new generated sheets; Codex wrote the one-line tracer.
+  Preview: https://claude.ai/artifact/2e3qybKHWFwd824v6ZoD2u
+
+**Round 18 — story first: The Sketch (built; extended in round 19):**
+- *"a story is main point… lets actually align on one"* → picked **The
+  Sketch That Wanted to Move + Chasing the Spark** (`docs/STORY.md` v11).
+- Interactivity: optional, parked for later (*"should optional but leave it
+  for now"*).
+- Aesthetic reference (editorial cards: SWARM / MELT / PULSE): blend with
+  the ink, **no words**, take the feeling and don't copy it.
+- Rivals: **one cameo**.
+- Character: the owner's own sheet, "The Wanderer" (chibi, dry-brush ink,
+  icy-blue hair highlights, blue eyes, scarf, coat). Code-drawn versions
+  were not good enough (*"dude i feel like you are overdoing this"*); poses
+  are now generated with the Codex CLI on the owner's ChatGPT plan from that
+  sheet (`scripts/gen-sketch.sh`, `scripts/cutout-sheet.py`).
+- Then: *"be the orchestrator. use chatgpt for things that it does better
+  than you and delegate it tasks… go on a creative spree… complete whole of
+  it… im gonna go sleep so handle all of it yourself"* and *"dont be limited
+  with what you planned… make it do crazy actions too"*. Built the whole
+  story (six chapters) with ~20 generated pose sheets (comedy, acrobatics,
+  falls, riding the crane, brush-sword fight, cord swing, superhero
+  landing, power-up, close-ups, an after-credits peek) and three painted
+  backgrounds; the effects module was delegated to Codex.
+
+**Round 17 — trimming the Reel (current, built):**
+- Cut **II Flock** (the murmuration) and the little painted birds on the
+  scroll: many small things together are "yuck" for the owner, and the birds
+  didn't match the aesthetic.
+- Cut **IV Neon**: *"the neon city looks so bad with the buildings from my
+  name"*.
+- Cut **Shadow's cloud of paper shards** (*"the flock is in shadow as well
+  please remove that as well"*). Shadow keeps the bulb and the shadow
+  pictures, which now melt from one to the next.
+- New seams: the scroll closes in to the square (Ink → Fold); the crane
+  flies off into the dark and becomes the bulb (Fold → Shadow).
+- The Reel is now **I Ink → II Fold → III Shadow → IV Impact → V Page**.
+- Next: talk with the owner about what to add (*"then we talk what to
+  add"*).
+
+**Round 16 — the Reel (built; trimmed in round 17):**
+- Fresh ideas using the three references → story-led pitches → rejected:
+  *"we are saying a story and not showing our skills"*. Back to the first
+  film's showreel format.
+- Asked *"do you think this will hit and look beautiful?… i want the absolute
+  best"* → plan tightened to "how did they do that" moments per chapter.
+- Vertical slice (I Ink) approved: *"yup looks great. complete whole website
+  then"*.
+- **Machine and TITAN cut:** *"get the machine part taken out its very weird.
+  even the titan. think of something else"*.
+- Offered four replacements (Murmuration, Origami, Neon type city, Light &
+  shadow) → *"all sounds good. do all of it"*.
+- Built: **I Ink → II Flock → III Fold → IV Neon → V Shadow → VI Impact →
+  VII Page** (see `docs/STORY.md` v9). Shadow became anamorphic shadow art
+  instead of hand puppets (hand shadows were on the rejected list; code-drawn
+  hands read as weird).
+- Open: the contact card still shows `hello@example.com` — ask for the real
+  address. Suggested, not built (needs the owner's yes): tap a circle on the
+  Page to jump to that chapter; optional per-chapter sound (off by default).
+
+**Rounds 6–15 (summarised; details in `docs/BRIEF.md`):**
+- Round 6: remove the Arcade act; fix the Berserker (ALTER) act's broken,
+  weird pieces and unclean transitions; add Giyu's Dead Calm and Gojo's
+  Domain Expansion. Then: no texts, creative freedom, report back.
+- Round 6b: Dead Calm and the Void approved (*"looks real good"*); asked for
+  more and bigger ideas; then *"add all of them… make a story… crazy story"*
+  because light saber + football + anime battle didn't make sense from the
+  outside → STORY doc written (docs only, no code changes that round).
+- Rounds 7–15: various rebuilds; see BRIEF for what was approved and
+  rejected (including the "glass" effects, pick-a-side, the manifesto
+  interlude, the hand-scroll interludes, the ink-blob beast, the Ink Dragon,
+  the Night Ride, the hand-shadow bridge, the X-Ray blueprint — all out).
+
+## 4. The owner's messages, word for word (this branch's sessions)
+
+Typos kept as written.
+
+**2026-10-04**
+
+> what i want you to do is. see the claude handoff and brief md get to know
+> the repo then remove the arcade act. thrn we need to change some animations
+> in the berserker act which looks weird. some look nice but there are some
+> broken pieces and the ones that doesnt have clean transitions so fix that.
+> after that i need you to include thr giyu tomioka 11th form dead calm
+> somewhere. and domain expansion of gojou satoru. so think aboit it and
+> suggest me how we can do that
+
+> i would say don't write any texts or anything just do the animations. do it
+> however you think would suit it. i give you the creative steering. you
+> don't have to follow any docs or anything. if you feel something will feel
+> better just do it and report to me. you report to me and not the docs so
+> yeah. what i want more is dedication and passion while you do it. clean
+> transitions crazy animation crazy motion graphics. that's what I would
+> adore. so i want you to think out of the box and do things. if you have
+> more ideas do suggest me before creating
+
+> you csn create a new link to show articfact
+
+> looks real good. what are your other suggestions?
+
+> i need more bigger new ideas from you
+
+> okay add all of them. put all your ideas stitch them up and push it in a
+> file. currently what we miss is a a proper story. so i want you to stitch
+> them up tohether go beyond everything and make s story out of it. because
+> when you look from outside everything it doesnt make sense at all. light
+> saber football anike battlr. it should make a story up and crazt story is
+> what i mean. you decide rhat and hand it off to the md file and push it you
+> dont need to make any changes. you just need to update md file wirh all thr
+> ideas you had from last 2 messages. all suggestions of yours. i loved thrm.
+> put that and put the stitch thing and push it
+
+**2026-10-09**
+
+> leave all that check latest and i want tyo get more ideas now fresh ideasd
+> regardflesds of what we hava already done. now i want a clean and good
+> looking but awesome one. use these. https://pdhouse.notion.site/motion-guide
+> https://github.com/cth9191/animate https://github.com/heygen-com/hyperframes
+> and tell mw how you can harness the best out of it
+
+> yeah but we are sayi9ng a story and not showinh our skills. remmebver how we
+> did it very well on the first time?
+
+> do you think this will hit and look beautiful? and does this rwally have the
+> awesome motion graphics you are saying? because i want the absolut ebest
+
+> go on then and uhm im only focused on website i dont want a video format
+> afterwards or ever so you can only focus ion website
+
+> yup looks greate. complete whole website then
+
+> get the machine part taken out its very weird. even the titan. think of
+> something else
+
+*(Asked to pick chapter II from Murmuration / Origami / Neon type city /
+Light & shadow; dismissed the picker and wrote:)*
+
+> all sounds good. do all of it
+
+> continue
+
+> push it to branch with all instruictionas i gave and related references or
+> websites or context i gave
+
+> so i want you to go through the latest branch and the thing i didnt
+> actually like is the birds personally i have that thing where i hate
+> multiple small things together its yuck for me. so lets remove birds kr
+> anything also it doesnt match aesthetic as well. also the neon city looks
+> so bad with the buildings from my name. so yeah kets remove those thrn we
+> talk what to add
+
+> tye flock is in shadow as well please remove that ws well
+
+*(Round 18, condensed: "flood me" with design ideas → "more interactive" →
+"should optional but leave it for now" → an editorial reference image "this
+is an example of aesthetic" → "lets take a step back… a story is main
+point" → "1 with 3 sounds awesome" → character: "show me an example of how
+cute round character would look like", then the Wanderer sheet "make him
+look something like this… exactly like that", then "dude i feel like you
+are overdoing this. do yoy need any connector" → "use codex cli in your
+session. do use device code and i will login" → "be the orchestrator…
+use chatgpt… complete whole of it… im gonna go sleep" → "dont be limiyed
+with what you plannrd… make it do crazy actuons too".)*
+
+**Round 19 (ideation session → build, condensed):** *"im gonna let thr
+other session work and use this session for ideation so pitch me"* → 16
+pitches → *"oh damn i liked all of it these arw such great qol. can you do
+it? before making a plan and matching all of up i want you to do devide code
+login for chatgpt and i want you to harness it for even little poses you can
+harness it perfectly so do it. theres no usage limit so get tye best outta
+it also you can let it handle some code jobs too. so yeah leys do it and do
+great animations and transitions everything should hit."* → network opened
+(*"done try now"*) → device-code login → chose "Separate branch" and "Yes,
+build it".

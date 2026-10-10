@@ -1,32 +1,57 @@
-# React + TypeScript + Vite
+# Max Gabriel — a film you scroll
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+The portfolio is one continuous animated film on a single canvas. Scrolling
+moves the playhead (forward and back); ambient motion runs on the clock, so
+the frame keeps moving when you stop.
 
-Currently, two official plugins are available:
+It tells one story about one page. A drop of ink falls off the brush by
+mistake and becomes **Blot** (eyes, a red scarf), the witness in every act.
+The brush paints a circle, the **Spark**, and two strokes from the same
+brush, **Blue** and **Green**, fight over it. Every time one of them grabs it,
+the page can't hold it and redraws itself in a new style.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+1. **Ink.** The ensō becomes a moon over sumi-e mountains. An ink Dragon rises
+   with the pearl; Blue and Green duel for it with blades of light; Blue's
+   thunder snaps Green's blade; the Dragon swallows the pearl and coils into
+   an ensō that tears the paper. Blue falls through.
+2. **Machine.** The pearl drops out as a ball into a poster-coloured chain
+   reaction (MAKE / THINGS / THAT / MOVE). The letters assemble into TITAN,
+   Green's robot, which punches the ball; the gold bolt splits the frame.
+3. **Alter.** The back of the page, cut like an anime episode: Blue as a
+   corrupted black knight against Green reborn as a violet swordsman. Dead
+   Calm, Beneath the Surface, the Void, a beam clash. The Spark is released as
+   a star.
+4. **Night Ride.** Blot on a motorbike chases the star through a neon city in
+   the rain, and skids to a stop at the stadium.
+5. **Match.** The same two, one more time. The Zone drains the pitch to chalk
+   before #10's thunder dash. Green wins.
+6. **Hello.** Powers of Ten: the camera pulls out through every world, circle
+   inside circle, back to the page, where the Hand signs the name.
+7. **Credits**, an X-Ray pencil test of how it was made, and a post-credits
+   scene.
 
-## React Compiler
+The big moments play in **holds** (`src/core/holds.ts`): the film pauses at a
+beat while the scroll plays the set piece, so scrolling back plays it in
+reverse.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## For agents and contributors
 
-## Expanding the Oxlint configuration
+Start with `CLAUDE.md`, then `docs/BRIEF.md` (creative brief and decision log)
+and `docs/HANDOFF.md` (architecture, timeline, workflow, open items).
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
+## Develop
 
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```sh
+npm install
+npx vite --port 5199 --strictPort         # dev server (the scripts expect :5199)
+npm run build                             # dist/
+npm run artifact                          # dist/ inlined into artifact/maxgabriel.html
+node scripts/shoot.mjs 0,3.6,18.5 phone 8 # screenshots at raw scroll beats
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+Code map: `src/main.ts` (playhead, loop, HUD) · `src/acts/*` (one file per act)
+· `src/core/brush.ts` (sumi brush) · `src/core/bolt.ts` (lightning) ·
+`src/core/holds.ts` (holds) · `src/core/*` (math, sprites, particles, type).
+Act timings are in film beats; see `src/core/frame.ts`.
+
+The contact email in `index.html` is a placeholder.
