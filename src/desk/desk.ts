@@ -2,13 +2,11 @@ import type { Frame } from '../core/frame';
 import { clamp, ease, lerp, seg } from '../core/math';
 import { artImage, artSize, queueArt } from '../sketch/art';
 import { bgImage } from '../sketch/bg';
-import { INK, RED } from '../sketch/common';
 import { CHAPTERS, chapterAt } from '../reel/reel';
 import { HM } from '../sketch/home';
 import { type Shot, isRest, matrix, mix, rest, unproject } from './camera';
 import { deskOn } from './layout';
-import { live } from './live';
-import { PHOTO_W, drawLight, drawOver, drawScreen, drawUnder, jolt, leafAngle, leafCapture, queueStory, storyCues } from './story';
+import { PHOTO_W, drawLight, drawOver, drawScreen, drawUnder, jolt, queueStory, storyCues } from './story';
 
 /** the margins beside the sheet where the act's things lie (desk units: CSS pixels) */
 interface Desk { mw: number }
@@ -25,10 +23,10 @@ interface Desk { mw: number }
  *          itself when the reader stops);
  *   right  the exposure sheet: its rows run under a red line with the
  *          playhead, and its notes get written in as their frames come up;
- *          a sticker slaps onto it for every act finished (drag and flick them);
- *   all    the mouse is a brush: drag to paint, click to splat (it dries away).
- * Everything but the stickers you threw and the ink you painted is a pure
- * function of the playhead, so scrolling back runs the desk backwards too.
+ *          a sticker slaps onto it for every act finished.
+ * The desk is part of the film (round 32): nothing on it is clicked or
+ * dragged. Everything is a pure function of the playhead, so scrolling back
+ * runs the desk backwards too.
  */
 
 const HAND = '"Caveat", "Segoe Print", cursive';
@@ -447,20 +445,14 @@ function drawXSheet(f: Frame, d: Desk, ci: number) {
 
 /* ------------------------------------------------------------ stickers */
 
-interface Thrown { x: number; y: number; vx: number; vy: number; rot: number; vr: number }
-const thrown = new Map<number, Thrown>();
-let held: { i: number; dx: number; dy: number; lx: number; ly: number; lt: number } | null = null;
-
 function stickerSize(d: Desk, h: number) {
   return Math.min(d.mw * 0.3, h * 0.15);
 }
-/** where sticker i sits now (home on the sheet's edge, or where you threw it), its turn and its slap (0→1) */
+/** where sticker i sits (on the exposure sheet's edge), its turn and its slap (0→1) */
 function stickerAt(f: Frame, d: Desk, i: number): { x: number; y: number; rot: number; k: number } | null {
   const slapB = CHAPTERS[i + 1].from + 0.15;
   const k = seg(f.B, slapB, slapB + 0.4);
-  if (k <= 0) { thrown.delete(i); return null; }
-  const th = thrown.get(i);
-  if (th) return { x: th.x, y: th.y, rot: th.rot, k: 1 };
+  if (k <= 0) return null;
   const sz = stickerSize(d, f.h);
   const xs = f.w - d.mw * 0.5 - Math.min(d.mw * 0.62, f.h * 0.36) / 2;
   return { x: xs - sz * (i % 2 ? 0.12 : 0.32), y: f.h * (0.2 + i * 0.1), rot: (rnd(i) - 0.5) * 0.5, k };
@@ -469,97 +461,16 @@ function stickerAt(f: Frame, d: Desk, i: number): { x: number; y: number; rot: n
 function drawStickers(f: Frame, d: Desk) {
   const { ctx, h } = f;
   const sz = stickerSize(d, h);
-  // physics for the thrown ones
-  for (const [i, th] of thrown) {
-    if (held?.i === i) continue;
-    const fr = Math.exp(-f.dt * 3.2);
-    th.vx *= fr; th.vy *= fr; th.vr *= fr;
-    th.x += th.vx * f.dt; th.y += th.vy * f.dt; th.rot += th.vr * f.dt;
-    const m = sz * 0.4;
-    // they slide about the whole desk round the sheet
-    const x0 = -f.w * 0.9, x1 = f.w * 1.6, y0 = -f.h * 0.6, y1 = f.h * 1.5;
-    if (th.x < x0 + m || th.x > x1 - m) { th.vx *= -0.6; th.x = clamp(th.x, x0 + m, x1 - m); }
-    if (th.y < y0 + m || th.y > y1 - m) { th.vy *= -0.6; th.y = clamp(th.y, y0 + m, y1 - m); }
-  }
   STICKERS.forEach((k, i) => {
     const s = stickerAt(f, d, i);
     if (!s) return;
     // slapped down from above the desk: big, turned, then flat with a little bounce
     const e = ease.outBack(s.k, 2.4);
-    const scale = s.k < 1 ? 1.9 - 0.9 * e : held?.i === i ? 1.08 : 1;
+    const scale = s.k < 1 ? 1.9 - 0.9 * e : 1;
     const [aw, ah] = artSize(k);
     const wd = sz * scale * Math.min(1, aw / ah);
-    drawBaked(ctx, k, s.x, s.y, wd, s.rot + (1 - s.k) * 0.6, clamp(s.k * 3), held?.i === i || s.k < 1 ? 2.2 : 0.8);
+    drawBaked(ctx, k, s.x, s.y, wd, s.rot + (1 - s.k) * 0.6, clamp(s.k * 3), s.k < 1 ? 2.2 : 0.8);
   });
-}
-
-function stickerUnder(f: Frame, d: Desk, x: number, y: number) {
-  const sz = stickerSize(d, f.h);
-  for (let i = STICKERS.length - 1; i >= 0; i--) {
-    const s = stickerAt(f, d, i);
-    if (s && s.k >= 1 && Math.hypot(x - s.x, y - s.y) < sz * 0.5) return { i, s };
-  }
-  return null;
-}
-
-/* ------------------------------------------------------------ the mouse brush */
-
-interface Stroke { pts: [number, number, number][]; col: string; splat: boolean; seed: number }
-const strokes: Stroke[] = [];
-let painting: Stroke | null = null;
-let downAt: [number, number] | null = null;
-const DRY = 4.5;
-
-function inkCol(ci: number) {
-  return CHAPTERS[ci].paper ? INK : RED;
-}
-
-function drawBrush(f: Frame) {
-  const { ctx } = f;
-  const now = performance.now() / 1000;
-  for (let s = strokes.length - 1; s >= 0; s--) {
-    const st = strokes[s];
-    const last = st.pts[st.pts.length - 1][2];
-    const age = st === painting ? 0 : now - last;
-    const a = 1 - clamp((age - DRY) / 1.4);
-    if (a <= 0) { strokes.splice(s, 1); continue; }
-    ctx.save();
-    ctx.globalAlpha = a * 0.92;
-    ctx.fillStyle = ctx.strokeStyle = st.col;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-    if (st.splat) {
-      const [x, y] = st.pts[0];
-      const r = 9 + rnd(st.seed) * 7;
-      ctx.beginPath();
-      for (let i = 0; i <= 18; i++) {
-        const an = (i / 18) * Math.PI * 2;
-        const rr = r * (0.8 + rnd(st.seed + i) * 0.45) * (i % 5 === 0 ? 1.5 : 1);
-        if (i) ctx.lineTo(x + Math.cos(an) * rr, y + Math.sin(an) * rr); else ctx.moveTo(x + rr, y);
-      }
-      ctx.fill();
-      for (let i = 0; i < 3; i++) {
-        const an = rnd(st.seed + 40 + i) * Math.PI * 2, dd = r * (1.9 + rnd(st.seed + 50 + i) * 1.4);
-        ctx.beginPath();
-        ctx.arc(x + Math.cos(an) * dd, y + Math.sin(an) * dd, r * (0.16 + rnd(st.seed + 60 + i) * 0.16), 0, Math.PI * 2);
-        ctx.fill();
-      }
-    } else {
-      // a brush: thick when slow, thin when fast, tapering at both ends
-      const P = st.pts, n = P.length;
-      for (let i = 1; i < n; i++) {
-        const [ax, ay, at] = P[i - 1], [bx, by, bt] = P[i];
-        const v = Math.hypot(bx - ax, by - ay) / Math.max(0.004, bt - at);
-        const taper = Math.min(1, i / 4, (n - i) / 4 + (st === painting ? 1 : 0));
-        ctx.lineWidth = Math.max(1.2, clamp(14 - v / 160, 3, 14) * taper);
-        ctx.beginPath();
-        ctx.moveTo(ax, ay);
-        ctx.lineTo(bx, by);
-        ctx.stroke();
-      }
-    }
-    ctx.restore();
-  }
 }
 
 /* ------------------------------------------------------------ the desk itself */
@@ -638,7 +549,7 @@ function drawBase(w: number, h: number) {
   prop('prop2_0', -h * 0.46, -h * 0.2, h * 0.36, 0.2); // the inkstone
   prop('prop1_1', -h * 0.16, -h * 0.15, h * 0.62, -0.95); // the brush, wet from it
   // (the eraser, the villain off duty, is drawn by src/desk/story.ts: it wakes up and leaves)
-  // (the red pencil is in your hand: it is the mouse pointer)
+  prop('prop1_0', w + h * 0.18, h * 1.08, h * 0.62, 1.15); // the red pencil
   return base;
 }
 
@@ -649,7 +560,7 @@ const PEEK_AFTER = 5;
 /** seconds the film's intro clock waits while the opening shot pushes in */
 export const INTRO_DELAY = 1.8;
 const OPEN = 3.8;
-let openT = 0, openDone = false, peekK = 0, lastShot: Shot | null = null, lastM: DOMMatrix | null = null;
+let openT = 0, openDone = false, peekK = 0, lastM: DOMMatrix | null = null;
 
 /** the opening: low across the desk in the lamplight, craning up and pushing into the sheet */
 function openShot(w: number, h: number, t: number): Shot {
@@ -729,15 +640,9 @@ function shotFor(f: Frame): Shot {
 
 /* ------------------------------------------------------------ input */
 
-let lastFrame: Frame | null = null;
-const skip = (e: PointerEvent) => !!(e.target as Element | null)?.closest?.('a, button, input, #hello, .reel-marks, #sign');
 /** a screen point on the sheet, in the film's own pixels (the same point while the sheet fills the screen) */
 export function screenToSheet(x: number, y: number): [number, number] {
   return lastM ? unproject(lastM, x, y) : [x, y];
-}
-/** the mouse on the desk (null while the sheet fills the screen) */
-function onDesk(e: PointerEvent): [number, number] | null {
-  return lastM && lastShot ? unproject(lastM, e.clientX, e.clientY) : null;
 }
 
 export function initDesk() {
@@ -754,18 +659,6 @@ export function initDesk() {
   overC.style.cssText = 'position:fixed;left:0;top:0;transform-origin:0 0;pointer-events:none;display:none';
   overG = overC.getContext('2d');
   filmC.after(overC);
-  leafC = document.createElement('canvas');
-  leafC.id = 'leaf';
-  leafC.setAttribute('aria-hidden', 'true');
-  leafC.style.cssText = 'position:fixed;left:0;top:0;transform-origin:0 0;pointer-events:none;display:none';
-  leafG = leafC.getContext('2d');
-  overC.after(leafC);
-  document.documentElement.classList.toggle('pencil', fine);
-  window.addEventListener('pointermove', (e) => {
-    if (e.pointerType !== 'mouse') return;
-    pointer = { x: e.clientX, y: e.clientY, at: performance.now(), ui: !!(e.target as Element | null)?.closest?.('a, button, input, #hello, .reel-marks') };
-  });
-  document.documentElement.addEventListener('pointerleave', () => { pointer = null; });
   inkC = document.createElement('canvas');
   inkC.id = 'ink';
   inkC.setAttribute('aria-hidden', 'true');
@@ -773,65 +666,6 @@ export function initDesk() {
   inkG = inkC.getContext('2d');
   filmC.after(inkC);
 
-  window.addEventListener('pointerdown', (e) => {
-    const f = lastFrame;
-    if (!f || e.pointerType !== 'mouse' || e.button !== 0 || skip(e) || !deskOn(f.w, f.h)) return;
-    const p = onDesk(e);
-    const hit = p && stickerUnder(f, deskMargins(f), p[0], p[1]);
-    if (p && hit) {
-      const th = thrown.get(hit.i) ?? { x: hit.s.x, y: hit.s.y, vx: 0, vy: 0, rot: hit.s.rot, vr: 0 };
-      thrown.set(hit.i, th);
-      held = { i: hit.i, dx: p[0] - th.x, dy: p[1] - th.y, lx: p[0], ly: p[1], lt: performance.now() };
-      e.preventDefault();
-      return;
-    }
-    downAt = [e.clientX, e.clientY];
-    painting = { pts: [[e.clientX, e.clientY, performance.now() / 1000]], col: inkCol(chapterAt(f.B)), splat: false, seed: Math.random() * 100 };
-    strokes.push(painting);
-    e.preventDefault();
-  });
-  window.addEventListener('pointermove', (e) => {
-    const f = lastFrame;
-    if (held) {
-      const p = onDesk(e);
-      if (!p) return;
-      const th = thrown.get(held.i)!;
-      const now = performance.now(), dt = Math.max(1, now - held.lt) / 1000;
-      th.vx = lerp(th.vx, (p[0] - held.lx) / dt, 0.5);
-      th.vy = lerp(th.vy, (p[1] - held.ly) / dt, 0.5);
-      th.vr = th.vx * 0.002;
-      th.x = p[0] - held.dx;
-      th.y = p[1] - held.dy;
-      held.lx = p[0]; held.ly = p[1]; held.lt = now;
-      return;
-    }
-    if (painting) {
-      const q = painting.pts[painting.pts.length - 1];
-      if (Math.hypot(e.clientX - q[0], e.clientY - q[1]) > 2) painting.pts.push([e.clientX, e.clientY, performance.now() / 1000]);
-      return;
-    }
-    // a hand over a sticker you can pick up
-    if (f && e.pointerType === 'mouse') {
-      const p = deskOn(f.w, f.h) ? onDesk(e) : null;
-      grabbing = !!(p && stickerUnder(f, deskMargins(f), p[0], p[1]));
-      document.body.style.cursor = grabbing ? 'grab' : '';
-    }
-  });
-  const up = (e: PointerEvent) => {
-    if (held) {
-      if (performance.now() - held.lt > 80) { const th = thrown.get(held.i)!; th.vx = th.vy = th.vr = 0; }
-      held = null;
-    }
-    if (painting) {
-      // a click, not a drag: a splat
-      if (downAt && Math.hypot(e.clientX - downAt[0], e.clientY - downAt[1]) < 5 && painting.pts.length < 4) painting.splat = true;
-      painting.pts[painting.pts.length - 1][2] = performance.now() / 1000;
-      painting = null;
-    }
-    downAt = null;
-  };
-  window.addEventListener('pointerup', up);
-  window.addEventListener('pointercancel', up);
 }
 
 /* ------------------------------------------------------------ draw */
@@ -842,33 +676,20 @@ function park() {
   if (filmC && filmC.style.transform) filmC.style.transform = '';
   if (deskC && deskC.style.display !== 'none') deskC.style.display = 'none';
   if (overC && overC.style.display !== 'none') overC.style.display = 'none';
-  if (leafC && leafC.style.display !== 'none') leafC.style.display = 'none';
   document.documentElement.classList.remove('cine', 'cine-open');
-  lastShot = lastM = null;
+  lastM = null;
 }
 
 /** the camera over the desk, and the desk under the sheet (wide screens with a mouse) */
 export function drawDesk(f: Frame) {
-  lastFrame = f;
-  live.pointer = pointerSheet();
   const { w, h } = f;
   if (!deskOn(w, h) || !filmC || !deskC || !deskG) { park(); return; }
   queueDesk();
   queueStory();
   PROPS.forEach((k, i) => queueArt(k, 1 + i * 0.1));
-  // the page turn: keep a copy of the night sheet's last frames, to lift off the peg bar after the seam
-  if (leafCapture(f.B)) {
-    leafFront ??= document.createElement('canvas');
-    if (leafFront.width !== filmC.width || leafFront.height !== filmC.height) { leafFront.width = filmC.width; leafFront.height = filmC.height; }
-    const lg = leafFront.getContext('2d')!;
-    lg.drawImage(filmC, 0, 0);
-    leafOk = true;
-    leafShown = '';
-  }
   const shot = shotFor(f);
   if (isRest(shot, w, h)) { park(); return; }
   const m = matrix(shot, w, h);
-  lastShot = shot;
   lastM = m;
   document.documentElement.classList.add('cine');
   filmC.style.transformOrigin = '0 0';
@@ -923,76 +744,19 @@ export function drawDesk(f: Frame) {
     overC.style.display = any ? '' : 'none';
     if (any) overC.style.transform = m.translate(X0, Y0).toString();
   }
-  // the page turn: the night sheet, hinged at its top under the peg bar, lifts up and over
-  const ang = leafAngle(f.B);
-  if (leafC && leafG && leafFront && ang !== null && leafOk) {
-    const side = ang > 90 ? 'back' : 'front';
-    if (side !== leafShown) {
-      if (leafC.width !== leafFront.width || leafC.height !== leafFront.height) { leafC.width = leafFront.width; leafC.height = leafFront.height; }
-      leafG.setTransform(1, 0, 0, 1, 0, 0);
-      leafG.globalAlpha = 1;
-      leafG.drawImage(leafFront, 0, 0);
-      // past upright we see its back: plain paper, the drawing faintly through it
-      if (side === 'back') {
-        leafG.fillStyle = 'rgba(240,233,218,0.9)';
-        leafG.fillRect(0, 0, leafC.width, leafC.height);
-      }
-      leafShown = side;
-    }
-    leafC.style.width = `${w}px`;
-    leafC.style.height = `${h}px`;
-    leafC.style.display = '';
-    leafC.style.transform = m.rotate(ang, 0, 0).toString();
-  } else if (leafC) leafC.style.display = 'none';
 }
 let overC: HTMLCanvasElement | null = null, overG: CanvasRenderingContext2D | null = null;
-let leafC: HTMLCanvasElement | null = null, leafG: CanvasRenderingContext2D | null = null, leafFront: HTMLCanvasElement | null = null, leafOk = false, leafShown = '';
-let pointer: { x: number; y: number; at: number; ui: boolean } | null = null;
-let grabbing = false;
-const fine = typeof matchMedia === 'function' && matchMedia('(pointer: fine)').matches;
-/** the mouse on the sheet, in the film's pixels, while it is being moved (for him to glance at: live.pointer) */
-function pointerSheet(): [number, number] | null {
-  if (!pointer || performance.now() - pointer.at > 4000) return null;
-  return screenToSheet(pointer.x, pointer.y);
-}
-
-/** the red pencil from the desk, as the mouse pointer: its point on the pointer */
-function drawPencil(g: CanvasRenderingContext2D, h: number) {
-  if (!pointer || pointer.ui || grabbing || performance.now() - pointer.at > 6000) return;
-  const im = artImage('prop1_0');
-  if (!im) return;
-  const [, ah] = artSize('prop1_0');
-  const s = (h * 0.24) / ah;
-  const down = painting ? 0.12 : 0;
-  g.save();
-  g.translate(pointer.x, pointer.y);
-  g.rotate(0.5 + down);
-  g.scale(s, s);
-  g.shadowColor = 'rgba(20,14,8,0.35)';
-  g.shadowBlur = 10;
-  g.shadowOffsetX = 6;
-  g.shadowOffsetY = 8;
-  // (the drawing's frame holds a little stray ink beside the pencil: draw only its column)
-  g.drawImage(im, 0, 0, 70, ah, -33.5, -940, 70, ah);
-  g.restore();
-}
-
-/** the reader's own ink, over everything (its own screen-space layer) */
+/** the screen-space layer over everything: the paint he falls into fills it (src/desk/story.ts drawScreen) */
 export function drawInk(f: Frame) {
   if (!inkC || !inkG) return;
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
   const W = Math.round(f.w * dpr), H = Math.round(f.h * dpr);
   if (inkC.width !== W || inkC.height !== H) { inkC.width = W; inkC.height = H; }
-  const pen = fine && deskOn(f.w, f.h);
-  if (!strokes.length && !inkDirty && !pen) return;
+  if (!deskOn(f.w, f.h) && !inkDirty) return;
   inkG.setTransform(1, 0, 0, 1, 0, 0);
   inkG.clearRect(0, 0, W, H);
   inkG.setTransform(dpr, 0, 0, dpr, 0, 0);
-  inkDirty = strokes.length > 0;
-  if (strokes.length) drawBrush({ ...f, ctx: inkG });
-  if (pen) {
-    drawScreen(inkG, f);
-    drawPencil(inkG, f.h);
-  }
+  inkDirty = deskOn(f.w, f.h);
+  if (inkDirty) drawScreen(inkG, f);
 }
 let inkDirty = false;

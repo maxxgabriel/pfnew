@@ -37,6 +37,10 @@ Before changing anything, read:
   is only seen when the camera moves over it), the dark night-lamp desk and
   cartoon desks are out; the desk is a real photo, nothing "girly" on it.
   The comic POW/BOOM words are cut ("isnt matching art style").
+  Round 32: drawing with the mouse/finger, the pencil cursor and dragging
+  things on the desk are cut (the desk is part of the film, not a toy); the
+  red-disc match cuts are cut; the desk tumble and the desk page turn are cut
+  (every seam is the same on phone and PC: src/sketch/seams.ts).
 - **No clusters of small things.** The owner finds many small things
   together "yuck" (flocks, swarms, shard clouds, dense particle fields).
   Prefer one strong shape over many small ones.

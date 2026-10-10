@@ -11,6 +11,4 @@ export const live: {
   runEraser: Spot | null;
   /** the hero's feet on the broom in Chase, and his face width */
   chaseHero: Spot | null;
-  /** (PC) the mouse on the sheet, in the film's pixels, while it is being moved; written by src/desk/desk.ts */
-  pointer: [number, number] | null;
-} = { runHero: null, runEraser: null, chaseHero: null, pointer: null };
+} = { runHero: null, runEraser: null, chaseHero: null };

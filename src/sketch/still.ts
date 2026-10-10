@@ -6,7 +6,6 @@ import { ONE_HEIGHT, ONE_START, drawOneLine } from './oneline';
 import { INK, drawGround, drawPaper, drawSpark, drawSparkStreak, drawTitle, faceOf, hop, idlePose , titleFit } from './common';
 import { shockRing } from './fx';
 import { DOODLE, drawDoodle, wideSheet } from './margins';
-import { live } from '../desk/live';
 
 /*
  * I · STILL.
@@ -82,7 +81,8 @@ export function drawStill(f: Frame, L: number) {
   // ---- the title, high on the page, fading as the page is about to turn
   // (it fits the space above his head, so on a wide screen it never runs into him)
   const headTop = gy - face * 3.6;
-  drawTitle(f, w / 2, h * 0.09, titleFit(w * 0.56, headTop - h * 0.09 - face * 0.4), 1 - seg(L, 2.6, 3.8));
+  // as he takes his first step the name's ink runs down onto the line and becomes the road he runs on (the seam into II)
+  drawTitle(f, w / 2, h * 0.09, titleFit(w * 0.56, headTop - h * 0.09 - face * 0.4), 1 - seg(L, 3.45, 3.8), seg(L, 2.55, 3.7), gy + face * 0.05);
 
   // ---- the ground he'll stand on, brushed under him as he is drawn
   drawGround(ctx, w * 0.12, w * 0.88, gy + face * 0.05, face * 0.07, ease.out2(seg(L, ST.line[0] - 0.2, ST.line[0] + 0.5)));
@@ -101,10 +101,7 @@ export function drawStill(f: Frame, L: number) {
   const idle = L > ST.look ? idlePose(f) : null;
   if (idle) { pose = idle; rot = 0; }
   const sc = poseHeight('still_0', face) / ONE_HEIGHT;
-  // (PC) once he is awake he glances toward the pencil in your hand when it is behind him
-  const mouse = L > ST.look - 0.2 && L < ST.step ? live.pointer : null;
-  const flip = !!mouse && mouse[0] < gx - face * 1.5;
-  if (fill > 0) drawPose(ctx, pose, gx, gy, face, { boil, t, rot, flip, reveal: fill < 1 ? fill : undefined });
+  if (fill > 0) drawPose(ctx, pose, gx, gy, face, { boil, t, rot, reveal: fill < 1 ? fill : undefined });
   let pen: Pt | null = null;
   const lineA = 1 - seg(L, ST.fill[0] + 0.15, ST.fill[1]);
   if (lineK > 0 && lineA > 0) {

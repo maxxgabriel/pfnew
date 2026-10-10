@@ -1,5 +1,5 @@
+import { type SeamChapter, drawSeam } from '../sketch/seams';
 import type { Frame } from '../core/frame';
-import { drawCircleCuts, setCuts } from '../sketch/cuts';
 import { setWallSources } from '../sketch/wall';
 import { drawRun } from '../sketch/run';
 import { drawRide } from '../sketch/ride';
@@ -87,7 +87,6 @@ export function chapterAt(B: number) {
   return i;
 }
 
-setCuts((name) => CHAPTERS.find((c) => c.name === name)!.from);
 // the storyboard wall's panels: each chapter at its best moment (local beats)
 const WALL_AT: Record<string, number> = { Still: 2.6, Run: 5.3, Fold: 4.6, Wave: 3.3, Deep: 3.0, Light: 4.62, Chase: 2.0, Home: 4.9 };
 // (each panel in its act's own art style)
@@ -98,6 +97,8 @@ setWallSources(CHAPTERS.map((c) => ({
 
 export function drawReel(f: Frame) {
   setPoseClock(f.t);
+  // between chapters, the seam draws both and passes from one to the other (src/sketch/seams.ts)
+  if (drawSeam(f, CHAPTERS as SeamChapter[], ACT_STYLE)) return;
   const c = CHAPTERS[chapterAt(f.B)];
   setActStyle(ACT_STYLE[c.name] ?? null);
   if (c.draw) c.draw(f, f.B - c.from);
@@ -106,8 +107,6 @@ export function drawReel(f: Frame) {
     f.ctx.fillRect(0, 0, f.w, f.h);
   }
   setActStyle(null);
-  // the red circle carries the cuts between chapters
-  drawCircleCuts(f);
 }
 
 /** HUD state: dark type over light chapters; the contact card at the very end */
@@ -122,5 +121,3 @@ export function reelHud(B: number) {
   };
 }
 
-/** a tap drops ink onto whatever is under the finger (a quiet answer, never blocks scrolling) */
-export function reelTap(_x: number, _y: number) {}

@@ -1,6 +1,6 @@
 import './style.css';
-import { autoAt, drawReel, reelHud, reelTap } from './reel/reel';
-import { preloadPoses } from './sketch/art';
+import { autoAt, drawReel, reelHud } from './reel/reel';
+import { pokeHero, preloadPoses } from './sketch/art';
 import { signEnd, signMove, signStart } from './sketch/home';
 import { INTRO_DELAY, deskWatching, drawDesk, drawInk, initDesk, screenToSheet, setDeskClock } from './desk/desk';
 import { deskOn } from './desk/layout';
@@ -224,10 +224,10 @@ function loop(now: number) {
   cost = cost * 0.9 + (performance.now() - c0) * 0.1;
 }
 
-// a tap drops ink (listening only: the page still scrolls)
+// a tap on him pokes him (he hops and wobbles); a tap anywhere else does nothing (listening only: the page still scrolls)
 window.addEventListener('click', (e) => {
-  if ((e.target as Element | null)?.closest?.('a, button, #hello, .reel-marks')) return;
-  reelTap(e.clientX, e.clientY);
+  if ((e.target as Element | null)?.closest?.('a, button, #hello, .reel-marks, #sign')) return;
+  pokeHero(...screenToSheet(e.clientX, e.clientY));
 });
 
 function post(t: number, dt: number) {

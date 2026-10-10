@@ -75,6 +75,15 @@ themselves, not to the docs: *"you report to me and not the docs"*.
 
 ## 3. Decisions (most recent first)
 
+**Round 32 — the seams are the show:** *"removbe the poencil use to draw
+things ig. that bugging the whole scenes so yeah. and let desk be part of act
+and not interactive so that we can click chartecvyer ot click to resume…
+also the tyransitions of each act looks really bad. we would neeed to match
+them up bro. we need to have great trabnsition and i want you to focus a lot
+in transition no kinda like making them the main part of the whole website"*.
+On the first plan: *"you need to check them again pc view its weird very
+weird"*. Tapping: *"Only tap him"*.
+
 **Round 31 — pop-culture moments:** after pushing for bolder ideas (*"think
 out of the box… like i added in star wars harry potter and inazuma"*, *"think
 about absolute iconic things or memes or pop culture things"*) the owner

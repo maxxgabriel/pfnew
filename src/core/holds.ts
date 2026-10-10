@@ -32,8 +32,6 @@ export const BULLET_AT = at('Light', 5.2);
 /** after the peek, the camera pulls back from the page onto the storyboard wall (src/sketch/home.ts) */
 export const WALL_AT = at('Home', 12.05);
 
-/** on the desk (PC): he runs off the drawing, tumbles across the desk and into the paint (src/desk/story.ts) */
-export const TUMBLE_AT = at('Run', 8.78);
 /** on the desk: at the wink he notices the desk, knocks on the page and flies out round the mug */
 export const ESCAPE_AT = at('Chase', 2.32);
 
@@ -42,10 +40,9 @@ export const REDLIGHT_AT = at('Run', 3.42);
 /** after the fire kick: this is fine, then the Eraser crawls back, "and i am maxx", the snap (src/sketch/home.ts) */
 export const FINALE_AT = at('Home', 5.8);
 
-/** the desk's two set pieces exist only where the desk does (decided once, at load) */
+/** the desk's set piece (the escape) exists only where the desk does (decided once, at load) */
 const desk = typeof window === 'object' && deskOn(window.innerWidth, window.innerHeight);
 export const HOLDS: Hold[] = [
-  ...(desk ? [{ at: TUMBLE_AT, len: 2.8, kind: 'tumble' as const }] : []),
   ...(desk ? [{ at: ESCAPE_AT, len: 3.6, kind: 'escape' as const }] : []),
   { at: REDLIGHT_AT, len: 4.2, kind: 'redlight' as const },
   { at: FINALE_AT, len: 5.0, kind: 'finale' as const },

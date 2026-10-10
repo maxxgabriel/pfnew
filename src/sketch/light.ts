@@ -371,7 +371,8 @@ function drawEscape(f: Frame, L: number) {
   }
 
   // behind it: the sunset
-  drawBg(ctx, 'bg_sunset', w, h, 0.3, 1, 1.12);
+  // (the same sky, framed exactly as chapter VII opens on it, so the seam is one sky: src/sketch/seams.ts)
+  drawBg(ctx, 'bg_sunset', w, h, 0.25, 1, 1.18);
   const k = ease.out3(seg(L, LT.cut[0], LT.cut[1]));
   const gap = k * w * 0.62;
   // the two halves of the whale, torn apart and falling away

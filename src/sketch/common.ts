@@ -1,7 +1,7 @@
 import { brush } from '../core/brush';
 import type { Frame } from '../core/frame';
 import { layoutWord, wordWidth } from '../core/glyphs';
-import { type Pt, TAU, clamp, ease } from '../core/math';
+import { type Pt, TAU, clamp, ease, lerp } from '../core/math';
 import { paperTile } from '../core/sprites';
 
 /*
@@ -54,7 +54,8 @@ export function drawGround(ctx: CanvasRenderingContext2D, x0: number, x1: number
 let title: { pts: Pt[]; order: number; size: number; word: number }[] | null = null;
 let titleKey = '';
 /** MAX GABRIEL, brushed stroke by stroke as the page opens (on the intro clock) */
-export function drawTitle(f: Frame, cx: number, top: number, scale: number, alpha = 1) {
+/** the name, brushed in on the intro clock; `melt` 0→1 runs its ink down onto the line at screen height `ground` (I → II) */
+export function drawTitle(f: Frame, cx: number, top: number, scale: number, alpha = 1, melt = 0, ground = 0) {
   const { ctx } = f;
   const MAXS = 300, GABS = 118;
   const key = 'v1';
@@ -79,7 +80,14 @@ export function drawTitle(f: Frame, cx: number, top: number, scale: number, alph
     const step = (a1 - a0) / n;
     const p = ease.out2(clamp((I - a0 - s.order * step) / (step * 1.6)));
     if (p <= 0) continue;
-    brush(ctx, s.pts, { width: s.size * (s.word === 0 ? 0.13 : 0.12), color: INK, progress: p, seed: 7 + s.order + s.word * 20, dry: 0.4, press: 1.35, tail: 0.3 });
+    let pts = s.pts;
+    if (melt > 0) {
+      // the ink lets go of its shape and runs down to the line (each stroke at its own pace)
+      const gl = (ground - top) / scale, own = 0.55 + 0.45 * Math.abs(Math.sin(s.order * 2.3 + s.word * 1.7));
+      const m = ease.in2(clamp(melt * (0.75 + own * 0.5)));
+      pts = s.pts.map(([x, y]) => [x * (1 - m * 0.15), lerp(y, gl, m * (0.8 + 0.2 * Math.sin(x * 0.02 + s.order)))] as Pt);
+    }
+    brush(ctx, pts, { width: s.size * (s.word === 0 ? 0.13 : 0.12) * (1 - melt * 0.55), color: INK, progress: p, seed: 7 + s.order + s.word * 20, dry: 0.4, press: 1.35, tail: 0.3 });
   }
   ctx.restore();
 }

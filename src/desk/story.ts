@@ -1,5 +1,5 @@
 import type { Frame } from '../core/frame';
-import { ESCAPE_AT, TUMBLE_AT } from '../core/holds';
+import { ESCAPE_AT } from '../core/holds';
 import { type Pt, TAU, clamp, ease, lerp, seg } from '../core/math';
 import { CHAPTERS } from '../core/frame';
 import { artImage, artSize, drawPose, queueArt } from '../sketch/art';
@@ -15,10 +15,6 @@ import { live } from './live';
  *
  *   I/II   the Eraser on the desk wakes up and hops onto the sheet (it is the
  *          villain); its dusty outline stays behind.
- *   II→III he runs off the drawing at the page's edge and tumbles right out
- *          of it, across the cutting mat and into the watercolour tin; the
- *          camera plunges into the paint (the 'tumble' hold).
- *   III→IV the night sheet is lifted off the peg bar: the ink sea is under it.
  *   VII    at the wink he notices the desk, knocks on the inside of the page
  *          (it bulges), then flies out and loops round the coffee (the
  *          'escape' hold).
@@ -32,7 +28,7 @@ import { live } from './live';
 
 /** chapter start beats */
 const AT = (n: string) => CHAPTERS.find((c) => c.name === n)!.at;
-const RUN = AT('Run'), WAVE = AT('Wave'), CHASE = AT('Chase'), HOME = AT('Home');
+const RUN = AT('Run'), CHASE = AT('Chase'), HOME = AT('Home');
 
 /* ------------------------------------------------------------ the photo */
 
@@ -44,7 +40,7 @@ export function photo(u: number, v: number, w: number, h: number): Pt {
   return [w / 2 + (u - 0.5) * ww, h * 0.5 + (v - 0.5) * wh];
 }
 /** where things are in the (mirrored) photo */
-const MUG: Pt = [0.67, 0.07], PLANT: Pt = [0.88, 0.15], TIN_BLUE: Pt = [0.875, 0.875];
+const MUG: Pt = [0.67, 0.07], PLANT: Pt = [0.88, 0.15];
 
 /* ------------------------------------------------------------ the eraser */
 
@@ -153,70 +149,6 @@ function eraserOver(g: CanvasRenderingContext2D, f: Frame) {
   }
 }
 
-/* ------------------------------------------------------------ the tumble (hold) */
-
-/** his path out of the drawing: from where he stands, over the sheet's edge, a bounce on the mat, into the paint */
-function tumbleAt(f: Frame, p: number): { at: Pt; lift: number; spin: number; alpha: number; splash: number } {
-  const { w, h } = f;
-  const s0: Pt = live.runHero ? [live.runHero.x, live.runHero.y] : [w * 0.62, h * 0.7];
-  const p1: Pt = [w * 1.1, h * 1.08], p2: Pt = [w * 1.28, h * 1.3];
-  const tin = photo(TIN_BLUE[0], TIN_BLUE[1], w, h);
-  const hop = (a: Pt, b: Pt, u: number, hgt: number) => ({ at: [lerp(a[0], b[0], u), lerp(a[1], b[1], u)] as Pt, lift: Math.sin(u * Math.PI) * hgt });
-  let r: { at: Pt; lift: number };
-  if (p < 0.2) r = { at: s0, lift: 0 };
-  else if (p < 0.44) r = hop(s0, p1, ease.inOut2(seg(p, 0.2, 0.44)), 1.5);
-  else if (p < 0.56) r = hop(p1, p2, seg(p, 0.44, 0.56), 0.5);
-  else r = hop(p2, tin, ease.inOut2(seg(p, 0.56, 0.7)), 0.8);
-  return { ...r, spin: seg(p, 0.2, 0.7) * TAU * 2.2, alpha: 1 - seg(p, 0.7, 0.78), splash: seg(p, 0.69, 0.85) };
-}
-
-function tumbleOver(g: CanvasRenderingContext2D, f: Frame, p: number) {
-  if (p < 0.2) return;
-  const face = live.runHero?.size ?? f.h * 0.08;
-  const t = tumbleAt(f, p);
-  const tin = photo(TIN_BLUE[0], TIN_BLUE[1], f.w, f.h);
-  // the splash in the paint: rings and a few big drops (one strong shape, not a spray)
-  if (t.splash > 0 && t.splash < 1) {
-    const s = t.splash;
-    g.save();
-    for (let i = 0; i < 2; i++) {
-      const k = clamp(s * 1.3 - i * 0.3);
-      if (k <= 0) continue;
-      g.globalAlpha = (1 - k) * 0.9;
-      g.strokeStyle = '#2f5fd0';
-      g.lineWidth = face * 0.18 * (1 - k);
-      g.beginPath();
-      g.ellipse(tin[0], tin[1], face * (0.6 + k * 2.4), face * (0.45 + k * 1.8), 0, 0, TAU);
-      g.stroke();
-    }
-    g.globalAlpha = 1 - s;
-    g.fillStyle = '#2a56c6';
-    for (let i = 0; i < 4; i++) {
-      const an = i * 1.7 + 0.4, d = face * (0.6 + s * 2.6);
-      g.beginPath();
-      g.arc(tin[0] + Math.cos(an) * d, tin[1] + Math.sin(an) * d * 0.8 - Math.sin(s * Math.PI) * face * 1.2, face * 0.22 * (1 - s * 0.6), 0, TAU);
-      g.fill();
-    }
-    g.restore();
-  }
-  if (t.alpha <= 0) return;
-  // his shadow on the desk, then him, tumbling (bigger the higher he is)
-  g.save();
-  g.globalAlpha = 0.25 * t.alpha * (1 - Math.min(0.7, t.lift * 0.5));
-  g.fillStyle = '#16110b';
-  g.beginPath();
-  g.ellipse(t.at[0] + t.lift * face * 0.8, t.at[1] + t.lift * face * 1.1, face * 0.9, face * 0.35, 0, 0, TAU);
-  g.fill();
-  g.restore();
-  g.save();
-  g.globalAlpha = t.alpha;
-  const frames = ['fall_0', 'fall_1', 'fall_2', 'fall_3'];
-  const k = frames[Math.floor(p * 40) % 4];
-  const sc = 1 + t.lift * 0.3;
-  drawPose(g, k, t.at[0], t.at[1] - t.lift * face * 1.6, face * sc, { rot: t.spin, boil: 0.004 });
-  g.restore();
-}
-
 /* ------------------------------------------------------------ the escape (hold) */
 
 /** his flight out of the sheet, round the coffee and the plant, and back in */
@@ -281,16 +213,6 @@ function escapeOver(g: CanvasRenderingContext2D, f: Frame, p: number) {
   const bank = Math.abs(e.ang) > 0.25 ? 'broom_3' : 'broom_1';
   drawPose(g, bank, e.at[0], e.at[1], face * sc, { rot: e.ang * e.dir, flip: e.dir < 0, boil: 0.004 });
 }
-
-/* ------------------------------------------------------------ the page turn (Fold → Wave) */
-
-/** the night sheet lifts off the peg bar as the camera eases out: its angle (degrees), or null */
-export function leafAngle(B: number): number | null {
-  if (B < WAVE || B > WAVE + 0.5) return null;
-  return 180 * ease.inOut2(seg(B, WAVE + 0.02, WAVE + 0.45));
-}
-/** the stretch just before the seam, when the film's frame is copied onto the leaf */
-export const leafCapture = (B: number) => B > WAVE - 0.45 && B < WAVE;
 
 /* ------------------------------------------------------------ the burn (Home) */
 
@@ -483,24 +405,6 @@ export function storyCues(f: Frame): Cue[] {
     const k = f.hold?.kind === 'redlight' ? 0 : ease.inOut2(seg(L, 2.4, 2.72)) * (1 - ease.inOut2(seg(L, 3.3, 3.42)));
     if (k > 0) out.push({ k, shot: { cx: w * 0.32, cy: h * 0.8, s: 1.75, tilt: 18, roll: -3 } });
   }
-  // the tumble (a hold)
-  if (f.hold?.kind === 'tumble') {
-    const p = f.hold.p;
-    const tin = photo(TIN_BLUE[0], TIN_BLUE[1], w, h);
-    const a: Shot = { cx: w * 0.82, cy: h * 0.9, s: 2.1, tilt: 22, roll: 2 };
-    const b: Shot = { cx: w * 1.12, cy: h * 1.2, s: 2.0, tilt: 16, roll: 1 };
-    const c: Shot = { cx: tin[0], cy: tin[1], s: 0.45, tilt: 0, roll: 0 };
-    const k = ease.inOut2(seg(p, 0, 0.18));
-    let s = a;
-    if (p > 0.4) s = mixShot(a, b, ease.inOut2(seg(p, 0.4, 0.62)));
-    if (p > 0.66) s = mixShot(b, c, ease.in3(seg(p, 0.66, 0.92)));
-    out.push({ k: p > 0.92 ? 1 - seg(p, 0.97, 1) : k, shot: s });
-  }
-  // the page turn: ease out to see the sheet lifted off the peg bar
-  {
-    const k = ease.inOut2(seg(B, WAVE - 0.45, WAVE - 0.08)) * (1 - ease.inOut2(seg(B, WAVE + 0.45, WAVE + 0.8)));
-    if (k > 0) out.push({ k, shot: { cx: w * 0.5, cy: h * 0.32, s: 1.65, tilt: 30, roll: 0 } });
-  }
   // the escape (a hold): near for the knock, wide for the flight, back in
   if (f.hold?.kind === 'escape') {
     const p = f.hold.p;
@@ -556,29 +460,13 @@ export function drawOver(g: CanvasRenderingContext2D, f: Frame, deskC: HTMLCanva
   let drawn = 0;
   const L = f.B - RUN;
   if (L > EZ.hop[0] - 0.01 && L < EZ.hop[1]) { eraserOver(g, f); drawn++; }
-  if (f.hold?.kind === 'tumble') { tumbleOver(g, f, f.hold.p); drawn++; }
   if (f.hold?.kind === 'escape') { escapeOver(g, f, f.hold.p); drawn++; }
   if (f.B >= HOME + HM.hit && f.B < HOME + 7.4) { burnOver(g, f, deskC, ext); drawn++; }
   return drawn > 0;
 }
 
-/** over the whole screen: the paint he fell into, filling the view, then thinning into the void of chapter III */
-export function drawScreen(g: CanvasRenderingContext2D, f: Frame) {
-  let a = 0;
-  if (f.hold?.kind === 'tumble') a = ease.in2(seg(f.hold.p, 0.8, 0.97));
-  else if (f.B > TUMBLE_AT && f.B < AT('Fold') + 0.7) a = 1 - ease.inOut2(seg(f.B, AT('Fold') + 0.05, AT('Fold') + 0.7));
-  if (a <= 0) return;
-  const { w, h } = f;
-  g.save();
-  g.globalAlpha = a;
-  const gr = g.createRadialGradient(w * 0.5, h * 0.45, h * 0.1, w * 0.5, h * 0.5, Math.hypot(w, h) * 0.6);
-  gr.addColorStop(0, '#3d6fe0');
-  gr.addColorStop(0.6, '#2346a8');
-  gr.addColorStop(1, '#101e52');
-  g.fillStyle = gr;
-  g.fillRect(0, 0, w, h);
-  g.restore();
-}
+/** over the whole screen (nothing at the moment: the paint wash went with the tumble, round 32) */
+export function drawScreen(_g: CanvasRenderingContext2D, _f: Frame) {}
 
-/** (dev) the escape and the tumble are holds at these film beats */
-export const STORY_HOLDS = { tumble: TUMBLE_AT, escape: ESCAPE_AT, wink: CHASE + CH.wink[0] };
+/** (dev) the escape is a hold at this film beat */
+export const STORY_HOLDS = { escape: ESCAPE_AT, wink: CHASE + CH.wink[0] };

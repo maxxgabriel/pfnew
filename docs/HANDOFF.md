@@ -136,6 +136,42 @@ seam.
     `node scripts/shoot-desk.mjs <raw beats> [WxH] [idle s]` (peek / end;
     `WAIT=ms` for slow big screens), `?desk=<name>` tries another desk top.
   Art: `scripts/gen-cine.sh` (desk, props, doodles).
+- **The seams (round 32: `src/sketch/seams.ts`).** `drawReel` hands any beat
+  inside a seam window to `drawSeam`, which renders the outgoing and incoming
+  chapters into two offscreen canvases (each in its own act style; outgoing
+  live until the seam then held, incoming held then live, unless `outL`/`inL`
+  say otherwise) and composites them per seam. `heroSeen` (art.ts: the last
+  solid drawPose each frame, in CSS px) tells a seam where he is in each
+  render. `handOff` hides him in whichever page is only held
+  (`setPosesHidden`). The seams:
+  - I → II (no window: one shot): `drawTitle(…, melt, ground)` runs the
+    name's strokes down onto the line (still.ts L 2.55–3.7); Run's first
+    0.55 beats turn him pixel from the feet up behind a cyan scanline
+    (`PIXEL_IN`, run.ts).
+  - II → III `irisHole` (−0.42/+0.5): the iris closes on him, the last circle
+    becomes a torn hole lined up on him in the fall, and opens. (Run's own
+    iris is gone.)
+  - III → IV `brushWipe` (−0.62/+0.55): the giant brush (`brushprop_0`)
+    sweeps left to right, the sea under a wet indigo wash in its wake.
+  - IV → V `waterline` (−0.95/+0.35; Wave held at L 3.85, Deep live from
+    L −1): a rippling waterline rises up the screen, the deep below it,
+    bubbles.
+  - V → VI `lightIris` (−0.5/+0.6): from the Spark at (0.5w, 0.35h) — the
+    bulb's spot — the belly opens out in a widening soft circle of light.
+  - VI → VII `burst` (−0.3/+0.5): a ring of air blasts out from him, the sky
+    inside it; Light's escape sky is framed like Chase's opening (pan 0.25,
+    zoom 1.18) so it is one sky.
+  - VII → VIII `panDown` (−0.85/+0.6, `handOff`): one long page. Home's
+    ride-in stroke (`rideIn`) begins as Chase's slide carried on one screen
+    down (`slideBelow`, same width/press), Chase ends him at `HANDOFF` 0.85
+    along it and Home starts him there, so the pan is one stroke, one rider.
+  - `scripts/seams.sh [phone|desktop]` shoots every seam; `scripts/seam1.sh
+    <name> <beat> [vp]` one.
+  Removed: the red-disc cuts (`cuts.ts`), the desk tumble hold and the desk
+  page turn, the mouse brush/splats/sticker dragging and the pencil cursor.
+  **Poke**: a tap (or click) on him (`pokeHero`, art.ts, from `heroSeen`;
+  through the desk camera on PC) makes him hop and wobble; taps elsewhere do
+  nothing.
 - **The story on the desk (round 30, PC only: `src/desk/story.ts`).** The desk
   is not the frame; the camera goes out to it only when the story spills off
   the paper (cues are pure functions of the playhead / hold progress, mixed

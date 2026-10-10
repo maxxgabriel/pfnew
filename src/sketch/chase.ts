@@ -174,7 +174,8 @@ export function drawChase(f: Frame, L: number) {
     if (L > CH.grab[0] + 0.25) pose = 'paint_0';
     if (L > CH.paint[0]) pose = 'paint_1';
     if (L > CH.slide[0]) {
-      const p = slideAt(w, h, ease.inOut2(seg(L, CH.slide[0], CH.end)));
+      // (he rides it to where chapter VIII's stroke takes him on: the seam pans straight down the one long stroke)
+      const p = slideAt(w, h, ease.in2(seg(L, CH.slide[0], CH.end)) * HANDOFF_FRAC(w, h));
       x = p[0];
       y = p[1];
       // he leans into the slope, but never more than a little (on the steep drop he leans back and rides it)
@@ -285,6 +286,8 @@ function bez(c: Pt[], u: number): Pt {
     v * v * v * c[0][1] + 3 * v * v * u * c[1][1] + 3 * v * u * u * c[2][1] + u * u * u * c[3][1],
   ];
 }
+/** a point on his painted slide past the bottom of the screen, one screen lower (so chapter VIII's stroke can carry it on: src/sketch/home.ts) */
+export const slideBelow = (w: number, h: number, u: number): Pt => { const p = bez(slideCtl(w, h), u); return [p[0], p[1] - h]; };
 let slideKey = '';
 let slidePts: Pt[] = [];
 /** the stroke's points (kept between frames so the brush can keep its preparation) */
@@ -301,6 +304,21 @@ export function slidePath(w: number, h: number): Pt[] {
 let rideKey = '';
 let ridePts: Pt[] = [];
 let rideLen: number[] = [];
+/** how far along the slide (by length) the hand-off point to chapter VIII is (src/sketch/home.ts starts him there) */
+export const HANDOFF = 0.85;
+let hoKey = '', hoFrac = 1;
+function HANDOFF_FRAC(w: number, h: number) {
+  const k = `${w}|${h}`;
+  if (k !== hoKey) {
+    hoKey = k;
+    slideAt(w, h, 0);
+    const t = bez(slideCtl(w, h), HANDOFF);
+    let best = 0, bd = Infinity;
+    ridePts.forEach((q, i) => { const dd = Math.hypot(q[0] - t[0], q[1] - t[1]); if (dd < bd) { bd = dd; best = i; } });
+    hoFrac = rideLen[best] / rideLen[rideLen.length - 1];
+  }
+  return hoFrac;
+}
 function slideAt(w: number, h: number, u: number): [number, number, number, boolean] {
   const k = `${w}|${h}`;
   if (k !== rideKey) {

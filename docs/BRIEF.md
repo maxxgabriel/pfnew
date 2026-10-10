@@ -297,3 +297,13 @@ the fire tornado): memes and movie/game beats, read from a pose or a camera
 move, never a costume. Built: this is fine, distracted, a surprised cut-in,
 imma head out, the 45° lean, the snap with "and i am maxx.", red light green
 light (a real scroll game), and the Toy Story freeze on the desk.
+
+**Round 32: the seams are the show.** Transitions between acts are to be
+the main part of the site. Every seam now draws both chapters and passes from
+one to the other while carrying him through it, built from the film's own
+materials: the title's ink runs down into the road (and he turns pixel from
+the feet up), the cartoon iris becomes a hole he drops through, the giant
+brush sweeps the sea in, the waterline takes us under, the Spark's light
+opens the whale's belly, a blast of air bursts him out into the sky, and one
+long painted stroke carries him from the sunset down onto the last page. The
+mouse no longer draws; a tap on him pokes him.

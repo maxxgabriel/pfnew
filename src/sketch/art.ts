@@ -123,15 +123,46 @@ export function poseHeight(k: string, face: number) {
   return m ? (m.foot[1] - m.top) * poseScale(k, face) : 0;
 }
 
+/** where the hero was last drawn this frame (CSS pixels: his feet, the top of his drawing, his face width) */
+export const heroSeen = { x: 0, y: 0, top: 0, face: 0, at: -1 };
+let pokedAt = -9;
+/** a tap at (x, y): if it lands on him, he reacts (returns whether it did) */
+export function pokeHero(x: number, y: number) {
+  const hs = heroSeen;
+  if (hs.at < 0 || Math.abs(hs.at - clock) > 0.5) return false;
+  const half = Math.max(hs.face * 0.9, (hs.y - hs.top) * 0.4);
+  if (x < hs.x - half || x > hs.x + half || y < hs.top - hs.face * 0.2 || y > hs.y + hs.face * 0.2) return false;
+  pokedAt = performance.now() / 1000;
+  return true;
+}
+
+let posesHidden = false;
+/** (the seams) draw a chapter without him: in the page that is only being held while the other carries him */
+export const setPosesHidden = (on: boolean) => { posesHidden = on; };
+
 /** draw pose `k` with its foot point at (x, y), its face `face` pixels wide */
 export function drawPose(ctx: CanvasRenderingContext2D, k: string, x: number, y: number, face: number, o: PoseOpts = {}) {
   // in a styled act, his restyled twin of this drawing (if there is one), at the ink drawing's height
+  if (posesHidden) return;
   const st = styledTwin(k);
   if (st) return drawPose(ctx, st, x, y, twinFace(k, st, face), { ...o, boil: o.boil ?? 0.004 });
   const m = M[k];
   const im = m && img(k);
   if (!m || !im) return;
   const s = poseScale(k, face);
+  // where he is on screen (the last solid drawing of him each frame): the seams line him up across a cut, a tap pokes him
+  const solid = !o.tint && (o.alpha ?? 1) > 0.5;
+  if (solid) {
+    const tm = ctx.getTransform(), d = Math.min(window.devicePixelRatio || 1, 2);
+    const p0 = tm.transformPoint({ x, y }), p1 = tm.transformPoint({ x, y: y - (m.foot[1] - m.top) * s });
+    heroSeen.x = p0.x / d; heroSeen.y = p0.y / d; heroSeen.top = p1.y / d; heroSeen.face = face * Math.hypot(tm.a, tm.b) / d; heroSeen.at = clock;
+  }
+  // poked: a startled hop and a squash that wobbles out
+  const pu = solid ? (performance.now() / 1000 - pokedAt) / 0.7 : 1;
+  if (pu >= 0 && pu < 1) {
+    o = { ...o, squash: (o.squash ?? 1) * (1 + Math.sin(pu * Math.PI * 3) * 0.2 * (1 - pu)), rot: (o.rot ?? 0) + Math.sin(pu * Math.PI * 4) * 0.08 * (1 - pu) };
+    y -= Math.sin(Math.min(1, pu * 2) * Math.PI) * face * 0.45;
+  }
   ctx.save();
   let bx = 0, by = 0, br = 0;
   const boil = o.boil ?? 0.006;

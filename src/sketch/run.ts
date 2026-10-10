@@ -1,8 +1,8 @@
 import { brush } from '../core/brush';
 import type { Frame } from '../core/frame';
-import { type Pt, TAU, clamp, ease, hash, lerp, seg } from '../core/math';
+import { type Pt, clamp, ease, hash, lerp, seg } from '../core/math';
 import { paperTile } from '../core/sprites';
-import { artSize, drawArtFoot, drawFig, figHeight, hasPose, meta, poseHeight, poseScale, drawPose } from './art';
+import { artSize, drawArtFoot, drawFig, figHeight, hasPose, meta, poseHeight, poseScale, drawPose, getActStyle, setActStyle } from './art';
 import { drawBg } from './bg';
 import { DOODLE, drawDoodle, wideSheet } from './margins';
 import { live } from '../desk/live';
@@ -54,6 +54,9 @@ export const RN = {
   hose: [8.0, 8.9] as const,
   iris: [8.6, 8.95] as const,
 };
+
+/** (the seam from I) by this local beat he is pixel art all over */
+const PIXEL_IN = 0.55;
 
 /** distracted: a gold star drifts past and he can't help looking back at it; the Spark stops dead, unimpressed */
 const DB = [1.95, 2.3, 2.45] as const;
@@ -145,17 +148,6 @@ function oldFilm(ctx: CanvasRenderingContext2D, w: number, h: number, k: number,
   ctx.restore();
 }
 
-/** the iris of an old cartoon closing on a point: black everywhere but a circle */
-function iris(ctx: CanvasRenderingContext2D, w: number, h: number, c: Pt, r: number) {
-  ctx.save();
-  ctx.fillStyle = '#0b0908';
-  ctx.beginPath();
-  ctx.rect(0, 0, w, h);
-  ctx.arc(c[0], c[1], Math.max(0.5, r), 0, TAU, true);
-  ctx.fill('evenodd');
-  ctx.restore();
-}
-
 export function drawRun(f: Frame, L: number) {
   const { ctx, w, h, t } = f;
   const { face, gx, gy, r } = stage(f);
@@ -163,9 +155,6 @@ export function drawRun(f: Frame, L: number) {
   const edgeX = xAt(RN.edge, f) + face * 0.25;
   const gap: [number, number] = [xAt(RN.flip[0], f) + face * 0.9, xAt(RN.flip[1], f) - face * 0.6];
   const hoseK = L >= RN.hose[0] && L < RN.hose[1] ? 1 : 0;
-  // on the desk (PC) he runs right out of the drawing at the edge and tumbles across the desk (src/desk/story.ts)
-  const onDesk = DESK_HOLDS && deskOn(w, h);
-  const offSheet = onDesk && L > RN.drop - 0.03 && (f.hold?.kind !== 'tumble' || f.hold.p >= 0.2);
   if (f.crossedFwd(f.B - L + RN.hose[0])) f.shake(face * 0.15);
 
   // ---- red light, green light: it lands with its back to him; he sneaks off while it isn't looking; scroll while it stares and you're caught
@@ -393,7 +382,31 @@ export function drawRun(f: Frame, L: number) {
   } else if (pose.startsWith('roto_')) {
     // the traced frames carry their own rise and fall: anchor them all on the sheet's shared ground line
     drawFig(ctx, pose, X, y, poseScale('roto_0', face), { anchor: [meta(pose)?.foot[0] ?? 0, 208] });
-  } else if (!offSheet && !leaning) drawPose(ctx, pose, X + sneakX + leanX, y, face, { rot });
+  } else if (L < PIXEL_IN) {
+    // (the seam from I) he turns pixel from his feet up: a scanline climbs him, ink above it, pixels below
+    const hx = X + sneakX, top = y - poseHeight(pose, face) * 1.05;
+    const line = lerp(y + face * 0.1, top - face * 0.1, ease.inOut2(seg(L, 0.02, PIXEL_IN)));
+    const was = getActStyle();
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(hx - face * 4, line, face * 8, y + face - line);
+    ctx.clip();
+    drawPose(ctx, pose, hx, y, face, { rot });
+    ctx.restore();
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(hx - face * 4, top - face, face * 8, line - top + face);
+    ctx.clip();
+    setActStyle(null);
+    drawPose(ctx, pose, hx, y, face, { rot });
+    setActStyle(was);
+    ctx.restore();
+    ctx.save();
+    ctx.globalAlpha = 0.8 * Math.sin(seg(L, 0.02, PIXEL_IN) * Math.PI);
+    ctx.fillStyle = '#7fe3ff';
+    ctx.fillRect(hx - face * 1.3, line - face * 0.025, face * 2.6, face * 0.05);
+    ctx.restore();
+  } else if (!leaning) drawPose(ctx, pose, X + sneakX + leanX, y, face, { rot });
   { const p = toS([X + sneakX, y]); live.runHero = { x: p[0], y: p[1], size: face * z }; }
   // the star he can't stop looking at (one big gold star, drifting past behind him)
   const dbU = seg(L, DB[0] - 0.33, DB[2] - 0.1);
@@ -444,7 +457,7 @@ export function drawRun(f: Frame, L: number) {
     // staring: two glaring eyes on its face
     if (rl >= 0 && game.look > 0.5) eraserEyes(ctx, ew, EH, seg(game.look, 0.5, 1));
     ctx.restore();
-    if (leaning && !offSheet) drawPose(ctx, pose, X + sneakX + leanX, y, face, { rot });
+    if (leaning) drawPose(ctx, pose, X + sneakX + leanX, y, face, { rot });
     // caught: a grey scrub across his legs
     if (rl >= 0 && caught > 0.3 && caught < 1) {
       ctx.save();
@@ -491,15 +504,8 @@ export function drawRun(f: Frame, L: number) {
   }
   ctx.restore();
 
-  // ---- the gag plays as an old cartoon, and an iris closes on him as he drops (it opens again on the void)
+  // ---- the gag plays as an old cartoon (the iris that closes on him is the seam's: src/sketch/seams.ts)
   oldFilm(ctx, w, h, hoseK, t);
-  const ik = seg(L, RN.iris[0], RN.iris[1]);
-  if (ik > 0 && L < RN.end && !onDesk) {
-    const c = toS([X, y - face * 1.1]);
-    const R0 = Math.hypot(w, h);
-    const close = ease.inOut3(seg(ik, 0, 0.55)), open = ease.in3(seg(ik, 0.75, 1));
-    iris(ctx, w, h, c, lerp(lerp(R0, face * 1.5, close), R0, open));
-  }
   ctx.restore();
 }
 

@@ -9,6 +9,7 @@ import { artSize, drawArt, drawArtFoot, drawFig, drawPose, ib, poseHeight, setAc
 import { drawVfx, vfxAspect } from './bg';
 import { INK, RED, cycle, drawGround, drawPaper, drawSpark, drawTitle, faceOf, titleFit } from './common';
 import { dryStreak, flash, impactFrame, letterbox, shockRing } from './fx';
+import { HANDOFF, slideBelow } from './chase';
 import { drawStill } from './still';
 import { drawWall } from './wall';
 
@@ -182,7 +183,8 @@ function rideIn(w: number, h: number, gx: number, gy: number): Pt[] {
   const k = `${w}|${h}`;
   if (k !== rideKey) {
     rideKey = k;
-    ridePts = [[w * 0.66, -h * 0.08], [w * 0.62, h * 0.12], [w * 0.42, h * 0.3], [gx - w * 0.12, gy - h * 0.02], [gx + w * 0.02, gy + 2]];
+    // the top of it IS his slide from chapter VII, carried on one screen down (the seam pans straight from one onto the other)
+    ridePts = [slideBelow(w, h, 0.55), slideBelow(w, h, 0.7), slideBelow(w, h, HANDOFF), [gx - w * 0.12, gy - h * 0.02], [gx + w * 0.02, gy + 2]];
   }
   return ridePts;
 }
@@ -308,7 +310,7 @@ export function drawHome(f0: Frame, L: number) {
     drawGround(ctx, w * 0.1, w * 0.9, gy + face * 0.05, face * 0.07, ease.out2(seg(L, HM.land - 0.1, HM.land + 0.4)), 9);
     ctx.restore();
     // the ink stroke he rode in on, staying on the page
-    brush(ctx, rideIn(w, h, gx, gy), { width: face * 0.3, color: INK, progress: 1, seed: 77, dry: 0.45, press: 1.2, tail: 0.3, halo: 0, alpha: 1 - seg(L, HM.brace, HM.orbit[0]) });
+    brush(ctx, rideIn(w, h, gx, gy), { width: face * 0.34, color: INK, progress: 1, seed: 77, dry: 0.45, press: 1.6, tail: 0.3, halo: 0, alpha: 1 - seg(L, HM.brace, HM.orbit[0]) });
   } else {
     // round him, the ground is a ring of ink that the camera's walk swings round
     ctx.save();
@@ -384,8 +386,9 @@ export function drawHome(f0: Frame, L: number) {
   let pose = 'ride_2', y = gy, x = gx, scale = 1, alpha = 1, rot = 0, flip = false;
   if (L < HM.land) {
     // riding the end of the stroke down onto the page
-    const pts = rideIn(w, h, gx, gy);
-    const u = ease.inOut2(seg(L, 0, HM.land));
+    // (from the hand-off point on his slide, where chapter VII left him, down to the page)
+    const pts = rideIn(w, h, gx, gy).slice(2);
+    const u = ease.out2(seg(L, 0, HM.land));
     const i = Math.min(pts.length - 2, Math.floor(u * (pts.length - 1)));
     const kk = u * (pts.length - 1) - i;
     x = lerp(pts[i][0], pts[i + 1][0], kk);
