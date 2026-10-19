@@ -75,6 +75,10 @@ themselves, not to the docs: *"you report to me and not the docs"*.
 
 ## 3. Decisions (most recent first)
 
+**v13 shelved:** *"just leave it lets not do it anymore. i feel lik etyhe first
+one was gfood enough. lets refine in that the chibili one"*. Back to The
+Sketch; refine it. The `?world` prototype was reverted.
+
 **v13 — The Storyteller (plan, docs/STORY13.md):** shown three cinematic
 painted frames as an art-style example (*"i just gave you artstyle the hand
 the things are example of artystyle not what i actually need. what i need is

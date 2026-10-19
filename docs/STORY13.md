@@ -1,4 +1,8 @@
-# STORY — The Storyteller (v13, plan)
+# STORY — The Storyteller (v13, plan) — SHELVED
+
+> **Shelved by the owner** after the style test and the code prototype: *"just leave it lets not do
+> it anymore. i feel like the first one was good enough. lets refine in that the chibi one"*. The
+> film stays The Sketch (ink chibi, v12 + rounds 29–32). Kept here as a record only.
 
 **Logline.** Across a dying campfire, an old wanderer tells you about a
 little ink boy who followed a Spark through the world. When the telling
