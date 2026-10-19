@@ -18,6 +18,7 @@ import { gsap } from 'gsap';
  *   data-wobble     stickers lift and wiggle
  *   data-tilt       cards tilt toward the cursor with a moving shine
  *   data-underline  a line draws in from the left, leaves to the right
+ *   data-preview=url a little drawing floats beside the cursor over the item
  *   data-cursor="Open"  the cursor grows into a labelled bubble
  */
 
@@ -189,6 +190,26 @@ export function tilt(el: HTMLElement, max = 9) {
   });
 }
 
+/** a little drawing floats beside the cursor while it's over the item (menu and list rows) */
+let previewBox: HTMLImageElement | null = null;
+export function preview(el: HTMLElement) {
+  if (!once(el, 'preview') || !el.dataset.preview) return;
+  if (!previewBox) {
+    previewBox = document.createElement('img');
+    previewBox.className = 'ix-preview';
+    previewBox.alt = '';
+    document.body.appendChild(previewBox);
+  }
+  const box = previewBox;
+  const px = gsap.quickTo(box, 'x', { duration: 0.55, ease: 'power3.out' });
+  const py = gsap.quickTo(box, 'y', { duration: 0.55, ease: 'power3.out' });
+  el.addEventListener('pointermove', (e) => { if (e.pointerType === 'mouse') { px(e.clientX + 24); py(e.clientY - 60); } });
+  onEnter(el, () => {
+    box.src = el.dataset.preview!;
+    gsap.to(box, { scale: 1, rotate: gsap.utils.random(-8, 8), opacity: 1, duration: 0.5, ease: 'back.out(2.5)', overwrite: 'auto' });
+  }, () => gsap.to(box, { scale: 0.4, opacity: 0, duration: 0.25, ease: 'power2.in', overwrite: 'auto' }));
+}
+
 /* ------------------------------------------------------------ the cursor: the red Spark */
 
 function sparkCursor() {
@@ -239,6 +260,7 @@ const RULES: [string, (el: HTMLElement) => void][] = [
   ['[data-squish]', squish],
   ['[data-wobble]', wobble],
   ['[data-tilt]', (el) => tilt(el)],
+  ['[data-preview]', preview],
 ];
 /** sensible defaults for markup that didn't opt in */
 const AUTO: [string, (el: HTMLElement) => void][] = [
