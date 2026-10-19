@@ -2,14 +2,12 @@ import { type SeamChapter, drawSeam } from '../sketch/seams';
 import type { Frame } from '../core/frame';
 import { setWallSources } from '../sketch/wall';
 import { drawRun } from '../sketch/run';
-import { drawRide } from '../sketch/ride';
 import { drawLight } from '../sketch/light';
 import { drawChase } from '../sketch/chase';
 import { HM, SIGN_WINDOW, drawHome } from '../sketch/home';
 import { type ActStyle, getActStyle, setActStyle, setPoseClock } from '../sketch/art';
 import { drawStill } from '../sketch/still';
 import { drawSea } from '../sketch/sea';
-import { drawDeep } from '../sketch/deep';
 
 /*
  * THE SKETCH (round 18; docs/STORY.md v11).
@@ -17,12 +15,7 @@ import { drawDeep } from '../sketch/deep';
  * A little ink drawing wants to move; a red spark keeps teasing it forward,
  * and every time it chases the spark it breaks into a new kind of animation.
  *
- *   I    Still   a drawing that can only tremble, and a spark on its nose
- *   II   Run     one unbroken shot: first steps, a walk, a run, off the edge of the page
- *   III  Fold    off the edge, a fall, a paper crane to ride
- *   IV   Light   one bulb, a shadow with a mind of its own, a light-blade duel
- *   V    Chase   a broom, a wizard's hat, the Spark on wings across the sunset
- *   VI   Home    the spark stamped down as the seal; the brush held out to you
+ *   I Still · II Run · III Wave · IV Light (moon) · V Chase · VI Home
  *
  * Each chapter owns [from, to) in film beats and draws itself from its own
  * local beat L = B - from. Its opening is responsible for the seam.
@@ -41,15 +34,13 @@ export interface Chapter {
 export const CHAPTERS: Chapter[] = [
   { n: 'I', name: 'Still', from: 0, to: 3.8, paper: true, draw: drawStill },
   { n: 'II', name: 'Run', from: 3.8, to: 12.8, paper: true, draw: drawRun },
-  { n: 'III', name: 'Fold', from: 12.8, to: 21.8, paper: false, draw: drawRide },
-  { n: 'IV', name: 'Wave', from: 21.8, to: 26.8, paper: false, draw: drawSea },
-  { n: 'V', name: 'Deep', from: 26.8, to: 31.8, paper: false, draw: (f, L) => drawDeep(f, L) },
-  { n: 'VI', name: 'Light', from: 31.8, to: 39.8, paper: false, draw: (f, L) => drawLight(f, L) },
-  { n: 'VII', name: 'Chase', from: 39.8, to: 48.8, paper: false, draw: drawChase },
-  { n: 'VIII', name: 'Home', from: 48.8, to: 62.8, paper: true, draw: drawHome },
+  { n: 'III', name: 'Wave', from: 12.8, to: 17.8, paper: false, draw: drawSea },
+  { n: 'IV', name: 'Light', from: 17.8, to: 25.8, paper: false, draw: drawLight },
+  { n: 'V', name: 'Chase', from: 25.8, to: 34.8, paper: false, draw: drawChase },
+  { n: 'VI', name: 'Home', from: 34.8, to: 48.8, paper: true, draw: drawHome },
 ];
 
-export const REEL_END = 63.2;
+export const REEL_END = 49.2;
 
 /**
  * Key moments that play themselves: once the playhead is inside one and the
@@ -58,9 +49,8 @@ export const REEL_END = 63.2;
  */
 const AUTO_LOCAL: [string, number, number, number][] = [
   ['Still', 0.12, 1.5, 0.9], // the one-line birth
-  ['Run', 8.0, 9.0, 0.8], // the rubber-hose gag and the iris
-  ['Wave', 2.0, 5.0, 1.0], // the wave stands up, the tube, the flip
-  ['Deep', 2.4, 5.0, 1.0], // the whale turns and swallows; the bulb
+  ['Run', 8.0, 9.0, 0.8], // the rubber-hose gag and the fall
+  ['Wave', 2.0, 5.0, 1.0], // the wave stands up, the tube, the moon launch
   ['Light', 4.75, 5.95, 0.9], // the clashes (and the bullet-time hold inside them)
   ['Light', 6.9, 8.0, 0.8], // the cut and the escape
   ['Chase', 2.3, 2.4, 1.0], // (on the desk) the knock and the escape round the mug: a hold inside
@@ -79,7 +69,7 @@ export function autoAt(B: number) {
 }
 
 /** every act between the book-ends is drawn in its own art style (only him: the scenery stays ink) */
-const ACT_STYLE: Record<string, ActStyle> = { Run: 'pixel', Fold: 'clay', Wave: 'water', Deep: 'chalk', Light: 'comic', Chase: 'hose' };
+const ACT_STYLE: Record<string, ActStyle> = { Run: 'pixel', Wave: 'water', Light: 'comic', Chase: 'hose' };
 
 export function chapterAt(B: number) {
   let i = 0;
@@ -88,7 +78,7 @@ export function chapterAt(B: number) {
 }
 
 // the storyboard wall's panels: each chapter at its best moment (local beats)
-const WALL_AT: Record<string, number> = { Still: 2.6, Run: 5.3, Fold: 4.6, Wave: 3.3, Deep: 3.0, Light: 4.62, Chase: 2.0, Home: 4.9 };
+const WALL_AT: Record<string, number> = { Still: 2.6, Run: 5.3, Wave: 3.3, Light: 4.62, Chase: 2.0, Home: 4.9 };
 // (each panel in its act's own art style)
 setWallSources(CHAPTERS.map((c) => ({
   draw: (f: Frame, L: number) => { const was = getActStyle(); setActStyle(ACT_STYLE[c.name] ?? null); c.draw!(f, L); setActStyle(was); },

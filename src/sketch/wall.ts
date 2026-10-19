@@ -71,12 +71,14 @@ export function drawWall(f: Frame, p: number, drawPage: (g: CanvasRenderingConte
   ctx.save();
   ctx.translate(cx, cy);
   ctx.scale(z, z);
-  // the grid, centred on the live page: the eight chapters round it, in reading order
+  // the grid, centred on the live page: the six chapters round it, in reading order
   let n = 0;
   for (let r = 0; r < 3; r++) {
     for (let c = 0; c < 3; c++) {
       const x = (c - 1) * pw * (1 + g), y = (r - 1) * ph * (1 + g);
       const centre = r === 1 && c === 1;
+      if (r === 1 && !centre) continue;
+      if (!centre && n >= sources.length) continue;
       const img = centre ? live.c : thumbs[n];
       const rot = centre ? 0 : Math.sin(n * 2.3 + 1) * 0.025 * out;
       ctx.save();

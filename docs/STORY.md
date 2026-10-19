@@ -1,3 +1,22 @@
+# STORY — The Sketch v12b
+
+**Owner's cut:** six chapters: **I Still → II Run → III Wave → IV Light
+(on the moon) → V Chase → VI Home**. Fold / the crane ride and Deep / the
+whale are removed. Surviving chapters keep their lengths and local beats.
+Run's page-edge fall continues straight into Wave's sea dive. The curl
+launches him toward the sea's full moon, which grows around him; Light's
+`LT.drop` / `LT.land` are the lunar landing. The Spark lights the dust; his
+long shadow copies him, waves, peels upright and draws red against his blue.
+The duel and bullet-time hold at Light 5.2 remain. A low-gravity leap/float
+replaces the cord swing; his upward slash splits the ink sky and he falls
+through clouds into Chase's sunset, broom and hat. No ribs, bulb or cord;
+space is a broad black-indigo wash with no star clusters.
+
+The v12 narrative below is historical; this v12b route supersedes its eight
+chapters and the subsequently rejected red-circle cuts.
+
+---
+
 # STORY — The Sketch v12 (round 19, built on `claude/sketch-v12`)
 
 **Logline.** A little ink drawing, born from a drop of red ink, chases the

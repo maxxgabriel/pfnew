@@ -378,7 +378,7 @@ export function drawLight(g: CanvasRenderingContext2D, f: Frame, x0: number, y0:
 /* ------------------------------------------------------------ the hits */
 
 /** the biggest hits jolt the camera and make the desk jump */
-const HITS = [RUN + RN.eraser, AT('Deep') + 3.15, AT('Light') + 4.9, HOME + 1.45, HOME + HM.hit];
+const HITS = [RUN + RN.eraser, AT('Light') + 1.2, AT('Light') + 4.9, HOME + 1.45, HOME + HM.hit];
 export function jolt(B: number, held = false) {
   // (not while the film holds: a held jolt would freeze the camera half out)
   if (held) return 0;

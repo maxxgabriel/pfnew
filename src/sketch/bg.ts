@@ -6,11 +6,12 @@ import { hurry, queue } from './load';
 
 const files = import.meta.glob('../assets/sketchbg/*.webp', { query: '?url', import: 'default', eager: true }) as Record<string, string>;
 /** when each painting is first needed, on the same scale as the drawings' order (src/sketch/art.ts) */
-const PRIO: Record<string, number> = { bg_void: 18, bg_night: 22, bg_inksea: 23, fg_inksea: 27, bg_deep: 28, bg_belly: 30, fg_belly: 31, bg_sunset: 32, fg_sunset: 36, vfx_tornado: 43, vfx_fire: 43 };
+const PRIO: Record<string, number> = { desk_top: 50, bg_void: 18, bg_inksea: 21, fg_inksea: 23, bg_space: 24, fg_moon: 25, bg_sunset: 32, fg_sunset: 36, vfx_tornado: 43, vfx_fire: 43 };
 const imgs = new Map<string, HTMLImageElement>();
 const urls = new Map<string, string>();
 for (const [path, url] of Object.entries(files)) {
   const name = path.split('/').pop()!.replace('.webp', '');
+  if (!(name in PRIO) && !(name.replace(/_\d+$/, '') in PRIO)) continue;
   urls.set(name, url);
   imgs.set(name, queue(url, PRIO[name] ?? PRIO[name.replace(/_\d+$/, '')] ?? 50));
 }

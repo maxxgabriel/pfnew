@@ -18,22 +18,54 @@ the owner's taste and decisions; this file is the technical side.
 ---
 
 
-## Current film: The Sketch v12 (round 19, branch `claude/sketch-v12`) — read this first
+## Current film: The Sketch v12b — six chapters
 
-`docs/STORY.md` v12. Eight chapters, conducted by `src/reel/reel.ts`
-(`CHAPTERS`, mirrored in `core/frame.ts` for the HUD). Each chapter owns its
-seam.
+`src/reel/reel.ts` conducts the route; `core/frame.ts` mirrors the HUD.
+Local beat timings and all six surviving chapter lengths are unchanged.
 
-| Chapter | Beats | File | New in v12 |
-|---|---|---|---|
-| I Still | 0 – 5.6 | `sketch/still.ts`, `sketch/oneline.ts` | the Spark's ink leaps to his head; one traced line draws him (`ST.leap/line/fill`); idle life |
-| II Run | 5.6 – 14.6 | `sketch/run.ts` | scroll speed → `sprint8` / `moonwalk6`; the Eraser (`RN.eraser…skid`, `eraserGap`) rubs the page out behind him; pop-ups (`POPS`); the runoff gag as a 1930s cartoon (`oldFilm`) and an iris (`iris`) |
-| III Fold | 14.6 – 23.6 | `sketch/ride.ts` | (the web-swinger cameo of rounds 21–22 was removed in round 23); he leaps up off the crane; the night dissolves into the ink sea |
-| IV Wave | 23.6 – 28.6 | `sketch/sea.ts` | the brush as a surfboard; the woodblock wave (`wave_0..2`, flipped) curls him in; black; the negative flip |
-| V Deep | 28.6 – 33.6 | `sketch/deep.ts` | negative world (difference + saturation + a depth gradient; he and the Spark drawn after, in colour); the whale passes, turns, swallows; the Spark rises and becomes the bulb |
-| VI Light | 33.6 – 41.6 | `sketch/light.ts` | the room is `bg_belly` lit by the bulb; the escape (`LT.slash/cut/tumble`, `drawEscape`): the belly, painted once at the cut into an offscreen canvas, splits in two over the sunset |
-| VII Chase | 41.6 – 50.6 | `sketch/chase.ts` | he grabs the brush, paints a stroke (`slidePath`) and rides it along the brush's own spline (`slideAt`) |
-| VIII Home | 50.6 – 64.6 | `sketch/home.ts` | rides in on the stroke; the Eraser returns; the orbit (`TURN`: turnA_0..3, turnB_0..3); the eye cut-in; the cinematic fire tornado (dark special-move backdrop + bars, painted `vfx_tornado_*` on black added as light, clockwise 4-drawing spin, `ftkick_*` wind-up/strike, painted meteor and explosion; research in `docs/research/fire-tornado.md`) smashes the Eraser; your signature (`signStart/Move/End`, the `#sign` pad from `main.ts`, shown by `reelHud().sign`); the loop into the first page |
+| Chapter | From | To | File / staging |
+|---|---:|---:|---|
+| I Still | 0 | 3.8 | `sketch/still.ts`: birth on the page |
+| II Run | 3.8 | 12.8 | `sketch/run.ts`: pixel, Eraser, page-edge fall |
+| III Wave | 12.8 | 17.8 | `sketch/sea.ts`: watercolour, brush surf, curl launches him |
+| IV Light | 17.8 | 25.8 | `sketch/light.ts`: comic, lunar dust, Spark-lit shadow duel |
+| V Chase | 25.8 | 34.8 | `sketch/chase.ts`: rubber hose, sunset broom, painted slide |
+| VI Home | 34.8 | 48.8 | `sketch/home.ts`: ink, fire kick, seal, brush, loop |
+
+Film end including the existing 0.4-beat tail: **49.2** (`ACT.END`, `REEL_END`).
+All active holds derive their starts from chapter names: bullet **23.002**
+(Light 5.2), finale **40.602**, wall **46.852**, escape **28.122** (desk
+only), red light **7.222**. AUTO drops Deep and has no Fold window.
+`ride.ts` and `deep.ts` are deleted. `reel/fold.ts` stays because the legacy
+`reel/page.ts` still imports it; neither is in the active film.
+
+**v12b art (built-in image generation):** `art/raw/bg_space.png` and
+`art/raw/fg_moon.png` → `python3 scripts/prepare-moon-art.py` →
+`src/assets/sketchbg/bg_space.webp` (106 KB) and `fg_moon.webp` (112 KB),
+both 1024×1536, quality 85. Raw files remain in the ignored raw directory.
+Foreground uses the existing magenta alpha/unmix/despill formula, full frame,
+with no crop; it maps to the viewport so its curved horizon survives desktop
+framing. The space painting is deep black-indigo wash with a low Earth rim,
+zero stars. The moon is broad grey dust dunes on pure #FF00FF. Prompts are
+recorded in `docs/MOON_ART.md`. PRIO schedules sea → space/moon → sunset;
+old night/deep/belly paintings are retained on disk but no longer queued.
+`bg_void` remains for Run and `desk_top` remains for the real desk.
+FIRST_USE removes the cut-only acro/swim/whale/swing families; those and
+stunned poses are no longer queued. The ride drawings remain for Chase
+and Home's painted stroke (they are reused without a crane).
+The six storyboard panels sit three above / three below the live page.
+
+**Desk:** removed Fold/Deep exposure notes and remapped scraps, pencil tests,
+and stickers to the surviving acts. Round 32 had already removed the desk
+page turn and tumble; they stay removed. The swallow jolt becomes the moon
+landing jolt (Light 1.2). Eraser, broom escape, burn, light cues and drafts
+still follow chapter starts.
+
+**Verification:** no browser available by the owner's instruction. TypeScript
+and oxlint are the required checks; phone / desktop screenshots remain the
+director's visual review. Oxlint ignores vendored `.claude/skills/**` scripts.
+
+The older round notes below are history where they conflict with v12b.
 
 - **Round 24** (`scripts/gen-v13.sh` sheets): the style shift (`RN.styles`, `style_*` sheets sized by `figHeight`, chalk gets a blackboard); the rotoscope beat (`roto_*` anchored on the sheet's ground line, `RN.flip`); the wink (`CH.wink`, `broom_wink_*`); bullet time (`light.ts` `drawBullet`, the `bullet` hold in `core/holds.ts`, `saberlock_*` with hand-set `hilt` points, blades in code); red-circle match cuts (`sketch/cuts.ts`, drawn by the conductor over every chapter); the storyboard wall (`sketch/wall.ts`, the `wall` hold; panels rendered once from `reel.ts` `WALL_AT`). Sheets are grouped by name minus the frame number (`art.ts`). Round 25: the ink cat and the visible brush laying the run's line were removed (the line still grows ahead of him).
 - **Art.** `scripts/gen-v12.sh` (Codex image tool, the owner's ChatGPT
@@ -148,23 +180,19 @@ seam.
     name's strokes down onto the line (still.ts L 2.55–3.7); Run's first
     0.55 beats turn him pixel from the feet up behind a cyan scanline
     (`PIXEL_IN`, run.ts).
-  - II → III `irisHole` (−0.42/+0.5): the iris closes on him, the last circle
-    becomes a torn hole lined up on him in the fall, and opens. (Run's own
-    iris is gone.)
-  - III → IV `brushWipe` (−0.62/+0.55): the giant brush (`brushprop_0`)
-    sweeps left to right, the sea under a wet indigo wash in its wake.
-  - IV → V `waterline` (−0.95/+0.35; Wave held at L 3.85, Deep live from
-    L −1): a rippling waterline rises up the screen, the deep below it,
-    bubbles.
-  - V → VI `lightIris` (−0.5/+0.6): from the Spark at (0.5w, 0.35h) — the
-    bulb's spot — the belly opens out in a widening soft circle of light.
-  - VI → VII `burst` (−0.3/+0.5): a ring of air blasts out from him, the sky
-    inside it; Light's escape sky is framed like Chase's opening (pan 0.25,
-    zoom 1.18) so it is one sky.
-  - VII → VIII `panDown` (−0.85/+0.6, `handOff`): one long page. Home's
-    ride-in stroke (`rideIn`) begins as Chase's slide carried on one screen
-    down (`slideBelow`, same width/press), Chase ends him at `HANDOFF` 0.85
-    along it and Home starts him there, so the pan is one stroke, one rider.
+  - II → III `fallToSea` (−0.2/+0.8 at 12.8): the page moves upward,
+    revealing the sea underneath; one falling drawing carries him from Run
+    into Wave's dive, down to its surf landing. No white mask rectangles.
+  - III → IV `moonLaunch` (−0.85/+1.2 at 17.8): one drawing launches out
+    of the curl; the sea painting's moon is cropped and enlarged around him,
+    then yields to the lunar surface. The descent follows LT.drop 0.55–1.2
+    and ends exactly at LT.land. Both underlying heroes are hidden in these
+    two seams; the seam draws the sole visible character and updates tap data.
+  - IV → V `burst` (−0.3/+0.5 at 25.8): the air ring reveals Chase after
+    Light splits the black sky and sends near clouds upward past his re-entry.
+    Both chapters share the sunset's pan 0.25 / zoom 1.18.
+  - V → VI `panDown` (−0.85/+0.6 at 34.8, `handOff`): the painted stroke
+    continues onto Home's page with one rider, as in round 32.
   - `scripts/seams.sh [phone|desktop]` shoots every seam; `scripts/seam1.sh
     <name> <beat> [vp]` one.
   Removed: the red-disc cuts (`cuts.ts`), the desk tumble hold and the desk

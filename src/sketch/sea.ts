@@ -1,22 +1,12 @@
 import type { Frame } from '../core/frame';
 import { type Pt, clamp, ease, lerp, seg } from '../core/math';
 import { artSize, drawArtFoot, drawPose } from './art';
-import { drawBgXY, drawLayer } from './bg';
+import { bgImage, drawBgXY, drawLayer } from './bg';
 import { drawSpark, drawSparkStreak, faceOf } from './common';
-import { drawDeep } from './deep';
-import { flash, shockRing } from './fx';
+import { shockRing } from './fx';
 
-/*
- * IV · WAVE.
- *
- * He dives off the crane after the Spark toward a night sea of ink, and
- * the brush that drew him falls with him: it hits the water flat and he
- * lands on it — a surfboard. He rides the swells under the moon, the Spark
- * skimming ahead. Behind him one colossal wave stands up out of the sea,
- * a woodblock wave in ink; it throws its lip over him and he crouches into
- * the tube; the lip closes, everything goes black — and the world flips to
- * its negative (chapter V is the deep, in negative).
- */
+/* III · WAVE. The page-edge fall lands on a brush in the sea.
+ * The curling lip launches him toward its huge painted moon. */
 
 export const SE = {
   dive: [0, 0.8] as const,
@@ -32,6 +22,20 @@ export const SE = {
 /** where the sea's surface is on screen */
 const seaY = (h: number) => h * 0.72;
 
+/** Keep the full moon in frame on wide screens too; the launch seam uses
+ * this exact projection, so its growing moon begins on the painted one. */
+export function seaCamera(w: number, h: number, L: number) {
+  const im = bgImage('bg_inksea');
+  const iw = im?.naturalWidth || 1024, ih = im?.naturalHeight || 1536;
+  const scale = Math.max(w / iw, h / ih) * 1.35;
+  const dw = iw * scale, dh = ih * scale;
+  const px = lerp(0.42, 0.58, seg(L, SE.dive[0], SE.close[1]));
+  const targetPan = clamp((ih * 0.35 * scale - h * 0.28) / Math.max(1, dh - h));
+  const py = targetPan * ease.out2(seg(L, 0, SE.land + 0.4));
+  return { px, py, x: iw * 0.5025 * scale - (dw - w) * px,
+    y: ih * 0.35 * scale - (dh - h) * py, r: iw * 0.1425 * scale };
+}
+
 export function drawSea(f: Frame, L: number) {
   const { ctx, w, h, t } = f;
   const face = faceOf(f);
@@ -41,8 +45,8 @@ export function drawSea(f: Frame, L: number) {
   // ---- the sea under the moon, sliding past as he rides
   ctx.fillStyle = '#0b0a0c';
   ctx.fillRect(0, 0, w, h);
-  const ride = seg(L, SE.dive[0], SE.close[1]);
-  drawBgXY(ctx, 'bg_inksea', w, h, lerp(0.05, 0.95, ride), lerp(0.0, 0.62, ease.out2(seg(L, 0, SE.land + 0.4))), 1, 1.35);
+  const camera = seaCamera(w, h, L);
+  drawBgXY(ctx, 'bg_inksea', w, h, camera.px, camera.py, 1, 1.35);
 
   // ---- the wave: it stands up behind him and throws its lip over him (flipped so it breaks to the right, his way)
   const rk = seg(L, SE.rise[0], SE.rise[1]);
@@ -96,6 +100,12 @@ export function drawSea(f: Frame, L: number) {
     shockRing(ctx, 0, 0, face * 2.6, splash, 'rgba(240,236,226,0.9)', face * 0.1);
     ctx.restore();
   }
+  if (L > SE.close[0]) {
+    const launch = ease.in2(seg(L, SE.close[0], 5.0));
+    x = lerp(x, w * 0.5, launch);
+    y = lerp(y, -h * 0.2, launch);
+    pose = 'leap_2'; rot = -launch * 0.3;
+  }
   drawPose(ctx, pose, x, y, face, { rot });
   // the near swell rolling past in front of him, faster than the sea behind (gone in the tube)
   const near = seg(L, SE.dive[0] + 0.3, SE.land) * (1 - seg(L, SE.tube[0] - 0.2, SE.tube[0] + 0.3));
@@ -109,19 +119,5 @@ export function drawSea(f: Frame, L: number) {
   drawSparkStreak(ctx, [sp[0] - face * 0.8, sp[1] + face * 0.05], sp, face * 0.17, 0.5);
   drawSpark(ctx, sp[0], sp[1], face * 0.17);
 
-  // ---- the lip closes: black — then the world flips to its negative and he is in the deep
-  const dark = ease.in2(seg(L, SE.close[0], SE.close[1]));
-  if (dark > 0) {
-    ctx.save();
-    ctx.globalAlpha = clamp(dark);
-    ctx.fillStyle = '#060506';
-    ctx.fillRect(0, 0, w, h);
-    ctx.restore();
-  }
-  if (L >= SE.flip) {
-    drawDeep(f, 0, (L - SE.flip) / (SE.end - SE.flip));
-    const fl = 1 - seg(L, SE.flip, SE.flip + 0.25);
-    if (fl > 0) flash(ctx, w, h, fl, '#ffffff');
-  }
-  if (f.crossedFwd(f.B - L + SE.flip)) f.shake(face * 0.25);
+  // The curl releases him upward; seams.ts carries this launch onto the moon.
 }

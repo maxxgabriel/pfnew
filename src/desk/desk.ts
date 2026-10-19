@@ -36,17 +36,17 @@ const PAPER_D = '#f3eee2';
 
 /** the act's two scraps (scripts/gen-desk.sh scraps_*) */
 const SCRAPS = [
-  ['scrap1_0', 'scrap1_1'], ['scrap1_2', 'scrap1_3'], ['scrap2_0', 'scrap2_1'], ['scrap2_2', 'scrap2_3'],
-  ['scrap3_0', 'scrap3_1'], ['scrap3_2', 'scrap3_3'], ['scrap4_0', 'scrap4_1'], ['scrap4_2', 'scrap4_3'],
+  ['scrap1_0', 'scrap1_1'], ['scrap1_2', 'scrap1_3'], ['scrap2_2', 'scrap2_3'],
+  ['scrap3_2', 'scrap3_3'], ['scrap4_0', 'scrap4_1'], ['scrap4_2', 'scrap4_3'],
 ];
 /** the flipbook's pencil test, per act */
 const PENCIL = [
-  ['pencil1_0', 'pencil1_1'], ['pencil1_2', 'pencil1_3', 'pencil1_4', 'pencil1_5'], ['pencil1_6', 'pencil1_7', 'pencil2_0', 'pencil2_1'],
-  ['pencil2_2', 'pencil2_3'], ['pencil2_4', 'pencil2_5'], ['pencil2_6', 'pencil2_7', 'pencil3_0'], ['pencil3_1', 'pencil3_2', 'pencil3_3'],
+  ['pencil1_0', 'pencil1_1'], ['pencil1_2', 'pencil1_3', 'pencil1_4', 'pencil1_5'],
+  ['pencil2_2', 'pencil2_3'], ['pencil2_6', 'pencil2_7', 'pencil3_0'], ['pencil3_1', 'pencil3_2', 'pencil3_3'],
   ['pencil3_4', 'pencil3_5', 'pencil3_6', 'pencil3_7'],
 ];
-/** one sticker for every act finished: ink, pixel, clay, watercolour, chalk, comic, rubber hose */
-const STICKERS = ['stick1_0', 'stick1_1', 'stick1_2', 'stick1_3', 'stick2_0', 'stick2_1', 'stick2_2'];
+/** one sticker for every act finished: ink, pixel, watercolour, comic, rubber hose */
+const STICKERS = ['stick1_0', 'stick1_1', 'stick1_3', 'stick2_1', 'stick2_2'];
 
 let queued = false;
 function queueDesk() {
@@ -268,18 +268,15 @@ const NOTES: [number, string, boolean][] = [];
   add('Run', 4.0, 'style swap ×5', true);
   add('Run', 6.0, 'flip — smear!');
   add('Run', 8.0, 'rubber hose gag');
-  add('Run', 8.6, 'iris out', true);
-  add('Fold', 0.3, 'fall — hold the scream');
-  add('Fold', 5.4, 'crane — slow in');
+  add('Run', 8.6, 'off the page → sea', true);
+  add('Wave', 0.3, 'continuous fall');
   add('Wave', 1.9, 'wave stands up');
   add('Wave', 3.2, 'tube: hold 6', true);
-  add('Wave', 4.5, 'flip into the dark');
-  add('Deep', 0.9, 'whale — FEEL the size');
-  add('Deep', 3.9, 'one bulb', true);
+  add('Wave', 4.5, 'launch toward the moon');
   add('Light', 1.4, 'shadow copies him');
   add('Light', 3.3, 'red blade up — slow');
   add('Light', 5.2, 'BULLET TIME → hold', true);
-  add('Light', 6.25, 'swing on the cord');
+  add('Light', 6.25, 'low gravity float');
   add('Chase', 0.55, 'broom! hat!');
   add('Chase', 1.7, 'wink at camera ;)', true);
   add('Chase', 2.4, 'loop the loop');
