@@ -7,12 +7,20 @@ export function createHot(canvas: HTMLCanvasElement) {
   let blot: {x:number;y:number;t:number}|null=null;
   const hit=(s:Spot)=>Math.hypot(mx-s.x,my-s.y)<s.r;
   window.addEventListener('pointermove',e=>{mx=e.clientX;my=e.clientY;canvas.style.cursor=spots.some(hit)?'pointer':'default';});
+  let press:{x:number;y:number;id:number}|null=null;
   window.addEventListener('pointerdown',e=>{
-    mx=e.clientX;my=e.clientY;blot={x:mx,y:my,t:performance.now()/1000};
-    if((e.target as Element).closest('button,a,dialog,iframe'))return;
+    if((e.target as Element).closest('button,a,dialog,iframe,nav'))return;
+    press={x:e.clientX,y:e.clientY,id:e.pointerId};
+    blot={x:e.clientX,y:e.clientY,t:performance.now()/1000};
+  },{passive:true});
+  window.addEventListener('pointercancel',()=>{press=null;},{passive:true});
+  window.addEventListener('pointerup',e=>{
+    const start=press;press=null;
+    if(!start||start.id!==e.pointerId||Math.hypot(e.clientX-start.x,e.clientY-start.y)>12)return;
+    mx=e.clientX;my=e.clientY;
     const spot=spots.findLast(hit);
     if(spot){times.set(`${spot.district.key}:${spot.id}`,performance.now()/1000);spot.district.tap?.(spot.id,spot.frame);}
-    pokeHero(mx,my);
+    if(!spot||spot.id==='boy')pokeHero(mx,my);
   },{passive:true});
   return {
     begin(){prior=spots;spots=[];},
