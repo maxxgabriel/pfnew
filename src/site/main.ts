@@ -1,4 +1,7 @@
-import '@fontsource/anton';
+import '@fontsource/permanent-marker';
+import '@fontsource/caveat-brush';
+import { startInk } from './ink';
+import { flood } from './flood';
 import '@fontsource/inter';
 import '@fontsource/inter/600.css';
 import '@fontsource/inter/700.css';
@@ -24,11 +27,13 @@ const lenis=calm?null:new Lenis({duration:1.05,smoothWheel:true,anchors:true});
 lenis?.on('scroll',ScrollTrigger.update);
 if(lenis){gsap.ticker.add(time=>lenis.raf(time*1000));gsap.ticker.lagSmoothing(0);}
 function lock(locked:boolean){if(locked){lenis?.stop();document.documentElement.style.overflow='hidden';}else{document.documentElement.style.overflow='';lenis?.start();}}
-hydrateArt();marquee(reduced);playground(reduced,lock,position=>{if(lenis)lenis.scrollTo(position,{immediate:true});else window.scrollTo({top:position,behavior:'instant'});});menu(reduced,lock);lock(true);
+const filmUrl=import.meta.env.VITE_FILM_URL as string|undefined;
+if(filmUrl)document.querySelectorAll<HTMLAnchorElement>('a[href="./film.html"]').forEach(a=>{a.href=filmUrl;});
+startInk();hydrateArt();marquee(reduced);playground(reduced,lock,position=>{if(lenis)lenis.scrollTo(position,{immediate:true});else window.scrollTo({top:position,behavior:'instant'});});menu(reduced,lock);lock(true);
 void preloader(reduced,()=>{
-  hero(reduced);statement(reduced);mascot(reduced);
+  hero(reduced);flood();statement(reduced);mascot(reduced);
   contact(reduced,()=>{if(lenis)lenis.scrollTo(0,{duration:1.1,easing:t=>1-Math.pow(1-t,4)});else window.scrollTo({top:0,behavior:'instant'});});
-  lock(false);ScrollTrigger.refresh();
+  lock(false);ScrollTrigger.sort();ScrollTrigger.refresh();
   startLife();
 });
 motion.addEventListener('change',()=>location.reload());

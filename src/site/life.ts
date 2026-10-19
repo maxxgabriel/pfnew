@@ -1,4 +1,5 @@
 import './interact.css';
+import { startInk } from './ink';
 import { initInteract } from './interact';
 import { autoReveal } from './reveal';
 import { startFx } from './fx';
@@ -9,7 +10,7 @@ import { startFx } from './fx';
  * sections are created: `import { startLife } from './life'; startLife();`
  */
 export function startLife() {
-  const go = () => { initInteract(); autoReveal(); startFx(); };
+  const go = () => { startInk(); initInteract(); autoReveal(); startFx(); };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', go, { once: true });
   else requestAnimationFrame(go);
 }

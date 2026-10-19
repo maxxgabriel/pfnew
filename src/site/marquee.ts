@@ -12,10 +12,10 @@ export function marquee(reduced:boolean){
       row.append(token);setArt(token.querySelector<HTMLElement>('.style-art')!,`style_${styles[i]}`);
     });
   });
-  if(reduced)return;
+  void reduced;
   let visible=false,speed=0;
   const offsets=[0,0];
-  ScrollTrigger.create({trigger:'.styles',start:'top bottom',end:'bottom top',onToggle:s=>{visible=s.isActive;},onUpdate:s=>{speed=Math.min(240,Math.abs(s.getVelocity())*.08);}});
+  ScrollTrigger.create({trigger:'.styles',start:'top bottom',end:'bottom top',onToggle:s=>{visible=s.isActive;},onUpdate:s=>{speed=gsap.utils.clamp(-240,240,s.getVelocity()*.08);}});
   gsap.ticker.add((_time,delta)=>{
     if(!visible||document.hidden)return;
     rows.forEach((row,i)=>{const width=row.scrollWidth/3;offsets[i]=(offsets[i]+(32+speed)*Math.min(delta,50)/1000)%width;gsap.set(row,{x:i?offsets[i]-width:-offsets[i]});});speed*=.95;

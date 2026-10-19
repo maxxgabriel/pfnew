@@ -122,7 +122,7 @@ export function underline(el: HTMLElement) {
 
 /** pulls toward the cursor while it's near, springs back on leave */
 export function magnet(el: HTMLElement, strength = 0.35) {
-  if (!once(el, 'magnet') || !fine || reduced) return;
+  if (!once(el, 'magnet') || !fine) return;
   const qx = gsap.quickTo(el, 'x', { duration: 0.5, ease: 'power3.out' });
   const qy = gsap.quickTo(el, 'y', { duration: 0.5, ease: 'power3.out' });
   el.addEventListener('pointermove', (e) => {
@@ -168,6 +168,8 @@ export function wobble(el: HTMLElement) {
 export function tilt(el: HTMLElement, max = 9) {
   if (!once(el, 'tilt') || !fine || reduced) return;
   el.classList.add('ix-tilt');
+  // never override an element that is already absolute or fixed (the carousel cards are)
+  if (getComputedStyle(el).position === 'static') el.style.position = 'relative';
   const shine = document.createElement('span');
   shine.className = 'ix-shine';
   shine.setAttribute('aria-hidden', 'true');
@@ -213,40 +215,28 @@ export function preview(el: HTMLElement) {
 /* ------------------------------------------------------------ the cursor: the red Spark */
 
 function sparkCursor() {
-  if (!fine || document.querySelector('.ix-cursor')) return;
-  document.documentElement.classList.add('ix-has-cursor');
-  const dot = document.createElement('div');
-  const ring = document.createElement('div');
-  const label = document.createElement('span');
-  dot.className = 'ix-cursor';
-  ring.className = 'ix-ring';
-  label.className = 'ix-ring-label';
-  ring.appendChild(label);
-  document.body.append(ring, dot);
-  const dx = gsap.quickTo(dot, 'x', { duration: 0.08, ease: 'power3.out' });
-  const dy = gsap.quickTo(dot, 'y', { duration: 0.08, ease: 'power3.out' });
-  const rx = gsap.quickTo(ring, 'x', { duration: 0.45, ease: 'power3.out' });
-  const ry = gsap.quickTo(ring, 'y', { duration: 0.45, ease: 'power3.out' });
-  let lx = 0, ly = 0;
-  addEventListener('pointermove', (e) => {
-    if (e.pointerType !== 'mouse') return;
-    dx(e.clientX); dy(e.clientY); rx(e.clientX); ry(e.clientY);
-    // the Spark stretches along its own speed, one shape, no trail of specks
-    const vx = e.clientX - lx, vy = e.clientY - ly;
-    lx = e.clientX; ly = e.clientY;
-    const v = Math.min(1, Math.hypot(vx, vy) / 40);
-    gsap.to(dot, { rotate: (Math.atan2(vy, vx) * 180) / Math.PI, scaleX: 1 + v * 1.4, scaleY: 1 - v * 0.35, duration: 0.15, overwrite: 'auto' });
-    const t = (e.target as Element | null)?.closest?.('[data-cursor], a, button, [role="button"], iframe');
-    const want = t?.getAttribute('data-cursor') ?? (t?.tagName === 'IFRAME' ? 'hide' : t ? 'link' : '');
-    if (ring.dataset.mode !== want) {
-      ring.dataset.mode = want;
-      dot.dataset.mode = want;
-      label.textContent = want && want !== 'link' && want !== 'hide' ? want : '';
-    }
-  });
-  addEventListener('pointerdown', () => gsap.fromTo(ring, { scale: 0.7 }, { scale: 1, duration: 0.6, ease: 'elastic.out(1.2, 0.35)' }));
-  document.addEventListener('pointerleave', () => gsap.to([dot, ring], { opacity: 0, duration: 0.2 }));
-  document.addEventListener('pointerenter', () => gsap.to([dot, ring], { opacity: 1, duration: 0.2 }));
+ if(!fine)return;
+ const dot=document.createElement('div'),bubble=document.createElement('div'),canvas=document.createElement('canvas');
+ dot.className='ix-cursor';bubble.className='cursor-label';canvas.className='cursor-tail';
+ dot.style.opacity='0';bubble.style.opacity='0';document.body.append(canvas,bubble,dot);
+ const ctx=canvas.getContext('2d')!;const points:{x:number;y:number;t:number}[]=[];
+ const resize=()=>{canvas.width=innerWidth;canvas.height=innerHeight;};resize();addEventListener('resize',resize);
+ addEventListener('pointermove',e=>{
+ if(e.pointerType!=='mouse')return;
+ dot.style.opacity='1';dot.style.transform=`translate(${e.clientX}px,${e.clientY}px)`;
+ points.push({x:e.clientX,y:e.clientY,t:performance.now()});if(points.length>16)points.shift();
+ const target=(e.target as Element).closest('[data-cursor],a,button');const mode=target?.getAttribute('data-cursor')??(target?'link':'');
+ bubble.dataset.mode=mode;bubble.textContent=mode==='link'?'':mode;bubble.style.opacity=mode&&mode!=='link'?'1':'0';bubble.style.transform=`translate(${e.clientX+22}px,${e.clientY+16}px)`;
+ });
+ gsap.ticker.add(()=>{
+ const now=performance.now();while(points.length&&now-points[0].t>220)points.shift();ctx.clearRect(0,0,canvas.width,canvas.height);
+ if(points.length<2)return;
+ // One filled tapered stroke, from the oldest point to the Spark.
+ ctx.beginPath();points.forEach((p,i)=>{const next=points[Math.min(i+1,points.length-1)],prev=points[Math.max(0,i-1)];const angle=Math.atan2(next.y-prev.y,next.x-prev.x)+Math.PI/2;const width=i/points.length*4;const x=p.x+Math.cos(angle)*width,y=p.y+Math.sin(angle)*width;if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);});
+ for(let i=points.length-1;i>=0;i--){const p=points[i],next=points[Math.min(i+1,points.length-1)],prev=points[Math.max(0,i-1)],angle=Math.atan2(next.y-prev.y,next.x-prev.x)+Math.PI/2,width=i/points.length*4;ctx.lineTo(p.x-Math.cos(angle)*width,p.y-Math.sin(angle)*width);}
+ ctx.closePath();ctx.fillStyle='#1b1714';ctx.globalAlpha=Math.max(0,1-(now-points[points.length-1].t)/220);ctx.fill();
+ });
+ document.addEventListener('pointerleave',()=>{dot.style.opacity='0';bubble.style.opacity='0';});
 }
 
 /* ------------------------------------------------------------ wiring */
@@ -267,7 +257,7 @@ const AUTO: [string, (el: HTMLElement) => void][] = [
   ['header a, header button, nav a, footer a, .menu a', (el) => { if (!el.querySelector('img, svg') && (el.textContent ?? '').trim().length < 28) roll(el); }],
   ['button, .pill, [class*="pill"], [class*="btn"]', (el) => { squish(el); magnet(el, 0.25); }],
   ['img[src*="sticker"], img[src*="style_"], [class*="sticker"]', wobble],
-  ['[data-piece], [class*="card"]', (el) => tilt(el, 6)],
+  ['[data-piece], [class*="card"]:not(.piece-card)', (el) => tilt(el, 6)],
   ['small, .label, [class*="label"], [class*="eyebrow"]', (el) => { if (el.closest('a, button')) scramble(el); }],
 ];
 
