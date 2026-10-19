@@ -57,3 +57,7 @@
 @media (prefers-reduced-motion: reduce) {
   .ix-ul::after, .ix-ring, .ix-cursor { transition: none; }
 }
+
+/* REVEAL (src/site/reveal.ts) */
+.rv-mask { display: inline-block; overflow: hidden; vertical-align: bottom; padding-bottom: 0.06em; margin-bottom: -0.06em; }
+.rv-in, .rv-ch { display: inline-block; will-change: transform; }

@@ -83,3 +83,14 @@ captured from the reference: same order, stacked, the two-word hero stacked.
 - `style_<style>.webp` ×7: one round sticker per art style (the boy's head in
   that style) for the marquee.
 - `pill_hi.webp`: "SAY HI, MAX!" lettering for the pill.
+
+## Interaction kit (Claude, round 36)
+`src/site/interact.ts` (+ `interact.css`): hover and press life on every control
+(text roll, glyph scramble, letter hops, drawn underlines, magnetic + squishy
+pills, wobbling stickers, tilting cards with a shine, the red Spark cursor with
+a ring that grows into a labelled bubble via `data-cursor="Open"`).
+`src/site/reveal.ts`: scroll entrances (`data-reveal="lines|chars|pop|wipe|fade"`,
+`data-parallax`, `data-skew`) and defaults for anything un-animated.
+`src/site/life.ts` starts both: call `startLife()` once from `src/site/main.ts`
+after the sections exist. Mark elements with the data attributes to choose the
+effect; autoWire/autoReveal cover the rest.
