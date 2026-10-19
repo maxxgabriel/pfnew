@@ -13,10 +13,10 @@ gsap.registerPlugin(ScrollTrigger);
  *   data-reveal="fade"    a quiet rise and fade
  *   data-parallax="0.2"   drifts against the scroll by that fraction
  *   data-skew             leans with the scroll speed
- * Every entrance plays once; reduced motion shows everything at rest.
+ * Every entrance plays once; reduced motion keeps them but drops parallax and skew (motion.ts).
  */
 
-const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+import { calm } from './motion';
 const seen = new WeakSet<Element>();
 
 function words(el: HTMLElement) {
@@ -66,7 +66,7 @@ const KINDS: Record<string, (el: HTMLElement) => void> = {
 };
 
 function reveal(el: HTMLElement, kind: string) {
-  if (seen.has(el) || reduced) return;
+  if (seen.has(el)) return;
   seen.add(el);
   (KINDS[kind] ?? KINDS.fade)(el);
 }
@@ -88,7 +88,7 @@ export function autoReveal(root: ParentNode = document) {
     const kind = k === 'lines' && (el.children.length || el.dataset.art) ? 'fade' : k;
     if (!el.matches(BUSY) && !el.closest('[data-no-reveal]')) reveal(el, kind);
   });
-  if (reduced) return;
+  if (calm) return;
   root.querySelectorAll<HTMLElement>('[data-parallax]').forEach((el) => {
     if (seen.has(el)) return;
     seen.add(el);

@@ -17,9 +17,10 @@ import { mascot } from './mascot';
 import { menu } from './menu';
 import { hydrateArt } from './design';
 import { startLife } from './life';
+import { calm } from './motion';
 gsap.registerPlugin(ScrollTrigger,Flip);
-const motion=matchMedia('(prefers-reduced-motion: reduce)'),reduced=motion.matches;
-const lenis=reduced?null:new Lenis({duration:1.05,smoothWheel:true,anchors:true});
+const motion=matchMedia('(prefers-reduced-motion: reduce)'),reduced=false;
+const lenis=calm?null:new Lenis({duration:1.05,smoothWheel:true,anchors:true});
 lenis?.on('scroll',ScrollTrigger.update);
 if(lenis){gsap.ticker.add(time=>lenis.raf(time*1000));gsap.ticker.lagSmoothing(0);}
 function lock(locked:boolean){if(locked){lenis?.stop();document.documentElement.style.overflow='hidden';}else{document.documentElement.style.overflow='';lenis?.start();}}

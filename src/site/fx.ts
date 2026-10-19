@@ -10,10 +10,10 @@ gsap.registerPlugin(ScrollTrigger);
  *   slam      each section lands with a camera punch as it arrives
  *   shock     every press sends one ring out and punches what was pressed
  *   grain     a living paper grain over everything
- * Reduced motion: none of it.
+ * Reduced motion keeps boil, shock and grain; lean, rubber and slam are calmed away (motion.ts).
  */
 
-const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+import { calm } from './motion';
 const fine = matchMedia('(hover: hover) and (pointer: fine)').matches;
 
 /** one SVG filter, its noise reseeded 8 times a second: the hand-drawn boil */
@@ -101,13 +101,11 @@ function grain() {
 }
 
 export function startFx() {
-  if (reduced) return;
   boil();
   const big = [...document.querySelectorAll<HTMLElement>(BOIL)];
   big.forEach((el) => el.classList.add('fx-boil'));
-  lean([...document.querySelectorAll<HTMLElement>('[data-boil], h1')]);
-  rubber();
-  slam();
+  if (!calm) lean([...document.querySelectorAll<HTMLElement>('[data-boil], h1')]);
+  if (!calm) { rubber(); slam(); }
   shock();
   grain();
 }

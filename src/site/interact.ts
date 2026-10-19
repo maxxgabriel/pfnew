@@ -1,4 +1,5 @@
 import { gsap } from 'gsap';
+import { calm as reduced } from './motion';
 
 /*
  * INTERACT — the hover and touch life of every control (round 36).
@@ -23,7 +24,6 @@ import { gsap } from 'gsap';
  */
 
 const fine = matchMedia('(hover: hover) and (pointer: fine)').matches;
-const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const done = new WeakSet<Element>();
 const once = (el: Element, key: string) => {
   const k = `__i_${key}`;
@@ -213,7 +213,7 @@ export function preview(el: HTMLElement) {
 /* ------------------------------------------------------------ the cursor: the red Spark */
 
 function sparkCursor() {
-  if (!fine || reduced || document.querySelector('.ix-cursor')) return;
+  if (!fine || document.querySelector('.ix-cursor')) return;
   document.documentElement.classList.add('ix-has-cursor');
   const dot = document.createElement('div');
   const ring = document.createElement('div');
