@@ -75,6 +75,14 @@ themselves, not to the docs: *"you report to me and not the docs"*.
 
 ## 3. Decisions (most recent first)
 
+**Refine The Sketch (after v13):** picked: cut the whale and the crane
+(Fold and Deep), finish the act styles (every pose he draws in an act gets
+that act's twin), fix the rough transitions. Where the duel goes without the
+whale: *"outside in space maybe where it shoiuld be?"* → the Wave flings him
+up to the moon; the duel is on the moon with the Spark low as the light; he
+falls back to Earth through the sunset into Chase. Done by ChatGPT (Codex),
+reviewed by Claude.
+
 **v13 shelved:** *"just leave it lets not do it anymore. i feel lik etyhe first
 one was gfood enough. lets refine in that the chibili one"*. Back to The
 Sketch; refine it. The `?world` prototype was reverted.
