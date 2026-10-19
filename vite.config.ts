@@ -1,8 +1,7 @@
 import { defineConfig } from 'vite';
 
-// One JS bundle, no code-splitting. The drawings and paintings are separate
-// files loaded in the order the film needs them (src/sketch/load.ts); set
-// SINGLE=1 to inline everything into one self-contained HTML file instead.
+// Separate site and film entries, with shared asset metadata extracted by Vite.
+// Drawings stay external and load only when each experience requests them.
 // SITE_URL (e.g. https://maxgabriel.com) makes the link-preview image absolute,
 // which most link previews require.
 const site = (process.env.SITE_URL ?? '').replace(/\/$/, '');
@@ -15,8 +14,8 @@ export default defineConfig({
   build: {
     target: 'es2022',
     assetsInlineLimit: process.env.SINGLE ? 100_000_000 : 0,
-    cssCodeSplit: false,
+    cssCodeSplit: true,
     modulePreload: false,
-    rollupOptions: { output: { inlineDynamicImports: true } },
+    rollupOptions: { input: { site: 'index.html', film: 'film.html' } },
   },
 });
