@@ -68,7 +68,7 @@ export function autoAt(B: number) {
   return AUTO.find((s) => B >= s.from && B < s.to - 0.01) ?? null;
 }
 
-/** every act between the book-ends is drawn in its own art style (only him: the scenery stays ink) */
+/** every act between the book-ends is drawn in its own art style (world layers share the chapter's style) */
 const ACT_STYLE: Record<string, ActStyle> = { Run: 'pixel', Wave: 'water', Light: 'comic', Chase: 'hose' };
 
 export function chapterAt(B: number) {

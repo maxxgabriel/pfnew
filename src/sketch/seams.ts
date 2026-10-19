@@ -2,9 +2,9 @@ import type { Frame } from '../core/frame';
 import { type Pt, TAU, ease, lerp, seg } from '../core/math';
 import { drawPose, heroSeen, setActStyle, setPosesHidden, type ActStyle } from './art';
 import { PAPER, faceOf } from './common';
-import { bgImage, drawBg } from './bg';
+import { drawBg } from './bg';
 import { drawRun } from './run';
-import { seaCamera } from './sea';
+import { seaCamera, seaMoon } from './sea';
 
 /* Six-chapter seams: continuous page-edge fall, sea-to-moon launch,
  * re-entry burst, and the painted stroke home. Pure playhead functions. */
@@ -139,12 +139,12 @@ function moonLaunch(f: Frame, p: number, A: HTMLCanvasElement, Bc: HTMLCanvasEle
   const camera = seaCamera(f.w, f.h, Math.min(5 + lerp(-0.85, 1.2, p), 4.999));
   const cx = lerp(camera.x * d, W * 0.5, approach), cy = lerp(camera.y * d, H * 0.28, approach);
   const r = lerp(camera.r * d, full(f) * 1.1, approach);
-  const moon = bgImage('bg_inksea');
+  const { im: moon, mx, my, radius } = seaMoon();
   g.save(); g.beginPath(); g.arc(cx, cy, r, 0, TAU); g.clip();
   g.fillStyle = '#d4d0c5'; g.fillRect(0, 0, W, H);
   // crop the existing sea painting's full moon: no new stylistic disc.
-  if (moon) g.drawImage(moon, moon.naturalWidth * 0.36, moon.naturalHeight * 0.255,
-    moon.naturalWidth * 0.285, moon.naturalHeight * 0.19, cx-r, cy-r, r*2, r*2);
+  if (moon) g.drawImage(moon, mx - radius, my - radius,
+    radius * 2, radius * 2, cx-r, cy-r, r*2, r*2);
   g.restore();
   g.save(); g.globalAlpha = ease.inOut2(seg(p, 0.4, 0.64)); g.drawImage(Bc, 0, 0); g.restore();
   g.save(); g.scale(d, d);

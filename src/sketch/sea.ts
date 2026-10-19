@@ -1,7 +1,8 @@
 import type { Frame } from '../core/frame';
 import { type Pt, clamp, ease, lerp, seg } from '../core/math';
 import { artSize, drawArtFoot, drawPose } from './art';
-import { bgImage, drawBgXY, drawLayer } from './bg';
+import { bgImage } from './bg';
+import { drawWorld } from './worlds';
 import { drawSpark, drawSparkStreak, faceOf } from './common';
 import { shockRing } from './fx';
 
@@ -22,18 +23,30 @@ export const SE = {
 /** where the sea's surface is on screen */
 const seaY = (h: number) => h * 0.72;
 
+/** Shared source coordinates for the painted moon and the launch seam.
+ * New landscape plates: upper-centre; legacy portrait plate: authored round 33 crop. */
+export function seaMoon() {
+  const fresh = bgImage('wc_sky');
+  const im = fresh ?? bgImage('bg_inksea');
+  const iw = im?.naturalWidth || 1024, ih = im?.naturalHeight || 1536;
+  return { im, iw, ih, mx: iw * (fresh ? 0.502 : 0.5025),
+    my: ih * (fresh ? 0.206 : 0.35), radius: iw * (fresh ? 0.0775 : 0.1425) };
+}
+
 /** Keep the full moon in frame on wide screens too; the launch seam uses
  * this exact projection, so its growing moon begins on the painted one. */
 export function seaCamera(w: number, h: number, L: number) {
-  const im = bgImage('bg_inksea');
-  const iw = im?.naturalWidth || 1024, ih = im?.naturalHeight || 1536;
+  const { iw, ih, mx, my, radius } = seaMoon();
   const scale = Math.max(w / iw, h / ih) * 1.35;
   const dw = iw * scale, dh = ih * scale;
-  const px = lerp(0.42, 0.58, seg(L, SE.dive[0], SE.close[1]));
-  const targetPan = clamp((ih * 0.35 * scale - h * 0.28) / Math.max(1, dh - h));
+  const drift = lerp(0.42, 0.58, seg(L, SE.dive[0], SE.close[1]));
+  const margin = Math.min(w * 0.48, radius * scale * 1.05);
+  const desiredX = clamp(mx * scale - (dw - w) * drift, margin, w - margin);
+  const px = clamp((mx * scale - desiredX) / Math.max(1, dw - w));
+  const targetPan = clamp((my * scale - h * 0.28) / Math.max(1, dh - h));
   const py = targetPan * ease.out2(seg(L, 0, SE.land + 0.4));
-  return { px, py, x: iw * 0.5025 * scale - (dw - w) * px,
-    y: ih * 0.35 * scale - (dh - h) * py, r: iw * 0.1425 * scale };
+  return { px, py, x: mx * scale - (dw - w) * px,
+    y: my * scale - (dh - h) * py, r: radius * scale };
 }
 
 export function drawSea(f: Frame, L: number) {
@@ -46,7 +59,7 @@ export function drawSea(f: Frame, L: number) {
   ctx.fillStyle = '#0b0a0c';
   ctx.fillRect(0, 0, w, h);
   const camera = seaCamera(w, h, L);
-  drawBgXY(ctx, 'bg_inksea', w, h, camera.px, camera.py, 1, 1.35);
+  drawWorld(f, 'Wave', L, { panX: camera.px, panY: camera.py, impacts: [SE.land], impactX: w * 0.42 });
 
   // ---- the wave: it stands up behind him and throws its lip over him (flipped so it breaks to the right, his way)
   const rk = seg(L, SE.rise[0], SE.rise[1]);
@@ -107,10 +120,6 @@ export function drawSea(f: Frame, L: number) {
     pose = 'leap_2'; rot = -launch * 0.3;
   }
   drawPose(ctx, pose, x, y, face, { rot });
-  // the near swell rolling past in front of him, faster than the sea behind (gone in the tube)
-  const near = seg(L, SE.dive[0] + 0.3, SE.land) * (1 - seg(L, SE.tube[0] - 0.2, SE.tube[0] + 0.3));
-  if (near > 0) drawLayer(ctx, 'fg_inksea', w, h, lerp(w * 0.35, -w * 0.35, seg(L, SE.dive[0], SE.tube[0])), h * 0.1 + Math.sin(t * 1.4) * face * 0.25, near, 1.3);
-
   // ---- the Spark: skimming the water ahead of him, then out through the end of the tube
   let sp: Pt = [x + face * 3, y - face * 1.6 + Math.sin(t * 5) * face * 0.2];
   if (L < SE.land) sp = [lerp(w * 0.5, x + face * 3, seg(L, 0, SE.land)), lerp(h * 0.3, sy - face * 1.4, ease.in2(seg(L, 0, SE.land)))];

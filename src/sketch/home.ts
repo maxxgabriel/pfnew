@@ -1,5 +1,5 @@
 import { deskOn } from '../desk/layout';
-import { DOODLE, drawDoodle, wideSheet } from './margins';
+import { drawWorld } from './worlds';
 import { drawSeal } from '../acts/ink';
 import { brush } from '../core/brush';
 import type { Frame } from '../core/frame';
@@ -267,6 +267,10 @@ export function drawHome(f0: Frame, L: number) {
   }
 
   drawPaper(ctx, w, h);
+  drawWorld(f, 'Home', L, { ground: gy, reveal: seg(L, HM.ride[0], HM.land + 0.7), camera: Math.sin(th) * w * 0.3,
+    eraser: L >= HM.slam ? lerp(w * 0.86, w * 0.74, ease.inOut2(seg(L, HM.scrub[0], HM.scrub[1]))) : undefined,
+    heal: seg(L, HM.hit, HM.hit + 1.8), impacts: [HM.slam], scorch: HM.hit,
+    impactX: w * 0.74, impactY: gy });
   // the special move: a hard cut to a dark backdrop at the crouch; it lifts back to paper after the hit
   const dark = L < HM.crouch ? 0 : L < HM.hit ? 1 : 1 - ease.inOut2(seg(L, HM.hit + 0.05, HM.landing[1]));
   if (dark > 0) drawBackdrop(ctx, w, h, gx, gy - face * 3, t, dark);
@@ -285,13 +289,6 @@ export function drawHome(f0: Frame, L: number) {
   if (name > 0) {
     drawTitle({ ...f, intro: 0.2 + name * 2 }, w / 2, h * 0.07, titleFit(w * 0.42, gy - face * 3.6 - h * 0.07 - face * 0.3), 1);
   }
-  // a wide sheet with no card beside it: a crane and the sea he crossed brush themselves into the margin
-  if (side === 0 && wideSheet(f) && L > HM.stand) {
-    const k = seg(L, HM.stand, HM.offer + 0.4), gone = 1 - seg(L, HM.loop[0] - 0.1, HM.loop[0] + 0.2);
-    drawDoodle(ctx, DOODLE.crane, w * 0.83, h * 0.36 + Math.sin(t * 1.3) * h * 0.008, h * 0.26, k, 0.8 * gone);
-    drawDoodle(ctx, DOODLE.wave, w * 0.87, h * 1.01, h * 0.34, seg(L, HM.stand + 0.3, HM.offer + 0.7), 0.8 * gone);
-  }
-
   // ---- the Eraser: where it is, and what it has rubbed out (the ground behind it)
   const eIn = seg(L, HM.eraserIn[0], HM.eraserIn[1]);
   const hit = seg(L, HM.hit, HM.hit + 0.08);
@@ -335,7 +332,7 @@ export function drawHome(f0: Frame, L: number) {
       drawSprite(ctx, glow('#5a2a10', 128), sealAt[0], sealAt[1] + face * 0.3, face * 3.2);
       ctx.restore();
     }
-    if (L < HM.hit + 0.05) flash(ctx, w, h, 0.8 * (1 - seg(L, HM.hit, HM.hit + 0.05)), '#fff3d6');
+    if (!f.reduced && L < HM.hit + 0.05) flash(ctx, w, h, 0.8 * (1 - seg(L, HM.hit, HM.hit + 0.05)), '#fff3d6');
   }
   if (f.crossedFwd(f.B - L + HM.hit)) f.shake(face * 0.6);
   if (f.crossedFwd(f.B - L + HM.land)) f.shake(face * 0.3);
@@ -563,8 +560,8 @@ export function drawHome(f0: Frame, L: number) {
     drawVfx(ctx, 'vfx_fire_1', sealAt[0], sealAt[1] - face * 0.2 * aspect, face * lerp(2, 7, ease.out3(exk)), 0, 1 - ease.in2(exk));
     drawVfx(ctx, 'vfx_fire_2', sealAt[0], sealAt[1] + face * 0.3, face * lerp(1.5, 8, ease.out2(exk)), 0, 1 - exk);
   }
-  if (L >= HM.kick && L < HM.kick + 0.03) impactFrame(ctx, w, h, 1, 'invert');
-  else if (L >= HM.kick + 0.03 && L < HM.kick + 0.07) impactFrame(ctx, w, h, 1, 'spikes', foot[0], foot[1], 7);
+  if (!f.reduced && L >= HM.kick && L < HM.kick + 0.03) impactFrame(ctx, w, h, 1, 'invert');
+  else if (!f.reduced && L >= HM.kick + 0.03 && L < HM.kick + 0.07) impactFrame(ctx, w, h, 1, 'spikes', foot[0], foot[1], 7);
   letterbox(ctx, w, h, ease.inOut2(seg(L, HM.crouch, HM.crouch + 0.2)) * (1 - seg(L, HM.hit, HM.landing[1])), '#000');
 
   // the brush he holds out glows a little while the page waits for you
@@ -624,6 +621,6 @@ export function drawHome(f0: Frame, L: number) {
     ctx.globalAlpha *= 0.9;
     drawSpark(ctx, w / 2 + ew * 0.11, h * 0.45 - ew * 0.02, ew * 0.012, 1, 0.6);
     ctx.restore();
-    if (ek > 0.9) flash(ctx, w, h, (ek - 0.9) * 10 * 0.6, '#ffffff');
+    if (!f.reduced && ek > 0.9) flash(ctx, w, h, (ek - 0.9) * 10 * 0.6, '#ffffff');
   }
 }

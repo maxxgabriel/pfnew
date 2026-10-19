@@ -2,7 +2,7 @@ import type { Frame } from '../core/frame';
 import { type Pt, TAU, ease, lerp, seg } from '../core/math';
 import { drawSprite, glow } from '../core/sprites';
 import { bladeOf, drawFig, drawPose, figHeight, figPoint, ib, meta } from './art';
-import { bgImage, drawBg, drawLayer } from './bg';
+import { drawWorld } from './worlds';
 import { BLUE, RED_BLADE, bladeLight, drawBlade } from './saber';
 import { drawSpark, faceOf } from './common';
 import { impactFrame, letterbox } from './fx';
@@ -122,20 +122,7 @@ export function drawLight(f: Frame, L: number, withHero = true, inner = false) {
   // ---- painted ink space and lunar dust (broad forms, no star field)
   ctx.fillStyle = '#070b15';
   ctx.fillRect(0, 0, w, h);
-  drawBg(ctx, 'bg_space', w, h, 0.55, 1, 1.04);
-  // A curved opaque underpainting also keeps the floor present while art loads.
-  ctx.fillStyle = '#777a80';
-  ctx.beginPath(); ctx.moveTo(0, h * 0.78);
-  ctx.quadraticCurveTo(w * 0.5, h * 0.60, w, h * 0.78);
-  ctx.lineTo(w, h); ctx.lineTo(0, h); ctx.closePath(); ctx.fill();
-  const ground = bgImage('fg_moon');
-  // Full frame mapping keeps the horizon in the same place on phone and desktop.
-  if (ground) ctx.drawImage(ground, 0, 0, w, h);
-  const pool = ctx.createRadialGradient(source[0], floorY, face, source[0], floorY, Math.max(w, h) * 0.7);
-  pool.addColorStop(0, 'rgba(246,231,207,0.22)');
-  pool.addColorStop(1, 'rgba(5,8,17,0)');
-  ctx.fillStyle = pool; ctx.fillRect(0, h * 0.68, w, h * 0.32);
-
+  drawWorld(f, 'Light', L, { impacts: LT.clashes, impactX: w * 0.36 + face * 1.2, impactY: floorY - face * 1.6 });
   // ---- who is where, and in which pose
   let hx = w * 0.36, hy = floorY, pose = 'home_1', flip = false, rot = 0;
   let shPose = 'home_1', shFlip = false, shDx = 0;
@@ -218,11 +205,6 @@ export function drawLight(f: Frame, L: number, withHero = true, inner = false) {
     }
   }
 
-  // The Spark casts a single soft pool over the dust.
-  ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = 0.45;
-  drawSprite(ctx, glow('#ffdfac', 128), source[0], source[1], face * 5);
-  ctx.restore();
-
   // ---- the hero
   if (withHero && L > LT.drop[0]) {
     drawPose(ctx, pose, hx, hy, face, { flip, rot });
@@ -255,8 +237,8 @@ export function drawLight(f: Frame, L: number, withHero = true, inner = false) {
   // ---- every clash is a frame of negative
   for (const c of LT.clashes) {
     if (f.crossedFwd(f.B - L + c)) f.shake(face * 0.25);
-    if (L >= c && L < c + 0.04) impactFrame(ctx, w, h, 1, 'invert');
-    else if (L >= c + 0.04 && L < c + 0.07) impactFrame(ctx, w, h, 0.9, 'spikes', hx + face * 1.2, hy - face * 1.6, Math.round(c * 10));
+    if (!f.reduced && L >= c && L < c + 0.04) impactFrame(ctx, w, h, 1, 'invert');
+    else if (!f.reduced && L >= c + 0.04 && L < c + 0.07) impactFrame(ctx, w, h, 0.9, 'spikes', hx + face * 1.2, hy - face * 1.6, Math.round(c * 10));
   }
 
   // The blade scratches a tapered, crooked brush tear into the black sky.
@@ -284,9 +266,7 @@ function drawEscape(f: Frame, L: number) {
   // behind it: the sunset
   // (the same sky, framed exactly as chapter V opens on it, so the seam is one sky: src/sketch/seams.ts)
   ctx.fillStyle = '#352330'; ctx.fillRect(0, 0, w, h);
-  drawBg(ctx, 'bg_sunset', w, h, 0.25, 1, 1.18);
-  const reentry = seg(L, LT.cut[0], LT.end);
-  drawLayer(ctx, 'fg_sunset', w, h, 0, lerp(h * 0.5, -h * 0.7, reentry), Math.sin(reentry * Math.PI), 1.3);
+  drawWorld(f, 'Chase', Math.max(0, L - LT.end), { panY: 0.25 });
   const k = ease.out3(seg(L, LT.cut[0], LT.cut[1]));
   // Keep the frozen moon outside one widening, jagged opening. There are
   // no translated rectangular halves or uniform strip of light.

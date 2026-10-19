@@ -4,7 +4,7 @@ import { type Pt, clamp, ease, hash, lerp, seg } from '../core/math';
 import { paperTile } from '../core/sprites';
 import { artSize, drawArtFoot, drawFig, figHeight, hasPose, meta, poseHeight, poseScale, drawPose, getActStyle, setActStyle } from './art';
 import { drawBg } from './bg';
-import { DOODLE, drawDoodle, wideSheet } from './margins';
+import { drawWorld } from './worlds';
 import { live } from '../desk/live';
 import { deskOn } from '../desk/layout';
 import { DESK_HOLDS } from '../core/holds';
@@ -191,7 +191,7 @@ export function drawRun(f: Frame, L: number, sheetOnly = false) {
 
   // the old film judders
   ctx.save();
-  if (hoseK) ctx.translate((hash(Math.floor(t * 12)) - 0.5) * 3, (hash(Math.floor(t * 12) + 5) - 0.5) * 3);
+  if (hoseK && !f.reduced) ctx.translate((hash(Math.floor(t * 12)) - 0.5) * 3, (hash(Math.floor(t * 12) + 5) - 0.5) * 3);
 
   // ---- the void beyond the page, then the page itself
   if (!sheetOnly) {
@@ -230,11 +230,13 @@ export function drawRun(f: Frame, L: number, sheetOnly = false) {
   if (pat) { ctx.fillStyle = pat; ctx.fillRect(left, top, edgeX - left + face, bot - top); }
   ctx.restore();
 
-  // ---- a wide sheet: a far ridge brushed into the empty top of the page, drifting slowly as he runs
-  if (wideSheet(f)) {
-    const sx = w * (0.8 - L * 0.025), sy = h * 0.42;
-    drawDoodle(ctx, DOODLE.ridge, fw[0] + (sx - fs[0]) / z, fw[1] + (sy - fs[1]) / z, (h * 0.4) / z, seg(L, 0.3, 1.4), 0.8 * (1 - Math.max(kB, kC)));
-  }
+  // Render inside the torn sheet, expressed in screen coordinates under its camera.
+  ctx.save(); ctx.clip();
+  ctx.translate(fw[0], fw[1]); ctx.scale(1 / z, 1 / z); ctx.translate(-fs[0], -fs[1]);
+  drawWorld(f, 'Run', L, { camera: X - gx, reveal: seg(L, 0, 1.5),
+    eraser: eraserOn ? toS([EX, gy])[0] : undefined, heal: seg(L, RN.skid[1], RN.end),
+    impacts: [RN.eraser], impactX: toS([EX, gy])[0], impactY: toS([EX, gy])[1] });
+  ctx.restore();
 
   // ---- what the Eraser has rubbed out: everything behind it (a grey smudge where the line was)
   const rubbed = eraserOn ? EX - face * 0.2 : left;
@@ -512,7 +514,7 @@ export function drawRun(f: Frame, L: number, sheetOnly = false) {
   ctx.restore();
 
   // ---- the gag plays as an old cartoon (the iris that closes on him is the seam's: src/sketch/seams.ts)
-  if (!sheetOnly) oldFilm(ctx, w, h, hoseK, t);
+  if (!sheetOnly) oldFilm(ctx, w, h, hoseK, f.reduced ? 0 : t);
   ctx.restore();
 }
 

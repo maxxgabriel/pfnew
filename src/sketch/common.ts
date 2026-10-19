@@ -3,6 +3,7 @@ import type { Frame } from '../core/frame';
 import { layoutWord, wordWidth } from '../core/glyphs';
 import { type Pt, TAU, clamp, ease, lerp } from '../core/math';
 import { paperTile } from '../core/sprites';
+import { worldGlow } from './worlds';
 
 /*
  * What every chapter of THE SKETCH shares: the paper, the brushed title,
@@ -98,13 +99,7 @@ export function drawTitle(f: Frame, cx: number, top: number, scale: number, alph
 export function drawSpark(ctx: CanvasRenderingContext2D, x: number, y: number, r: number, squash = 1, glow = 1) {
   ctx.save();
   if (glow > 0) {
-    const g = ctx.createRadialGradient(x, y, r * 0.5, x, y, r * 3.4);
-    g.addColorStop(0, `rgba(232,67,42,${0.38 * glow})`);
-    g.addColorStop(1, 'rgba(232,67,42,0)');
-    ctx.fillStyle = g;
-    ctx.beginPath();
-    ctx.arc(x, y, r * 3.4, 0, TAU);
-    ctx.fill();
+    worldGlow(ctx, x, y, r * 12, 0.16 * glow);
   }
   ctx.translate(x, y);
   ctx.scale(1 / squash, squash);

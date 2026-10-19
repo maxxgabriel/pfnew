@@ -18,6 +18,44 @@ the owner's taste and decisions; this file is the technical side.
 ---
 
 
+## Living worlds (round 34)
+
+`src/sketch/worlds.ts` now supplies the background for every chapter. Still/Home
+brush in quiet ink strips with pine wind; Run builds pixel sky/ridges/hills under
+a stepped reveal inside its existing torn-page camera. The Eraser wipes those
+worlds and they heal in film time. Wave has drifting clouds, two 20-band rolling
+swells, a landing surge and one lightning bolt at local 2.12. Light has a turning
+Earth/atmosphere, comic lunar floor, alternating clash washes and one expanding
+moon-dust shape. Chase has drifting cloud banks, a heat-shimmering sun, one broad
+ray, cloud parting and a sun flare at the broom/Spark catches. Home adds a slam
+refraction ring and a fading scorch ring at `HM.hit`. Existing timing constants,
+holds, hero tracks and drawings are unchanged. Round 29 margin doodles are
+replaced on all sizes (`margins.ts` is now a compatibility re-export).
+
+Tune `WORLD` for drift, roll, wind, ink/glow strength, pixel block size and
+reaction length; chapter calls pass camera/reveal/eraser/healing and their existing
+impact constants. `bg.ts` queues every spec asset by first use; `drawStrip` caches
+scaled tiles per name/height and wraps horizontally with optional 20-band offsets.
+Static centred plates and 128px light pools are cached; only paper slam windows
+use a reusable viewport scratch canvas for one refracting annulus. Missing/loading
+art falls back per layer to the old paintings or bare paper. Separate Earth/sun
+wait for their new sky to avoid doubling the old painting's disc. Assets added
+after a production build require rebuilding to enter Vite's glob.
+
+Seams render the same worlds; Light's escape also uses Chase's world. `seaMoon()`
+shares the sky source/crop with the launch seam. The delivered `wc_sky` was inspected directly: its moon centre is approximately
+`(0.502, 0.206)`, radius `0.0775 × image width`. These coordinates live in
+`seaMoon()`; horizontal pan is clamped to retain the full disc at both viewport
+shapes. The legacy crop stays unchanged.
+Reduced motion disables wind/heat wobble, lightning/clash/global/direct impact
+flashes and refraction; ambient drift runs at 18% speed.
+
+Validation: TypeScript and oxlint clean; a temporary mocked-canvas geometry smoke
+check sampled 7,560 world frames at 390×844, 1440×900 and Home's fractional contact
+width, with missing/legacy/new assets, reverse seeks and reduced motion. No browser
+was opened per task instructions: actual phone/desktop composition and the ≤4ms
+phone JS budget still need visual/device verification after art delivery.
+
 ## Current film: The Sketch v12b — six chapters
 
 `src/reel/reel.ts` conducts the route; `core/frame.ts` mirrors the HUD.

@@ -81,7 +81,7 @@ const frame: Frame = {
   crossed: (b) => (prevB < b) !== (B < b),
   crossedFwd: (b) => prevB < b && B >= b,
   shake: (a) => { if (!reduced) shakeAmt = Math.max(shakeAmt, a); },
-  flash: (a, c = '#ffffff') => { flashAmt = Math.max(flashAmt, reduced ? a * 0.3 : a); flashColor = c; },
+  flash: (a, c = '#ffffff') => { flashAmt = Math.max(flashAmt, reduced ? 0 : a); flashColor = c; },
 };
 
 /* ----------------------------------------------------------------- hud */

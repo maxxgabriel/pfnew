@@ -4,7 +4,7 @@ import type { Frame } from '../core/frame';
 import { type Pt, TAU, clamp, ease, lerp, seg, spline } from '../core/math';
 import { drawSprite, glow } from '../core/sprites';
 import { drawArt, drawArtFoot, drawPose } from './art';
-import { drawBg, drawLayer } from './bg';
+import { drawWorld } from './worlds';
 import { INK, PAPER, drawPaper, drawSpark, drawSparkStreak, faceOf } from './common';
 import { dryStreak, flash, shockRing, speedWedges } from './fx';
 
@@ -93,9 +93,8 @@ export function drawChase(f: Frame, L: number) {
   ctx.fillStyle = '#2a0c14';
   ctx.fillRect(0, 0, w, h);
   const dive = ease.inOut2(seg(L, CH.dive[0], CH.pull[1]));
-  drawBg(ctx, 'bg_sunset', w, h, lerp(0.25, 0.85, dive) - seg(L, CH.sprint[0], CH.toss[1]) * 0.2, 1, 1.18);
-  // the near clouds: the same painting's nearer layer, moving further than the sky behind it
-  drawLayer(ctx, 'fg_sunset', w, h, Math.sin(L * 0.9) * w * 0.12, lerp(h * 0.12, -h * 0.32, dive) + seg(L, CH.sprint[0], CH.toss[1]) * h * 0.18, 1 - seg(L, CH.paper[0], CH.paper[1]), 1.3);
+  drawWorld(f, 'Chase', L, { panY: lerp(0.25, 0.85, dive) - seg(L, CH.sprint[0], CH.toss[1]) * 0.2,
+    impacts: [CH.catch, CH.close] });
 
   // ---- where he is and how he sits
   let x = w * 0.5, y = h * 0.4, pose = 'fall_0', rot = 0, onBroom = false, slideFlip = false;
@@ -205,7 +204,7 @@ export function drawChase(f: Frame, L: number) {
   const pf = seg(L, CH.catch - 0.06, CH.catch + 0.3);
   if (pf > 0 && pf < 1) {
     shockRing(ctx, x, y - face * 1.2, face * 2.6, pf, '#fff1dc', face * 0.12);
-    if (pf < 0.25) flash(ctx, w, h, 0.5 * (1 - pf * 4), '#fff1dc');
+    if (!f.reduced && pf < 0.25) flash(ctx, w, h, 0.5 * (1 - pf * 4), '#fff1dc');
   }
   live.chaseHero = { x, y, size: face };
   // (out of the sheet, flying round the desk: src/desk/story.ts draws him there)
