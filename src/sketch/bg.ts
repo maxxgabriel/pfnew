@@ -8,6 +8,8 @@ const files = import.meta.glob('../assets/sketchbg/*.webp', { query: '?url', imp
 /** when each painting is first needed, on the same scale as the drawings' order (src/sketch/art.ts) */
 const PRIO: Record<string, number> = {
   ink_far: 0, ink_mid: 1,
+  cl_map: 27, cl_theatre: 28, ch_sky: 29, ch_cloud: 29, ch_door: 29,
+  px_sign: 14, wc_bottle: 23, hs_mailbox: 34,
   px_sky: 12, px_far: 13, px_mid: 14,
   bg_void: 18,
   wc_sky: 20, bg_inksea: 21, wc_cloud: 21, wc_sea_far: 22, wc_sea_near: 23, fg_inksea: 23,
