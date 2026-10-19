@@ -42,7 +42,7 @@ device, sign in to ChatGPT and enter the code.
 One image per call, from the repo root, into `art/raw/`:
 ```sh
 mkdir -p art/raw
-codex exec --skip-git-repo-check --full-auto \
+codex exec --skip-git-repo-check -s workspace-write \
   "Use your image generation tool to create ONE image and save it as art/raw/<name>.png. \
    <STYLE BLOCK> <THE IMAGE'S PROMPT>"
 ```
