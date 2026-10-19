@@ -48,6 +48,9 @@ export const setPoseClock = (t: number) => { clock = t; };
 const imgs = new Map<string, HTMLImageElement>();
 /** the desk's drawings (wide screens only: src/desk) are queued by the desk itself, never on a phone */
 const DESK = /^(scrap|stick|pencil|prop)\d_/;
+/** the world (src/world) loads only the drawings each district asks for: no load-everything fallback */
+let lazy = false;
+export const setLazyPoses = (on: boolean) => { lazy = on; };
 export function preloadPoses() {
   for (const k of Object.keys(SRC)) if (!imgs.has(k) && !DESK.test(k) && !/^(?:[a-z]+-)?(?:acro|swim|whale|stunned|swing)_/.test(k)) imgs.set(k, queue(SRC[k], prioOf(k)));
 }
@@ -59,7 +62,7 @@ export function hasPose(k: string) {
   return k in SRC && k in M;
 }
 function img(k: string) {
-  if (!imgs.has(k)) { preloadPoses(); queueArt(k, 100); }
+  if (!imgs.has(k)) { if (!lazy) preloadPoses(); queueArt(k, lazy ? 5 : 100); }
   const im = imgs.get(k);
   if (im && im.complete && im.naturalWidth) return im;
   if (k in SRC) hurry(SRC[k]);

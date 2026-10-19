@@ -1,7 +1,7 @@
 import '@fontsource/permanent-marker';
 import '@fontsource/caveat-brush';
 import './world.css';
-import { setPoseClock, preloadPoses } from '../sketch/art';
+import { setPoseClock, setLazyPoses } from '../sketch/art';
 import { ink } from './districts/ink';
 import { pixel } from './districts/pixel';
 import { water } from './districts/water';
@@ -29,7 +29,7 @@ function resize(){w=innerWidth;h=innerHeight;dpr=Math.min(devicePixelRatio||1,2)
 function go(p:number){P=target=Math.max(0,Math.min(end,p));previous=P;vP=0;idle=0;if(P===0)introAt=performance.now();window.scrollTo({top:P*step,behavior:'instant'});}
 const hud=createHud(districts,i=>go(starts[i]+(i?overlap:0)));
 window.addEventListener('resize',resize);window.addEventListener('scroll',()=>{target=Math.min(end,scrollY/step);},{passive:true});
-resize();districts.forEach(d=>d.preload());preloadPoses();
+resize();setLazyPoses(true);districts.forEach(d=>d.preload());
 const grain=document.createElement('canvas');grain.width=grain.height=128;const gg=grain.getContext('2d')!,noise=gg.createImageData(128,128);let seed=14;for(let i=0;i<noise.data.length;i+=4){seed=(seed*1664525+1013904223)>>>0;noise.data[i]=noise.data[i+1]=noise.data[i+2]=seed>>>24;noise.data[i+3]=255;}gg.putImageData(noise,0,0);const pattern=ctx.createPattern(grain,'repeat');
 function frame(g:CanvasRenderingContext2D,d:District,index:number,active:boolean,t:number,dt:number):WorldFrame{
  const f:WorldFrame={ctx:g,w,h,u:Math.min(w,h*.62)/100,portrait:h>w,P,vP,t,dt,idle,calm,face:Math.min(w*.19,h*.088),intro:(performance.now()-introAt)/1000,
