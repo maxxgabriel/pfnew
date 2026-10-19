@@ -1,6 +1,7 @@
 import './interact.css';
 import { initInteract } from './interact';
 import { autoReveal } from './reveal';
+import { startFx } from './fx';
 
 /*
  * LIFE — starts the interaction kit and the scroll entrances once the site has
@@ -8,7 +9,7 @@ import { autoReveal } from './reveal';
  * sections are created: `import { startLife } from './life'; startLife();`
  */
 export function startLife() {
-  const go = () => { initInteract(); autoReveal(); };
+  const go = () => { initInteract(); autoReveal(); startFx(); };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', go, { once: true });
   else requestAnimationFrame(go);
 }

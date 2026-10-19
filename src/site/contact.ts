@@ -1,14 +1,21 @@
 import gsap from 'gsap';
-import { SplitText } from 'gsap/SplitText';
-export function contact(reduced: boolean, top: () => void) {
-  if(!reduced){
-    const split=SplitText.create('.contact h2',{type:'words,chars',charsClass:'char'});
-    gsap.from(split.chars,{yPercent:85,rotation:5,opacity:0,stagger:.018,duration:.85,ease:'expo.out',scrollTrigger:{trigger:'.contact h2',start:'top 82%'}});
-  }
-  const copy=document.querySelector<HTMLButtonElement>('.copy')!,status=document.querySelector<HTMLElement>('.copy-status')!;
-  copy.addEventListener('click',async()=>{
-    try {await navigator.clipboard.writeText('hello@example.com');status.textContent='Copied. Let’s get something moving.';if(!reduced)gsap.fromTo(status,{y:10,opacity:0},{y:0,opacity:1,duration:.5,ease:'expo.out'});}
-    catch {status.textContent='Email: hello@example.com — select the address to copy.';}
-  });
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { styles, setArt } from './design';
+export function contact(reduced:boolean,top:()=>void){
   document.querySelector('.back-top')!.addEventListener('click',top);
+  if(!reduced){
+    gsap.from('.contact-pill',{y:150,scale:.82,duration:1.3,ease:'elastic.out(1,.6)',scrollTrigger:{trigger:'.contact',start:'top 78%'}});
+    gsap.fromTo('.footer',{y:100,borderTopLeftRadius:'45%',borderTopRightRadius:'45%'},{y:0,borderTopLeftRadius:0,borderTopRightRadius:0,ease:'none',scrollTrigger:{trigger:'.footer',start:'top bottom',end:'top top',scrub:true}});
+  }
+  const logo=document.querySelector<HTMLElement>('.living-word')!;
+  setArt(logo,'logo_ink');
+  if(reduced)return;
+  let index=0,last=0,visible=false;
+  ScrollTrigger.create({trigger:'.footer',start:'top bottom',end:'bottom top',onToggle:s=>{visible=s.isActive;}});
+  gsap.ticker.add(time=>{
+    if(!visible||document.hidden||time-last<.8)return;last=time;index=(index+1)%styles.length;
+    logo.dataset.style=styles[index];logo.innerHTML='<span>MAX<br>GABRIEL</span>';setArt(logo,`logo_${styles[index]}`);
+    gsap.fromTo(logo,{scaleX:1.12,scaleY:.65,rotation:-3},{scaleX:1,scaleY:1,rotation:0,duration:.65,ease:'elastic.out(1,.4)',overwrite:true});
+    gsap.fromTo('.logo-spark',{scale:.1,rotation:-30},{scale:1,rotation:20,duration:.5,ease:'back.out(2)',overwrite:true});
+  });
 }

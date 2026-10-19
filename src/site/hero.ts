@@ -1,23 +1,18 @@
 import gsap from 'gsap';
-import { SplitText } from 'gsap/SplitText';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-export function hero(reduced: boolean) {
-  const title = document.querySelector<HTMLElement>('#hero-title')!;
-  const measure = document.createElement('canvas').getContext('2d')!;
-  const fit = () => {
-    const style = getComputedStyle(title), size = parseFloat(style.fontSize);
-    measure.font = `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
-    const text = title.textContent ?? 'MAX GABRIEL';
-    const width = measure.measureText(text).width + (parseFloat(style.letterSpacing) || 0) * (text.length - 1);
-    if (width > 0) title.style.fontSize = `${size * title.clientWidth / width}px`;
+import { slices } from './design';
+export function hero(reduced:boolean){
+  const words=Array.from(document.querySelectorAll<HTMLElement>('.hero-word'));
+  words.forEach((word,index)=>{
+    const strips=slices(word,word.dataset.word!);
+    if(reduced)return;
+    gsap.fromTo(strips,{x:(i)=>((i+index)%2?1:-1)*innerWidth*.75,y:(i)=>i%2?12:-12},{x:0,y:0,stagger:.055,duration:1.25,delay:index*.16,ease:'expo.out'});
+    gsap.to(word,{yPercent:index?12:-15,ease:'none',scrollTrigger:{trigger:'.hero',start:'top top',end:'bottom top',scrub:true}});
+  });
+  const positionBoy=()=>{
+    const max=words[0],boy=document.querySelector<HTMLElement>('.hero-boy')!;
+    // Use the actual font box so the boy stays on the X at every aspect ratio.
+    boy.style.left=`${max.offsetLeft+max.offsetWidth*.83-boy.offsetWidth*.5}px`;
+    boy.style.top=`${max.offsetTop-boy.offsetHeight*.68}px`;
   };
-  fit();
-  window.addEventListener('resize',fit);
-  if (reduced) return;
-  const split = SplitText.create('#hero-title',{type:'chars',charsClass:'char'});
-  gsap.from(split.chars,{yPercent:110,rotation:9,opacity:0,stagger:.035,duration:1.1,ease:'expo.out'});
-  gsap.from('.hero-middle,.hero-top,.hero-foot',{y:25,opacity:0,stagger:.09,duration:.8,delay:.35,ease:'power4.out'});
-  gsap.to('#hero-title',{yPercent:18,ease:'none',scrollTrigger:{trigger:'.hero',start:'top top',end:'bottom top',scrub:true}});
-  const skew = gsap.quickTo('#hero-title','skewX',{duration:.5,ease:'power4.out'});
-  ScrollTrigger.create({trigger:'.hero',start:'top top',end:'bottom top',onUpdate:s=>skew(gsap.utils.clamp(-5,5,s.getVelocity()/-500)),onLeave:()=>skew(0)});
+  positionBoy();window.addEventListener('resize',positionBoy);
 }
