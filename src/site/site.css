@@ -229,3 +229,5 @@ img{max-width:100%}
 .service:not(:first-child) .service-sticker,.service:not(:first-child) .service-boy,.service:not(:first-child) .service-spark{display:none}
 .style-row{will-change:auto}
 }
+
+.piece-film-link{position:absolute;inset:auto 50% 50% auto;transform:translate(50%,50%);background:var(--red,#e8432a);color:#fff;font:700 clamp(16px,2vw,22px)/1 Inter,sans-serif;padding:18px 30px;border-radius:999px;border:4px solid #111;text-decoration:none;z-index:2}

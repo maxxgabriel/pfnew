@@ -40,7 +40,12 @@ export function playground(reduced: boolean, lock: (locked: boolean) => void, sc
       lock(true); dialog.showModal(); slot.append(active);
       Flip.from(state,{duration:reduced?0:.8,ease:'expo.inOut',absolute:true,onComplete:()=>{
         busy=false;
-        if(i===0 && active){const frame=document.createElement('iframe');frame.title='The Sketch — interactive scroll film';frame.src='./film.html';active.append(frame);}
+        if(i===0 && active){
+          // a preview build can point at the film hosted elsewhere (VITE_FILM_URL): link out instead of embedding
+          const filmUrl=import.meta.env.VITE_FILM_URL as string|undefined;
+          if(filmUrl){const a=document.createElement('a');a.className='piece-film-link';a.href=filmUrl;a.target='_blank';a.rel='noopener';a.textContent='Watch the film ↗';active.append(a);}
+          else{const frame=document.createElement('iframe');frame.title='The Sketch — interactive scroll film';frame.src='./film.html';active.append(frame);}
+        }
         document.querySelector<HTMLButtonElement>('.close-piece')!.focus();
       }});
     });
