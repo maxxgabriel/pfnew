@@ -1,0 +1,59 @@
+/* INTERACT (src/site/interact.ts): hover and touch life. Colours follow docs/SITE2.md. */
+:root { --ix-red: #e8432a; --ix-blue: #1f4bff; --ix-ink: #111111; --ix-paper: #fbf9f3; }
+
+.ix-ch { display: inline-block; will-change: transform; }
+
+/* text roll: two stacked copies inside a one-line window */
+.ix-roll { position: relative; display: inline-flex; overflow: hidden; vertical-align: bottom; }
+.ix-roll-a, .ix-roll-b { display: inline-block; white-space: nowrap; }
+.ix-roll-b { position: absolute; left: 0; top: 0; color: var(--ix-red); }
+
+/* underline: draws in from the left, leaves to the right */
+.ix-ul { position: relative; }
+.ix-ul::after {
+  content: ''; position: absolute; left: 0; right: 0; bottom: -0.12em; height: 0.09em; min-height: 2px;
+  background: currentColor; transform: scaleX(0); transform-origin: left; transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.ix-ul-on::after { transform: scaleX(1); }
+.ix-ul-out::after { transform-origin: right; }
+
+/* stickers: a hard drop shadow when lifted */
+.ix-sticker { transition: filter 0.25s ease; will-change: transform; }
+.ix-lift { filter: drop-shadow(4px 7px 0 rgba(17, 17, 17, 0.22)); }
+
+/* tilt cards: a soft moving shine */
+.ix-tilt { transform-style: preserve-3d; will-change: transform; }
+.ix-tilt { position: relative; }
+.ix-shine {
+  position: absolute; inset: 0; pointer-events: none; border-radius: inherit; opacity: 0; transition: opacity 0.3s ease;
+  background: radial-gradient(circle at var(--sx, 50%) var(--sy, 50%), rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0) 45%);
+  mix-blend-mode: soft-light;
+}
+.ix-tilt-on .ix-shine { opacity: 1; }
+
+/* the cursor: the red Spark and a ring that becomes a labelled bubble */
+.ix-has-cursor, .ix-has-cursor a, .ix-has-cursor button { cursor: none; }
+.ix-has-cursor iframe { cursor: auto; }
+.ix-cursor, .ix-ring { position: fixed; left: 0; top: 0; pointer-events: none; z-index: 10000; }
+.ix-cursor {
+  width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%; background: var(--ix-red);
+  box-shadow: 0 0 12px rgba(232, 67, 42, 0.55); transition: width 0.25s, height 0.25s, margin 0.25s, opacity 0.2s;
+}
+.ix-ring {
+  width: 40px; height: 40px; margin: -20px 0 0 -20px; border-radius: 50%; border: 1.5px solid var(--ix-ink);
+  display: grid; place-items: center; transition: width 0.35s cubic-bezier(0.16, 1, 0.3, 1), height 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+    margin 0.35s cubic-bezier(0.16, 1, 0.3, 1), background 0.25s, border-color 0.25s, opacity 0.2s;
+  mix-blend-mode: normal;
+}
+.ix-ring-label { font: 700 11px/1 Inter, system-ui, sans-serif; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ix-paper); opacity: 0; transition: opacity 0.2s; }
+.ix-ring[data-mode='link'] { width: 64px; height: 64px; margin: -32px 0 0 -32px; border-color: var(--ix-red); }
+.ix-ring[data-mode]:not([data-mode='']):not([data-mode='link']):not([data-mode='hide']) {
+  width: 92px; height: 92px; margin: -46px 0 0 -46px; background: var(--ix-blue); border-color: var(--ix-blue);
+}
+.ix-ring[data-mode]:not([data-mode='']):not([data-mode='link']):not([data-mode='hide']) .ix-ring-label { opacity: 1; }
+.ix-cursor[data-mode]:not([data-mode='']):not([data-mode='link']) { opacity: 0; }
+.ix-ring[data-mode='hide'], .ix-cursor[data-mode='hide'] { opacity: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ix-ul::after, .ix-ring, .ix-cursor { transition: none; }
+}
