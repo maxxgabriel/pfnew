@@ -5,7 +5,7 @@ import { bladeOf, drawFig, drawPose, figHeight, figPoint, ib, meta } from './art
 import { bgImage, drawBg, drawLayer } from './bg';
 import { BLUE, RED_BLADE, bladeLight, drawBlade } from './saber';
 import { drawSpark, faceOf } from './common';
-import { impactFrame, letterbox, shockRing } from './fx';
+import { impactFrame, letterbox } from './fx';
 
 /* IV · LIGHT. On the moon, the Spark throws a long shadow across grey
  * dust. It copies him, waves, peels upright and draws its red blade.
@@ -141,9 +141,10 @@ export function drawLight(f: Frame, L: number, withHero = true, inner = false) {
   let shPose = 'home_1', shFlip = false, shDx = 0;
   if (L < LT.land) {
     const u = ease.in2(seg(L, LT.drop[0], LT.drop[1]));
-    hy = lerp(-face * 3, floorY, u);
+    hx = lerp(w * 0.5, w * 0.36, ease.inOut2(seg(L, LT.drop[0], LT.land)));
+    hy = lerp(Math.max(h * 0.34, face * 4.5), floorY, u);
     pose = 'fall_3';
-    rot = Math.PI * (1 - ease.inOut2(seg(L, LT.drop[0], LT.land)));
+    rot = -0.3 * (1 - seg(L, LT.drop[0], LT.land));
   } else if (L < LT.land + 0.3) pose = 'hero_0';
   if (L >= LT.land && f.crossedFwd(f.B - L + LT.land)) f.shake(face * 0.35);
   if (L > LT.copy[0]) { pose = ib('curious', 'curious', L, LT.copy[0], 'ib_rise'); shPose = pose; }
@@ -235,13 +236,12 @@ export function drawLight(f: Frame, L: number, withHero = true, inner = false) {
       drawBlade(ctx, bl[0], bl[1], BLUE, face * 0.11, ig, t + 1);
     }
   }
-  const ring = seg(L, LT.land, LT.land + 0.4);
-  if (ring > 0 && ring < 1) {
-    ctx.save();
-    ctx.translate(hx, floorY);
-    ctx.scale(1, 0.25);
-    shockRing(ctx, 0, 0, face * 2, ring, '#f6e9cc', face * 0.08);
-    ctx.restore();
+  const dust = seg(L, LT.land, LT.land + 0.4);
+  if (dust > 0 && dust < 1) {
+    ctx.save(); ctx.globalAlpha = Math.sin(dust * Math.PI) * 0.45;
+    ctx.fillStyle = '#d9d4c7'; ctx.beginPath();
+    ctx.ellipse(hx, floorY, face * (0.7 + dust * 1.5), face * (0.12 + dust * 0.25), 0, 0, TAU);
+    ctx.fill(); ctx.restore();
   }
 
   // ---- the Spark: lighting the horizon, then dropping the hilt into his hand, then fleeing into the sunset
@@ -259,18 +259,9 @@ export function drawLight(f: Frame, L: number, withHero = true, inner = false) {
     else if (L >= c + 0.04 && L < c + 0.07) impactFrame(ctx, w, h, 0.9, 'spikes', hx + face * 1.2, hy - face * 1.6, Math.round(c * 10));
   }
 
-  // ---- the cut: a white line ripping up the whole height of the frame along his blade
+  // The blade scratches a tapered, crooked brush tear into the black sky.
   const cutK = seg(L, LT.slash[0] + 0.05, LT.cut[0]);
-  if (cutK > 0) {
-    ctx.save();
-    ctx.fillStyle = '#fff8ec';
-    const top = lerp(h, -h * 0.05, ease.in2(cutK));
-    ctx.fillRect(w * 0.5 - face * 0.04, top, face * 0.08, h - top);
-    ctx.globalCompositeOperation = 'lighter';
-    ctx.globalAlpha = 0.6;
-    drawSprite(ctx, glow('#bfe4ff', 64), w * 0.5, top, face * 1.6);
-    ctx.restore();
-  }
+  if (cutK > 0) drawTear(f, ease.in2(cutK), 0);
   void TAU;
 }
 
@@ -297,27 +288,12 @@ function drawEscape(f: Frame, L: number) {
   const reentry = seg(L, LT.cut[0], LT.end);
   drawLayer(ctx, 'fg_sunset', w, h, 0, lerp(h * 0.5, -h * 0.7, reentry), Math.sin(reentry * Math.PI), 1.3);
   const k = ease.out3(seg(L, LT.cut[0], LT.cut[1]));
-  const gap = k * w * 0.62;
-  // the two halves of space, torn apart and falling away
-  ctx.save();
-  ctx.translate(-gap, k * h * 0.08);
-  ctx.rotate(-k * 0.08);
-  ctx.drawImage(split.c, 0, 0, W / 2, H, 0, 0, w / 2, h);
-  ctx.restore();
-  ctx.save();
-  ctx.translate(gap, k * h * 0.08);
-  ctx.rotate(k * 0.08);
-  ctx.drawImage(split.c, W / 2, 0, W / 2, H, w / 2, 0, w / 2, h);
-  ctx.restore();
-  // the light pouring through the rip
-  const pour = 1 - seg(L, LT.cut[0], LT.cut[0] + 0.3);
-  if (pour > 0) {
-    ctx.save();
-    ctx.globalAlpha = pour;
-    ctx.fillStyle = '#fff3dc';
-    ctx.fillRect(w * 0.5 - gap - face * 0.1, 0, gap * 2 + face * 0.2, h);
-    ctx.restore();
-  }
+  // Keep the frozen moon outside one widening, jagged opening. There are
+  // no translated rectangular halves or uniform strip of light.
+  ctx.save(); ctx.beginPath(); ctx.rect(0, 0, w, h);
+  tearPath(ctx, w, h, face, 1, k);
+  ctx.clip('evenodd'); ctx.drawImage(split.c, 0, 0, w, h); ctx.restore();
+  drawTear(f, 1, k);
   if (f.crossedFwd(f.B - L + LT.cut[0])) { f.shake(face * 0.5); f.flash(0.5, '#fff3dc'); }
 
   // him: bursting up through the gap, blade high; at the top, a happy tumble; then falling (chapter V's broom)
@@ -332,12 +308,43 @@ function drawEscape(f: Frame, L: number) {
     rot = u < 0.5 ? -u * 1.2 : Math.sin(L * 7) * 0.15;
   }
   const x = w * 0.5 + (L >= LT.tumble[0] ? Math.sin(L * 5) * face * 0.3 : 0);
-  drawPose(ctx, pose, x, y, face, { rot });
-  const bl = bladeOf(pose, x, y, face, { rot });
+  const flightFace = face * lerp(1, 0.72, up);
+  y = Math.max(y, flightFace * 4.9);
+  drawPose(ctx, pose, x, y, flightFace, { rot });
+  const bl = bladeOf(pose, x, y, flightFace, { rot });
   if (bl) {
     bladeLight(ctx, bl[0], bl[1], BLUE, face * 3.5, 0.35);
     drawBlade(ctx, bl[0], bl[1], BLUE, face * 0.11, 1, t + 1);
   }
   // the Spark, out ahead in the sky
   drawSpark(ctx, w * 0.5 + Math.cos(t * 2) * face * 1.6, h * 0.12 + Math.sin(t * 3) * face * 0.3, face * 0.17);
+}
+
+/** A single connected brush silhouette; its middle follows the raised blade.
+ * Opening grows beyond the viewport so sunset fills it before re-entry. */
+function tearPath(ctx: CanvasRenderingContext2D, w: number, h: number, face: number, length: number, open: number) {
+  const top = lerp(h * 0.43, -h * 0.12, length), bottom = h * (0.52 + open);
+  const width = face * 0.10 + open * Math.hypot(w, h) * 1.5;
+  const points: Pt[] = [];
+  for (let i = 0; i <= 20; i++) {
+    const u = i / 20, y = lerp(top, bottom, u);
+    const center = w * 0.5 + Math.sin(u * 7) * face * 0.12 + (u - 0.5) * face * 0.35;
+    const taper = Math.sin(Math.PI * u) ** 0.65;
+    points.push([center, y]);
+    const x = center - width * taper * (0.8 + 0.2 * Math.sin(i * 2.3));
+    if (!i) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  }
+  for (let i = 20; i >= 0; i--) {
+    const u = i / 20;
+    ctx.lineTo(points[i][0] + width * Math.sin(Math.PI * u) ** 0.65 * (0.85 + 0.15 * Math.cos(i * 2.7)), points[i][1]);
+  }
+  ctx.closePath();
+}
+function drawTear(f: Frame, length: number, open: number) {
+  const { ctx, w, h } = f;
+  ctx.save(); ctx.beginPath(); tearPath(ctx, w, h, faceOf(f), length, open);
+  ctx.shadowColor = '#76dfff'; ctx.shadowBlur = faceOf(f) * 0.3;
+  ctx.strokeStyle = '#b5f1ff'; ctx.lineWidth = Math.max(1, faceOf(f) * 0.035);
+  if (open === 0) { ctx.fillStyle = '#efffff'; ctx.fill(); }
+  ctx.globalAlpha = 1 - ease.out2(open); ctx.stroke(); ctx.restore();
 }

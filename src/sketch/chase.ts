@@ -212,7 +212,7 @@ export function drawChase(f: Frame, L: number) {
   const gone = f.hold?.kind === 'escape' && f.hold.p > ESC_OUT[0] && f.hold.p < ESC_OUT[1];
   if (gone) { /* off the page */ }
   else if (L < CH.hand[0] + 0.05) drawPose(ctx, pose, x, y, face, { rot });
-  else if (L > CH.toss[0]) drawPose(ctx, pose, x, y, face, { rot });
+  else if (L > CH.toss[0] && L <= CH.fall[0]) drawPose(ctx, pose, x, y, face, { rot });
 
   // ---- the hat, flung up into the sky; the broom flying off without him
   if (tossU >= 0.3) {

@@ -2,7 +2,8 @@ import type { Frame } from '../core/frame';
 import { type Pt, TAU, ease, lerp, seg } from '../core/math';
 import { drawPose, heroSeen, setActStyle, setPosesHidden, type ActStyle } from './art';
 import { PAPER, faceOf } from './common';
-import { bgImage } from './bg';
+import { bgImage, drawBg } from './bg';
+import { drawRun } from './run';
 import { seaCamera } from './sea';
 
 /* Six-chapter seams: continuous page-edge fall, sea-to-moon launch,
@@ -32,8 +33,8 @@ interface Hero { x: number; y: number; top: number; face: number }
 const SEAMS: Seam[] = [
   { into: 'Wave', a: 0.2, b: 0.8, draw: fallToSea, carrier: true },
   { into: 'Light', a: 0.85, b: 1.2, draw: moonLaunch, carrier: true },
-  { into: 'Chase', a: 0.3, b: 0.5, draw: burst },
-  { into: 'Home', a: 0.85, b: 0.6, draw: panDown, handOff: true },
+  { into: 'Chase', a: 0.3, b: 0.5, draw: burst, carrier: true },
+  { into: 'Home', a: 0.85, b: 0.6, draw: panDown, carrier: true },
 ];
 
 let A: HTMLCanvasElement | null = null, Bc: HTMLCanvasElement | null = null;
@@ -59,13 +60,16 @@ export function drawSeam(f: Frame, chapters: SeamChapter[], styles: Record<strin
     const tm = ctx.getTransform();
     const render = (c: SeamChapter, L: number, target: HTMLCanvasElement, hide = false): Hero => {
       const g = target.getContext('2d')!;
+      g.setTransform(1, 0, 0, 1, 0, 0);
+      g.clearRect(0, 0, W, H);
       g.setTransform(tm);
       g.globalAlpha = 1;
       g.globalCompositeOperation = 'source-over';
       heroSeen.at = -1;
       setActStyle(styles[c.name] ?? null);
       setPosesHidden(hide || !!s.carrier);
-      c.draw({ ...f, ctx: g }, L);
+      if (s.into === 'Wave' && c.name === 'Run') drawRun({ ...f, ctx: g }, L, true);
+      else c.draw({ ...f, ctx: g }, L);
       setPosesHidden(false);
       setActStyle(null);
       return { x: heroSeen.x, y: heroSeen.y, top: heroSeen.top, face: heroSeen.face || f.h * 0.08 };
@@ -105,17 +109,24 @@ function blob(g: CanvasRenderingContext2D, cx: number, cy: number, r: number, se
 
 /** A single falling drawing bridges the departing page and the sea's dive.
  * The page slides upward; the incoming sea always fills the canvas beneath it. */
-function fallToSea(f: Frame, p: number, A: HTMLCanvasElement, Bc: HTMLCanvasElement) {
+function fallToSea(f: Frame, p: number, A: HTMLCanvasElement, Bc: HTMLCanvasElement, s: SeamInfo) {
   const g = f.ctx, d = dpr(), W = A.width, H = A.height;
-  g.drawImage(Bc, 0, 0);
-  const page = ease.in3(seg(p, 0, 0.68));
-  g.drawImage(A, 0, -H * page, W, H);
+  // The void yields to the sea's open sky while the camera keeps falling.
+  g.save(); g.scale(d, d);
+  g.fillStyle = PAPER; g.fillRect(0, 0, f.w, f.h);
+  drawBg(g, 'bg_void', f.w, f.h, 0.3, 1, 1.1);
+  g.fillStyle = 'rgba(28,22,18,0.22)'; g.fillRect(0, 0, f.w, f.h);
+  g.restore();
+  g.save(); g.globalAlpha = ease.inOut2(seg(p, 0, 0.5));
+  g.drawImage(Bc, 0, 0); g.restore();
+  const page = ease.inOut2(seg(p, 0, 0.55));
+  g.drawImage(A, 0, -H * 1.5 * page, W, H);
   g.save(); g.scale(d, d);
   const face = faceOf(f);
-  const y = p < 0.2 ? lerp(f.h * 0.38, f.h * 0.43, p / 0.2)
+  const y = p < 0.2 ? lerp(s.outHero.y, f.h * 0.43, p / 0.2)
     : lerp(f.h * 0.43, f.h * 0.72, ease.in2(seg(p, 0.2, 1)));
   setActStyle(p < 0.2 ? 'pixel' : 'water');
-  drawPose(g, p < 0.2 ? 'runoff_3' : 'fall_3', lerp(f.w * 0.5, f.w * 0.42, ease.inOut2(p)), y, face);
+  drawPose(g, p < 0.2 ? 'runoff_3' : 'fall_3', lerp(s.outHero.x, f.w * 0.42, ease.inOut2(p)), y, face * (p < 0.2 ? 1 : lerp(0.8, 1, seg(p, 0.2, 1))));
   setActStyle(null); g.restore();
 }
 
@@ -135,7 +146,7 @@ function moonLaunch(f: Frame, p: number, A: HTMLCanvasElement, Bc: HTMLCanvasEle
   if (moon) g.drawImage(moon, moon.naturalWidth * 0.36, moon.naturalHeight * 0.255,
     moon.naturalWidth * 0.285, moon.naturalHeight * 0.19, cx-r, cy-r, r*2, r*2);
   g.restore();
-  g.save(); g.globalAlpha = ease.inOut2(seg(p, 0.58, 0.76)); g.drawImage(Bc, 0, 0); g.restore();
+  g.save(); g.globalAlpha = ease.inOut2(seg(p, 0.4, 0.64)); g.drawImage(Bc, 0, 0); g.restore();
   g.save(); g.scale(d, d);
   const face = faceOf(f);
   const local = lerp(-0.85, 1.2, p);
@@ -144,10 +155,12 @@ function moonLaunch(f: Frame, p: number, A: HTMLCanvasElement, Bc: HTMLCanvasEle
   const startX = lerp(f.w * 0.42 + Math.sin(4.15 * 1.3) * face * 0.3, f.w * 0.5, ejected);
   const x = local < 0.55 ? lerp(startX, f.w * 0.5, ease.out2(launch))
     : lerp(f.w * 0.5, f.w * 0.36, ease.inOut2(landing));
-  const y = local < 0.55 ? lerp(lerp(f.h * 0.72, -f.h * 0.2, ejected), -face * 3, ease.out2(launch))
-    : lerp(-face * 3, f.h * 0.74, ease.in2(landing));
+  const apex = Math.max(f.h * 0.34, face * 4.5);
+  const flightFace = face * lerp(1, 0.72, Math.sin(launch * Math.PI / 2)) * lerp(1, 1 / 0.72, landing);
+  const y = local < 0.55 ? lerp(lerp(f.h * 0.72, -f.h * 0.2, ejected), apex, ease.out2(launch))
+    : lerp(apex, f.h * 0.74, ease.in2(landing));
   setActStyle(local < 0 ? 'water' : 'comic');
-  drawPose(g, local < 0.55 ? 'leap_2' : 'fall_3', x, y, face, { rot: local < 0.55 ? -launch * 0.3 : Math.PI * (1 - ease.inOut2(landing)) });
+  drawPose(g, local < 0.55 ? 'leap_2' : 'fall_3', x, y, flightFace, { rot: local < 0.55 ? -launch * 0.3 : -0.3 * (1 - landing) });
   setActStyle(null); g.restore();
 }
 
@@ -156,11 +169,9 @@ function moonLaunch(f: Frame, p: number, A: HTMLCanvasElement, Bc: HTMLCanvasEle
 function burst(f: Frame, p: number, A: HTMLCanvasElement, Bc: HTMLCanvasElement, s: SeamInfo) {
   const g = f.ctx, d = dpr();
   const W = A.width;
-  const o = s.outHero;
-  const c: Pt = [o.x * d, lerp(o.y, o.top, 0.5) * d];
+  const c: Pt = [f.w * 0.5 * d, f.h * 0.35 * d];
   g.drawImage(A, 0, 0);
   const k = ease.out3(seg(p, 0.3, 0.85));
-  if (k <= 0) return;
   // a ring of air blasting out from him: inside it, the open sky (and him, as he is in it)
   const R = k * full(f) * 0.75;
   g.save();
@@ -170,20 +181,6 @@ function burst(f: Frame, p: number, A: HTMLCanvasElement, Bc: HTMLCanvasElement,
   g.restore();
   const edge = 1 - seg(p, 0.7, 1);
   if (edge > 0) {
-    // long rays of the blast (a few, long)
-    g.save();
-    g.globalAlpha = 0.35 * edge;
-    g.strokeStyle = '#fff4e2';
-    g.lineCap = 'round';
-    for (let i = 0; i < 7; i++) {
-      const a = i * 0.9 + 0.4, r0 = R * 0.35, r1 = R * 0.95;
-      g.lineWidth = Math.max(2, W * 0.005);
-      g.beginPath();
-      g.moveTo(c[0] + Math.cos(a) * r0, c[1] + Math.sin(a) * r0);
-      g.lineTo(c[0] + Math.cos(a) * r1, c[1] + Math.sin(a) * r1);
-      g.stroke();
-    }
-    g.restore();
     g.save();
     g.globalAlpha = edge;
     g.strokeStyle = '#fff4e2';
@@ -196,17 +193,32 @@ function burst(f: Frame, p: number, A: HTMLCanvasElement, Bc: HTMLCanvasElement,
     g.stroke();
     g.restore();
   }
+  const local = lerp(-0.3, 0.5, p);
+  const mix = ease.inOut2(seg(p, 0, 0.85));
+  const x = lerp(s.outHero.x, s.inHero.x, mix), y = lerp(s.outHero.y, s.inHero.y, mix);
+  const face = faceOf(f) * lerp(0.72, 1, mix);
+  const tumble = seg(local + 8, 7.6, 8);
+  const rot = lerp(tumble < 0.5 ? -tumble * 1.2 : Math.sin((local + 8) * 7) * 0.15,
+    Math.sin(Math.max(0, local) * 7) * 0.15, mix);
+  g.save(); g.scale(d, d); setActStyle(local < 0 ? 'comic' : 'hose');
+  drawPose(g, local < -0.2 ? 'escape_3' : 'fall_0', x, y, face, { rot });
+  setActStyle(null); g.restore();
 }
 
 /* ------------------------------------------------------------ V → VI: down the stroke to the new page */
 
-function panDown(f: Frame, p: number, A: HTMLCanvasElement, Bc: HTMLCanvasElement, _s: SeamInfo) {
-  const g = f.ctx;
-  const H = A.height;
+function panDown(f: Frame, p: number, A: HTMLCanvasElement, Bc: HTMLCanvasElement, s: SeamInfo) {
+  const g = f.ctx, H = A.height, d = dpr();
   const u = ease.inOut2(p);
-  // one long page: chapter VI's stroke is his slide carried on (src/sketch/home.ts rideIn), so the two meet exactly
-  g.fillStyle = PAPER;
-  g.fillRect(0, 0, A.width, H);
+  g.fillStyle = PAPER; g.fillRect(0, 0, A.width, H);
   g.drawImage(A, 0, -u * H);
   g.drawImage(Bc, 0, (1 - u) * H);
+  // One rider, tracking the two live stroke endpoints through the camera pan.
+  const o = s.outHero, i = s.inHero;
+  const blend = ease.inOut2(seg(p, 0.35, 0.8));
+  const x = lerp(o.x, i.x, blend);
+  const y = lerp(o.y - u * f.h, i.y + (1 - u) * f.h, blend);
+  g.save(); g.scale(d, d); setActStyle(p < 0.586 ? 'hose' : null);
+  drawPose(g, 'ride_2', x, Math.max(faceOf(f) * 3.5, Math.min(f.h * 0.88, y)), faceOf(f), { flip: true, rot: 0.25 });
+  setActStyle(null); g.restore();
 }

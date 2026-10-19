@@ -143,7 +143,6 @@ export const setPosesHidden = (on: boolean) => { posesHidden = on; };
 /** draw pose `k` with its foot point at (x, y), its face `face` pixels wide */
 export function drawPose(ctx: CanvasRenderingContext2D, k: string, x: number, y: number, face: number, o: PoseOpts = {}) {
   // in a styled act, his restyled twin of this drawing (if there is one), at the ink drawing's height
-  if (posesHidden) return;
   const st = styledTwin(k);
   if (st) return drawPose(ctx, st, x, y, twinFace(k, st, face), { ...o, boil: o.boil ?? 0.004 });
   const m = M[k];
@@ -157,6 +156,7 @@ export function drawPose(ctx: CanvasRenderingContext2D, k: string, x: number, y:
     const p0 = tm.transformPoint({ x, y }), p1 = tm.transformPoint({ x, y: y - (m.foot[1] - m.top) * s });
     heroSeen.x = p0.x / d; heroSeen.y = p0.y / d; heroSeen.top = p1.y / d; heroSeen.face = face * Math.hypot(tm.a, tm.b) / d; heroSeen.at = clock;
   }
+  if (posesHidden) return;
   // poked: a startled hop and a squash that wobbles out
   const pu = solid ? (performance.now() / 1000 - pokedAt) / 0.7 : 1;
   if (pu >= 0 && pu < 1) {

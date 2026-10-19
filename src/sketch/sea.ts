@@ -72,7 +72,7 @@ export function drawSea(f: Frame, L: number) {
     const u = ease.in2(seg(L, SE.dive[0], SE.land));
     pose = 'fall_3';
     x = lerp(w * 0.5, w * 0.42, u);
-    y = lerp(-face * 2, sy - face * 0.6, u);
+    y = lerp(-face * 2, sy, u);
     // the brush tumbling down beside him, landing flat on the water
     const bw = face * 3.4;
     const by = lerp(-face * 4, sy + face * 0.15, ease.in2(seg(L, 0.1, SE.land)));

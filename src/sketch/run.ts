@@ -148,7 +148,7 @@ function oldFilm(ctx: CanvasRenderingContext2D, w: number, h: number, k: number,
   ctx.restore();
 }
 
-export function drawRun(f: Frame, L: number) {
+export function drawRun(f: Frame, L: number, sheetOnly = false) {
   const { ctx, w, h, t } = f;
   const { face, gx, gy, r } = stage(f);
   const X = xAt(L, f);
@@ -171,7 +171,7 @@ export function drawRun(f: Frame, L: number) {
   // (on the desk the real eraser hops onto the page and becomes it, so it does not drop out of the sky)
   const eraserOn = L >= RN.eraser - (DESK_HOLDS && deskOn(w, h) ? 0.005 : 0.15);
   const drop = ease.in3(seg(L, RN.eraser - 0.15, RN.eraser));
-  let EX = Math.min(X - eraserGap(L) * face, edgeX - face * 1.1);
+  let EX = Math.min(X - eraserGap(L) * face, edgeX - face * 3.1);
   const EH = face * 3.4;
   if (f.crossedFwd(f.B - L + RN.eraser)) f.shake(face * 0.35);
 
@@ -194,34 +194,41 @@ export function drawRun(f: Frame, L: number) {
   if (hoseK) ctx.translate((hash(Math.floor(t * 12)) - 0.5) * 3, (hash(Math.floor(t * 12) + 5) - 0.5) * 3);
 
   // ---- the void beyond the page, then the page itself
-  ctx.fillStyle = PAPER;
-  ctx.fillRect(0, 0, w, h);
-  if (kB > 0 || kC > 0) {
-    const k = Math.max(kB, kC);
-    drawBg(ctx, 'bg_void', w, h, 0.2 + kC * 0.1, k, 1.1);
-    ctx.fillStyle = `rgba(28,22,18,${0.55 * k * (1 - kC * 0.6)})`;
+  if (!sheetOnly) {
+    ctx.fillStyle = PAPER;
     ctx.fillRect(0, 0, w, h);
+    if (kB > 0 || kC > 0) {
+      const k = Math.max(kB, kC);
+      drawBg(ctx, 'bg_void', w, h, 0.2 + kC * 0.1, k, 1.1);
+      ctx.fillStyle = `rgba(28,22,18,${0.55 * k * (1 - kC * 0.6)})`;
+      ctx.fillRect(0, 0, w, h);
+    }
   }
   ctx.save();
   ctx.translate(fs[0], fs[1]);
   ctx.scale(z, z);
   ctx.translate(-fw[0], -fw[1]);
   const top = gy - h * 0.74, bot = gy + h * 0.42, left = -w * 3;
-  ctx.fillStyle = 'rgba(8,5,3,0.35)';
-  ctx.fillRect(left + face * 0.5, top + face * 0.5, edgeX - left, bot - top);
-  if (!tile) tile = paperTile(512, PAPER);
-  ctx.fillStyle = PAPER;
-  ctx.fillRect(left, top, edgeX - left, bot - top);
-  const pat = ctx.createPattern(tile, 'repeat');
-  if (pat) {
-    ctx.globalAlpha = 0.5;
-    ctx.fillStyle = pat;
-    ctx.fillRect(left, top, edgeX - left, bot - top);
-    ctx.globalAlpha = 1;
+  // One torn silhouette, including the texture and all ink on the sheet.
+  ctx.beginPath(); ctx.moveTo(left, top);
+  for (let i = 1; i <= 60; i++) {
+    ctx.lineTo(lerp(left, edgeX, i / 60), top + face * (hash(i + 21) - 0.5) * 0.16);
   }
-  ctx.strokeStyle = 'rgba(27,23,20,0.25)';
-  ctx.lineWidth = 1.5 / z;
-  ctx.strokeRect(left, top, edgeX - left, bot - top);
+  for (let i = 0; i <= 40; i++) {
+    const yy = lerp(top, bot, i / 40);
+    ctx.lineTo(edgeX + face * (hash(i + 81) - 0.5) * 0.22, yy);
+  }
+  for (let i = 1; i <= 60; i++) {
+    ctx.lineTo(lerp(edgeX, left, i / 60), bot + face * (hash(i + 151) - 0.5) * 0.16);
+  }
+  ctx.closePath();
+  ctx.fillStyle = PAPER; ctx.fill();
+  ctx.strokeStyle = 'rgba(27,23,20,0.25)'; ctx.lineWidth = 1.5 / z; ctx.stroke();
+  ctx.save(); ctx.clip();
+  if (!tile) tile = paperTile(512, PAPER);
+  const pat = ctx.createPattern(tile, 'repeat');
+  if (pat) { ctx.fillStyle = pat; ctx.fillRect(left, top, edgeX - left + face, bot - top); }
+  ctx.restore();
 
   // ---- a wide sheet: a far ridge brushed into the empty top of the page, drifting slowly as he runs
   if (wideSheet(f)) {
@@ -438,7 +445,7 @@ export function drawRun(f: Frame, L: number) {
       // stopped dead at the edge: tilted back, teetering
       k = 'eraser_3';
       er = -0.35 + Math.sin(t * 7) * 0.08 * (1 - seg(L, RN.skid[1], RN.end));
-      EX = edgeX - face * 1.1;
+      EX = edgeX - face * 3.1;
     }
     let turnX = 1;
     if (rl >= 0) {
@@ -505,7 +512,7 @@ export function drawRun(f: Frame, L: number) {
   ctx.restore();
 
   // ---- the gag plays as an old cartoon (the iris that closes on him is the seam's: src/sketch/seams.ts)
-  oldFilm(ctx, w, h, hoseK, t);
+  if (!sheetOnly) oldFilm(ctx, w, h, hoseK, t);
   ctx.restore();
 }
 
