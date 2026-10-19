@@ -4,6 +4,7 @@ import { pokeHero, preloadPoses } from './sketch/art';
 import { signEnd, signMove, signStart } from './sketch/home';
 import { INTRO_DELAY, deskWatching, drawDesk, drawInk, initDesk, screenToSheet, setDeskClock } from './desk/desk';
 import { deskOn } from './desk/layout';
+preloadPoses();
 import { CHAPTERS, type Frame } from './core/frame';
 import { clamp, damp } from './core/math';
 import { canvas, grainTiles } from './core/sprites';
@@ -18,12 +19,6 @@ import { HOLDS, RAW_END, toFilm, toRaw } from './core/holds';
  * and when the reader stops, the ambient motion keeps playing.
  */
 
-const worldName = new URLSearchParams(location.search).get('world');
-if (worldName) {
-  void import('./world/prototype').then(({ startWorld }) => startWorld(worldName));
-} else {
-// Keep the authored film intact; only its startup is gated.
-preloadPoses();
 const cvs = document.getElementById('film') as HTMLCanvasElement;
 const ctx = cvs.getContext('2d', { alpha: false })!;
 const track = document.getElementById('track')!;
@@ -314,5 +309,3 @@ function jumpRaw(b: number) {
   },
   cost: () => cost,
 };
-
-}
