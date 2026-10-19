@@ -233,7 +233,8 @@ export function drawRun(f: Frame, L: number, sheetOnly = false) {
   // Render inside the torn sheet, expressed in screen coordinates under its camera.
   ctx.save(); ctx.clip();
   ctx.translate(fw[0], fw[1]); ctx.scale(1 / z, 1 / z); ctx.translate(-fs[0], -fs[1]);
-  drawWorld(f, 'Run', L, { camera: X - gx, reveal: seg(L, 0, 1.5),
+  drawWorld(f, 'Run', L, { camera: X - gx, reveal: Math.max(seg(L, 0, 1.5), toS([X + face * 2, gy])[0] / w),
+    ground: toS([X, gy])[1], eraserHeight: EH * z,
     eraser: eraserOn ? toS([EX, gy])[0] : undefined, heal: seg(L, RN.skid[1], RN.end),
     impacts: [RN.eraser], impactX: toS([EX, gy])[0], impactY: toS([EX, gy])[1] });
   ctx.restore();

@@ -28,6 +28,25 @@ for p in sorted(raw.glob('*.png')):
   fg[...,0]-=spill; fg[...,2]-=spill
   arr=np.dstack((fg,a*255))
  else: arr=np.dstack((rgb,np.full(rgb.shape[:2],255)))
+ if n == 'wc_cloud':
+  # Remove blue-violet spill throughout the bank, retaining blue-grey shadows.
+  fg=arr[...,:3]
+  violet=np.maximum(fg[...,2]-fg[...,1]-35,0)
+  fg[...,2]-=violet*.8
+  fg[...,1]+=violet*.35
+ if n == 'cm_moon':
+  # Quiet the floor while preserving the printed halftone and alpha.
+  fg=arr[...,:3]; grey=fg.mean(axis=2,keepdims=True)
+  arr[...,:3]=(grey*.25+fg*.75)*.76
+ if n in {'cm_earth','hs_sun'}:
+  # Ignore isolated keying residue; crop the actual disc, never stretch its plate.
+  labels,count=nd.label(arr[...,3]>128)
+  sizes=np.bincount(labels.ravel()); sizes[0]=0
+  disc=labels==sizes.argmax()
+  yy,xx=np.where(disc)
+  x0,x1=max(0,xx.min()-3),min(arr.shape[1],xx.max()+4)
+  y0,y1=max(0,yy.min()-3),min(arr.shape[0],yy.max()+4)
+  arr=arr[y0:y1,x0:x1]
  if n in tiles:
   # Crossfade corresponding edge neighbourhoods using premultiplied colour.
   # Both outside columns converge to the same average, with smooth falloff.

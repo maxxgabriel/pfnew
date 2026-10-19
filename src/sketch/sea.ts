@@ -1,6 +1,6 @@
 import type { Frame } from '../core/frame';
 import { type Pt, clamp, ease, lerp, seg } from '../core/math';
-import { artSize, drawArtFoot, drawPose } from './art';
+import { artSize, drawArtFoot, drawPose, drawWaterWave } from './art';
 import { bgImage } from './bg';
 import { drawWorld } from './worlds';
 import { drawSpark, drawSparkStreak, faceOf } from './common';
@@ -75,7 +75,7 @@ export function drawSea(f: Frame, L: number) {
     ctx.translate(bx, sy + face * 0.4 + tube * h * 0.25);
     ctx.rotate(lean);
     ctx.scale(-1, 1);
-    drawArtFoot(ctx, key, 0, 0, W);
+    drawWaterWave(ctx, key, W);
     ctx.restore();
   }
 

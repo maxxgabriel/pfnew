@@ -13,6 +13,7 @@ interface Options {
   reveal?: number;
   eraser?: number;
   heal?: number;
+  eraserHeight?: number;
   impacts?: readonly number[];
   impactX?: number;
   impactY?: number;
@@ -70,12 +71,13 @@ function paintWorld(f: Frame, act: Act, L: number, o: Options) {
   ctx.save();
   if (act === 'Still' || act === 'Home' || act === 'Run') {
     const pixel = act === 'Run', reveal = clamp(o.reveal ?? seg(L, 0, 1.4));
+    const ground = o.ground ?? h * 0.7;
     ctx.save(); ctx.beginPath();
     if (pixel) {
       // A single advancing stepped edge, not a field of animated particles.
       const b = WORLD.block;
       for (let y = 0; y < h; y += b) {
-        const edge = Math.ceil((reveal * (w + b * 2) - (Math.floor(y / b) % 3) * b) / b) * b;
+        const edge = reveal >= 1 ? w : Math.floor((reveal * (w + b * 2) - (Math.floor(y / b) % 3) * b) / b) * b;
         ctx.rect(0, y, Math.max(0, edge), b);
       }
     } else {
@@ -84,29 +86,45 @@ function paintWorld(f: Frame, act: Act, L: number, o: Options) {
       ctx.lineTo(0, h); ctx.closePath();
     }
     ctx.clip();
+    if (pixel && o.eraser !== undefined) {
+      const b = WORLD.block, ex = o.eraser;
+      const eh = o.eraserHeight ?? h * 0.24;
+      ctx.beginPath(); ctx.rect(0, 0, w, h);
+      // A short trail attached to the rubber; older columns heal in whole tiles.
+      for (let y = Math.floor((ground - eh) / b) * b; y < ground + b; y += b) {
+        for (let x = Math.floor((ex - eh * 2) / b) * b; x < ex; x += b) {
+          const age = (ex - x) / Math.max(b, eh * 2);
+          const stagger = ((Math.floor(x / b) * 7 + Math.floor(y / b) * 3) % 5 + 5) % 5 / 5;
+          if (age + (o.heal ?? 0) < 0.65 + stagger * 0.35) ctx.rect(x, y, b, b);
+        }
+      }
+      ctx.clip('evenodd');
+    }
     ctx.imageSmoothingEnabled = !pixel;
     if (pixel) {
-      ctx.save(); ctx.globalAlpha *= seg(L, 0, 0.55) * 0.7;
+      ctx.save(); ctx.globalAlpha *= seg(L, 0, 0.55);
       plate(f, 'px_sky', ''); ctx.restore();
     }
-    const a = pixel ? 0.75 : WORLD.inkAlpha;
-    const ground = o.ground ?? h * 0.7;
+    const a = pixel ? 1 : WORLD.inkAlpha;
+    if (pixel) {
+      // Match px_mid's bottom grass and continue it to the sheet's bottom.
+      ctx.fillStyle = '#436d5a'; ctx.fillRect(0, ground, w, Math.max(0, h - ground));
+      const b = WORLD.block;
+      for (let y = ground; y < h; y += b) {
+        for (let x = -b; x < w; x += b * 2) {
+          ctx.fillStyle = Math.floor((y - ground) / b) % 2 ? '#4b755e' : '#3e6552';
+          ctx.fillRect(x + (Math.floor(y / b) % 2) * b, y, b, b);
+        }
+      }
+    }
     drawStrip(ctx, pixel ? 'px_far' : 'ink_far', w, h, 0.44, -camera * 0.13 - t * WORLD.farSpeed, ground - h * 0.46, a);
     ctx.save(); ctx.transform(1, 0, pixel ? 0 : wind, 1, pixel ? 0 : -wind * ground, 0);
     drawStrip(ctx, pixel ? 'px_mid' : 'ink_mid', w, h, 0.34, -camera * 0.3 - t * WORLD.nearSpeed, ground - h * 0.31, a);
     ctx.restore(); ctx.restore();
-    if (o.eraser !== undefined) {
+    if (!pixel && o.eraser !== undefined) {
       const heal = 1 - clamp(o.heal ?? 0);
       ctx.save(); ctx.globalAlpha *= heal * 0.87; ctx.fillStyle = '#efe9dc';
-      if (pixel) {
-        const b = WORLD.block, edge = Math.floor(o.eraser / b) * b;
-        for (let y = Math.floor(h * 0.25 / b) * b; y < h * 0.75; y += b) {
-          const blink = f.reduced ? 0 : Math.floor(L * 8 + y / b) % 2;
-          ctx.fillRect(0, y, Math.max(0, edge - blink * b), b);
-        }
-      } else {
-        ctx.beginPath(); ctx.ellipse(o.eraser + w * 0.5, h * 0.52, w * 0.5, h * 0.25, 0, 0, TAU); ctx.fill();
-      }
+      ctx.beginPath(); ctx.ellipse(o.eraser + w * 0.5, h * 0.52, w * 0.5, h * 0.25, 0, 0, TAU); ctx.fill();
       ctx.restore();
     }
   } else if (act === 'Wave') {
@@ -125,18 +143,33 @@ function paintWorld(f: Frame, act: Act, L: number, o: Options) {
       ctx.lineTo(w * 0.71, h * 0.35); ctx.lineTo(w * 0.64, h * 0.53); ctx.stroke(); ctx.restore();
     }
   } else if (act === 'Light') {
-    plate(f, 'cm_space', 'bg_space');
+    const space = bgImage('cm_space');
+    // Sample the open centre of the plate, outside both oversized halftone banks.
+    if (space) {
+      const sw = space.naturalWidth * 0.12, sh = space.naturalHeight * 0.2;
+      const scale = Math.max(w / sw, h / sh);
+      ctx.save(); ctx.beginPath(); ctx.rect(0, 0, w, h); ctx.clip();
+      ctx.drawImage(space, space.naturalWidth * 0.54, space.naturalHeight * 0.18, sw, sh,
+        (w - sw * scale) / 2, (h - sh * scale) / 2, sw * scale, sh * scale);
+      ctx.restore();
+    } else plate(f, 'bg_space', '');
     const earth = bgImage('cm_space') ? bgImage('cm_earth') : null;
     if (earth) {
       const r = Math.min(w * 0.22, h * 0.18), x = w * 0.73, y = h * 0.26;
       worldGlow(ctx, x, y, r * 1.2, 0.16 + Math.sin(t * 0.5) * 0.025, '#8fcaff');
       ctx.save(); ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.clip(); ctx.translate(x, y); ctx.rotate(L * 0.012 + t * 0.008);
-      ctx.drawImage(earth, -r, -r, r * 2, r * 2); ctx.restore();
+      const scale = r * 2 / Math.max(earth.naturalWidth, earth.naturalHeight);
+      ctx.drawImage(earth, -earth.naturalWidth * scale / 2, -earth.naturalHeight * scale / 2,
+        earth.naturalWidth * scale, earth.naturalHeight * scale); ctx.restore();
     }
     ctx.fillStyle = '#777a80'; ctx.beginPath(); ctx.moveTo(0, h * 0.78);
     ctx.quadraticCurveTo(w * 0.5, h * 0.6, w, h * 0.78); ctx.lineTo(w, h); ctx.lineTo(0, h); ctx.fill();
     const moon = bgImage('cm_moon') ?? bgImage('fg_moon');
-    if (moon) ctx.drawImage(moon, 0, 0, w, h);
+    if (moon) {
+      const scale = Math.max(w / moon.naturalWidth, h / moon.naturalHeight);
+      ctx.drawImage(moon, (w - moon.naturalWidth * scale) / 2,
+        h - moon.naturalHeight * scale, moon.naturalWidth * scale, moon.naturalHeight * scale);
+    }
     if (impact > 0) {
       const past = (o.impacts ?? []).filter(at => at <= L);
       const last = past.at(-1) ?? L, age = seg(L, last, last + WORLD.reactionLength);
@@ -152,13 +185,14 @@ function paintWorld(f: Frame, act: Act, L: number, o: Options) {
     const sun = bgImage('hs_sky') ? bgImage('hs_sun') : null, sx = w * 0.66, sy = h * 0.33;
     const r = Math.min(w * 0.25, h * 0.22);
     if (sun) {
-      // Upper disc stays registered; just the lower edge shimmers in heat.
-      ctx.drawImage(sun, 0, 0, sun.naturalWidth, sun.naturalHeight * 0.7, sx - r, sy - r, r * 2, r * 1.4);
-      const sh = sun.naturalHeight * 0.3 / 6;
-      for (let b = 0; b < 6; b++) {
-        const dx = f.reduced ? 0 : Math.sin(t * 1.1 + b * 0.6) * r * 0.008 * b / 6;
-        ctx.drawImage(sun, 0, sun.naturalHeight * 0.7 + sh * b, sun.naturalWidth, sh,
-          sx - r + dx, sy + r * 0.4 + r * 0.1 * b, r * 2, r * 0.1 + 0.5);
+      const scale = r * 2 / Math.max(sun.naturalWidth, sun.naturalHeight);
+      const dw = sun.naturalWidth * scale, dh = sun.naturalHeight * scale;
+      // All bands share one scale; heat shifts horizontally, never stretches the disc.
+      for (let band = 0; band < 10; band++) {
+        const sh = sun.naturalHeight / 10;
+        const dx = f.reduced || band < 7 ? 0 : Math.sin(t * 1.1 + band * 0.6) * r * 0.004;
+        ctx.drawImage(sun, 0, band * sh, sun.naturalWidth, sh,
+          sx - dw / 2 + dx, sy - dh / 2 + band * dh / 10, dw, dh / 10);
       }
     }
     // One broad shaft; the same sun position also lights the cloud rims.

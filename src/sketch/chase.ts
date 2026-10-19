@@ -190,16 +190,6 @@ export function drawChase(f: Frame, L: number) {
     speedWedges(ctx, w, h, x, y - face * 1.2, 0.55 * fast, t, 'rgba(255,236,210,0.5)', 7);
     dryStreak(ctx, [x - face * 0.8, y - face * 0.7], [x - Math.cos(rot) * face * 3.6, y - face * 0.7 - Math.sin(rot) * face * 3.6], face * 0.4, '#2a0c14', 0.35, 21);
   }
-  // the dive's splash: a long streak cut in the water as he pulls up
-  const sk = seg(L, CH.pull[0], CH.pull[1] + 0.3);
-  if (sk > 0 && sk < 1) {
-    ctx.save();
-    ctx.translate(w * 0.5, h * 0.74);
-    ctx.scale(1, 0.18);
-    shockRing(ctx, 0, 0, face * 3.5, sk, 'rgba(255,240,220,0.9)', face * 0.15);
-    ctx.restore();
-  }
-
   // the poof as the broom and hat appear under him
   const pf = seg(L, CH.catch - 0.06, CH.catch + 0.3);
   if (pf > 0 && pf < 1) {

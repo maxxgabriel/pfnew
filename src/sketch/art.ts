@@ -264,6 +264,33 @@ export function drawArtFoot(ctx: CanvasRenderingContext2D, k: string, x: number,
   ctx.restore();
 }
 
+// Prepared once per cut-out; preserve the original silhouette/anchor in water acts.
+const waterWaves = new Map<string, HTMLCanvasElement>();
+export function drawWaterWave(ctx: CanvasRenderingContext2D, k: string, width: number) {
+  const m = M[k], im = m && img(k);
+  if (!m || !im) return;
+  let c = waterWaves.get(k);
+  if (!c) {
+    c = document.createElement('canvas'); c.width = im.naturalWidth; c.height = im.naturalHeight;
+    const g = c.getContext('2d')!; g.drawImage(im, 0, 0);
+    const pixels = g.getImageData(0, 0, c.width, c.height), d = pixels.data;
+    for (let y = 0; y < c.height; y++) for (let x = 0; x < c.width; x++) {
+      const i = (y * c.width + x) * 4;
+      const light = (d[i] * .2126 + d[i + 1] * .7152 + d[i + 2] * .0722) / 255;
+      // Indigo wash through warm paper foam; broad pigment variation plus paper tooth.
+      const grain = Math.sin(x * .031 + Math.sin(y * .019)) * 4
+        + (((x * 73 + y * 151) % 19) - 9) * .35;
+      d[i] = 24 + light * 209 + grain;
+      d[i + 1] = 60 + light * 179 + grain;
+      d[i + 2] = 100 + light * 133 + grain;
+      d[i + 3] *= .92;
+    }
+    g.putImageData(pixels, 0, 0); waterWaves.set(k, c);
+  }
+  const scale = width / m.w;
+  ctx.save(); ctx.scale(scale, scale); ctx.drawImage(c, -m.foot[0], -m.foot[1]); ctx.restore();
+}
+
 /** the top of a pose's drawing above its foot point, in screen pixels (for putting things on his head) */
 export function poseTop(k: string, face: number) {
   const m = M[k];

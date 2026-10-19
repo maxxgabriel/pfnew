@@ -20,6 +20,20 @@ the owner's taste and decisions; this file is the technical side.
 
 ## Living worlds (round 34)
 
+Director polish: Earth/sun are cropped to their connected alpha disc by
+`prepare-world-art.py`, then drawn with one uniform scale. The same preparation
+removes the cloud's violet underside and reduces the comic moon's saturation
+and brightness. Light samples the open centre of its space plate and cover-fits
+its lunar surface. Run fills grass to the sheet bottom; its reveal and Eraser
+holes clip the world to expose the existing paper, with ground/eraser height
+projected through Run's camera and whole tiles healing along the short trail.
+Wave's three curl silhouettes receive a cached indigo/paper pigment treatment
+(`drawWaterWave`); Chase's thin pull-up splash ring is removed. Still/Home,
+chapter timing, hero tracks and desk camera remain unchanged. TypeScript,
+oxlint and diff whitespace checks passed; browser screenshots unavailable in
+this sandbox. Asset previews and phone/desktop layout math reviewed directly.
+
+
 `src/sketch/worlds.ts` now supplies the background for every chapter. Still/Home
 brush in quiet ink strips with pine wind; Run builds pixel sky/ridges/hills under
 a stepped reveal inside its existing torn-page camera. The Eraser wipes those
