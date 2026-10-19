@@ -257,6 +257,16 @@ seam.
   space), a crane and a wave in Home's right half when no card column is
   there. Ink only (their red was taken out: the film's one red circle is the
   Spark).
+- **Skills (added after round 32).** `.claude/skills/`: `design-taste-frontend` (taste-skill b9ca2fd, MIT),
+  `image-to-code` (imagegen-skills beb16b0, MIT), `web-design-guidelines` (vercel-labs/agent-skills
+  063bee9, MIT; its rules saved as `rules.md`), `awesome-design-md` (3b60532, MIT; our own SKILL.md
+  wraps the 84 files), `playwright-cli` (microsoft/playwright-cli b85c7a7, Apache-2.0; a note on
+  this container added at its top). The Playwright CLI comes with the project's Playwright 1.61
+  (`npx playwright cli`); `.playwright/cli.config.json` points it at `/opt/pw-browsers/chromium`
+  with the sandbox off. `scripts/chromium-nosandbox.sh` is the same for tools that take
+  `CHROME_PATH` (the taste inspector). First taste inspection of the film: 5 FAIL, 5 WARN, mostly
+  because it reads the canvas film as an ordinary page (no headline found, no video, cream ground,
+  too little DOM motion); judge its findings against the owner's rules, don't just obey them.
 - **Perf** (headless, JS ms/frame): 0.3 – 3.4 everywhere.
 - Codex image calls: use `--image=a.png --image=b.png` (a bare `-i` swallows
   the prompt as another file), `< /dev/null`.

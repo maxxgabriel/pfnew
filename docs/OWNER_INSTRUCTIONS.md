@@ -75,6 +75,15 @@ themselves, not to the docs: *"you report to me and not the docs"*.
 
 ## 3. Decisions (most recent first)
 
+**After round 32 — skills:** *"get these for you Taste Skill: https://www.tasteskill.dev/
+1. Web Design Guidelines: https://github.com/ vercel-labs /agent-skills/blob/main/skills
+/web-design-guidelines/SKILL .md 2. Image to Code: https://github.com/Leonxinx /
+taste-skill/blob/main/skills /image-to-code-skill/ SKILL.md 3. Awesome Design:
+https://github.com/ VoltAgent /awesome-design-md/ 5. Playwright CLI:
+https://github.com/microsoft / playwright-cli"*. Installed as project skills in
+`.claude/skills/` (see CLAUDE.md, "Skills"). Image to Code had moved to
+Leonxlnx/imagegen-skills; the taste skill's repo is Leonxlnx/taste-skill.
+
 **Round 32 — the seams are the show:** *"removbe the poencil use to draw
 things ig. that bugging the whole scenes so yeah. and let desk be part of act
 and not interactive so that we can click chartecvyer ot click to resume…

@@ -59,6 +59,17 @@ Before changing anything, read:
 - Don't put model names in commits. Commit to the working branch and push. No
   PR unless asked.
 
+## Skills (`.claude/skills/`)
+
+The owner added these: `design-taste-frontend` (tasteskill.dev), `image-to-code`,
+`web-design-guidelines`, `awesome-design-md` (84 real sites' DESIGN.md files) and `playwright-cli`;
+`codex-images` was already here. They are tools for craft and checking. **The owner's rules above and
+the film's own look win over any skill's house rules** (the taste skill bans gradients, shadows,
+cream grounds and so on, and expects a page of DOM sections; this is a canvas film). Use them for
+the DOM parts (HUD, contact card, signing pad), for honest critique, and for reference.
+In this container: `npx playwright cli open --config=.playwright/cli.config.json <url>`; the taste
+scripts need `CHROME_PATH=$PWD/scripts/chromium-nosandbox.sh`.
+
 ## Quick commands
 
 ```sh

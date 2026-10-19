@@ -1,0 +1,12 @@
+{
+  "browser": {
+    "browserName": "chromium",
+    "launchOptions": {
+      "executablePath": "/opt/pw-browsers/chromium",
+      "headless": true,
+      "chromiumSandbox": false,
+      "args": ["--use-gl=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"]
+    },
+    "contextOptions": { "viewport": { "width": 1440, "height": 900 } }
+  }
+}
