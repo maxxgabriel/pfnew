@@ -23,3 +23,11 @@ dist-ssr
 *.sln
 *.sw?
 scripts/shots/
+scripts/tmp/
+artifact/
+art/raw/*.log
+art/raw/
+
+# skill working files
+.taste-skill/
+.playwright-cli/

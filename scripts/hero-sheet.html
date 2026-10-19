@@ -1,0 +1,14 @@
+<!doctype html><html><body style="margin:0;background:#223">
+<canvas id="c" width="1500" height="1300" style="width:1500px;height:1300px"></canvas>
+<script type="module">
+import { drawHero, POSE } from '/src/hero3d/index.ts';
+const c = document.getElementById('c'), ctx = c.getContext('2d');
+const W = 1500, H = 1300;
+const g = ctx.createLinearGradient(0,0,0,H); g.addColorStop(0,'#0b1233'); g.addColorStop(1,'#1d2a5e');
+ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
+const L = { t: 1.2, wind: 0.35, light:[-0.6,-0.7,0.6], rim:'#bfe9ff' };
+[[0.15],[Math.PI/4],[Math.PI/2],[Math.PI]].forEach(([yaw],i)=> drawHero(ctx, W, H, { ...L, x: 120 + i*210, y: 600, anchor:'footL', height: 520, pose: POSE.stand, yaw }));
+ctx.save(); ctx.beginPath(); ctx.rect(860,0,640,H); ctx.clip(); ctx.fillStyle='#16204a'; ctx.fillRect(860,0,640,H); drawHero(ctx, W, H, { ...L, x: 1200, y: 420, anchor:'head', height: 2300, pose: POSE.stand, yaw: 0.45, fov: 26 }); ctx.restore();
+['flick','tuck','volley'].forEach((p,i)=> drawHero(ctx, W, H, { ...L, x: 140 + i*270, y: 1000, anchor:'hips', height: 460, pose: POSE[p], yaw: Math.PI/2 - 0.4 }));
+window.done = true;
+</script></body></html>

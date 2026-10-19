@@ -1,0 +1,83 @@
+<!doctype html><html><head><link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Shippori+Mincho:wght@600;800&display=swap" rel="stylesheet" /></head><body style="margin:0;background:#777">
+<canvas id="c"></canvas>
+<script type="module">
+import { drawSpark } from '/scripts/sketch/chibi.ts';
+import { drawSky } from '/src/reel/fold.ts';
+import { paperTile, glow, drawSprite } from '/src/core/sprites.ts';
+import { drawSeal } from '/src/acts/ink.ts';
+import { brush } from '/src/core/brush.ts';
+const PW = 390, PH = 844, GAP = 24, N = 5, dpr = 2;
+const c = document.getElementById('c');
+const W = N * PW + (N - 1) * GAP;
+c.width = W * dpr; c.height = PH * dpr; c.style.width = W + 'px'; c.style.height = PH + 'px';
+const ctx = c.getContext('2d'); ctx.scale(dpr, dpr);
+const load = (n) => new Promise((r) => { const i = new Image(); i.onload = () => r(i); i.src = `/src/assets/sketch/${n}.webp`; });
+const S = Object.fromEntries(await Promise.all(['hero','stand','walk','reach','rest','calm','curious','confident','serious','wink'].map(async (n) => [n, await load(n)])));
+await Promise.all([document.fonts.load('64px "Dela Gothic One"'), document.fonts.load('600 11px "Shippori Mincho"')]).catch(() => {}); await document.fonts.ready;
+const tile = paperTile(512, '#efe9dc');
+const paper = (g) => { g.fillStyle = '#efe9dc'; g.fillRect(0, 0, PW, PH); g.globalAlpha = 0.5; g.fillStyle = g.createPattern(tile, 'repeat'); g.fillRect(0, 0, PW, PH); g.globalAlpha = 1; };
+// draw a sprite by its feet: x centre, y ground, height in px
+const put = (g, n, x, y, h, flip = false) => { const im = S[n]; const w = im.width * h / im.height; g.save(); g.translate(x, y); if (flip) g.scale(-1, 1); g.drawImage(im, -w / 2, -h, w, h); g.restore(); };
+const hud = (g, n, name, dark) => { g.font = '600 11px "Shippori Mincho", Georgia, serif'; g.fillStyle = dark ? '#efe9dc' : '#1b1714'; g.textAlign = 'right'; g.fillText(`${n}  ${name.toUpperCase()}`, PW - 18, 34); };
+const scene = (i, fn) => { ctx.save(); ctx.translate(i * (PW + GAP), 0); ctx.beginPath(); ctx.rect(0, 0, PW, PH); ctx.clip(); fn(ctx); ctx.restore(); };
+
+// 1 · STILL: a drawing on the page, the spark just out of reach
+scene(0, (g) => {
+  paper(g);
+  g.fillStyle = '#1b1714'; g.textAlign = 'center';
+  g.font = '64px "Dela Gothic One", sans-serif'; g.fillText('MAX', PW / 2, 170);
+  g.font = '26px "Dela Gothic One", sans-serif'; g.fillText('GABRIEL', PW / 2, 210);
+  brush(g, [[60, 640], [200, 646], [330, 638]], { width: 3, color: '#1b1714', seed: 3, dry: 0.6 });
+  put(g, 'curious', 175, 645, 250);
+  drawSpark(g, 300, 400, 13);
+  hud(g, 'I', 'Still');
+});
+// 2 · FLIP: the first steps, frames flipping (a page corner lifting, an onion-skin ghost)
+scene(1, (g) => {
+  paper(g);
+  g.save(); g.globalAlpha = 0.18; put(g, 'stand', 140, 600, 230); g.restore();
+  put(g, 'walk', 210, 600, 230);
+  brush(g, [[40, 596], [200, 602], [360, 594]], { width: 3, color: '#1b1714', seed: 5, dry: 0.6 });
+  drawSpark(g, 345, 470, 12);
+  // the page's corner lifting
+  g.fillStyle = '#e2dccd'; g.beginPath(); g.moveTo(PW, PH - 120); g.quadraticCurveTo(PW - 70, PH - 60, PW - 120, PH); g.lineTo(PW, PH); g.fill();
+  g.fillStyle = '#f7f3ea'; g.beginPath(); g.moveTo(PW, PH - 120); g.quadraticCurveTo(PW - 40, PH - 40, PW - 120, PH); g.lineTo(PW - 60, PH - 70); g.closePath(); g.fill();
+  hud(g, 'II', 'Flip');
+});
+// 3 · FOLD: out in the dusk, reaching for it
+scene(2, (g) => {
+  drawSky({ ctx: g, w: PW, h: PH, t: 2.0 });
+  g.fillStyle = '#efe9dc'; g.beginPath(); g.moveTo(0, PH); g.lineTo(0, 650); g.quadraticCurveTo(PW * 0.5, 600, PW, 660); g.lineTo(PW, PH); g.fill();
+  put(g, 'reach', 175, 650, 240);
+  drawSpark(g, 262, 400, 12);
+  hud(g, 'III', 'Fold', true);
+});
+// 4 · LIGHT: one bulb, and the Sketch's shadow on the paper wall
+scene(3, (g) => {
+  g.fillStyle = '#000'; g.fillRect(0, 0, PW, PH);
+  const lit = g.createRadialGradient(150, 300, 0, 150, 300, 420);
+  lit.addColorStop(0, '#f6e9cc'); lit.addColorStop(0.35, '#cdb48c'); lit.addColorStop(0.75, '#4a3a2a'); lit.addColorStop(1, '#000');
+  g.fillStyle = lit; g.fillRect(0, 0, PW, 640);
+  g.fillStyle = '#120d0a'; g.fillRect(0, 640, PW, PH - 640);
+  // the shadow: the same drawing, flattened to black, thrown big on the wall
+  const sh = document.createElement('canvas'); const im = S.reach; sh.width = im.width; sh.height = im.height;
+  const sg = sh.getContext('2d'); sg.drawImage(im, 0, 0); sg.globalCompositeOperation = 'source-in'; sg.fillStyle = '#1a120c'; sg.fillRect(0, 0, sh.width, sh.height);
+  g.save(); g.globalAlpha = 0.85; g.drawImage(sh, 165, 300, im.width * 1.25, im.height * 1.25); g.restore();
+  put(g, 'stand', 120, 720, 180);
+  g.save(); g.globalCompositeOperation = 'lighter'; g.globalAlpha = 0.5; drawSprite(g, glow('#ffcf7a', 128), 150, 300, 380); g.restore();
+  g.strokeStyle = '#2a2219'; g.lineWidth = 1.5; g.beginPath(); g.moveTo(150, 0); g.lineTo(150, 286); g.stroke();
+  g.save(); g.globalCompositeOperation = 'lighter'; drawSprite(g, glow('#fff6e0', 64, 0.35), 150, 300, 46); g.restore();
+  drawSpark(g, 300, 330, 11);
+  hud(g, 'IV', 'Light', true);
+});
+// 6 · HOME: the spark caught and stamped, the Sketch pleased with itself
+scene(4, (g) => {
+  paper(g);
+  drawSeal(g, PW / 2, 230, 74, -0.06, 1);
+  put(g, 'confident', 190, 600, 250);
+  brush(g, [[70, 596], [200, 602], [320, 594]], { width: 3, color: '#1b1714', seed: 7, dry: 0.6 });
+  g.fillStyle = '#1b1714'; g.textAlign = 'center'; g.font = '22px "Dela Gothic One", sans-serif'; g.fillText('Let’s make something', PW / 2, 700); g.fillText('that moves.', PW / 2, 728);
+  hud(g, 'VI', 'Home');
+});
+window.done = true;
+</script></body></html>

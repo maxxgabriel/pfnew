@@ -1,0 +1,24 @@
+<!doctype html><html><body style="margin:0;background:#efe9dc">
+<canvas id="c"></canvas>
+<script type="module">
+// Dev: every sheet's standing pose side by side at one face width, on one ground line,
+// so size jumps between sheets are easy to see. Open /scripts/pose-lineup.html?keys=a,b,c
+import { drawPose, preloadPoses, poseScale } from '/src/sketch/art.ts';
+const keys = (new URLSearchParams(location.search).get('keys') ?? 'still_0,curious,firststep_0,walk8_0,run8_0,sprint8_0,moonwalk6_0,chase_0,home_1,home_2,hero_0,bye_0,sign_0,sign_3,idle_3,turnA_0,powerup_1,saberdraw_0,saber_1,firetornado_0,leap_3,ride_2,surf_1,escape_0').split(',');
+const W = 160 * keys.length, H = 460, dpr = 1;
+const c = document.getElementById('c'); c.width = W * dpr; c.height = H * dpr; c.style.width = W + 'px';
+const ctx = c.getContext('2d');
+preloadPoses();
+setTimeout(() => {
+  ctx.fillStyle = '#efe9dc'; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = 'rgba(27,23,20,0.25)'; ctx.fillRect(0, 380, W, 1);
+  for (const y of [380 - 60 * 2.4, 380 - 60 * 2.7]) { ctx.fillStyle = 'rgba(200,60,40,0.3)'; ctx.fillRect(0, y, W, 1); }
+  keys.forEach((k, i) => {
+    drawPose(ctx, k, 80 + i * 160, 380, 60, { boil: 0 });
+    ctx.font = '11px monospace'; ctx.fillStyle = '#333'; ctx.textAlign = 'center';
+    ctx.fillText(k, 80 + i * 160, 410); ctx.fillText(poseScale(k, 60).toFixed(3), 80 + i * 160, 426);
+  });
+  document.title = 'ready';
+}, 1500);
+</script>
+</body></html>
