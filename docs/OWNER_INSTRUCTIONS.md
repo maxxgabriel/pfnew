@@ -75,6 +75,21 @@ themselves, not to the docs: *"you report to me and not the docs"*.
 
 ## 3. Decisions (most recent first)
 
+**v13 — The Storyteller (plan, docs/STORY13.md):** shown three cinematic
+painted frames as an art-style example (*"i just gave you artstyle the hand
+the things are example of artystyle not what i actually need. what i need is
+sikilar artystle and the limit is unlimited basically of thinking"*). Picked:
+our ink hero in painted worlds; the storyteller frame (the boy grown old
+tells it to you by a dying fire); remove the whale and the origami crane
+ride (*"those were pretty useless"*); a few handwritten fire lines; style
+test first. On the test: *"its good but these are just opicturte and
+tranditiion would be hard here no? what i wabnted is more code like thing
+that you can code around these images… it will look static and bad… your
+wish tho you know more"* → worlds are vectorized and drawn live in code.
+Keep the per-act styles; drop the PC desk; fire lines OK. Working mode:
+*"delegate most to chatgpt and just mostly be the orchestrator and do it well
+and perfectly"* (Claude's usage is limited; ChatGPT has resets).
+
 **After round 32 — skills:** *"get these for you Taste Skill: https://www.tasteskill.dev/
 1. Web Design Guidelines: https://github.com/ vercel-labs /agent-skills/blob/main/skills
 /web-design-guidelines/SKILL .md 2. Image to Code: https://github.com/Leonxinx /

@@ -17,7 +17,17 @@ being told. Every environment is a cinematic posterized painting: flat
 colour masses, hard shadow shapes, one motivated light, warm against cool.
 The imagined places and their physical props are painted too; only the
 boy and his drawn shadow retain the ink language. His line stays visible
-under coloured light. No pixel, clay, chalk or rubber-hose skin changes.
+under coloured light. **Owner (v13 review): keep the per-act styles** — he
+still turns pixel, clay, watercolour, chalk, comic or rubber hose per world
+(round 27's `ACT_STYLE`), now against painted worlds.
+
+**Worlds are drawn in code, not shown as pictures** (owner: "these are just
+pictures… it will look static"). Paintings are made in layers, vectorized
+into flat posterized shapes (`scripts/vectorize.py`) and rendered live with
+moving hard-edged light, flicker, sway, parallax and relit/morphing seams
+(`src/world/`, `docs/WORLD.md`). PC: no desk (owner: drop it); the same film,
+wider and cinematic. Fire lines approved: "let me tell you.", "go on?",
+"and i am maxx."
 
 **Frame.** The fire stays lit only while the story does. An Eraser victory
 shrinks the real flame; a boy's victory brings it back. No permanent fire
