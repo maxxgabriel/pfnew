@@ -75,6 +75,15 @@ themselves, not to the docs: *"you report to me and not the docs"*.
 
 ## 3. Decisions (most recent first)
 
+**Round 37 — ink, and motion that actually plays:** on the v2 preview: *"no
+effecrs at all nothing good in the webiste actually make it ink style our
+orighina one and there are really no affectds in there mate no animations at
+all"*. Found: the OS Reduce Motion switch was turning every animation off. Now
+it only calms smooth-scroll inertia, scroll stretch, parallax and the 3D lean
+(src/site/motion.ts); everything else always plays. The look goes back to the
+film's ink: paper, sumi ink, the red Spark as the only colour; electric blue and
+the pop lettering are out. Spec: docs/SITE3.md.
+
 **Round 36 — v2 on matvoyce.tv's structure:** on motion site v1: *"its just like
 any other website nowadsys lol. can you try seeing matvoyce.tv for source"* →
 picked "Yes, but louder", partner colour electric blue → *"make it almost 1:1
