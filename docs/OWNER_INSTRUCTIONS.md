@@ -75,6 +75,15 @@ themselves, not to the docs: *"you report to me and not the docs"*.
 
 ## 3. Decisions (most recent first)
 
+**Round 35 — the major revamp: a motion website:** *"nah man too bad we need a
+major revamp"* → rejected every concept pitch (flipbook, one line, one second,
+webcam/multi-window ideas) → *"somewhere we can use gsap or framer or
+locomotion crazily come on man the idead dont need to be crazy but animations
+should hit"*, big screens first (phones too). Picked: a new motion site (GSAP +
+Lenis, real web layout) on branch `claude/motion-site`, the canvas film kept and
+shown inside it; content = the Playground; bold editorial look; the ink boy as a
+mascot. Spec: docs/SITE.md.
+
 **Refine The Sketch (after v13):** picked: cut the whale and the crane
 (Fold and Deep), finish the act styles (every pose he draws in an act gets
 that act's twin), fix the rough transitions. Where the duel goes without the
