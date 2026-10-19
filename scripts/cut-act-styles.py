@@ -27,7 +27,8 @@ def cut(sheet, n):
     png = os.path.join(RAW, sheet + '.png')
     if not os.path.exists(png):
         print('missing', sheet); return False
-    subprocess.run([sys.executable, '-I', os.path.join(ROOT, 'scripts/cutout-sheet.py'), png, '_tmp_' + sheet, A, str(n)], check=True, capture_output=True)
+    blade = any(s['name'] == sheet and s.get('blade') for s in spec['sheets'])
+    subprocess.run([sys.executable, '-I', os.path.join(ROOT, 'scripts/cutout-sheet.py'), png, '_tmp_' + sheet, A, str(n), *([] if blade else ['--no-blade'])], check=True, capture_output=True)
     return True
 
 def adopt(tmp, key):

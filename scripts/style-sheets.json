@@ -202,6 +202,175 @@
         "saberlock_2",
         "saberlock_3"
       ]
+    },
+    {
+      "name": "pixel_complete_01",
+      "style": "pixel",
+      "keys": [
+        "sprint8_0",
+        "sprint8_1",
+        "sprint8_2",
+        "sprint8_3",
+        "sprint8_4",
+        "sprint8_5",
+        "sprint8_6",
+        "sprint8_7"
+      ]
+    },
+    {
+      "name": "pixel_complete_02",
+      "style": "pixel",
+      "keys": [
+        "moonwalk6_0",
+        "moonwalk6_1",
+        "moonwalk6_2",
+        "moonwalk6_3",
+        "moonwalk6_4",
+        "moonwalk6_5",
+        "curious",
+        "lookback_0"
+      ]
+    },
+    {
+      "name": "pixel_complete_03",
+      "style": "pixel",
+      "keys": [
+        "lookback_1",
+        "sneak_0",
+        "sneak_1",
+        "sneak_2",
+        "sneak_3",
+        "roto_0",
+        "roto_1",
+        "roto_2"
+      ]
+    },
+    {
+      "name": "pixel_complete_04",
+      "style": "pixel",
+      "keys": [
+        "roto_3",
+        "roto_4",
+        "roto_5",
+        "roto_6",
+        "roto_7",
+        "rubberhose_0",
+        "rubberhose_1",
+        "rubberhose_2"
+      ]
+    },
+    {
+      "name": "pixel_complete_05",
+      "style": "pixel",
+      "keys": [
+        "rubberhose_3",
+        "runoff_3",
+        "idle_0",
+        "idle_1",
+        "idle_2",
+        "idle_3"
+      ]
+    },
+    {
+      "name": "comic_complete_01",
+      "style": "comic",
+      "keys": [
+        "ib_rise_0",
+        "ib_rise_1"
+      ]
+    },
+    {
+      "name": "hose_complete_01",
+      "style": "hose",
+      "keys": [
+        "knock_0",
+        "knock_1",
+        "knock_2",
+        "closeup_1",
+        "closeup_2"
+      ]
+    },
+    {
+      "name": "pixel_shift_pixel",
+      "style": "pixel",
+      "keys": [
+        "style_pixel_0",
+        "style_pixel_1",
+        "style_pixel_2",
+        "style_pixel_3",
+        "style_pixel_4",
+        "style_pixel_5"
+      ]
+    },
+    {
+      "name": "pixel_shift_water",
+      "style": "pixel",
+      "keys": [
+        "style_water_0",
+        "style_water_1",
+        "style_water_2",
+        "style_water_3",
+        "style_water_4",
+        "style_water_5"
+      ]
+    },
+    {
+      "name": "pixel_shift_clay",
+      "style": "pixel",
+      "keys": [
+        "style_clay_0",
+        "style_clay_1",
+        "style_clay_2",
+        "style_clay_3",
+        "style_clay_4",
+        "style_clay_5"
+      ]
+    },
+    {
+      "name": "pixel_shift_chalk",
+      "style": "pixel",
+      "keys": [
+        "style_chalk_0",
+        "style_chalk_1",
+        "style_chalk_2",
+        "style_chalk_3",
+        "style_chalk_4",
+        "style_chalk_5"
+      ]
+    },
+    {
+      "name": "pixel_shift_comic",
+      "style": "pixel",
+      "keys": [
+        "style_comic_0",
+        "style_comic_1",
+        "style_comic_2",
+        "style_comic_3",
+        "style_comic_4",
+        "style_comic_5"
+      ]
+    },
+    {
+      "name": "water_launch",
+      "style": "water",
+      "keys": [
+        "leap_2"
+      ]
+    },
+    {
+      "name": "pixel_lookback",
+      "style": "pixel",
+      "keys": [
+        "lookback_1"
+      ]
+    },
+    {
+      "name": "hose_hands",
+      "style": "hose",
+      "keys": [
+        "closeup_1",
+        "closeup_2"
+      ]
     }
   ],
   "reuse": [

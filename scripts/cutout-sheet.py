@@ -67,6 +67,9 @@ for i, (x0, x1) in enumerate(runs):
     blade = None
     cr, cg, cb = rgba[..., 0].astype(int), rgba[..., 1].astype(int), rgba[..., 2].astype(int)
     cyan = (rgba[..., 3] > 100) & (cg > 190) & (cb > 190) & (cr < 70)
+    # Act-style sheets opt out unless a cyan blade guide was explicitly requested.
+    # Comic hair highlights can otherwise be mistaken for a blade and erased.
+    if '--no-blade' in sys.argv: cyan[:] = False
     if cyan.sum() > 150:
         # keep only the biggest connected streak (the blade), not stray cyan in the hair
         lab = np.zeros(cyan.shape, np.int32); best, bestn, nl = 0, 0, 0
