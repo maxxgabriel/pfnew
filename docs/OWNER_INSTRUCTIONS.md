@@ -75,6 +75,15 @@ themselves, not to the docs: *"you report to me and not the docs"*.
 
 ## 3. Decisions (most recent first)
 
+**Round 38 — ask, don't guess: one explorable world:** on v3 *"nope its still
+really bad how about instead if guessing you ask me what is it that i actually
+want"*. Asked three rounds of questions. Answers: one explorable world; to wow;
+scroll as a journey; districts per style (all seven); the boy is the star and
+performs scenes; animation scenes, style portals, about/contact and secrets;
+the film becomes a place in the world; cameras *"use all of them"*; seams
+*"use them all"*; every kind of motion (character acts, ink FX, tap life, big
+transitions). Spec: docs/WORLD.md.
+
 **Round 37 — ink, and motion that actually plays:** on the v2 preview: *"no
 effecrs at all nothing good in the webiste actually make it ink style our
 orighina one and there are really no affectds in there mate no animations at
