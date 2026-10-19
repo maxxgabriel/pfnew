@@ -75,6 +75,15 @@ themselves, not to the docs: *"you report to me and not the docs"*.
 
 ## 3. Decisions (most recent first)
 
+**Round 36 — v2 on matvoyce.tv's structure:** on motion site v1: *"its just like
+any other website nowadsys lol. can you try seeing matvoyce.tv for source"* →
+picked "Yes, but louder", partner colour electric blue → *"make it almost 1:1
+mate no limits"*. Done as: matvoyce.tv's structure, layout, pacing and motion
+matched as closely as possible; everything visible is Max's own (lettering in
+the 7 styles, red + electric blue, the ink boy, stickers, copy) — never its
+typeface, logos, icons, copy or palette (the original-not-copied rule).
+Spec: docs/SITE2.md.
+
 **Round 35 — the major revamp: a motion website:** *"nah man too bad we need a
 major revamp"* → rejected every concept pitch (flipbook, one line, one second,
 webcam/multi-window ideas) → *"somewhere we can use gsap or framer or
