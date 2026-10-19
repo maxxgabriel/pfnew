@@ -31,5 +31,7 @@ export function createHot(canvas: HTMLCanvasElement) {
     };},
     draw(g:CanvasRenderingContext2D,t:number){if(!blot)return;const q=(t-blot.t)/.65;if(q>1){blot=null;return;}g.save();g.globalAlpha=(1-q)*.45;g.fillStyle='#1b1714';g.translate(blot.x,blot.y);g.beginPath();for(let i=0;i<28;i++){const a=i/28*Math.PI*2,r=(9+24*Math.sqrt(Math.max(0,q)))*(1+.12*Math.sin(i*7));if(i)g.lineTo(Math.cos(a)*r,Math.sin(a)*r);else g.moveTo(Math.cos(a)*r,Math.sin(a)*r);}g.closePath();g.fill();g.restore();},
     get current(){return {owner,frame};},
+    /** dev: the tap targets drawn last frame (scripts/tap-world.mjs) */
+    spots(){return spots.map(s=>({id:s.id,district:s.district.key,x:s.x,y:s.y,r:s.r}));},
   };
 }

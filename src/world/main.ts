@@ -56,4 +56,4 @@ function tick(now:number){requestAnimationFrame(tick);const dt=Math.min(.05,(now
  ctx.fillStyle=vignette;ctx.fillRect(0,0,w,h);if(pattern){ctx.save();ctx.globalAlpha=.035;ctx.translate((Math.floor(t*12)*29)%128,(Math.floor(t*12)*47)%128);ctx.fillStyle=pattern;ctx.fillRect(-128,-128,w+128,h+128);ctx.restore();}hot.draw(ctx,t);
  hud(districts[incoming&&P<starts[index]+overlap*.5?index-1:index],clamp(P/end));
 }
-(window as unknown as {__world:{go:(P:number)=>void}}).__world={go};requestAnimationFrame(tick);
+(window as unknown as {__world:object}).__world={go,spots:()=>hot.spots()};requestAnimationFrame(tick);
