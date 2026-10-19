@@ -18,6 +18,31 @@ function lettering(g: CanvasRenderingContext2D, text: string, x: number, y: numb
   g.lineJoin = 'round'; g.lineWidth = size * .13; g.strokeStyle = black; g.fillStyle = cream;
   g.strokeText(text, 0, size * .065); g.fillText(text, 0, 0); g.restore();
 }
+// Hand-drawn round capitals: independent of locally installed display fonts.
+const titleGlyphs: Record<string, Path2D> = {};
+for (const [letter, path] of Object.entries({
+  R: 'M0 1V0H.32C.82 0 .82 .5 .32 .5H0M.32 .5L.72 1',
+  U: 'M0 0V.65C0 1.12 .72 1.12 .72 .65V0',
+  B: 'M0 .5H.35C.85 .5 .85 1 .35 1H0V0H.3C.78 0 .78 .5 .3 .5',
+  E: 'M.68 0H0V1H.68M0 .48H.54',
+  H: 'M0 0V1M.72 0V1M0 .5H.72',
+  O: 'M.36 0C-.14 0 -.14 1 .36 1C.86 1 .86 0 .36 0Z',
+  S: 'M.68 .08C.04 -.25 -.26 .45 .35 .5C1 .56 .76 1.25 .02 .92',
+})) titleGlyphs[letter] = new Path2D(path);
+function cartoonTitle(g: CanvasRenderingContext2D, text: string, y: number, size: number, beat: number) {
+  const step = size * 1.12;
+  for (let i = 0; i < text.length; i++) {
+    const q = (i - (text.length - 1) / 2) / Math.max(1, (text.length - 1) / 2);
+    const hop = Math.max(0, Math.sin(beat - i * .24));
+    g.save(); g.translate((i - (text.length - 1) / 2) * step, y + q * q * size * .3 - hop * size * .08);
+    g.rotate(q * .16); g.scale(size, size * (1 + hop * .035)); g.translate(-.36, -.5);
+    g.lineCap = g.lineJoin = 'round';
+    const glyph = titleGlyphs[text[i]];
+    g.save(); g.translate(.075, .10); g.strokeStyle = '#100d0b'; g.lineWidth = .38; g.stroke(glyph); g.restore();
+    g.strokeStyle = '#100d0b'; g.lineWidth = .34; g.stroke(glyph);
+    g.strokeStyle = cream; g.lineWidth = .19; g.stroke(glyph); g.restore();
+  }
+}
 function plate(g: CanvasRenderingContext2D, key: string, w: number, h: number, shift: number, y: number) {
   const im = bgImage(key); if (!im) return;
   const sw = Math.max(w * 1.4, h * 1.5), sh = sw * im.naturalHeight / im.naturalWidth;
@@ -95,11 +120,25 @@ export const hose: District = {
     if (sun) g.drawImage(sun, w * .65 - pan * w * .1 - sr, h * .35 - sr + twoBeat * 2, sr * 2, sr * 2);
     plate(g, 'hs_cloud_far', w, h, -pan * w * .12 + Math.sin(t * .17) * w * .025, h * .47 + twoBeat * 3);
     plate(g, 'hs_cloud_near', w, h, -pan * w * .27 + Math.sin(t * .23) * w * .035, h * .72 + bounce * 4);
-    // One broad rolling stage, with a single elastic contour instead of detail noise.
+    // A warm, bowed proscenium floor: broad boards converge toward the sunset.
     const gy = ground + bounce * 3;
-    g.fillStyle = '#aa633a'; g.strokeStyle = black; g.lineWidth = 4;
-    g.beginPath(); g.moveTo(-w, gy + 20); g.bezierCurveTo(w * .1, gy - 20, w * .65, gy + 16, w * 2, gy - 10);
-    g.lineTo(w * 2, h * 2); g.lineTo(-w, h * 2); g.closePath(); g.fill(); g.stroke();
+    g.save();
+    g.beginPath(); g.moveTo(-w, gy + h * .09);
+    g.bezierCurveTo(w * .1, gy - h * .055, w * .65, gy - h * .015, w * 2, gy + h * .06);
+    g.lineTo(w * 2, h * 2); g.lineTo(-w, h * 2); g.closePath();
+    g.fillStyle = '#c47c47'; g.fill(); g.clip();
+    g.fillStyle = '#e9aa67'; g.fillRect(-w, gy - h * .08, w * 3, h * .105);
+    g.strokeStyle = '#77472f'; g.lineWidth = Math.max(2, h * .003);
+    for (let i = -2; i <= 6; i++) {
+      const bx = i * w / 4 - pan * w * .12;
+      g.beginPath(); g.moveTo(w * .5 + (bx - w * .5) * .58, gy - h * .06);
+      g.lineTo(bx, h * 1.15); g.stroke();
+    }
+    g.beginPath(); g.moveTo(-w, h * .91); g.quadraticCurveTo(w * .5, h * .865, w * 2, h * .95); g.stroke();
+    g.restore();
+    g.beginPath(); g.moveTo(-w, gy + h * .09);
+    g.bezierCurveTo(w * .1, gy - h * .055, w * .65, gy - h * .015, w * 2, gy + h * .06);
+    g.strokeStyle = black; g.lineWidth = Math.max(3, h * .005); g.stroke();
     const age = f.since('hs_mailbox'), open = Number.isFinite(age) && t - age > dismissedAt;
     mailboxArt();
     const mh = Math.min(h * .37, w * .57), mw = mh * (box ? box.width / box.height : .64);
@@ -138,8 +177,11 @@ export const hose: District = {
     } else { pose = 'hose-hat_1'; x = mix(w * .63, w * .46, smooth(.82, .87, L)); }
     if (f.idle > 3 && L > .14 && L < .82) { pose = cycle('hose-broom_wink', 3, t, 1.5); rot += Math.sin(t * 2) * .045; }
     g.save(); g.fillStyle = '#40261750'; g.beginPath(); g.ellipse(x, gy + 4, face * .85 * (1 - (gy - y) / h), face * .12, 0, 0, Math.PI * 2); g.fill(); g.restore();
-    drawPose(g, pose, x, y, face, { rot, squash, boil: .003 });
-    if (!open) f.hot('boy', screenX(x), screenY(y - poseHeight(pose, face) * .5), face * 1.4 * push);
+    // Calibrate against a standing drawing so action silhouettes keep their natural proportions.
+    const standingHeight = poseHeight('hose-hat_1', face);
+    const boyFace = !f.portrait && standingHeight > 0 ? face * h * .30 / standingHeight : face;
+    drawPose(g, pose, x, y, boyFace, { rot, squash, boil: .003 });
+    if (!open) f.hot('boy', screenX(x), screenY(y - poseHeight(pose, boyFace) * .5), boyFace * 1.4 * push);
     g.restore();
     if (f.crossedFwd(.435)) f.shake(5);
     // Intro lettering is drawn as a bouncing, outlined cartoon credit.
@@ -147,8 +189,9 @@ export const hose: District = {
     if (title > 0) {
       g.save(); g.globalAlpha = title; g.translate(w * .5, h * .22 - (1 - title) * h * .12); g.rotate(twoBeat * .025);
       g.scale(1 + bounce * .018, 1 - bounce * .025);
-      lettering(g, 'RUBBER', 0, -h * .045, Math.min(w * .18, h * .13), w * .86);
-      lettering(g, 'HOSE', 0, h * .065, Math.min(w * .22, h * .16), w * .85); g.restore();
+      const size = Math.min(w * .12, h * .105);
+      cartoonTitle(g, 'RUBBER', -size * .64, size, beat);
+      cartoonTitle(g, 'HOSE', size * .91, size * 1.12, beat + .3); g.restore();
     }
     // This arrives before L=.8214, where the engine begins the final iris.
     const end = smooth(.775, .835, L);

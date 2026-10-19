@@ -39,10 +39,31 @@ function title(g: CanvasRenderingContext2D, w: number, h: number, L: number) {
   }
   g.restore();
 }
+// Feather the painting once, including its horizontal cut edges. Reuse at every scale.
+let cloudPlate: HTMLCanvasElement | null = null;
+function softCloud() {
+  if (cloudPlate) return cloudPlate;
+  const im = bgImage('ch_cloud'); if (!im) return null;
+  const c = document.createElement('canvas');
+  c.width = im.naturalWidth; c.height = im.naturalHeight;
+  const g = c.getContext('2d')!;
+  g.drawImage(im, 0, 0);
+  g.globalCompositeOperation = 'destination-in';
+  const edge = g.createLinearGradient(0, 0, c.width, 0);
+  edge.addColorStop(0, 'transparent'); edge.addColorStop(.18, '#fff');
+  edge.addColorStop(.82, '#fff'); edge.addColorStop(1, 'transparent');
+  g.fillStyle = edge; g.fillRect(0, 0, c.width, c.height);
+  const vertical = g.createLinearGradient(0, 0, 0, c.height);
+  vertical.addColorStop(0, 'transparent'); vertical.addColorStop(.15, '#fff');
+  vertical.addColorStop(.85, '#fff'); vertical.addColorStop(1, 'transparent');
+  g.fillStyle = vertical; g.fillRect(0, 0, c.width, c.height);
+  cloudPlate = c;
+  return c;
+}
 function cloud(g: CanvasRenderingContext2D, x: number, y: number, width: number, alpha: number, flip = false) {
-  const im = bgImage('ch_cloud'); if (!im) return;
+  const im = softCloud(); if (!im) return;
   g.save(); g.globalAlpha *= alpha; g.translate(x, y); g.scale(flip ? -1 : 1, 1);
-  const height = width * im.naturalHeight / im.naturalWidth;
+  const height = width * im.height / im.width;
   g.drawImage(im, -width / 2, -height / 2, width, height); g.restore();
 }
 function streak(g: CanvasRenderingContext2D, x: number, y: number, size: number, lean: number, alpha: number) {
@@ -75,21 +96,32 @@ export const chalk: District = {
     cloud(g, w * .02 + wind - ride * w * .23, h * (.38 + whip), w * (1 + ride * .6), .67);
     cloud(g, w * .99 - wind + ride * w * .23, h * (.48 + whip), w * (1.1 + ride * .7), .8, true);
 
-    // The destination is on the road from the outset, growing in perspective.
+    // Grow about the seam's optical centre, with the same door proportions.
+    // The painted door gives way to the live opening during the overlap.
     const door = bgImage('ch_door');
-    const doorH = h * (.07 + .36 * ease((L - .37) / .43) + 1.45 * approach * approach);
-    const doorW = door ? doorH * door.naturalWidth / door.naturalHeight : doorH * .44;
-    const doorY = h * (.49 + .34 * ease((L - .4) / .4) + .4 * approach);
-    if (door) g.drawImage(door, w * .5 - doorW * .5, doorY - doorH, doorW, doorH);
+    const seamStart = 1 - 1.25 / 8;
+    const arrival = ease((L - .32) / (seamStart - .32));
+    const doorH = h * (.065 + .795 * arrival);
+    const doorW = w * .38 * doorH / (h * .86);
+    const seamQ = clamp((L - seamStart) / (1 - seamStart));
+    const seamZoom = 1 + ease(seamQ) * .16;
+    const doorFade = 1 - ease((seamQ - .60) / .20);
+    if (door && doorFade > 0) {
+      g.save(); g.globalAlpha = doorFade;
+      // Undo the outgoing shot's push so both frames keep the same centre.
+      const cy = h * (.56 - .02 / seamZoom);
+      g.drawImage(door, w * .5 - doorW * .5 / seamZoom, cy - doorH * .5 / seamZoom, doorW / seamZoom, doorH / seamZoom);
+      g.restore();
+    }
 
     const born = clamp((L - .035) / .14);
     const crouch = Math.sin(clamp((L - .18) / .095) * Math.PI);
     const lift = Math.sin(clamp((L - .265) / .16) * Math.PI) * h * .14;
     const x = w * (.5 + carve * .24 - brake * .13 + approach * .13);
     const y = h * (.65 + ride * .18 - approach * .15) - lift + Math.sin(t * 1.8) * face * .035;
-    const size = face * (.57 + ride * .62 - approach * .35);
     const surfing = L > .265 && L < .795;
     const pose = surfing ? 'chalk-surf_2' : 'chalk-home_3';
+    const size = h * (.18 + ride * .10 - approach * .035) / Math.max(1, poseHeight(pose, 1));
     const ph = poseHeight(pose, size);
     const since = f.since('eraser');
     const wipe = ease((since - .35) / .6), redraw = ease((since - 1.6) / 1.1);
@@ -99,15 +131,18 @@ export const chalk: District = {
     const dustOff = since > 2.7 && since < 3.5 ? Math.sin((since - 2.7) * 24) * (3.5 - since) : 0;
     if (surfing) {
       streak(g, x, y + size * .12, size * 1.8, carve < 0 ? -1 : 1, 1 - approach);
-      cloud(g, x, y + size * .19, size * 4.3, .95);
+      streak(g, x, y + size * .19, size * 2.2, carve < 0 ? -1 : 1, .85);
     }
     if (reacting) streak(g, x, y - ph * .38, size * 2, 1, wipe * (1 - redraw) * 2);
     const idle = f.idle > 3 ? Math.sin(t * 2.1) * .045 : 0;
-    drawPose(g, pose, x + dustOff * size * .13, y, size, {
+    // A solid chalk underdrawing strengthens the translucent source strokes.
+    const performance = {
       reveal, rot: carve * -.24 + idle + dustOff * .08,
       squash: 1 - crouch * .24 + Math.sin(clamp((L - .27) / .12) * Math.PI) * .19 - Math.sin(brake * Math.PI) * .2,
-      boil: .008, t,
-    });
+      boil: .008, t, alpha: 1,
+    };
+    drawPose(g, pose, x + dustOff * size * .13, y, size, { ...performance, tint: chalkWhite });
+    drawPose(g, pose, x + dustOff * size * .13, y, size, performance);
     f.hot('boy', x, y - ph * .5, Math.max(size * 1.4, ph * .45));
     // A chalk nib follows the single drawing front; it disappears once he is complete.
     if (reveal > 0 && reveal < .99) {
@@ -122,9 +157,23 @@ export const chalk: District = {
     const eraserX = reacting ? ex + (x - ex + size * 1.4) * sweep * (1 - retreat) : ex;
     const eraserY = reacting ? ey + (y - ph * .5 - ey) * sweep * (1 - retreat) : ey;
     g.save(); g.translate(eraserX, eraserY); g.rotate(-.16 + (reacting ? sweep * .35 : 0));
-    g.fillStyle = '#101e1c'; g.fillRect(-es * .5, es * .04, es, es * .27);
-    g.fillStyle = '#9a9d88'; g.fillRect(-es * .5, -es * .23, es, es * .28);
-    g.strokeStyle = chalkWhite; g.lineWidth = 1.5; g.strokeRect(-es * .5, -es * .23, es, es * .28);
+    // Thick charcoal felt below a bevelled, warm wooden grip.
+    g.fillStyle = '#101916';
+    g.beginPath(); g.roundRect(-es * .5, -es * .01, es, es * .32, es * .055); g.fill();
+    g.strokeStyle = '#56635a'; g.lineWidth = Math.max(1, es * .018);
+    for (let i = 0; i < 3; i++) {
+      const fy = es * (.09 + i * .065);
+      g.beginPath(); g.moveTo(-es * .44, fy); g.lineTo(es * .43, fy); g.stroke();
+    }
+    g.fillStyle = '#805b39';
+    g.beginPath(); g.roundRect(-es * .52, -es * .25, es * 1.04, es * .29, es * .06); g.fill();
+    g.fillStyle = '#c49b65';
+    g.beginPath(); g.roundRect(-es * .49, -es * .27, es * .98, es * .21, es * .055); g.fill();
+    g.strokeStyle = '#795331'; g.lineWidth = Math.max(1, es * .016);
+    g.beginPath(); g.moveTo(-es * .38, -es * .18);
+    g.bezierCurveTo(-es * .08, -es * .23, es * .11, -es * .1, es * .39, -es * .16);
+    g.moveTo(-es * .35, -es * .1); g.quadraticCurveTo(0, -es * .15, es * .3, -es * .09); g.stroke();
+    g.strokeStyle = chalkWhite; g.lineWidth = 1.5;
     const glint = Math.pow(Math.max(0, Math.cos(t * 1.4)), 12);
     g.globalAlpha = .25 + glint * .65 + (f.over('eraser') ? .25 : 0);
     g.beginPath(); g.moveTo(-es * .38, -es * .14); g.lineTo(es * .3, -es * .14); g.stroke(); g.restore();

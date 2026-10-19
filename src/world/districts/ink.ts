@@ -1,25 +1,36 @@
 import { drawPose, queueArt, poseHeight } from '../../sketch/art';
-import { drawPaper,drawGround,drawSpark,drawTitle,titleFit,INK,cycle } from '../../sketch/common';
+import { drawPaper,drawGround,drawSpark,INK,cycle } from '../../sketch/common';
 import { drawOneLine,ONE_HEIGHT } from '../../sketch/oneline';
 import { brush,ensoPath } from '../../core/brush';
-import type { Frame } from '../../core/frame';
 import { side } from '../camera';
 import { clamp,type District } from '../types';
 const seg=(x:number,a:number,b:number)=>clamp((x-a)/(b-a));
-const title=document.createElement('canvas');title.width=1000;title.height=650;
-const titleG=title.getContext('2d')!;let titleClock=-1;
+import logoUrl from '../../site/art/logo_ink.webp?url';
+const logo=new Image();logo.src=logoUrl;
 const moon=document.createElement('canvas');moon.width=moon.height=384;
 const mg=moon.getContext('2d')!;
-const wash=mg.createRadialGradient(160,145,15,192,192,169);
-wash.addColorStop(0,'#ded8c8');wash.addColorStop(.7,'#b5b1a2');wash.addColorStop(.94,'#93978b');wash.addColorStop(1,'#b1b2a500');
-mg.fillStyle=wash;mg.beginPath();mg.arc(192,192,170,0,Math.PI*2);mg.fill();
-// A broken dry rim around a tonal wash, rather than a cartoon face.
-brush(mg,ensoPath(192,192,163,9,.99,-2.4),{width:12,color:'#555d53',seed:12,dry:.65,press:.6,tail:.12,alpha:.52,halo:.08});
+// Flat pigment, with a feathered perimeter baked once into the moon plate.
+mg.fillStyle='#e1d8bd';
+for(let i=8;i>=0;i--){
+ mg.globalAlpha=i===0?1:.035;
+ mg.beginPath();mg.arc(192,192,160+i,0,Math.PI*2);mg.fill();
+}
+mg.globalAlpha=1;
+brush(mg,ensoPath(192,192,161,9,.36,1.25),{width:8,color:'#777563',seed:12,dry:.78,press:.7,tail:.08,alpha:.48,halo:.08});
+const shore=document.createElement('canvas');shore.width=1024;shore.height=384;
+const sg=shore.getContext('2d')!;
+{const gr=sg.createLinearGradient(0,0,0,384);gr.addColorStop(0,'rgba(83,88,80,.62)');gr.addColorStop(.45,'rgba(120,124,114,.3)');gr.addColorStop(1,'rgba(239,233,220,0)');sg.fillStyle=gr;}sg.beginPath();sg.moveTo(0,24);
+for(let x=0;x<=1024;x+=16)sg.lineTo(x,24+Math.sin(x*.012)*7+Math.sin(x*.043)*2);
+sg.lineTo(1024,384);sg.lineTo(0,384);sg.fill();
+// Broad translucent loads settle into the bank, rather than a flat grey footer.
+brush(sg,[[0,65],[310,80],[710,95],[1024,76]],{width:95,color:'#74796c',seed:21,dry:.4,alpha:.55,halo:.18});
+brush(sg,[[1024,215],[700,230],[300,200],[0,260]],{width:170,color:'#343e38',seed:24,dry:.3,alpha:.36,halo:.2});
 const layers=[{key:'ink_far',depth:.16,height:.78,y:.08},{key:'ink_mid',depth:.4,height:.65,y:.22}];
 export const ink: District={key:'ink',name:'Ink',len:8,preload(){
  for(const [name,n] of [['home',4],['idle',4],['walk8',8],['run8',8],['leap',4],['firststep',4],['powerup',3]] as const)for(let i=0;i<n;i++)queueArt(`${name}_${i}`,0);queueArt('curious',0);
 },draw(f,L){
- const {ctx:g,w,h,face,t}=f,ground=h*.79;
+ const {ctx:g,w,h,t}=f,ground=h*.79;
+ const face=f.portrait?f.face:h*.30/(poseHeight('home_3',1)||3.6);
  const intro=Math.max(f.intro,seg(L,0,.09)*3.1),birth=seg(intro,.55,2.1);
  const run=seg(L,.32,.66),anticipate=seg(L,.66,.74),jump=seg(L,.74,.99);
  const lift=Math.sin(jump*Math.PI*.82)*Math.min(h*.36,face*4.6);
@@ -29,7 +40,7 @@ export const ink: District={key:'ink',name:'Ink',len:8,preload(){
  const hy=(v:number)=>ground+(v-ground)*zoom+camY;
  drawPaper(g,w,h);g.save();g.translate(w*.48,ground+camY);g.scale(zoom,zoom);g.translate(-w*.48,-ground);
  side(f,L*3+Math.sin(t*.22)*.012,layers);
- const mx=w*.87-L*w*.2,my=h*.23+Math.sin(t*.65)*face*.025,r=Math.min(w*.105,h*.082);
+ const mx=w*(f.portrait?.78:.84)-L*w*.2,my=h*(f.portrait?.4:.42)+Math.sin(t*.65)*face*.025,r=Math.min(w*.105,h*.082);
  const since=f.since('moon');
  const wink=since<1.5?Math.sin(Math.PI*seg(since,.12,1.4))**2:0;
  g.save();g.translate(mx,my);g.scale(1,1-wink*.88);g.drawImage(moon,-r,-r,r*2,r*2);g.restore();
@@ -37,6 +48,7 @@ export const ink: District={key:'ink',name:'Ink',len:8,preload(){
  // One faint breathing wash makes the find readable without hover.
  g.strokeStyle=`rgba(113,119,99,${.09+.12*Math.max(0,Math.sin(t*1.3))})`;g.lineWidth=1;g.beginPath();g.arc(mx,my,r*1.08,0,Math.PI*2);g.stroke();
  f.hot('moon',hx(mx),hy(my),r*zoom*1.3);
+ g.drawImage(shore,-w,ground-h*.03125,w*3,h*.5);
  drawGround(g,-w,w*2,ground,face*.065);
  let pose='home_3',squash=1+Math.sin(t*2.5)*.012,rot=0;
  if(L>.045)pose=`firststep_${Math.min(3,Math.floor(seg(L,.045,.13)*4))}`;
@@ -56,10 +68,14 @@ export const ink: District={key:'ink',name:'Ink',len:8,preload(){
  // The title completes on the clock and holds at the opening until scrolling.
  const alpha=1-seg(L,.025,.23);
  if(alpha>0){
-  const clock=Math.min(3,intro);
-  if(titleClock!==clock){titleClock=clock;titleG.clearRect(0,0,1000,650);drawTitle({ctx:titleG,intro:clock} as Frame,500,20,titleFit(900,570));}
-  const scale=Math.min(w*.78/1000,h*.34/650);
-  g.save();g.globalAlpha=alpha;g.drawImage(title,w*.4-500*scale-L*w*.5,h*.135,1000*scale,650*scale);g.restore();
+  // the wordmark itself (the brush lettering with the red Spark), painted on left to right with a ragged wet edge
+  if(logo.complete&&logo.naturalWidth){
+   const q=seg(intro,.35,2.1),lw=Math.min(w*.86,h*.5*logo.naturalWidth/logo.naturalHeight),lh=lw*logo.naturalHeight/logo.naturalWidth;
+   const lx=w*.5-lw/2,ly=h*(f.portrait?.11:.08)-L*h*.12,edge=lx+lw*q*1.08;
+   g.save();g.globalAlpha=alpha;g.beginPath();g.moveTo(lx-2,ly-2);
+   for(let i=0;i<=10;i++){const yy=ly+lh*i/10;g.lineTo(edge+Math.sin(i*2.7+q*9)*lw*.035,yy);}
+   g.lineTo(lx-2,ly+lh+2);g.closePath();g.clip();g.drawImage(logo,lx,ly,lw,lh);g.restore();
+  }
  }
  if(f.crossedFwd(.74)){f.shake(5);f.flash(.055);}
 },tap(id,f){if(id==='moon')f.flash(.045,'#efe9dc');}};

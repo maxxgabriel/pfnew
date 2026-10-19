@@ -38,18 +38,28 @@ function title(f: WorldFrame, L: number) {
   const a = smooth(.025, .065, L) * (1 - smooth(.16, .235, L));
   if (a <= 0) return;
   const { ctx: g, w, h } = f;
-  const size = Math.min(w * .19, h * .16);
-  g.save(); g.translate(w * .5, h * .3 - smooth(.16, .235, L) * h * .08);
+  const bleed = smooth(.16, .235, L);
+  const size = Math.min(w * .245, h * .205);
+  g.save(); g.translate(w * .5, h * .3 - bleed * h * .06);
   g.rotate(-.045); g.globalAlpha = a;
   g.textAlign = 'center'; g.font = `${size}px "Caveat Brush", cursive`;
-  // Broad wet underpaint, bleeding edges, then the pigment settling in.
-  g.fillStyle = 'rgba(75,139,162,.24)';
-  g.beginPath(); g.ellipse(0, -size * .2, w * .47, size * .82, -.04, 0, Math.PI * 2); g.fill();
+  g.lineJoin = 'round';
+  // Paper halo isolates the wet indigo from the busy sea without a title plate.
+  // The outer washes spread as the pigment lifts; the dense core leaves first.
+  g.strokeStyle = 'rgba(249,245,222,.35)'; g.lineWidth = size * (.14 + bleed * .16);
+  g.strokeText('Watercolour', 0, 0, w * .91);
+  g.strokeStyle = 'rgba(249,245,222,.92)'; g.lineWidth = size * .075;
+  g.strokeText('Watercolour', 0, 0, w * .91);
   for (let i = 3; i > 0; i--) {
-    g.lineWidth = i * size * .035; g.strokeStyle = 'rgba(180,215,213,.12)';
-    g.strokeText('Watercolour', 0, 0, w * .9);
+    g.lineWidth = size * (i * .014 + bleed * .10);
+    g.strokeStyle = `rgba(30,47,91,${.12 * (1 - bleed * .45)})`;
+    g.strokeText('Watercolour', 0, bleed * size * .08, w * .91);
   }
-  g.fillStyle = '#e5e9d4'; g.fillText('Watercolour', 0, 0, w * .9);
+  g.globalAlpha = a * (1 - bleed * .8);
+  g.fillStyle = '#182a57'; g.fillText('Watercolour', 0, 0, w * .91);
+  // A narrow pooled edge gives the wash a darker lower rim.
+  g.globalAlpha *= .45; g.strokeStyle = '#111e43'; g.lineWidth = size * .009;
+  g.strokeText('Watercolour', 0, size * .008, w * .91);
   g.restore();
 }
 

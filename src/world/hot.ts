@@ -18,7 +18,8 @@ export function createHot(canvas: HTMLCanvasElement) {
     const start=press;press=null;
     if(!start||start.id!==e.pointerId||Math.hypot(e.clientX-start.x,e.clientY-start.y)>12)return;
     mx=e.clientX;my=e.clientY;
-    const spot=spots.findLast(hit);
+    // a find beats the boy when both are under the finger (he often stands in front of it)
+    const under=spots.filter(hit),spot=under.findLast(s=>s.id!=='boy')??under.at(-1);
     if(spot){times.set(`${spot.district.key}:${spot.id}`,performance.now()/1000);spot.district.tap?.(spot.id,spot.frame);}
     if(!spot||spot.id==='boy')pokeHero(mx,my);
   },{passive:true});
