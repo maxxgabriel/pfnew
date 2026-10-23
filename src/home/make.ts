@@ -53,8 +53,9 @@ export function initMake() {
     const num = li.querySelector<HTMLElement>('.mk-num')!;
     gsap.set(letters.flat(), { yPercent: 115 });
     num.style.visibility = 'hidden';
-    ScrollTrigger.create({ trigger: li, start: 'top 90%', once: true, onEnter: () => { bandsIn(letters, { stagger: 0.035, jitter: 0.22 }); scramble(num, 0.4); } });
-    return { li, words, letters };
+    const line = { li, words, letters, landed: false };
+    ScrollTrigger.create({ trigger: li, start: 'top 90%', once: true, onEnter: () => { bandsIn(letters, { stagger: 0.035, jitter: 0.22 }).eventCallback('onComplete', () => { line.landed = true; }); scramble(num, 0.4); } });
+    return line;
   });
 
   // the boy: drawn on a canvas so every pose stands on the same feet at the same height
@@ -132,7 +133,8 @@ export function initMake() {
     active = i;
     if (i < 0) return;
     // the active line's bands give a small jolt as the ink lands
-    lines[i].letters.forEach((bands, li) => bands.forEach((b) => popTl!.fromTo(b, { yPercent: gsap.utils.random(-14, 14) }, { yPercent: 0, duration: 0.4, ease: 'power4.out' }, (prev >= 0 ? 0.12 : 0) + li * 0.012)));
+    // (its own tweens, so a quick line change never leaves the bands sheared)
+    if (lines[i].landed) lines[i].letters.forEach((bands, li) => bands.forEach((b) => gsap.fromTo(b, { yPercent: gsap.utils.random(-14, 14) }, { yPercent: 0, duration: 0.4, ease: 'power4.out', overwrite: true, delay: (prev >= 0 ? 0.12 : 0) + li * 0.012 })));
     const c = CRAFTS[i];
     popTl.add(() => {
       frame = 0; acc = 0; place(i); draw();

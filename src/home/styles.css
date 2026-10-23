@@ -1,5 +1,5 @@
 /* STYLES (src/home/styles.ts) */
-.s-styles { position: relative; padding: clamp(60px, 12vh, 140px) var(--pad) clamp(80px, 16vh, 180px); }
+.s-styles { position: relative; overflow-x: clip; padding: clamp(60px, 12vh, 140px) var(--pad) clamp(80px, 16vh, 180px); }
 .st-head { display: flex; flex-direction: column; align-items: center; gap: 16px; margin-bottom: clamp(32px, 7vh, 80px); }
 .st-eyebrow { display: flex; align-items: center; gap: 10px; font: 600 13px/1 var(--ui); letter-spacing: .08em; text-transform: uppercase; }
 .st-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--red); }

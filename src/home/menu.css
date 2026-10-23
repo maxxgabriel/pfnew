@@ -3,7 +3,7 @@
   position: fixed; inset: 0; z-index: 45; background: var(--paper); color: var(--ink);
   display: grid; grid-template-rows: auto 1fr auto; align-items: center;
   padding: calc(var(--pad) + 72px) var(--pad) calc(var(--pad) + 76px);
-  opacity: 0; visibility: hidden; overscroll-behavior: contain; touch-action: none;
+  opacity: 0; visibility: hidden; overflow: hidden; overscroll-behavior: contain; touch-action: none;
 }
 .menu[hidden] { display: none; }
 .mn-top { display: flex; align-items: center; gap: 8px; font: 26px/1 var(--hand); color: var(--wash); }

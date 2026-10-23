@@ -1,5 +1,5 @@
 /* WHAT I DO (src/home/make.ts) */
-.s-make { position: relative; padding: clamp(80px, 16vh, 180px) var(--pad) clamp(90px, 22vh, 220px); }
+.s-make { position: relative; overflow-x: clip; padding: clamp(80px, 16vh, 180px) var(--pad) clamp(90px, 22vh, 220px); }
 /* the whole-page ground wash for the active line: a fixed layer under everything, cross-fading */
 .mk-tint { position: fixed; inset: 0; z-index: -1; opacity: 0; pointer-events: none; transition: opacity .6s var(--ease-inout), background-color .55s var(--ease-inout); }
 
