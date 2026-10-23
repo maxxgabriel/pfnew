@@ -19,7 +19,7 @@
   will-change: transform;
 }
 .wp-pill {
-  position: absolute; left: 0; right: 0; top: 50%; margin-inline: auto; width: fit-content; translate: 0 -50%;
+  position: absolute; inset: 0; margin: auto; width: fit-content; height: fit-content;
   display: flex; align-items: center; gap: .28em;
   padding: .22em .55em .26em .42em; border: clamp(4px, .5vw, 7px) solid var(--ink); border-radius: 999px;
   background: var(--paper); color: var(--ink); box-shadow: .09em .09em 0 var(--red);

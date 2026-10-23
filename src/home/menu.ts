@@ -47,7 +47,7 @@ export function initMenu() {
   menu.innerHTML = `
     <p class="mn-top"><span class="mn-hand">where to?</span>${SPARK}</p>
     <nav class="mn-list" aria-label="Sections">
-      ${LINES.map((l, i) => `<div class="mn-clip"><a class="mn-line" href="${l.to}" data-i="${i}">
+      ${LINES.map((l, i) => `<div class="mn-clip"><a class="mn-line" href="${l.to}" data-i="${i}" aria-label="${l.label.toLowerCase()}">
         <span class="mn-num">0${i + 1}</span><span class="mn-word">${l.label}</span>
         <span class="mn-boy" aria-hidden="true"><img alt="" /><i class="mn-tag">${l.note}</i></span></a></div>`).join('')}
     </nav>
@@ -130,7 +130,8 @@ export function initMenu() {
     gsap.to(plus, { rotate: 135, duration: 0.5, ease: 'power4.inOut' });
     menu!.classList.remove('landed');
     tl = gsap.timeline({ onComplete: () => menu!.classList.add('landed') });
-    tl.fromTo(menu, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.45, ease: 'power4.inOut' }, 0)
+    gsap.set(menu, { visibility: 'visible' });
+    tl.fromTo(menu, { opacity: 0 }, { opacity: 1, duration: 0.45, ease: 'power4.inOut' }, 0)
       .fromTo(rises, { yPercent: 110, rotate: 3 }, { yPercent: 0, rotate: 0, duration: 0.6, ease: 'power4.out', stagger: 0.07 }, 0.08)
       .fromTo(spark, { scale: 0, rotate: -120 }, { scale: 1, rotate: 0, duration: 0.6, ease: 'power4.out' }, 0.3)
       .add(scramble(top, 0.4), 0.1)
