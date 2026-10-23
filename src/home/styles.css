@@ -1,0 +1,41 @@
+/* STYLES (src/home/styles.ts) */
+.s-styles { position: relative; padding: clamp(60px, 12vh, 140px) var(--pad) clamp(80px, 16vh, 180px); }
+.st-head { display: flex; flex-direction: column; align-items: center; gap: 16px; margin-bottom: clamp(32px, 7vh, 80px); }
+.st-eyebrow { display: flex; align-items: center; gap: 10px; font: 600 13px/1 var(--ui); letter-spacing: .08em; text-transform: uppercase; }
+.st-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--red); }
+.st-title { font: 400 clamp(46px, 7.2vw, 128px)/.95 var(--display); text-transform: uppercase; text-align: center; }
+.st-l { display: inline-block; overflow: hidden; padding: 0 .04em .08em; vertical-align: top; }
+
+/* desktop: 4 + 3, the short row centred */
+.st-grid { list-style: none; padding: 0; display: flex; flex-wrap: wrap; justify-content: center; gap: clamp(14px, 1.6vw, 28px); max-width: min(1120px, 135vh); margin: 0 auto; }
+.st-cell { flex: 0 0 calc((100% - 3 * clamp(14px, 1.6vw, 28px)) / 4); }
+.st-tile { position: relative; display: block; width: 100%; aspect-ratio: 20 / 21; border: 2.5px solid var(--ink); border-radius: 22px; background: var(--paper); overflow: hidden; box-shadow: 5px 5px 0 var(--ink); touch-action: manipulation; transform-origin: 50% 80%; will-change: transform; }
+.st-ground { position: absolute; inset: 0; clip-path: inset(100% 0 0 0); }
+.st-num { position: absolute; left: 14px; top: 14px; font: 700 11px/1 var(--ui); letter-spacing: .06em; z-index: 2; }
+.st-tile.on .st-num { color: var(--red); }
+.st-facebox { position: absolute; left: 13%; right: 13%; top: 9%; bottom: 22%; display: grid; place-items: center; pointer-events: none; }
+.st-face { width: auto; height: auto; max-width: 100%; max-height: 100%; aspect-ratio: 1; transform-origin: 50% 100%; border-radius: 50%; }
+.st-cv { position: absolute; inset: 0; width: 100%; height: 100%; transform: scaleY(0); transform-origin: 50% 80%; pointer-events: none; }
+.st-label { position: absolute; left: 0; right: 0; bottom: 6%; z-index: 2; text-align: center; font: 400 clamp(24px, 2.3vw, 36px)/1 var(--hand); }
+.st-label.light { transition: color .3s var(--ease-inout); }
+.st-tile.on .st-label.light { color: var(--paper); }
+.st-tile:focus-visible { outline: 3px solid var(--red); outline-offset: 4px; }
+
+/* phone: two columns, the seventh tile centred under them */
+@media (max-width: 700px) {
+  .st-head { align-items: flex-start; }
+  .st-title { text-align: left; font-size: min(15vw, 64px); }
+  .st-l { display: block; width: max-content; }
+  .st-grid { gap: 14px; }
+  .st-cell { flex-basis: calc((100% - 14px) / 2); }
+  .st-tile { border-radius: 18px; box-shadow: 4px 4px 0 var(--ink); }
+  .st-label { font-size: 25px; }
+}
+/* landscape phones and small tablets: still 4 + 3, shorter tiles */
+@media (max-height: 500px) and (orientation: landscape) {
+  .st-tile { aspect-ratio: 1 / 1; }
+  .st-facebox { top: 13%; bottom: 27%; }
+  .st-label { font-size: 20px; bottom: 7%; }
+  .st-cell { flex-basis: calc((100% - 3 * 16px) / 4); max-width: 200px; }
+  .st-grid { gap: 16px; }
+}

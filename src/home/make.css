@@ -1,0 +1,40 @@
+/* WHAT I DO (src/home/make.ts) */
+.s-make { position: relative; padding: clamp(80px, 16vh, 180px) var(--pad) clamp(90px, 22vh, 220px); }
+/* the whole-page ground wash for the active line: a fixed layer under everything, cross-fading */
+.mk-tint { position: fixed; inset: 0; z-index: -1; opacity: 0; pointer-events: none; transition: opacity .6s var(--ease-inout), background-color .55s var(--ease-inout); }
+
+.mk-eyebrow { display: flex; align-items: center; justify-content: center; gap: 10px; font: 600 13px/1 var(--ui); letter-spacing: .08em; text-transform: uppercase; margin-bottom: clamp(28px, 6vh, 64px); }
+.mk-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--red); }
+
+.mk-list { list-style: none; padding: 0; display: flex; flex-direction: column; align-items: center; gap: clamp(18px, 4.5vh, 48px); }
+.mk-item { position: relative; display: flex; align-items: flex-start; gap: .6em; transition: opacity .8s var(--ease-out); }
+.mk-item.out { opacity: .1; }
+.mk-num { font: 700 12px/1 var(--ui); letter-spacing: .06em; padding-top: .9em; color: var(--ink); min-width: 2ch; }
+.mk-line { font: 400 clamp(40px, min(5.8vw, 11vh), 110px)/1.02 var(--display); text-transform: uppercase; letter-spacing: .005em; text-align: center; white-space: nowrap; }
+.mk-w { display: inline-block; }
+/* letters rise inside the line: clip each word so bands come up from under it */
+.mk-w { overflow: hidden; padding: 0 .04em .08em; margin-bottom: -.08em; vertical-align: top; }
+
+.mk-boy, .mk-prop { position: absolute; left: 0; top: 0; z-index: 2; will-change: transform; }
+.mk-boy { pointer-events: auto; touch-action: manipulation; }
+.mk-boy canvas { display: block; }
+.mk-prop { pointer-events: none; }
+.mk-prop img, .mk-prop svg { display: block; width: 100%; height: auto; }
+
+/* phone: two stacked words per craft, left-aligned, the number on the left */
+@media (max-width: 700px) {
+  .s-make { padding-top: 72px; padding-bottom: 120px; }
+  .mk-eyebrow { justify-content: flex-start; padding-left: 4px; }
+  .mk-list { align-items: stretch; gap: 26px; }
+  .mk-item { gap: 10px; }
+  .mk-num { font-size: 11px; padding-top: 1.1em; }
+  .mk-line { font-size: min(13.4vw, 64px); line-height: .98; text-align: left; white-space: normal; }
+  .mk-w { display: block; width: max-content; }
+}
+@media (max-height: 500px) and (orientation: landscape) {
+  .mk-line { font-size: min(6.4vw, 15vh); }
+  .mk-list { gap: 18px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mk-item, .mk-tint { transition-duration: .01s; }
+}

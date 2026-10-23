@@ -1,0 +1,22 @@
+/* CURSOR (src/home/cursor.ts): fine pointers only — an ink brush-tip arrow, the red Spark at its tip */
+@media (hover: hover) and (pointer: fine) {
+  html.has-cursor, html.has-cursor * { cursor: none !important; }
+  html.has-cursor iframe { cursor: auto !important; }
+}
+.cu { position: fixed; left: 0; top: 0; z-index: 200; pointer-events: none; width: 0; height: 0; will-change: transform; }
+/* the tip of the arrow sits exactly on the pointer: everything pivots there */
+.cu-body { position: absolute; left: -2px; top: -2px; width: 26px; height: 30px; transform-origin: 2px 2px; }
+.cu-arrow { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.cu-ink { fill: var(--ink); stroke: var(--paper); stroke-width: 2.2; stroke-linejoin: round; paint-order: stroke; }
+.cu-hair { fill: none; stroke: var(--wash); stroke-width: 1.1; stroke-linecap: round; opacity: .55; }
+.cu-spark { position: absolute; left: -5px; top: -5px; width: 13px; height: 13px; fill: var(--red); stroke: var(--paper); stroke-width: 1.6; paint-order: stroke; overflow: visible; }
+.cu[data-mode="link"] .cu-spark { animation: cu-spin 1.6s linear infinite; }
+@keyframes cu-spin { to { rotate: 360deg; } }
+.cu-disc {
+  position: absolute; left: -44px; top: -44px; width: 88px; height: 88px; border-radius: 50%;
+  background: var(--ink); color: var(--paper); display: grid; place-items: center;
+  box-shadow: 4px 4px 0 var(--red);
+}
+.cu-label { font: 17px/1 var(--display); letter-spacing: .04em; }
+.cu-dspark { position: absolute; right: 4px; top: 2px; width: 18px; height: 18px; fill: var(--red); stroke: var(--paper); stroke-width: 1.6; paint-order: stroke; overflow: visible; }
+@media (prefers-reduced-motion: reduce) { .cu[data-mode="link"] .cu-spark { animation: none; } }

@@ -1,0 +1,69 @@
+/* CONTACT (#5): the striped SAY HI pill, the boy on top, the hanko. */
+.s-contact {
+  position: relative; z-index: 2; background: var(--paper);
+  /* the bottom of the page: it lifts off the footer underneath (see footer.css) */
+  box-shadow: 0 34px 46px -18px rgba(10, 8, 6, .55);
+  padding: clamp(150px, 22vh, 260px) var(--pad) clamp(110px, 18vh, 220px);
+}
+.ct { display: grid; justify-items: center; gap: clamp(18px, 3vh, 34px); }
+.ct-line { width: min(94vw, 1240px); padding-left: 5%; font: clamp(22px, 2.1vw, 32px)/1.05 var(--hand); text-align: left; }
+.ct-mask { display: block; overflow: hidden; padding-bottom: .12em; max-width: min(15ch, 58%); }
+.ct-txt { display: block; }
+.ct-stage { width: min(94vw, 1240px); display: grid; justify-items: center; transform-origin: 50% 60%; will-change: transform; }
+
+.ct-pill {
+  --b: clamp(4px, .55vw, 8px);
+  position: relative; display: block; width: 100%; text-decoration: none; color: var(--ink);
+  touch-action: manipulation; -webkit-user-select: none; user-select: none; outline: none;
+}
+.ct-face {
+  position: relative; display: grid; place-items: center; overflow: hidden;
+  height: clamp(132px, 22vw, 300px);
+  border: var(--b) solid var(--ink); border-radius: 999px; background: var(--paper);
+  box-shadow: clamp(6px, .9vw, 14px) clamp(7px, 1.1vw, 16px) 0 var(--ink);
+  transform-origin: 50% 100%;
+  isolation: isolate;
+}
+.ct-pill:focus-visible .ct-face { box-shadow: clamp(6px, .9vw, 14px) clamp(7px, 1.1vw, 16px) 0 var(--red); }
+.ct-stripes {
+  --tile: clamp(30px, 3.6vw, 56px);
+  position: absolute; top: 0; bottom: 0; left: calc(-1 * var(--tile)); width: calc(100% + 2 * var(--tile));
+  background: linear-gradient(45deg, var(--ink) 0 13%, var(--paper) 13% 50%, var(--ink) 50% 63%, var(--paper) 63% 100%) 0 0 / var(--tile) var(--tile);
+  will-change: transform; z-index: -1;
+}
+.ct-word {
+  font: clamp(58px, 15vw, 200px)/1 var(--display); letter-spacing: .01em; white-space: nowrap;
+  color: var(--paper); -webkit-text-stroke: .085em var(--ink); paint-order: stroke fill;
+  text-shadow: .045em .055em 0 var(--ink);
+  transform: translateY(.04em);
+}
+/* the boy stands on the pill's top edge, right of centre */
+.ct-boy {
+  position: absolute; bottom: calc(100% - var(--b) - 2px); right: 13%;
+  width: clamp(120px, 15vw, 230px); height: clamp(118px, 15vw, 230px);
+  pointer-events: none; z-index: 2;
+}
+/* the hanko: a red square seal with MG, stamped once on the bottom-right corner */
+.ct-seal {
+  --s: clamp(50px, 5.6vw, 88px); --ring: 0;
+  position: absolute; right: 4%; bottom: calc(var(--s) * -.4); width: var(--s); height: var(--s);
+  display: grid; grid-template-columns: 1fr 1fr; place-items: center; padding: calc(var(--s) * .12);
+  background: var(--red); border-radius: 8%; color: var(--paper);
+  font: calc(var(--s) * .42)/1 var(--display);
+  box-shadow: inset 0 0 0 calc(var(--s) * .05) var(--red), inset 0 0 0 calc(var(--s) * .085) var(--paper);
+  pointer-events: none; z-index: 3;
+}
+.ct-seal b { font-weight: 400; transform: translateY(.04em); }
+.ct-seal::after {
+  content: ''; position: absolute; inset: -4px; border: 3px solid var(--red); border-radius: 12%;
+  opacity: calc(1 - var(--ring)); transform: scale(calc(1 + var(--ring) * .7));
+}
+.ct-mail { font: 600 clamp(13px, 1.1vw, 16px)/1 var(--ui); margin-top: clamp(10px, 2vh, 24px); }
+.ct-mail a { text-decoration: none; border-bottom: 2px solid var(--red); padding-bottom: 3px; }
+@media (hover: hover) and (pointer: fine) { .ct-pill { cursor: pointer; } }
+@media (orientation: landscape) and (max-height: 500px) {
+  .s-contact { padding-top: 130px; padding-bottom: 80px; }
+  .ct-face { height: clamp(110px, 30vh, 150px); }
+  .ct-word { font-size: clamp(54px, 22vh, 110px); }
+  .ct-boy { width: 110px; height: 108px; }
+}

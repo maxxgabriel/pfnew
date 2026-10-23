@@ -1,0 +1,82 @@
+/* WORK (src/home/work.ts) — phone first: one card at a time; .is-strip = the pinned desktop strip */
+.s-work { position: relative; padding: clamp(80px, 14vh, 160px) 0 clamp(60px, 10vh, 120px); }
+.wk-head { padding: 0 var(--pad); text-align: center; }
+.wk-kicker { font: 600 13px/1.2 var(--ui); letter-spacing: .04em; margin-bottom: 10px; min-height: 1.2em; }
+.wk-h { font: 400 clamp(56px, 15.5vw, 220px)/.88 var(--display); letter-spacing: .01em; }
+.wk-h > span { display: block; white-space: nowrap; }
+
+.wk-stage { position: relative; padding: 0 var(--pad); margin-top: clamp(16px, 3vh, 40px); }
+.wk-meta { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font: 700 12px/1 var(--ui); letter-spacing: .08em; text-transform: uppercase; }
+.wk-num { font: 400 22px/1 var(--display); letter-spacing: .02em; display: inline-flex; align-items: baseline; }
+.wk-count { display: inline-flex; }
+
+/* the cards: phone stacks them in one cell; room above for the boy on the frame */
+.wk-track { position: relative; display: grid; margin: 110px auto 0; width: min(100%, 52svh); touch-action: pan-y; }
+.wk-card { grid-area: 1 / 1; position: relative; transform-origin: 50% 60%; }
+.wk-in { position: relative; display: block; width: 100%; aspect-ratio: 1; text-align: left; transform-origin: 50% 100%; }
+.wk-art { position: absolute; inset: 0; overflow: hidden; border: 3px solid var(--ink); border-radius: 7px 12px 6px 14px / 12px 6px 14px 7px; background: var(--paper-2); box-shadow: calc(2px + var(--lift, 0) * 10px) calc(2px + var(--lift, 0) * 10px) 0 var(--ink); }
+.wk-art canvas { width: 100%; height: 100%; display: block; }
+.wk-lab { position: absolute; left: 10px; top: 10px; background: var(--paper); border: 2px solid var(--ink); padding: 5px 8px 4px; font: 700 10px/1 var(--ui); letter-spacing: .08em; text-transform: uppercase; }
+.wk-arrow { position: absolute; right: 10px; bottom: 10px; width: 40px; height: 40px; display: grid; place-items: center; background: var(--ink); color: var(--paper); font: 700 18px/1 var(--ui); border-radius: 50%; transition: background .3s var(--ease-out), transform .45s var(--ease-out); }
+.wk-card.hot .wk-arrow { background: var(--red); transform: rotate(45deg) scale(1.1); }
+.wk-seat { position: absolute; left: 70%; top: 2px; width: 0; height: 0; }
+.wk-in:focus-visible { outline: none; }
+.wk-in:focus-visible .wk-art { outline: 3px solid var(--red); outline-offset: 4px; }
+
+/* the boy sits on the active card's frame */
+.wk-boy { position: absolute; left: 0; top: 0; width: 170px; height: 170px; pointer-events: none; z-index: 20; transform-origin: 50% 96%; will-change: transform; }
+
+.wk-foot { margin-top: 22px; text-align: center; }
+.wk-title { position: relative; height: 1em; overflow: hidden; padding: .06em 0; box-sizing: content-box; font: 400 clamp(44px, 13vw, 64px)/1 var(--display); }
+.wk-tt { position: absolute; left: 0; right: 0; top: .06em; white-space: nowrap; }
+.wk-line { margin: 8px auto 0; max-width: 34ch; font: 400 20px/1.15 var(--hand); color: var(--ink); min-height: 2.3em; }
+.wk-ctrl { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 14px; }
+.wk-btn, .wk-open { height: 48px; border: 2px solid var(--ink); border-radius: 8px; box-shadow: 3px 3px 0 var(--ink); transition: transform .3s var(--ease-out), box-shadow .3s var(--ease-out), background .3s var(--ease-out); }
+.wk-btn { width: 48px; flex: none; background: var(--paper); font: 700 20px/1 var(--ui); }
+.wk-open { flex: 1; max-width: 240px; background: var(--ink); color: var(--paper); font: 700 15px/1 var(--ui); letter-spacing: .04em; text-transform: uppercase; display: inline-flex; align-items: center; justify-content: center; gap: .5em; }
+.wk-open b { color: var(--red); font-size: 18px; }
+.wk-btn:active, .wk-open:active { transform: translate(3px, 3px) scale(.97); box-shadow: 0 0 0 var(--ink); }
+@media (hover: hover) and (pointer: fine) {
+  .wk-btn:hover { background: var(--paper-2); transform: translate(-2px, -2px); box-shadow: 5px 5px 0 var(--ink); }
+  .wk-open:hover { transform: translate(-2px, -2px); box-shadow: 5px 5px 0 var(--red); }
+}
+.wk-bar { position: relative; height: 2px; background: var(--ink); margin: 22px auto 0; width: min(100%, 52svh); }
+.wk-bar i { position: absolute; left: 0; top: -5px; width: 100%; height: 12px; pointer-events: none; transition: transform .5s var(--ease-out); }
+.wk-bar i::before { content: ''; position: absolute; left: -6px; top: 0; width: 12px; height: 12px; border-radius: 50%; background: var(--red); }
+
+/* phone landscape / short screens: card left, words right */
+@media (max-height: 559px) and (orientation: landscape) {
+  .s-work { padding-top: 70px; }
+  .wk-h { font-size: clamp(48px, 12vh, 90px); }
+  .wk-h > span { display: inline; }
+  .wk-stage { display: grid; grid-template-columns: auto 1fr; grid-template-rows: auto 1fr auto; column-gap: 5vw; align-items: center; max-width: 900px; margin-inline: auto; }
+  .wk-meta { grid-column: 2; grid-row: 1; }
+  .wk-track { grid-column: 1; grid-row: 1 / span 3; width: min(62vh, 44vw); margin-top: 70px; }
+  .wk-foot { grid-column: 2; grid-row: 2; margin: 0; text-align: left; }
+  .wk-title { font-size: clamp(36px, 9vh, 56px); }
+  .wk-line { margin-left: 0; }
+  .wk-bar { grid-column: 2; grid-row: 3; width: 100%; }
+  .wk-boy { width: 120px; height: 120px; }
+}
+
+/* desktop: the pinned strip */
+.s-work.is-strip { padding-bottom: 0; }
+.is-strip .wk-h > span { display: inline; }
+.is-strip .wk-h { font-size: min(11vw, 22vh); }
+.is-strip .wk-stage { --ch: min(48vh, 29vw); --cw: calc(var(--ch) * 1.6); height: 100vh; margin: 0; padding: 0; overflow: hidden; overflow: clip; }
+.is-strip .wk-meta { position: absolute; left: var(--pad); right: auto; bottom: calc(7vh + min(12vh, 8.4vw) + 22px); justify-content: flex-start; gap: 18px; }
+.is-strip .wk-num { font-size: 30px; }
+.is-strip .wk-track { position: absolute; left: 0; top: calc(47vh - var(--ch) / 2); margin: 0; width: auto; display: flex; column-gap: 6vw; padding-left: calc(50vw - var(--cw) / 2); will-change: transform; }
+.is-strip .wk-card { flex: none; width: var(--cw); height: var(--ch); transform-origin: 50% 50%; }
+.is-strip .wk-in { height: 100%; aspect-ratio: auto; }
+.is-strip .wk-lab { font-size: 11px; left: 14px; top: 14px; }
+.is-strip .wk-boy { width: clamp(190px, 26vh, 300px); height: clamp(190px, 26vh, 300px); }
+.is-strip .wk-foot { position: absolute; left: var(--pad); right: var(--pad); bottom: 7vh; margin: 0; display: grid; grid-template-columns: 1fr auto; align-items: end; column-gap: 4vw; text-align: left; }
+.is-strip .wk-title { grid-row: 1 / span 2; font-size: min(12vh, 8.4vw); }
+.is-strip .wk-tt { right: auto; }
+.is-strip .wk-line { margin: 0 0 14px; font-size: 24px; max-width: 26ch; }
+.is-strip .wk-ctrl { margin: 0; justify-content: flex-end; }
+.is-strip .wk-btn { display: none; }
+.is-strip .wk-open { flex: none; width: 220px; }
+.is-strip .wk-bar { position: absolute; left: var(--pad); right: var(--pad); bottom: 3.6vh; width: auto; margin: 0; }
+.is-strip .wk-bar i { transition: none; }
