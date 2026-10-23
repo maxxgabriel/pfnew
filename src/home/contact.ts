@@ -70,7 +70,7 @@ export function initContact() {
     const im = image(key), m = meta[key];
     if (!m || !im.complete || !im.naturalWidth) return;
     const ref = meta.bye_0;
-    const s = (H * 0.8) / (ref.foot[1] - ref.top);   // one scale for every frame
+    const s = (H * 0.4) / (ref.foot[1] - ref.top);   // one scale for every frame; he is 40% of the canvas tall
     ctx.globalAlpha = boy.alpha;
     ctx.translate(W / 2, H + boy.y);
     ctx.rotate(boy.rot);
@@ -100,7 +100,8 @@ export function initContact() {
       .to(pill, { scale: 1, rotate: -2.5, duration: 0.85, ease: 'back.out(1.9)' }, 0.05)
       .add(bandsIn(word, { stagger: 0.05, jitter: 0.2 }), 0.3)
       // the boy falls in from above the pill and lands with a squash
-      .set(boy, { alpha: 1, pose: 'leap_3', y: -innerHeight * 0.45, rot: -0.2 }, 0.65)
+      .set(boy, { pose: 'leap_3', y: -H * 0.55, rot: -0.2 }, 0.65)
+      .to(boy, { alpha: 1, duration: 0.12, ease: 'none' }, 0.65)
       .to(boy, { y: 0, rot: 0, duration: 0.45, ease: 'power2.in' }, 0.65)
       .set(boy, { pose: 'leap_0' }, 1.1)
       .fromTo(boy, { sx: 1.18, sy: 0.8 }, { sx: 1, sy: 1, duration: 0.45, ease: 'elastic.out(1, 0.45)' }, 1.1)
@@ -133,7 +134,7 @@ export function initContact() {
   const jump = () => {
     if (!arrived || jumping) return;
     jumping = true;
-    const h = H * 0.55;
+    const h = H * 0.3;
     gsap.timeline({ onComplete: () => { jumping = false; } })
       .set(boy, { pose: 'leap_0' })
       .to(boy, { sx: 1.15, sy: 0.82, duration: 0.08, ease: 'power2.out' })

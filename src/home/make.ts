@@ -99,7 +99,7 @@ export function initMake() {
         boy: { x: Math.min(a.right - host.left - fs * 0.35, host.width - fs * 0.75), y: a.top - host.top + fs * 0.28 },
         prop: words.length > 1
           ? { x: Math.min(b.right - host.left + fs * 0.2, host.width - fs * 0.4), y: b.bottom - host.top - fs * 0.3 }
-          : { x: a.left - host.left + fs * 0.1, y: a.top - host.top - fs * 0.05 },
+          : { x: a.left - host.left + fs * 0.4, y: a.top - host.top - fs * 0.12 },
       };
     }
     return {

@@ -39,8 +39,10 @@
 }
 /* the boy stands on the pill's top edge, right of centre */
 .ct-boy {
-  position: absolute; bottom: calc(100% - var(--b) - 2px); right: 13%;
-  width: clamp(120px, 15vw, 230px); height: clamp(118px, 15vw, 230px);
+  /* the canvas is twice his height and wider than him, so a jump never leaves it */
+  --h: clamp(118px, 15vw, 230px);
+  position: absolute; bottom: calc(100% - var(--b) - 2px); right: calc(13% - var(--h) * .3);
+  width: calc(var(--h) * 1.6); height: calc(var(--h) * 2);
   pointer-events: none; z-index: 2;
 }
 /* the hanko: a red square seal with MG, stamped once on the bottom-right corner */
@@ -65,5 +67,5 @@
   .s-contact { padding-top: 130px; padding-bottom: 80px; }
   .ct-face { height: clamp(110px, 30vh, 150px); }
   .ct-word { font-size: clamp(54px, 22vh, 110px); }
-  .ct-boy { width: 110px; height: 108px; }
+  .ct-boy { --h: 108px; }
 }
