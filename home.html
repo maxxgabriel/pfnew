@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#efe9dc" />
+<meta name="description" content="Max Gabriel — motion designer and animator. One little ink boy, every style." />
+<link rel="icon" href="./favicon.svg" />
+<title>Max Gabriel — drawing things that move</title>
+</head>
+<body>
+<header class="hd" id="hd">
+  <a class="hd-logo" href="#top" aria-label="Max Gabriel, back to top"></a>
+  <p class="hd-tag" data-scramble>Motion designer &amp; animator,<br>drawing things that move.</p>
+  <p class="hd-loc"><span data-scramble>Based in India</span><br><span class="dim" data-scramble>Working everywhere</span></p>
+  <button class="hd-menu" type="button" aria-expanded="false" aria-controls="menu"><span class="menu-word" data-roll="MENU|CLOSE">MENU</span> <span class="menu-plus">+</span></button>
+</header>
+<main id="top">
+  <!-- each section is filled by its own module in src/home/ -->
+  <section class="s-hero" id="hero" aria-label="Max Gabriel"></section>
+  <section class="s-work" id="work" aria-label="Featured work"></section>
+  <section class="s-make" id="make" aria-label="What I do"></section>
+  <section class="s-styles" id="styles" aria-label="Styles I draw in"></section>
+  <section class="s-contact" id="contact" aria-label="Say hi"></section>
+</main>
+<footer class="s-footer" id="footer" aria-label="Footer"></footer>
+<div class="menu" id="menu" hidden></div>
+<div class="wipe" aria-hidden="true"></div>
+<script type="module" src="/src/home/main.ts"></script>
+</body>
+</html>

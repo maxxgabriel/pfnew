@@ -1,0 +1,31 @@
+/* HERO (src/home/hero.ts) */
+/* hero */
+.s-hero { position: relative; height: 100svh; overflow: hidden; }
+.counter { position: absolute; left: 50%; bottom: 0; transform: translateX(-50%); display: flex; font: 31vh/0.92 'Permanent Marker', cursive; }
+.slot { position: relative; width: .62em; height: 1em; overflow: hidden; }
+.slot .band { position: absolute; inset: 0; }
+.slot .strip { display: flex; flex-direction: column; will-change: transform; }
+.slot .strip span { height: 1em; display: grid; place-items: center; }
+
+.name { position: absolute; inset: 0; pointer-events: none; }
+/* one size for both lines, set so GABRIEL spans the screen; MAX sits top-left, GABRIEL bottom-right */
+.line { position: absolute; display: flex; overflow: hidden; padding: .08em .04em; font: min(18.6vw, 34vh)/0.86 'Permanent Marker', cursive; will-change: transform; }
+.line-max { left: 3vw; top: 13vh; }
+.line-gab { right: 2.5vw; bottom: 6vh; }
+.g { position: relative; display: inline-block; }
+.g .ghost { visibility: hidden; }
+.g .band { position: absolute; inset: 0; will-change: transform; }
+.spark { position: absolute; width: min(4.4vw, 8vh); height: min(4.4vw, 8vh); border-radius: 50%; background: var(--red); transform: scale(0); left: 0; top: 0; }
+@media (max-width: 700px) {
+  .line { font-size: 19.5vw; }
+  .line-max { left: 4vw; top: 16vh; font-size: 30vw; }
+  .line-gab { right: 3vw; bottom: 14vh; }
+}
+
+.boy { position: absolute; width: clamp(150px, 15vw, 270px); height: auto; left: 0; top: 0; opacity: 0; pointer-events: none; transform-origin: 50% 100%; }
+
+/* the scroll chip: an ink box with a running marquee */
+.s-hero .chip { position: fixed; left: clamp(16px, 2.6vw, 40px); bottom: clamp(16px, 2.6vw, 40px); z-index: 5; width: 190px; height: 40px; overflow: hidden; border: 2px solid var(--ink); background: var(--paper); box-shadow: 4px 4px 0 var(--ink); display: flex; align-items: center; text-decoration: none; color: var(--ink); opacity: 0; }
+.chip-run { white-space: nowrap; font: 600 12px/1 Inter, sans-serif; letter-spacing: .06em; animation: run 6s linear infinite; padding-left: 10px; }
+@keyframes run { to { transform: translateX(-50%); } }
+

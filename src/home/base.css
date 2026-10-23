@@ -1,0 +1,39 @@
+/* HOME (round 39): the shared look. Section styles live with their modules (src/home/<section>.css). */
+:root {
+  --paper: #efe9dc; --paper-2: #e4dccb; --ink: #1b1714; --wash: #8a8378; --red: #e8432a;
+  --pad: clamp(16px, 2.6vw, 40px);
+  --display: 'Permanent Marker', cursive; --hand: 'Caveat Brush', cursive; --ui: Inter, system-ui, sans-serif;
+  --ease-out: cubic-bezier(0.25, 1, 0.5, 1);      /* ease-out-quart: every entrance */
+  --ease-inout: cubic-bezier(0.76, 0, 0.24, 1);  /* ease-in-out-quart: fades and wipes */
+}
+* { box-sizing: border-box; margin: 0; }
+html { background: var(--paper); color: var(--ink); font-family: var(--ui); -webkit-tap-highlight-color: transparent; }
+body { overflow-x: hidden; }
+img { display: block; max-width: 100%; }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; padding: 0; }
+a { color: inherit; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.dim { color: var(--wash); }
+
+/* banded letters (src/home/slices.ts) */
+.g { position: relative; display: inline-block; }
+.g .ghost { visibility: hidden; }
+.g .band { position: absolute; inset: 0; will-change: transform; }
+.slot { position: relative; width: .62em; height: 1em; overflow: hidden; }
+.slot .band { position: absolute; inset: 0; }
+.slot .strip { display: flex; flex-direction: column; will-change: transform; }
+.slot .strip span { height: 1em; display: grid; place-items: center; }
+
+/* header: fixed, logo left, tagline centre, place, MENU right (on phones MENU sits bottom-right, in the thumb zone) */
+.hd { position: fixed; inset: 0 0 auto 0; z-index: 50; display: grid; grid-template-columns: auto 1fr auto auto; gap: clamp(20px, 5vw, 100px); align-items: start; padding: var(--pad); pointer-events: none; }
+.hd > * { pointer-events: auto; }
+.hd-logo { width: clamp(84px, 9vw, 130px); aspect-ratio: 1.6; background: center / contain no-repeat; opacity: 0; }
+.hd-tag, .hd-loc { font: 600 13px/1.25 var(--ui); }
+.hd-tag { justify-self: center; }
+.hd-menu { font: 26px/1 var(--display); letter-spacing: .02em; display: inline-flex; gap: .25em; align-items: baseline; }
+@media (max-width: 700px) {
+  .hd { grid-template-columns: auto 1fr; }
+  .hd-tag { justify-self: end; text-align: right; font-size: 11px; }
+  .hd-loc { display: none; }
+  .hd-menu { position: fixed; right: var(--pad); bottom: var(--pad); background: var(--ink); color: var(--paper); padding: 12px 18px; box-shadow: 4px 4px 0 var(--red); font-size: 22px; }
+}
