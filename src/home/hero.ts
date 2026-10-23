@@ -378,7 +378,7 @@ export async function initHero(o: { lock: (on: boolean) => void }) {
     stl.fromTo(lineGab, { x: 0, scale: 1 }, { x: () => innerWidth - lineGab.offsetLeft + lineGab.offsetWidth * 0.3 + innerWidth * 0.05, scale: 1.25, duration: GROW, ease: 'power2.in' }, 0);
     stl.set({}, {}, 1);
     ScrollTrigger.create({
-      trigger: hero, start: 'top top', end: () => `+=${innerHeight * 3.2}`, pin: true, scrub: 0.5, animation: stl,
+      trigger: hero, start: 'top top', end: () => `+=${innerHeight * 2}`, pin: true, scrub: 0.5, animation: stl,
       refreshPriority: 10, invalidateOnRefresh: true,
       onUpdate: (s) => {
         const p = s.progress, n2 = p < GROW + 0.04 ? 0 : Math.min(SHOW.length - 1, Math.floor(((p - GROW - 0.04) / (1 - GROW - 0.04)) * SHOW.length));

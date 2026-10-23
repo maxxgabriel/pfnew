@@ -47,7 +47,7 @@ const MARKUP = `
   <div class="wk-stage">
     <p class="wk-meta"><span class="wk-num"><span class="wk-count">01</span><span class="dim"> / 0${N}</span></span><span class="wk-tag">${PIECES[0].tag}</span></p>
     <div class="wk-track">
-      ${PIECES.map((p, i) => `<article class="wk-card${i === 0 ? ' on' : ''}" data-i="${i}">
+      ${PIECES.map((p, i) => `<article class="wk-card${i === 0 ? ' on' : ''}" data-i="${i}" data-cursor="open" data-cursor-label="OPEN">
         <button class="wk-in" type="button" aria-label="Open ${p.title}">
           <span class="wk-art"><canvas role="img" aria-label="${p.title}: live drawing of the ink boy"></canvas></span>
           <span class="wk-lab">${pad2(i)} — ${p.tag}</span><span class="wk-arrow" aria-hidden="true">↗</span>

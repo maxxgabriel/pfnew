@@ -7,7 +7,8 @@
   --ease-inout: cubic-bezier(0.76, 0, 0.24, 1);  /* ease-in-out-quart: fades and wipes */
 }
 * { box-sizing: border-box; margin: 0; }
-html { background: var(--paper); color: var(--ink); font-family: var(--ui); -webkit-tap-highlight-color: transparent; }
+html { background: var(--paper); color: var(--ink); font-family: var(--ui); -webkit-tap-highlight-color: transparent; overflow-x: clip; }
+body { overflow-x: clip; }
 body { overflow-x: hidden; }
 img { display: block; max-width: 100%; }
 button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; padding: 0; }
