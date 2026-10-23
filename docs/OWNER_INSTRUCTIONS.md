@@ -75,6 +75,17 @@ themselves, not to the docs: *"you report to me and not the docs"*.
 
 ## 3. Decisions (most recent first)
 
+**Round 39 — the world is rejected; a proper portfolio, studied frame by frame:** on
+the world: *"nah dude wtf is this lol. rhis is certainly not what we agreed on right?"* →
+everything was wrong (slideshow, static pictures, cheap, not the idea) → *"lets acrao
+this man. lets have a proper portfolio website but thung is you are making it generic.
+we csn use out chibli brilliantly here so lets do that as well. now what i mainly want
+is a website like matvoyce you took ideas right but 0 transitions 0 anything of course
+we will make it our way and not copy but sorry man it sucked i want you to go frame bu
+feame and see what actually happens. every little affect. every little animation
+transitions motions every 1s"* → *"continue for next 30 mins … gets agents as well"*.
+The world (`world.html`, src/world) is shelved. Study: docs/study/MATVOYCE_*.md.
+
 **Round 38 — ask, don't guess: one explorable world:** on v3 *"nope its still
 really bad how about instead if guessing you ask me what is it that i actually
 want"*. Asked three rounds of questions. Answers: one explorable world; to wow;
