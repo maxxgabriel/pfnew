@@ -255,6 +255,7 @@ export async function initHero(o: { lock: (on: boolean) => void }) {
 
   // 4. 100 sinks out through the bottom edge in bands; the header's MENU wipes on in steps
   slots.forEach((s, i) => s.strips.forEach((strip, b) => tl.to(strip.parentElement, { yPercent: 130, duration: 0.5, ease: 'power3.in' }, at + i * 0.04 + b * 0.03)));
+  tl.add(() => { document.body.classList.add('hd-ready'); }, at + 0.05);
   tl.to(menuWord, { clipPath: 'inset(0 0% 0 0)', duration: 0.5, ease: 'steps(5)' }, at + 0.1);
 
   // 5. MAX / GABRIEL assemble band by band, letters out of sync

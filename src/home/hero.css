@@ -1,7 +1,7 @@
 /* HERO (src/home/hero.ts) */
 /* hero */
 .s-hero { position: relative; height: 100svh; overflow: hidden; }
-.counter { position: absolute; left: 50%; bottom: 0; transform: translateX(-50%); display: flex; font: 31vh/0.92 'Permanent Marker', cursive; }
+.counter { position: absolute; left: 50%; bottom: 0; transform: translateX(-50%); display: flex; font: min(31vh, 44vw)/0.92 'Permanent Marker', cursive; }
 .slot { position: relative; width: .62em; height: 1em; overflow: hidden; }
 .slot .band { position: absolute; inset: 0; }
 .slot .strip { display: flex; flex-direction: column; will-change: transform; }
