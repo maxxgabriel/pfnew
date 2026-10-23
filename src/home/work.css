@@ -51,7 +51,7 @@
   .wk-h > span { display: inline; }
   .wk-stage { display: grid; grid-template-columns: auto 1fr; grid-template-rows: auto 1fr auto; column-gap: 5vw; align-items: center; max-width: 900px; margin-inline: auto; }
   .wk-meta { grid-column: 2; grid-row: 1; }
-  .wk-track { grid-column: 1; grid-row: 1 / span 3; width: min(62vh, 44vw); margin-top: 70px; }
+  .wk-track { grid-column: 1; grid-row: 1 / span 3; width: min(56vh, 40vw); margin-top: 64px; }
   .wk-foot { grid-column: 2; grid-row: 2; margin: 0; text-align: left; }
   .wk-title { font-size: clamp(36px, 9vh, 56px); }
   .wk-line { margin-left: 0; }
