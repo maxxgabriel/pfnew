@@ -4,6 +4,10 @@ This repo is **Max Gabriel's portfolio**: a single-canvas, scroll-driven
 animated film (vanilla TypeScript + Vite, no framework). Animation *is* the
 product; projects are deliberately absent.
 
+**Round 40 (branch `claude/break-loose`):** the newest direction is `break.html`, a scroll-driven
+music video (no music) where a generic website breaks loose and becomes Max's site — read
+`docs/BREAK.md` for it. The notes below describe the older canvas film.
+
 Before changing anything, read:
 
 -1. `docs/OWNER_INSTRUCTIONS.md` — every instruction, reference and website the

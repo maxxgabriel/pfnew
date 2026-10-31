@@ -116,6 +116,9 @@ export function snap(c: Ctx) {
   if (b > T.land + 3) ml.strain = Math.max(ml.strain, 0.55 + 0.35 * kick * k5);
   for (let i = 0; i < 3; i++) if (n % 2 === 1) P(`card${i}`).look.y -= 14 * hit(ph, 8) * k5;
 
+  // the camera punches in on the kick, harder on the one
+  c.cam.z *= 1 - (0.018 + (n % 4 === 0 ? 0.03 : 0)) * kick * k1;
+
   // the build: kicks on the eighths, the camera swings round the page and leans in
   if (build > 0) {
     const sw = Math.sin((B * Math.PI) / 2);

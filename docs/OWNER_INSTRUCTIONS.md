@@ -75,6 +75,16 @@ themselves, not to the docs: *"you report to me and not the docs"*.
 
 ## 3. Decisions (most recent first)
 
+**Round 40 — the site as a music video (BREAK LOOSE):** on the motion site: *"now tell mw what we
+can do to make it look super good currently i dont like it much"* → *"what i want What I want: a
+full music video like a website here, with a lot of crazy ass animations or some story, but made as
+motion graphics only. No filmed footage. It can be 2D, 3D or both. What matters to me is that it's
+creative and unique."* Picked the concept **"the page breaks into song"** (a generic website whose
+own parts break loose and dance, ending as Max's site); music: *"music is totally not needed use all
+creativity in website making. just make sure its crazy"* and *"no musi8c again focus should be
+creativity"*; the boy: **"He's the star"**; then *"it should be a scrolllable thing things happpen
+when scroll its scroll bases"*. Built on branch `claude/break-loose` as `break.html`. Spec: docs/BREAK.md.
+
 **Round 39 — the world is rejected; a proper portfolio, studied frame by frame:** on
 the world: *"nah dude wtf is this lol. rhis is certainly not what we agreed on right?"* →
 everything was wrong (slideshow, static pictures, cheap, not the idea) → *"lets acrao
@@ -458,3 +468,27 @@ it also you can let it handle some code jobs too. so yeah leys do it and do
 great animations and transitions everything should hit."* → network opened
 (*"done try now"*) → device-code login → chose "Separate branch" and "Yes,
 build it".
+
+**2026-10-31 (round 40)**
+
+> pull the latest branch
+
+> yeah get this i mean claude/motion-site
+
+> show how this lookd run it on local
+
+> now tell mw what we can do to make it look super good currently i dont like it much
+
+> what i want What I want: a full music video like a website here, with a lot of crazy ass
+> animations or some story, but made as motion graphics only. No filmed footage. It can be 2D, 3D or
+> both. What matters to me is that it's creative and unique.
+
+*(Asked to pick a concept / music / mood / the boy: picked "Page breaks into song"; music:)*
+
+> music is totally not needed use all creativity in website making. just make sure its crazy
+
+> no musi8c again focus should be creativity
+
+*(the boy: "He's the star"; then, while the build was starting:)*
+
+> it should be a scrolllable thing things happpen when scroll its scroll bases
