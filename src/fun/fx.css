@@ -1,0 +1,18 @@
+/* the finish: grain over everything, the glitch flash, the cursor, the skip link */
+.grain { position: fixed; inset: 0; z-index: 90; pointer-events: none; opacity: .07; mix-blend-mode: multiply; background-size: 160px 160px; }
+.glitch-flash { position: fixed; inset: 0; z-index: 95; pointer-events: none; opacity: 0; }
+.glitch-flash.go { animation: gflash .32s steps(1) both; background:
+  linear-gradient(transparent 0 12%, rgba(255, 61, 34, .9) 12% 15%, transparent 15% 41%, rgba(79, 182, 255, .85) 41% 47%, transparent 47% 63%, rgba(255, 213, 74, .9) 63% 65%, transparent 65% 82%, rgba(21, 19, 17, .9) 82% 88%, transparent 88%); }
+@keyframes gflash {
+  0% { opacity: 1; transform: translateX(-3%); filter: hue-rotate(0deg); }
+  25% { opacity: 1; transform: translateX(4%) scaleY(1.1); }
+  50% { opacity: .8; transform: translateX(-2%) scaleY(.7); filter: hue-rotate(90deg); }
+  75% { opacity: 1; transform: translateX(1%); }
+  100% { opacity: 0; transform: none; }
+}
+.has-cursor, .has-cursor a, .has-cursor button { cursor: none; }
+.cursor { position: fixed; left: 0; top: 0; z-index: 99; width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 50%; background: var(--hot); pointer-events: none; opacity: 0; transition: width .25s, height .25s, margin .25s, background .25s, border .25s, opacity .3s; }
+.cursor.on { opacity: 1; }
+.cursor.big { width: 54px; height: 54px; margin: -27px 0 0 -27px; background: transparent; border: 3px solid var(--hot); }
+.skip { position: absolute; left: 12px; top: -60px; z-index: 100; padding: 10px 14px; border-radius: 999px; background: var(--ink); color: var(--bg); font: 700 14px var(--ui); }
+.skip:focus { top: 12px; }

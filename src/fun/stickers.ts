@@ -10,7 +10,9 @@ gsap.registerPlugin(CustomEase, CustomWiggle);
  * the sun swaggers, the boombox pumps on the beat, the ink pot hops, the glove points the way down.
  */
 const files = import.meta.glob('../assets/fun/*.webp', { query: '?url', import: 'default', eager: true }) as Record<string, string>;
-export const stickerUrl = (name: string) => files[`../assets/fun/${name}.webp`];
+/** a sticker's url (falls back to the sparkle if that one hasn't been drawn yet) */
+export const stickerUrl = (name: string) => files[`../assets/fun/${name}.webp`] ?? files['../assets/fun/sparkle.webp'];
+export const hasSticker = (name: string) => !!files[`../assets/fun/${name}.webp`];
 const BEAT = 60 / 118;
 
 type Bits = { host: HTMLElement; inner: HTMLElement; img: HTMLImageElement };

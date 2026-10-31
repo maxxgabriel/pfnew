@@ -3,22 +3,35 @@ import '@fontsource/inter/700.css';
 import './fun.css';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
 import Lenis from 'lenis';
+import { initBands } from './bands';
 import { initBoil } from './boil';
 import { Boy } from './boy';
-import { CARD_POSES, initCard } from './card';
+import { initComic } from './comic';
+import { initContact } from './contact';
+import { initFoot } from './foot';
+import { initFx } from './fx';
 import { HERO_POSES, initHero } from './hero';
+import { calm, fine } from './kit';
+import { initMenu } from './menu';
+import { initSkills } from './skills';
 import { stickerUrl } from './stickers';
-gsap.registerPlugin(ScrollTrigger);
+import { initStyles } from './styles';
+import { TRAILER_POSES, initTrailer } from './trailer';
+import { initWork } from './work';
+gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 
 /*
- * FUN — the opening screen and one card. Smooth wheel on fine pointers, native scrolling on phones.
- * Nothing starts until the type, his drawings and the stickers are in, so the first thing you see is
- * already moving properly.
+ * MAX GABRIEL — a fun site that never stops playing. In order: the name is a playground, two bands
+ * of words, a neo-noir trailer the scroll plays, six little loops, what I do (every word moves its
+ * own way), about as a comic page, one boy in seven styles, say hi, and a graffiti footer.
+ * Smooth wheel on fine pointers, native scrolling on phones. Nothing starts until the type, his
+ * drawings and the stickers are in, so the first thing you see already moves properly.
  */
-const fine = matchMedia('(pointer: fine)').matches;
-const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const q = <T extends HTMLElement = HTMLElement>(s: string) => document.querySelector<T>(s)!;
 initBoil(calm);
+initFx();
 
 const lenis = fine ? new Lenis({ duration: 1.1, smoothWheel: true }) : null;
 if (lenis) {
@@ -26,45 +39,40 @@ if (lenis) {
   gsap.ticker.add((t) => lenis.raf(t * 1000));
   gsap.ticker.lagSmoothing(0);
 }
+const go = (target: string) => {
+  const el = target === '#top' ? 0 : q(target);
+  if (lenis) lenis.scrollTo(el, { duration: 1.6 });
+  else gsap.to(window, { scrollTo: el, duration: 1.2, ease: 'power3.inOut' });
+};
 
-const hero = initHero(document.querySelector<HTMLElement>('.hero')!, fine);
-const card = initCard(document.querySelector<HTMLElement>('.card')!, fine);
+const hero = initHero(q('.hero'), fine);
+initBands(q('.bands'));
+initTrailer(q('.trailer'));
+const work = initWork(q('.work'));
+initSkills(q('.skills'));
+initComic(q('.comic'));
+initStyles(q('.styles'));
+initContact(q('.contact'));
+initFoot(q('.foot'), () => go('#top'));
+initMenu(go);
+document.querySelectorAll<HTMLAnchorElement>('a[href^="#"]:not(.menu-panel a):not(.up)').forEach((a) => a.addEventListener('click', (e) => { e.preventDefault(); go(a.getAttribute('href') ?? '#top'); }));
 
-// the section title: every letter pops up on its own, in a random order (words stay whole when it wraps)
-const title = document.querySelector<HTMLElement>('[data-pop]')!;
-const chars: HTMLElement[] = [];
-const words = (title.textContent ?? '').split(' ').map((w) => {
-  const word = document.createElement('span');
-  word.className = 'pw';
-  for (const ch of w) { const s = document.createElement('span'); s.className = 'pc'; s.textContent = ch; word.append(s); chars.push(s); }
-  return word;
-});
-title.replaceChildren(...words.flatMap((w, i) => (i ? [document.createTextNode(' '), w] : [w])));
-gsap.set(chars, { yPercent: 120, rotation: () => gsap.utils.random(-40, 40), scale: 0.4, opacity: 0 });
-ScrollTrigger.create({
-  trigger: title, start: 'top 85%', once: true,
-  onEnter: () => gsap.to(chars, { yPercent: 0, rotation: 0, scale: 1, opacity: 1, duration: 0.8, ease: 'back.out(2.2)', stagger: { each: 0.035, from: 'random' } }),
-});
-
-// the scroll ring turns; MENU rolls its letters when pressed
-gsap.to('.badge svg', { rotation: 360, duration: 14, repeat: -1, ease: 'none', transformOrigin: '50% 50%' });
-const menuWord = document.querySelector<HTMLElement>('.menu-word')!;
-const menuChars = [...(menuWord.textContent ?? '')].map((ch) => { const s = document.createElement('span'); s.textContent = ch; s.style.display = 'inline-block'; return s; });
-menuWord.replaceChildren(...menuChars);
-document.querySelector('.menu')!.addEventListener('pointerdown', () => gsap.timeline()
-  .to(menuChars, { yPercent: -120, duration: 0.18, ease: 'power2.in', stagger: 0.04 })
-  .set(menuChars, { yPercent: 120 })
-  .to(menuChars, { yPercent: 0, duration: 0.4, ease: 'back.out(2.4)', stagger: 0.04 }));
+// the header turns light over the dark sections
+const top = q('.top');
+for (const s of ['.trailer', '.foot']) ScrollTrigger.create({ trigger: s, start: 'top 40px', end: 'bottom 40px', onToggle: (st) => top.classList.toggle('on-dark', st.isActive) });
+new MutationObserver(() => document.documentElement.classList.toggle('menu-open', q('.menu').getAttribute('aria-expanded') === 'true')).observe(q('.menu'), { attributes: true });
 
 // start once the type, his drawings and the stickers are ready (but never wait more than 3 s)
 const decode = (src: string) => { const im = new Image(); im.src = src; return im.decode().catch(() => undefined); };
-const stickers = ['spark', 'sun', 'sparkle', 'inkpot', 'boombox', 'bolt', 'glove', 'flipbook', 'badge', 'stopwatch'].map((n) => stickerUrl(n)).filter(Boolean);
+const fonts = ['900 100px Anybody', '100px Anton', '100px Bangers', '100px "Bebas Neue"', '900 100px Montserrat', '800 100px Jost'];
+const poses = [...HERO_POSES, ...TRAILER_POSES, 'curious', 'bye_0', 'bye_1', 'bye_2', 'bye_3', 'leap_3', ...Array.from({ length: 8 }, (_, i) => `run8_${i}`)];
+const stickers = ['spark', 'sun', 'sparkle', 'inkpot', 'boombox', 'bolt', 'glove'].map((n) => stickerUrl(n));
 const ready = Promise.race([
-  Promise.all([document.fonts.load('900 100px Anybody'), Boy.load([...HERO_POSES, ...CARD_POSES]), ...stickers.map(decode)]),
+  Promise.all([...fonts.map((f) => document.fonts.load(f)), Boy.load(poses), ...stickers.map(decode)]),
   new Promise((r) => setTimeout(r, 3000)),
 ]);
 void ready.then(() => {
-  hero.fit(); card.fit();
+  hero.fit(); work.fit();
   hero.intro();
   ScrollTrigger.refresh();
 });
@@ -72,6 +80,6 @@ let rw = innerWidth;
 addEventListener('resize', () => {
   if (innerWidth === rw) return; // phone toolbars: ignore
   rw = innerWidth;
-  hero.fit(); card.fit(); ScrollTrigger.refresh();
+  hero.fit(); work.fit(); ScrollTrigger.refresh();
 });
-(window as unknown as { __fun: object }).__fun = { ready, gsap };
+(window as unknown as { __fun: object }).__fun = { ready, gsap, go };

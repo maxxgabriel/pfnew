@@ -1,46 +1,137 @@
 <!doctype html>
-<html lang="en" data-look="pop">
+<html lang="en">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <meta name="theme-color" content="#fbf7ef" />
-<meta name="description" content="Max Gabriel — motion designer and animator. Letters that dance, shapes that misbehave." />
+<meta name="description" content="Max Gabriel — motion designer and animator. Letters that dance, shapes that misbehave, a little ink boy who never sits still." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anybody:wdth,wght@50..150,100..900&display=swap" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anybody:wdth,wght@50..150,100..900&family=Anton&family=Bangers&family=Bebas+Neue&family=Jost:wght@600;800&family=Montserrat:wght@800;900&display=swap" />
 <link rel="icon" href="./favicon.svg" />
 <title>Max Gabriel — motion designer &amp; animator</title>
 </head>
 <body>
+<a class="skip" href="#work">Skip to the work</a>
 <header class="top">
   <a class="mark" href="#top" aria-label="Max Gabriel, back to top"><i class="mark-dot"></i><span>MAX GABRIEL</span></a>
-  <button class="menu" type="button"><span class="menu-word">MENU</span><b>+</b></button>
+  <button class="menu" type="button" aria-expanded="false" aria-controls="menu"><span class="menu-word">MENU</span><b aria-hidden="true">+</b></button>
 </header>
+
 <main id="top">
+  <!-- 1 · the name is a playground -->
   <section class="hero" aria-label="Max Gabriel">
     <p class="tag"><span data-scramble>Motion designer &amp; animator.</span><br /><span data-scramble>I make letters dance and shapes misbehave.</span></p>
     <h1 class="name" aria-label="Max Gabriel"><span class="line" data-word="MAX"></span><span class="line" data-word="GABRIEL"></span></h1>
     <div class="stickers" aria-hidden="true"></div>
     <img class="boy" alt="" aria-hidden="true" />
-    <a class="badge" href="#made" aria-label="Scroll to the work">
+    <a class="badge" href="#work" aria-label="Scroll to the work">
       <svg viewBox="0 0 100 100" aria-hidden="true"><defs><path id="badge-ring" d="M50 50 m-42 0 a42 42 0 1 1 84 0 a42 42 0 1 1 -84 0" /></defs><text><textPath href="#badge-ring">SCROLL DOWN • SCROLL DOWN • </textPath></text></svg>
     </a>
   </section>
-  <section class="made" id="made" aria-labelledby="made-title">
-    <div class="made-head"><h2 class="made-title" id="made-title" data-pop>THINGS THAT MOVE</h2></div>
-    <div class="card-wrap">
-    <img class="peek" alt="" aria-hidden="true" />
-    <article class="card" tabindex="0" aria-label="Squish: letters that feel the weight">
-      <div class="card-stage"><div class="squish" aria-hidden="true" data-word="SQUISH"></div><i class="glare"></i></div>
-      <div class="card-meta">
-        <h3>SQUISH</h3>
-        <p>Letters that feel the weight.</p>
-        <ul class="tags"><li>TYPE</li><li>LOOP</li></ul>
+
+  <!-- 2 · two bands of words crossing -->
+  <section class="bands" aria-label="What I do, in a few words">
+    <div class="band band-a"><div class="band-run" data-words="ANIMATION|MOTION DESIGN|KINETIC TYPE|CHARACTERS|CREATIVE CODE"></div></div>
+    <div class="band band-b"><div class="band-run" data-words="FRAME BY FRAME|ON TWOS|SQUASH &amp; STRETCH|SMEARS|SPEED LINES"></div></div>
+  </section>
+
+  <!-- 3 · the trailer: a neo-noir minute, played by the scroll -->
+  <section class="trailer" aria-label="The trailer">
+    <div class="tr-stage">
+      <div class="tr-bars" aria-hidden="true"><i></i><i></i></div>
+      <div class="tr-glow" aria-hidden="true"></div>
+      <img class="tr-boy" alt="" aria-hidden="true" />
+      <div class="tr-faces" aria-hidden="true"></div>
+      <div class="tr-cards">
+        <p class="tr-card tr-clean" data-k="0">ONE ANIMATOR.</p>
+        <p class="tr-card tr-bold" data-k="1">SEVEN STYLES.</p>
+        <p class="tr-card tr-glitch" data-k="2" data-text="ZERO STILL FRAMES.">ZERO STILL FRAMES.</p>
+        <p class="tr-card tr-freeze" data-k="3"><span class="tr-stamp">FREEZE FRAME</span><span class="tr-time">00:00:07:12</span></p>
+        <p class="tr-card tr-bold tr-big" data-k="4">EVERYTHING MOVES.</p>
+        <p class="tr-card tr-neon" data-k="5">NOW PLAYING<small>scroll on, it gets better</small></p>
       </div>
-    </article>
+      <div class="tr-vhs" aria-hidden="true"><i class="tr-roll"></i></div>
+      <div class="tr-flash" aria-hidden="true"></div>
+      <p class="tr-rec" aria-hidden="true"><i></i>REC <span class="tr-tc">00:00:00:00</span></p>
     </div>
   </section>
+
+  <!-- 4 · the work: six little loops -->
+  <section class="work" id="work" aria-labelledby="work-title">
+    <div class="sec-head">
+      <p class="eyebrow">01 — The work</p>
+      <h2 class="sec-title" id="work-title" data-pop>THINGS THAT MOVE</h2>
+      <p class="sec-sub">Six little loops. Tap them, they tap back.</p>
+    </div>
+    <div class="deck">
+      <article class="card" data-loop="squish" tabindex="0"><div class="stage"></div><div class="meta"><h3>SQUISH</h3><p>Letters that feel the weight.</p><ul class="tags"><li>TYPE</li><li>LOOP</li></ul></div></article>
+      <article class="card" data-loop="glitch" tabindex="0"><div class="stage"></div><div class="meta"><h3>GLITCH</h3><p>Signal lost, style found.</p><ul class="tags"><li>RGB</li><li>VHS</li></ul></div></article>
+      <article class="card" data-loop="ink" tabindex="0"><div class="stage"></div><div class="meta"><h3>INK</h3><p>Every reveal starts with a drop.</p><ul class="tags"><li>BRUSH</li><li>REVEAL</li></ul></div></article>
+      <article class="card" data-loop="pow" tabindex="0"><div class="stage"></div><div class="meta"><h3>POW!</h3><p>Comic timing, literally.</p><ul class="tags"><li>POP ART</li><li>PRINT</li></ul></div></article>
+      <article class="card" data-loop="twos" tabindex="0"><div class="stage"></div><div class="meta"><h3>ON TWOS</h3><p>Twelve drawings a second. On purpose.</p><ul class="tags"><li>FRAMES</li><li>CYCLE</li></ul></div></article>
+      <article class="card" data-loop="whoosh" tabindex="0"><div class="stage"></div><div class="meta"><h3>WHOOSH</h3><p>Speed lines, smears, no brakes.</p><ul class="tags"><li>SMEAR</li><li>SPEED</li></ul></div></article>
+    </div>
+  </section>
+
+  <!-- 5 · what I do: every word moves its own way -->
+  <section class="skills" id="skills" aria-labelledby="skills-title">
+    <p class="eyebrow" id="skills-title">02 — What I do</p>
+    <ol class="skill-list">
+      <li class="skill" data-move="walk" data-sticker="inkpot">CHARACTER ANIMATION</li>
+      <li class="skill" data-move="wave" data-sticker="boombox">MOTION DESIGN</li>
+      <li class="skill" data-move="stretch" data-sticker="sparkle">KINETIC TYPE</li>
+      <li class="skill" data-move="code" data-sticker="bulb">CREATIVE CODE</li>
+      <li class="skill" data-move="print" data-sticker="brush">ILLUSTRATION</li>
+    </ol>
+  </section>
+
+  <!-- 6 · about, as a comic page -->
+  <section class="comic" id="about" aria-labelledby="about-title">
+    <h2 class="sr" id="about-title">About Max</h2>
+    <div class="page">
+      <figure class="panel p1"><figcaption class="cap">MEET MAX.</figcaption><img class="pboy" alt="" /><p class="bubble b1">THAT'S MY GUY.<br />HE DREW ME!</p></figure>
+      <figure class="panel p2"><figcaption class="cap">HE DRAWS.</figcaption><p class="sfx">SWOOSH!</p></figure>
+      <figure class="panel p3"><figcaption class="cap">THEN HE MAKES IT MOVE.</figcaption><div class="strip"></div><p class="sfx">FLIP FLIP FLIP</p></figure>
+      <figure class="panel p4"><figcaption class="cap">YOUR IDEA COULD BE NEXT.</figcaption><img class="pboy" alt="" /><a class="cta" href="#contact">LET'S TALK →</a></figure>
+    </div>
+  </section>
+
+  <!-- 7 · one boy, seven styles -->
+  <section class="styles" id="styles" aria-labelledby="styles-title">
+    <p class="eyebrow">03 — Range</p>
+    <h2 class="sec-title" id="styles-title" data-pop>ONE BOY. SEVEN STYLES.</h2>
+    <div class="fan"></div>
+    <p class="fan-name" aria-live="polite">INK</p>
+  </section>
+
+  <!-- 8 · say hi -->
+  <section class="contact" id="contact" aria-labelledby="contact-title">
+    <p class="eyebrow">04 — Contact</p>
+    <h2 class="hi-title" id="contact-title" data-pop>SAY HI!</h2>
+    <p class="hi-sub">Got something that needs to move? Let's make it move.</p>
+    <a class="pill" href="mailto:hello@example.com"><span class="pill-run" aria-hidden="true"></span><span class="pill-text">hello@example.com</span></a>
+    <p class="copied" aria-live="polite"></p>
+    <img class="hi-boy" alt="" aria-hidden="true" />
+  </section>
 </main>
+
+<footer class="foot" aria-label="Footer">
+  <div class="foot-tag" aria-hidden="true"></div>
+  <p class="foot-name">MAX GABRIEL<small>Motion designer &amp; animator</small></p>
+  <nav class="foot-links" aria-label="Sections"><a href="#work">Work</a><a href="#skills">What I do</a><a href="#about">About</a><a href="#styles">Styles</a><a href="#contact">Contact</a></nav>
+  <nav class="foot-social" aria-label="Elsewhere"><a href="https://www.instagram.com/" rel="noopener" target="_blank">Instagram</a><a href="https://www.behance.net/" rel="noopener" target="_blank">Behance</a><a href="https://www.linkedin.com/" rel="noopener" target="_blank">LinkedIn</a></nav>
+  <a class="up" href="#top" aria-label="Back to the top"></a>
+  <p class="foot-copy">© 2026 Max Gabriel. Drawn by hand, moved by code.</p>
+</footer>
+
+<div class="menu-panel" id="menu" hidden>
+  <nav aria-label="Menu"><a href="#work" data-sticker="flipbook">WORK</a><a href="#skills" data-sticker="boombox">WHAT I DO</a><a href="#about" data-sticker="inkpot">ABOUT</a><a href="#styles" data-sticker="sparkle">STYLES</a><a href="#contact" data-sticker="envelope">SAY HI</a></nav>
+  <p class="menu-foot">hello@example.com</p>
+</div>
+<div class="grain" aria-hidden="true"></div>
+<div class="glitch-flash" aria-hidden="true"></div>
+<i class="cursor" aria-hidden="true"></i>
 <script type="module" src="/src/fun/main.ts"></script>
 </body>
 </html>

@@ -1,0 +1,35 @@
+/* about, as a comic page: butter yellow, red Ben-Day dots, four panels revealed through an ink splat */
+.comic { position: relative; padding: 14vh var(--pad) 16vh; background: var(--sun) radial-gradient(circle, rgba(255, 61, 34, .5) 22%, transparent 24%) 0 0 / 18px 18px; }
+.page { max-width: 1140px; margin: 0 auto; display: grid; grid-template-columns: 1fr; gap: clamp(18px, 2.4vw, 28px); }
+@media (min-width: 900px) { .page { grid-template-columns: 1.25fr 1fr; } .p4 { grid-column: span 1; } }
+.panel { position: relative; margin: 0; min-height: clamp(300px, 46vh, 430px); overflow: hidden; border: 4px solid var(--ink); background: #fff8ec; box-shadow: 8px 8px 0 var(--ink);
+  -webkit-mask: var(--splat) center / var(--m, 420%) no-repeat; mask: var(--splat) center / var(--m, 420%) no-repeat; }
+.p1 { transform: rotate(-1deg); background: #fff8ec radial-gradient(circle, rgba(79, 182, 255, .45) 24%, transparent 26%) 100% 100% / 12px 12px; }
+.p2 { transform: rotate(1.2deg); background: var(--hot) radial-gradient(circle, rgba(255, 213, 74, .55) 22%, transparent 24%) 0 0 / 12px 12px; }
+.p3 { transform: rotate(.8deg); background: var(--cool) repeating-linear-gradient(90deg, transparent 0 46px, rgba(255, 255, 255, .45) 46px 49px); }
+.p4 { transform: rotate(-1.4deg); background: #fff8ec repeating-conic-gradient(from 0deg at 64% 58%, rgba(255, 213, 74, .7) 0 8deg, transparent 8deg 22deg); }
+.cap { position: absolute; left: 14px; top: 14px; z-index: 4; padding: 8px 12px 6px; background: var(--sun); border: 3px solid var(--ink);
+  font: 400 clamp(20px, 2.6vw, 30px)/1 'Bangers', sans-serif; letter-spacing: .06em; text-shadow: 2px 1px 0 rgba(79, 182, 255, .85), -1px -1px 0 rgba(255, 61, 34, .8); }
+.p2 .cap { background: #fff8ec; }
+.pboy { position: absolute; bottom: 6%; left: 50%; height: 64%; translate: -50% 0; z-index: 2; filter: drop-shadow(4px 3px 0 rgba(79, 182, 255, .55)) drop-shadow(-3px -2px 0 rgba(255, 61, 34, .5)); }
+.p1 .pboy { left: 34%; }
+.bubble { position: absolute; right: 6%; top: 18%; z-index: 3; max-width: 52%; padding: 16px 20px 14px; background: #fff; border: 3px solid var(--ink);
+  border-radius: 48% 52% 46% 54% / 56% 48% 52% 44%; font: 400 clamp(18px, 2.2vw, 26px)/1.05 'Bangers', sans-serif; letter-spacing: .05em; text-align: center; }
+.bubble::after { content: ''; position: absolute; left: 14%; bottom: -16px; width: 26px; height: 26px; background: #fff; border-right: 3px solid var(--ink); border-bottom: 3px solid var(--ink); transform: rotate(40deg) skewX(10deg); }
+.sfx { position: absolute; z-index: 3; font: 400 clamp(46px, 7vw, 92px)/1 'Bangers', sans-serif; letter-spacing: .04em; color: var(--sun); -webkit-text-stroke: 3px var(--ink); paint-order: stroke fill; text-shadow: 5px 5px 0 var(--ink); }
+.sfx .w { display: inline-block; white-space: nowrap; }
+.sfx .sx { display: inline-block; }
+.p2 .sfx { right: 6%; bottom: 8%; transform: rotate(-8deg); }
+.p3 .sfx { left: 6%; bottom: 6%; font-size: clamp(30px, 4.4vw, 54px); color: #fff; transform: rotate(-4deg); }
+.c-brush { left: 8%; top: 22%; width: 52%; z-index: 2; }
+.c-splash { right: 10%; top: 16%; width: 26%; z-index: 1; }
+.c-splash2 { left: 34%; bottom: 10%; width: 18%; z-index: 1; }
+.strip { position: absolute; left: 0; right: 0; bottom: 18%; height: 52%; z-index: 2; }
+.c-run { position: absolute; bottom: 0; height: 100%; translate: -50% 0; }
+.c-flip { right: 6%; top: 10%; width: 26%; z-index: 3; }
+.p4 .pboy { left: 30%; height: 70%; bottom: 10%; }
+.c-boing { right: 4%; top: 18%; width: 46%; z-index: 3; }
+.cta { position: absolute; right: 6%; bottom: 8%; z-index: 4; padding: 12px 18px 9px; background: var(--hot); color: #fff; border: 3px solid var(--ink); box-shadow: 5px 5px 0 var(--ink); text-decoration: none;
+  font: 400 clamp(20px, 2.4vw, 28px)/1 'Bangers', sans-serif; letter-spacing: .08em; transition: transform .2s, box-shadow .2s; }
+.cta:hover, .cta:focus-visible { transform: translate(-2px, -2px); box-shadow: 7px 7px 0 var(--ink); }
+.cta:active { transform: translate(3px, 3px); box-shadow: 2px 2px 0 var(--ink); }

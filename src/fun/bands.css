@@ -1,0 +1,12 @@
+/* two bands of words crossing like tape */
+.bands { position: relative; height: clamp(250px, 44vh, 460px); overflow: hidden; }
+.band { position: absolute; left: -10%; width: 120%; white-space: nowrap; overflow: hidden; padding: .16em 0 .1em; font: 400 clamp(40px, 8.4vw, 118px)/1 'Anton', sans-serif; text-transform: uppercase; letter-spacing: .01em; }
+.band-a { top: 24%; z-index: 2; transform: rotate(-4deg); background: var(--hot); color: var(--bg); border-block: 3px solid var(--ink); }
+.band-b { top: 47%; z-index: 1; transform: rotate(3deg); background: var(--ink); color: var(--sun); }
+.band-run { display: inline-flex; will-change: transform; }
+.band .half { display: inline-flex; align-items: center; }
+.band .wd { display: inline-block; padding: 0 .28em; transform-origin: 50% 60%; }
+.band .wd.out { color: transparent; -webkit-text-stroke: 2px var(--sun); }
+.band .sep { display: inline-block; font-size: .5em; transform: translateY(-.1em); }
+.band-a .sep { color: var(--sun); }
+.band-b .sep { color: var(--hot); }

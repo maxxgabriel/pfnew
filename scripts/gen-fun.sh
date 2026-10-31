@@ -29,4 +29,18 @@ run hi "the word HI! as chunky 3D block letters seen slightly from below: cream 
 run boing "the word BOING! in chunky 3D block letters set on a bouncy wave so every letter sits at a different height: butter yellow letter faces, red extruded sides, thick black outlines, and a black coil spring under the B. Spell it exactly: BOING!"
 run bolt "a chunky zig-zag lightning bolt, butter yellow with a red inner stripe and a cream shine mark, slightly tilted, with two short black crackle lines beside it."
 run sun "a cheerful cartoon sun: a round butter-yellow face ringed with short wavy red rays, wearing black sunglasses with cream shine marks, grinning wide with confidence."
+# ---- round two: the rest of the site
+run envelope "a cartoon envelope in cream with its flap slightly open and a letter peeking out, sealed with a round red wax seal with a heart pressed into it, two short black motion lines on each side as if it just flew in."
+run megaphone "a chunky cartoon megaphone, red with cream bands and a black handle, pointing up and to the right and shouting, with three bold black sound lines bursting out of its mouth."
+run spraycan "a cartoon spray paint can: sky blue can with cream label stripes and a red cap, tilted, spraying one short fat puff of red paint mist with a few round red dots at its edge."
+run popcorn "a red-and-cream striped cartoon popcorn bucket overflowing with big fluffy cream popcorn, two kernels popping out of the top with tiny black motion marks."
+run vhs "a black VHS video cassette seen at a slight tilt: a cream label with a red stripe, two cream tape reels visible through the window, shine marks on the plastic."
+run rocket "a chunky retro cartoon rocket pointing straight up: a cream body with red fins and a red nose cone, a round sky blue porthole window with a shine mark, a short butter-yellow and red flame at its base."
+run bulb "a cartoon light bulb glowing butter yellow, a red screw base with black thread lines, short black rays all around it as if an idea just struck, a cream shine mark on the glass."
+run splat "ONE big glossy black ink splat with an organic edge, a few thick drips running down and two round drops beside it. Solid ink black only: no shine marks, no outline, no other colour."
+run paintred "ONE big juicy red paint splash with an organic edge, two thick drips running down and three round droplets beside it, a few cream shine marks, thick black outline."
+run paintyellow "ONE big juicy butter-yellow paint splash with an organic edge, a thick drip and two round droplets beside it, a few cream shine marks, thick black outline."
+run graffiti "the name MAX as a graffiti throw-up: fat round bubbly spray-paint letters with a red fill fading to butter yellow highlights, a thick black outline, a cream 3D drop shadow block, two or three paint drips, a short spray arrow. Spell it exactly: MAX"
+run bubble "an EMPTY comic speech bubble with a cream fill and a thick wobbly black brush outline, an oval shape with a curved tail at the bottom left. Nothing written inside."
+run shout "an EMPTY spiky comic shout burst: a jagged star-shaped explosion bubble with a butter-yellow fill, a red inner burst shape and a thick black outline. Nothing written inside."
 wait

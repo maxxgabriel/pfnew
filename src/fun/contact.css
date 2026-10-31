@@ -1,0 +1,27 @@
+/* say hi: red, halftone, the drawn HI!, a huge pill */
+.contact { position: relative; padding: 16vh var(--pad) 20vh; text-align: center; color: var(--bg); overflow: hidden; -webkit-mask: var(--splat) 50% 30% / var(--m, 600%) no-repeat; mask: var(--splat) 50% 30% / var(--m, 600%) no-repeat;
+  background: var(--hot) radial-gradient(circle, rgba(21, 19, 17, .14) 24%, transparent 26%) 0 0 / 16px 16px; }
+.contact .eyebrow { color: var(--bg); }
+.hi-title { position: relative; display: inline-flex; align-items: center; gap: .1em; font: 400 clamp(84px, 20vw, 280px)/.86 'Anton', sans-serif; letter-spacing: .01em; color: var(--bg); text-shadow: 7px 7px 0 var(--ink); }
+.hi-title .say { display: inline-block; overflow: hidden; padding: 0 .04em; }
+.hi-title .w { display: inline-block; }
+.hi-title .hc { display: inline-block; }
+.contact .hi-title .stk { position: relative; width: 1.15em; }
+.hi-sub { margin: 18px auto 0; max-width: 34ch; font: 600 clamp(16px, 1.6vw, 20px)/1.4 var(--ui); }
+.pill-wrap { position: relative; display: inline-block; margin-top: clamp(90px, 13vw, 150px); }
+.pill { position: relative; display: inline-grid; place-items: center; padding: clamp(22px, 3vw, 34px) clamp(30px, 5vw, 64px); border-radius: 999px; overflow: hidden;
+  background: var(--bg); color: var(--ink); border: 4px solid var(--ink); box-shadow: 9px 9px 0 var(--ink); text-decoration: none; transition: translate .2s, rotate .2s, box-shadow .2s; }
+.pill:hover, .pill:focus-visible { translate: -3px -3px; rotate: -1deg; box-shadow: 12px 12px 0 var(--ink); }
+.pill:active { translate: 4px 4px; box-shadow: 4px 4px 0 var(--ink); }
+.pill-run { position: absolute; inset: 0; opacity: .5; background: repeating-linear-gradient(-45deg, var(--sun) 0 18px, transparent 18px 36px); background-size: 51px 51px; animation: pill-run 1.2s linear infinite; }
+@keyframes pill-run { to { background-position: 51px 0; } }
+.pill-text { position: relative; font: 400 clamp(26px, 5.4vw, 70px)/1 'Anton', sans-serif; letter-spacing: .02em; }
+.hi-boy { position: absolute; left: 12%; bottom: calc(100% - 8px); height: clamp(110px, 14vw, 180px); pointer-events: none; }
+.copied { position: absolute; right: -2%; top: -42%; z-index: 6; font: 400 clamp(26px, 3.6vw, 44px)/1 'Bangers', sans-serif; letter-spacing: .06em; color: var(--ink); transform: scale(0); pointer-events: none; }
+.contact .stk { position: absolute; }
+.c-mega { left: 4%; top: 18%; width: clamp(90px, 15vw, 220px); }
+.c-env { right: 5%; bottom: 12%; width: clamp(90px, 14vw, 200px); }
+.c-shout { right: -12%; top: -95%; z-index: 5; width: clamp(130px, 17vw, 220px); pointer-events: none; }
+.c-sp1 { left: -10%; bottom: -55%; width: clamp(70px, 9vw, 130px); pointer-events: none; }
+.c-sp2 { right: -8%; bottom: -45%; width: clamp(56px, 7vw, 100px); pointer-events: none; }
+@media (max-width: 759px) { .c-mega { top: 9%; width: 84px; } .c-env { bottom: 4%; width: 92px; } }

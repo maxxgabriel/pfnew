@@ -47,7 +47,8 @@ export function initHero(root: HTMLElement, fine: boolean) {
   function fit() {
     name.style.fontSize = '100px';
     const W = root.clientWidth, H = innerHeight;
-    fs = Math.min((100 * W * (W < 760 ? 0.92 : 0.72)) / span(3, letters.length - 1), (H * (W < 760 ? 0.6 : 0.44)) / 1.6);
+    // headroom: the letters stretch as they play, so the resting name stays well inside the edges
+    fs = Math.min((100 * W * (W < 760 ? 0.84 : 0.68)) / span(3, letters.length - 1), (H * (W < 760 ? 0.6 : 0.44)) / 1.6);
     name.style.fontSize = `${fs}px`;
     boy.face = fs * (W < 760 ? 0.34 : 0.31);
     // where the cap line sits inside each letter's box: the dot sits on the baseline, the cap height comes from the font
@@ -100,7 +101,7 @@ export function initHero(root: HTMLElement, fine: boolean) {
     (el) => gsap.fromTo(el, { rotationY: 0 }, { rotationY: 360, transformPerspective: 700, duration: 0.9, ease: 'back.out(1.6)' }),
     (el) => gsap.fromTo(el, { scaleX: 1 }, { scaleX: 1.25, duration: 0.9, ease: wiggle }),
     (el) => gsap.timeline().to(el, { yPercent: -38, duration: 0.28, ease: 'power2.out' }).to(el, { yPercent: 0, duration: 0.24, ease: 'power2.in' }).add(squash(el, 0.7)),
-    (el) => gsap.timeline().to(el, { '--ds': 0.6, duration: 0.3, ease: 'power2.out' }).to(el, { '--ds': 0, duration: 0.9, ease: 'elastic.out(1, 0.35)' }),
+    (el) => gsap.timeline().to(el, { '--ds': 0.42, duration: 0.3, ease: 'power2.out' }).to(el, { '--ds': 0, duration: 0.9, ease: 'elastic.out(1, 0.35)' }),
     (el) => gsap.fromTo(el, { rotation: 0 }, { rotation: 14, duration: 0.9, ease: 'elastic.out(1.4, 0.25)', yoyo: true, repeat: 1, repeatDelay: 0.1 }),
     (el) => gsap.timeline().to(el, { '--dg': -0.85, duration: 0.25, ease: 'power2.inOut' }).to(el, { '--dg': 0, duration: 0.7, ease: 'back.out(2)' }, '+=0.25'),
   ];
@@ -184,7 +185,7 @@ export function initHero(root: HTMLElement, fine: boolean) {
 
   // the never-ending part
   function idle() {
-    gsap.timeline({ repeat: -1, repeatDelay: 3.6 }).to(letters, { '--ds': 0.32, duration: 0.45, ease: 'sine.inOut', yoyo: true, repeat: 1, stagger: 0.05 });
+    gsap.timeline({ repeat: -1, repeatDelay: 3.6 }).to(letters, { '--ds': 0.16, duration: 0.45, ease: 'sine.inOut', yoyo: true, repeat: 1, stagger: 0.05 });
     gsap.timeline({ repeat: -1, repeatDelay: 2.2 }).call(() => {
       const choices = letters.map((_, i) => i).filter((i) => i !== on);
       trick(choices[Math.floor(Math.random() * choices.length)]);

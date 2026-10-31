@@ -1,0 +1,13 @@
+/* what I do: five huge words; the lit one moves its own way */
+.skills { position: relative; padding: 16vh var(--pad) 22vh; text-align: center; transition: none; }
+.skills .eyebrow { margin-bottom: 8vh; }
+.skill-list { list-style: none; padding: 0; margin: 0 auto; max-width: 1300px; display: grid; gap: clamp(18px, 4vh, 44px); }
+.skill { position: relative; font: 400 clamp(46px, 10.5vw, 160px)/.86 'Anton', sans-serif; text-transform: uppercase; opacity: .12; transition: opacity .5s; }
+.skill.on { opacity: 1; }
+.skill .w { display: inline-block; white-space: nowrap; }
+.skill .sk { display: inline-block; transform-origin: 50% 80%; }
+.skill .sk.glyph { color: var(--hot); }
+.skill.printing { --px: 0; filter: url(#boil); text-shadow: calc(3px + var(--px) * 4px) calc(2px + var(--px) * 2px) 0 var(--cool), calc(-3px - var(--px) * 3px) calc(-2px + var(--px) * 1px) 0 var(--hot); }
+.skill .stk { top: 50%; width: clamp(60px, 13vw, 170px); translate: 0 -50%; pointer-events: none; }
+.skill .stk.sk-left { left: -2%; } .skill .stk.sk-right { right: -2%; }
+@media (max-width: 759px) { .skill .stk { width: 64px; top: -10%; translate: 0 0; } .skill .stk.sk-left { left: 0; } .skill .stk.sk-right { right: 0; } }

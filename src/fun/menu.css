@@ -1,0 +1,10 @@
+/* the menu: a black page opening in a circle out of the button */
+.menu-panel { position: fixed; inset: 0; z-index: 19; display: grid; align-content: center; justify-items: center; gap: 4vh; padding: 12vh var(--pad);
+  background: radial-gradient(60% 50% at 50% 40%, rgba(255, 61, 34, .22), transparent 70%), #0d0c0b; color: var(--bg); }
+.menu-panel[hidden] { display: none; }
+.menu-panel nav { display: grid; justify-items: center; gap: 1.2vh; }
+.menu-panel nav a { position: relative; display: inline-block; font: 400 clamp(48px, 10vw, 120px)/.9 'Anton', sans-serif; letter-spacing: .02em; color: var(--bg); text-decoration: none; transition: color .25s, transform .25s; }
+.menu-panel nav a:hover, .menu-panel nav a:focus-visible { color: var(--sun); transform: skewX(-6deg); outline: none; }
+.menu-panel .m-stk { position: absolute; left: 100%; top: 50%; width: clamp(54px, 7vw, 90px); margin-left: 12px; translate: 0 -50%; pointer-events: none; }
+.menu-foot { font: 400 20px/1 'Bebas Neue', sans-serif; letter-spacing: .14em; opacity: .6; }
+.menu-open .top .mark { color: var(--bg); }
