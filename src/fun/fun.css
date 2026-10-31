@@ -27,11 +27,21 @@ a { color: inherit; }
 .menu b { font-size: 16px; }
 .menu-word { display: inline-flex; overflow: hidden; }
 
-/* hero */
-.hero { position: relative; min-height: 100vh; min-height: 100svh; display: grid; place-items: center; padding: 120px 0 140px; }
-@media (min-width: 760px) { .hero { padding: 30vh 0 12vh; } }
-.tag { position: absolute; top: calc(var(--pad) + 56px); left: var(--pad); z-index: 2; font: 600 13px/1.35 var(--ui); max-width: 30ch; }
-.name { position: relative; z-index: 2; text-align: center; font-family: var(--display); line-height: .78; text-transform: uppercase; user-select: none; -webkit-user-select: none; }
+/* the opening: the hero and the dive share one pinned screen (the dive is in dive.css) */
+.opening { position: relative; height: 100vh; height: 100svh; overflow: hidden; }
+.hero { position: absolute; inset: 0; z-index: 1; }
+.hero-cam, .hero-act { position: absolute; inset: 0; transform-origin: 0 0; }
+.hero-cam { z-index: 1; }
+.hero-act { display: grid; grid-template-columns: 100%; place-items: center; padding: 120px 0 140px; }
+@media (min-width: 760px) { .hero-act { padding: 28vh 0 10vh; } }
+.hero-lines { position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; pointer-events: none; }
+/* the freeze frame when the name lands: a halftone screen over everything */
+.hero .freeze { position: absolute; inset: 0; z-index: 5; pointer-events: none; opacity: 0; mix-blend-mode: multiply;
+  background: radial-gradient(circle, rgba(21, 19, 17, .22) 27%, transparent 31%) 0 0 / 7px 7px; }
+.hero-fill { position: absolute; inset: 0; z-index: 6; pointer-events: none; opacity: 0; background: var(--hot); }
+.hero.impact { filter: invert(1); }
+.tag { position: absolute; top: calc(var(--pad) + 56px + env(safe-area-inset-top, 0px)); left: calc(var(--pad) + env(safe-area-inset-left, 0px)); z-index: 4; font: 600 13px/1.35 var(--ui); max-width: 30ch; }
+.name { position: relative; z-index: 2; width: max-content; justify-self: center; text-align: center; font-family: var(--display); line-height: .78; text-transform: uppercase; user-select: none; -webkit-user-select: none; }
 .name .line { display: block; white-space: nowrap; }
 .ch {
   display: inline-block; cursor: pointer; transform-origin: 50% 92%; will-change: transform;
@@ -41,6 +51,13 @@ a { color: inherit; }
 /* the dot after MAX is the drawn red ball */
 .dot { display: inline-block; width: .3em; height: auto; margin-left: .02em; will-change: transform; cursor: pointer; filter: url(#boil); }
 .boy { position: absolute; left: 0; top: 0; z-index: 3; cursor: pointer; user-select: none; -webkit-user-drag: none; opacity: 0; }
+/* while the camera flies into the A, the letters are painted at the camera's scale (crisp edges) */
+.hero.zooming .ch, .hero.zooming .dot { will-change: auto; }
+/* the colour plates slipping out of register (the landing, the slice, the colour cuts) */
+.name.plates .ch { text-shadow: calc(var(--mis, 0px) * -1) calc(var(--mis, 0px) * .6) 0 rgba(79, 182, 255, .88), var(--mis, 0px) calc(var(--mis, 0px) * -.6) 0 rgba(255, 61, 34, .88); }
+.name.slice { position: absolute; margin: 0; pointer-events: none; }
+/* the slot machine's reels, laid over the letters */
+.reel { position: absolute; display: flex; align-items: center; justify-content: center; pointer-events: none; white-space: nowrap; }
 
 /* stickers: host (placed) > inner (pops, tricks) > img (life, boil) */
 .stickers { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
@@ -54,10 +71,10 @@ a { color: inherit; }
 .hero .stk-bolt     { display: none; }
 @media (min-width: 760px) {
   .hero .stk-sun      { top: 9%; right: 9%; width: min(12vw, 200px); }
-  .hero .stk-sparkle  { top: 25%; left: 14%; width: min(6.5vw, 110px); }
-  .hero .stk-inkpot   { top: auto; bottom: 31%; left: 10%; width: min(10vw, 170px); }
-  .hero .stk-boombox  { bottom: 8%; right: 7%; width: min(14vw, 240px); }
-  .hero .stk-bolt     { display: block; top: 42%; left: 3.5%; width: min(5.5vw, 90px); }
+  .hero .stk-sparkle  { top: 21%; left: 15%; width: min(6vw, 104px); }
+  .hero .stk-inkpot   { top: 33%; bottom: auto; left: 3.5%; width: min(8.5vw, 150px); }
+  .hero .stk-boombox  { bottom: 4%; right: 3%; width: min(13vw, 220px); }
+  .hero .stk-bolt     { display: block; top: 41%; left: auto; right: 5%; width: min(5vw, 84px); }
 }
 
 /* the scroll cue: a ring of text that turns round the glove pointing down */
@@ -76,11 +93,11 @@ a { color: inherit; }
 @media (prefers-reduced-motion: reduce) { .stk img, .dot, .sq-ball, .face img { filter: none !important; } }
 /* short landscape screens (phones on their side): smaller cast, no scroll ring */
 @media (max-height: 520px) and (orientation: landscape) {
-  .hero { padding: 70px 0 40px; }
+  .hero-act { padding: 70px 0 40px; }
   .hero .stk-sun { top: 14%; right: 4%; width: 9vw; }
   .hero .stk-sparkle { top: 22%; left: 16%; width: 5vw; }
   .hero .stk-inkpot { top: auto; bottom: 10%; left: 6%; width: 7.5vw; }
   .hero .stk-boombox { bottom: 6%; right: 4%; width: 11vw; }
-  .hero .stk-bolt { top: 40%; left: 4%; width: 4vw; }
+  .hero .stk-bolt { top: 40%; left: 4%; right: auto; width: 4vw; }
   .badge { display: none; }
 }

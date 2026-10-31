@@ -76,6 +76,17 @@ themselves, not to the docs: *"you report to me and not the docs"*.
 
 ## 3. Decisions (most recent first)
 
+**Round 42 — the first two pages go crazy:** on the finished fun site: *"the first two pages need
+creativity we dont reallyt need to copy matvoyce but come on man we need to maker it look crazy"*.
+Asked with options; picked **page 1: cold open + loud name** (each letter slams in on its own beat
+as a full-screen smash cut — new colour, new font, zoom punch, shake, RGB split — the whole name
+lands in a freeze frame, then it never calms down: a stunt every two bars — slot machine of fonts,
+stretch across the screen, slices sliding apart, dominoes, a camera punch — with the boy riding it)
+and **page 2: the dive** (replaces the two crossing tapes: the scroll flies you into a letter until
+its colour fills the screen, then down through the tagline one giant word per world — LETTERS,
+DANCE, SHAPES, MISBEHAVE — each word doing what it says, the boy falling with you, speed lines, a
+punch and shake at each landing, the last one cutting into the trailer).
+
 **Round 41 — a fun site, hand-drawn (FUN):** BREAK LOOSE is rejected (*"nah quite dont liek the
 idea"*). Pitched films and single concepts were all turned down (*"thats too cliche and cringe"*);
 the owner wants many cool things together, not one idea: *"we wanna ad anything lookng coopl and
@@ -555,3 +566,10 @@ build it".
 > somewhee some Bloom & Glow some motiuon desifn (Text popping in on the beat, Slight overshoot, Camera
 > shake, Zoom punches, RGB split, Glitch flashes, Freeze frames) and main work is make it look premium
 > aesthetic elegant and polidhed. tyhjats your whole jib. only stop when its compoletelyu done.
+
+**2026-10-31 (round 42)**
+
+> the first two pages need creativity we dont reallyt need to copy matvoyce but come on man we need
+> to maker it look crazy
+
+*(Asked: page 1 → "Cold open + loud name"; page 2 → "The dive".)*

@@ -1,0 +1,26 @@
+/* the dive: one pinned screen over the hero; a colour ground, speed lines, a giant word, him falling */
+.dive { position: absolute; inset: 0; z-index: 2; visibility: hidden; background: #050607; overflow: hidden; }
+.dive.on { visibility: visible; }
+.dv-screen { position: absolute; inset: 0; overflow: hidden; transform-origin: 50% 50%; }
+.dv-bg { position: absolute; inset: 0; z-index: 0; }
+.dv-lines { position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%; pointer-events: none; }
+.dv-world { position: absolute; inset: 0; z-index: 2; visibility: hidden; }
+.dv-world.on { visibility: visible; }
+.dv-cam, .dv-hit { position: absolute; inset: 0; transform-origin: 0 0; }
+.dv-hit { transform-origin: 50% 50%; }
+.dv-word { position: absolute; margin: 0; white-space: nowrap; line-height: 1; text-transform: uppercase; }
+.dv-word .dl { display: inline-block; position: relative; transform-origin: 50% 90%; text-align: center; }
+.dv-word .dg { display: block; transform-origin: 50% 80%; }
+.dv-word.plates .dg { text-shadow: calc(var(--mis, 0px) * -1) calc(var(--mis, 0px) * .5) 0 rgba(79, 182, 255, .9), var(--mis, 0px) calc(var(--mis, 0px) * -.5) 0 rgba(255, 61, 34, .9); }
+.dv-probe { display: inline-block; width: 0; height: 0; vertical-align: baseline; }
+.dv-small { position: absolute; left: 0; right: 0; margin: 0; text-align: center; font: 800 clamp(15px, 2.1vw, 30px)/1 'Jost', var(--ui); letter-spacing: .34em; padding-left: .34em; }
+.dv-shape { position: absolute; display: block; overflow: visible; fill: currentColor; transform: scale(0); transform-origin: 50% 100%; filter: url(#boil); }
+/* the DANCE world prints off-register; MISBEHAVE glows a little */
+.dv-dance .dg { text-shadow: .045em .045em 0 var(--hot); }
+.dv-misbehave .dg { text-shadow: 0 0 .12em rgba(255, 255, 255, .25); }
+.dv-dance .dv-word.plates .dg, .dv-misbehave .dv-word.plates .dg { text-shadow: calc(var(--mis, 0px) * -1) calc(var(--mis, 0px) * .5) 0 rgba(79, 182, 255, .9), var(--mis, 0px) calc(var(--mis, 0px) * -.5) 0 rgba(255, 61, 34, .9); }
+.dv-fill { position: absolute; inset: 0; z-index: 3; opacity: 0; pointer-events: none; }
+.dv-boy { position: absolute; left: 0; top: 0; z-index: 4; pointer-events: none; user-select: none; }
+.dv-flash { position: absolute; inset: 0; z-index: 5; opacity: 0; pointer-events: none; background: #fff; }
+.dv-letters .dv-small, .dv-misbehave .dv-small { color: var(--bg); }
+@media (prefers-reduced-motion: reduce) { .dv-shape { filter: none; } }

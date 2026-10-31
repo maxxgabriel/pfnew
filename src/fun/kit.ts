@@ -74,6 +74,17 @@ export function glitchFlash(t = 0.32) {
   gsap.delayedCall(t, () => el.classList.remove('go'));
 }
 
+/** the header turns light over dark ground; several parts of the page can ask at once */
+const darkAsks = new Set<string>();
+export function darkHeader(key: string, on: boolean) {
+  if (on === darkAsks.has(key)) return;
+  if (on) darkAsks.add(key); else darkAsks.delete(key);
+  document.querySelector('.top')?.classList.toggle('on-dark', darkAsks.size > 0);
+}
+
+/** the house colours, for code that paints */
+export const C = { paper: '#fbf7ef', ink: '#151311', hot: '#ff3d22', sun: '#ffd54a', cool: '#4fb6ff', mint: '#7fddb4' };
+
 /** run start() while the element is on screen and stop() when it leaves (loops cost nothing off screen) */
 export function whileVisible(el: Element, start: () => void, stop: () => void) {
   new IntersectionObserver(([e]) => (e.isIntersecting ? start() : stop()), { rootMargin: '10% 0px' }).observe(el);
