@@ -15,7 +15,7 @@ await page.goto(BASE, { waitUntil: 'load' });
 await page.waitForFunction(() => window.__brk);
 await page.evaluate(() => window.__brk.ready);
 const out = await page.evaluate(async (bps) => {
-  const sections = [[0, 'open'], [26, 'snap'], [46, 'peel'], [66, 'drop'], [98, 'floor'], [122, 'quiet'], [142, 'rise'], [158, 'slam'], [182, 'home']];
+  const sections = [[0, 'open'], [21, 'snap'], [41, 'peel'], [61, 'drop'], [93, 'floor'], [117, 'quiet'], [137, 'rise'], [153, 'slam'], [177, 'home']];
   const acc = {};
   let b = 0, last = performance.now();
   await new Promise((done) => {
@@ -25,7 +25,7 @@ const out = await page.evaluate(async (bps) => {
       (acc[name] ??= []).push(dt);
       b += (bps * Math.min(dt, 50)) / 1000;
       window.__brk.seek(b);
-      if (b < 198) requestAnimationFrame(step); else done();
+      if (b < 193) requestAnimationFrame(step); else done();
     };
     requestAnimationFrame(step);
   });

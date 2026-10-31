@@ -19,6 +19,7 @@ THREE.ColorManagement.enabled = false;
 const canvas = document.querySelector<HTMLCanvasElement>('.stage')!;
 const track = document.querySelector<HTMLElement>('.track')!;
 const hi = document.querySelector<HTMLAnchorElement>('.hi')!;
+const cue = document.querySelector<HTMLElement>('.cue')!;
 const theme = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')!;
 const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const touch = matchMedia('(pointer: coarse)').matches;
@@ -41,7 +42,7 @@ applySize();
 
 const lenis = touch ? null : new Lenis({ duration: 1.15, smoothWheel: true });
 let b = 0, target = 0, t = 0, last = performance.now(), moved = 0, vel = 0;
-let frozen: number | null = null, forcedIdle: number | null = null;
+let frozen: number | null = null, forcedIdle: number | null = null, failed = false;
 const read = () => (lenis ? lenis.scroll : scrollY) / ppb;
 
 addEventListener('resize', () => {
@@ -55,7 +56,8 @@ addEventListener('resize', () => {
 });
 
 function tick(now: number) {
-  const dt = Math.min(0.05, (now - last) / 1000);
+  requestAnimationFrame(tick); // first, so one bad frame can never stop the piece
+  const dt = Math.max(0, Math.min(0.05, (now - last) / 1000));
   last = now;
   lenis?.raf(now);
   t = frozen ?? t + dt;
@@ -66,16 +68,21 @@ function tick(now: number) {
   b += (target - b) * (1 - Math.exp(-dt * (lenis ? 14 : 9)));
   if (Math.abs(target - b) < 1e-4) b = target;
   vel += ((dt > 0 ? (b - prev) / dt : 0) - vel) * (1 - Math.exp(-dt * 10));
-  dir.update(b, t, forcedIdle ?? Math.min(1, Math.max(0, (t - moved - 0.5) / 0.6)), frozen === null ? vel : 0);
-  dir.render(renderer);
+  try {
+    dir.update(b, t, forcedIdle ?? Math.min(1, Math.max(0, (t - moved - 0.5) / 0.6)), frozen === null ? vel : 0);
+    dir.render(renderer);
+  } catch (e) {
+    if (!failed) { failed = true; console.error(e); }
+  }
   if (theme.content !== dir.c.theme) theme.content = dir.c.theme;
+  // the scroll hint: after the first knocks, gone as soon as you scroll
+  cue.classList.toggle('on', t > 1.8 && b < 0.4);
   // the painted button becomes a real link at the end
   if (dir.c.hi) {
     const r = dir.ctaRect();
     Object.assign(hi.style, { transform: `translate(${r.x}px, ${r.y}px)`, width: `${r.w}px`, height: `${r.h}px` });
     if (!hi.classList.contains('on')) { hi.classList.add('on'); hi.tabIndex = 0; }
   } else if (hi.classList.contains('on')) { hi.classList.remove('on'); hi.tabIndex = -1; }
-  requestAnimationFrame(tick);
 }
 requestAnimationFrame(tick);
 

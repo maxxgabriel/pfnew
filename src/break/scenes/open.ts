@@ -40,11 +40,11 @@ export function opening(c: Ctx) {
       const v = knock(b - kb);
       if (v) { ks.push([fx * w, fy * h, v * a * mn, mn * 0.62]); energy += Math.max(0, v); }
     }
-    const zone = (1 - seg(b, T.push - 1, T.push)) * c.idle * (b < T.pin - 0.5 ? 0.7 : 1);
-    if (zone > 0) {
-      const P = 2.4, n = Math.floor(t / P), kt = beatsOf(t - n * P);
+    const zone = (1 - seg(b, T.push - 1, T.push)) * c.idle;
+    if (zone > 0 && t > 1) {
+      const P = 2.4, n = Math.floor((t - 1) / P), kt = beatsOf(t - 1 - n * P);
       const fx = [-0.2, 0.18, 0.02, -0.1, 0.24][n % 5], fy = [0.04, -0.06, 0.08, -0.02, 0][n % 5];
-      for (const [d, a] of [[0, 0.17], [0.5, 0.23]]) {
+      for (const [d, a] of [[0, 0.22], [0.5, 0.29]]) {
         const v = knock(kt - d) * zone;
         if (v) { ks.push([fx * w + d * 24, fy * h, v * a * mn, mn * 0.56]); energy += Math.max(0, v); }
       }
@@ -83,10 +83,11 @@ export function opening(c: Ctx) {
 
   // the eye in the dark
   if (b >= T.peek && b < T.jump - 0.1) {
-    const look = -smooth(seg(b, 14.6, 15)) + 2 * smooth(seg(b, 15.6, 16)) - smooth(seg(b, 16.5, 16.8));
-    const lunge = smooth(seg(b, 16.5, 16.8)) - smooth(seg(b, 16.95, 17.3));
-    const z = m.rest.z - m.depth * lerp(0.62, 0.22, lunge) - m.depth * 0.3 * seg(b, 16.95, 17.35);
-    c.eye.set('closeup_0', mx + look * w * 0.11, my + h * 0.04, z, (w * 1.02 * 756) / 864, { mid: true, soft: 0.55, ink: Math.max(1 - seg(b, T.peek, T.peek + 0.8), seg(b, 16.95, 17.35)) });
+    const e = (x: number) => T.peek + x;
+    const look = -smooth(seg(b, e(0.8), e(1.2))) + 2 * smooth(seg(b, e(1.8), e(2.2))) - smooth(seg(b, e(2.7), e(3)));
+    const lunge = smooth(seg(b, e(2.7), e(3))) - smooth(seg(b, e(3.15), e(3.5)));
+    const z = m.rest.z - m.depth * lerp(0.62, 0.22, lunge) - m.depth * 0.3 * seg(b, e(3.15), e(3.55));
+    c.eye.set('closeup_0', mx + look * w * 0.11, my + h * 0.04, z, (w * 1.02 * 756) / 864, { mid: true, soft: 0.55, ink: Math.max(1 - seg(b, T.peek, T.peek + 0.8), seg(b, e(3.15), e(3.55))) });
   }
 
   // OUT: crouch in the well, launch, over the camera, down onto the button
