@@ -24,4 +24,4 @@
 .c-shout { right: -12%; top: -95%; z-index: 5; width: clamp(130px, 17vw, 220px); pointer-events: none; }
 .c-sp1 { left: -10%; bottom: -55%; width: clamp(70px, 9vw, 130px); pointer-events: none; }
 .c-sp2 { right: -8%; bottom: -45%; width: clamp(56px, 7vw, 100px); pointer-events: none; }
-@media (max-width: 759px) { .c-mega { top: 9%; width: 84px; } .c-env { bottom: 4%; width: 92px; } }
+@media (max-width: 759px) { .c-mega { top: 40%; left: 2%; width: 78px; } .c-env { bottom: 4%; width: 92px; } }

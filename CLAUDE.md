@@ -4,9 +4,10 @@ This repo is **Max Gabriel's portfolio**: a single-canvas, scroll-driven
 animated film (vanilla TypeScript + Vite, no framework). Animation *is* the
 product; projects are deliberately absent.
 
-**Round 41 (branch `claude/fun-site`):** the newest direction is `fun.html`, a fun site full of
+**Round 41 (branch `claude/fun-site`):** the site is now `index.html` (src/fun), a fun site full of
 letter and shape animation with hand-drawn stickers made with ChatGPT — read `docs/FUN.md`. Text is
-allowed now. (Round 40's `break.html` was rejected.) The notes below describe the older canvas film.
+allowed now. (Round 40's `break.html` was rejected; the round 35–37 motion site moved to `motion.html`.)
+The notes below describe the older canvas film.
 
 Before changing anything, read:
 

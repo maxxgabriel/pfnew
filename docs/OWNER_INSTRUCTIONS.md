@@ -81,11 +81,18 @@ the owner wants many cool things together, not one idea: *"we wanna ad anything 
 sum them up as s story or somwthing that looks great … not revolving around 1 think"*. **Text is
 allowed now** (*"we can add texts as well its no issue"*). After looking at matvoyce.tv again:
 *"i need a hell lot of animations shapes aniamtions letgters aniamtions a lot of fun in website"*.
-On the first mock (fun.html): the letter animations are liked; everything else looked bad and not
+On the first mock (fun.html, now index.html): the letter animations are liked; everything else looked bad and not
 handmade → stickers drawn with ChatGPT through the Codex CLI on the owner's own Plus account,
 *"beautiful fucking ones"*, matvoyce-level, *"i donrt need generic ones"*. The POP look (paper,
 red, yellow, ink, the stretchy Anybody letters) is kept; CANDY is dropped. Built on branch
-`claude/fun-site`. Spec: docs/FUN.md.
+`claude/fun-site`. Spec: docs/FUN.md. Then: *"looks fair. use your creativity and complete the whole
+website … finish this off compleyely and create great one"* with a list of effects (comic book / pop
+art, kinetic type, glitch, graffiti, offset print, frame stepping, speed lines and smears, freeze
+frames, zoom punches, whip pans, smash cuts, glitch transitions, ink reveals, paint splashes, paper and
+grain, VHS noise, screen print, neo-noir grading, bloom, camera shake, RGB split, text popping on the
+beat) and fonts (Bangers, Badaboom BB, Komika, CC Wild Words, Gotham Ultra, Druk Condensed, Anton,
+Bebas Neue, Futura Extra Bold — the licensed ones have free stand-ins); *"main work is make it look
+premium aesthetic elegant and polidhed"*. The site became `index.html`.
 
 **Round 40 — the site as a music video (BREAK LOOSE):** on the motion site: *"now tell mw what we
 can do to make it look super good currently i dont like it much"* → *"what i want What I want: a
@@ -535,3 +542,15 @@ build it".
 
 > yes thats mine start doibg it then and for gods sake see matvoyce tv and do as per that i donrt
 > need generic ones. go beyond your limits to create some
+
+> looks fair. use your creativity and complete the whole website. im gonna go sleeo so teake your
+> timer use chatgpt as your agent as well to make it weork. finish this off compleyely and create
+> great one. different colouring animation pops and some even use some Comic Book / Pop Art Kinetic
+> Typography Glitch Effects Graffiti Style Offset Printing Effect Frame SteppingSpeed Lines & Smearsuse
+> these fonts (Bangers, Badaboom BB, Komika, CC Wild Words, Gotham Ultra (clean trailers), Druk
+> Condensed (modern bold trailers), Anton, Bebas Neue, Futura Extra Bold) use these motuon graphicsd
+> (Freeze frames, Zoom punches, Whip pans, Smash cuts, Glitch transitions, Ink reveals, Paint splashes,
+> Paper texture overlays, Grain, VHS noise, Screen print textures) maybe siome Neo-Noir Color Grading
+> somewhee some Bloom & Glow some motiuon desifn (Text popping in on the beat, Slight overshoot, Camera
+> shake, Zoom punches, RGB split, Glitch flashes, Freeze frames) and main work is make it look premium
+> aesthetic elegant and polidhed. tyhjats your whole jib. only stop when its compoletelyu done.

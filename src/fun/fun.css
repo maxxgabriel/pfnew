@@ -73,3 +73,13 @@ a { color: inherit; }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
 @media (prefers-reduced-motion: reduce) { .stk img, .dot, .sq-ball, .face img { filter: none !important; } }
+/* short landscape screens (phones on their side): smaller cast, no scroll ring */
+@media (max-height: 520px) and (orientation: landscape) {
+  .hero { padding: 70px 0 40px; }
+  .hero .stk-sun { top: 14%; right: 4%; width: 9vw; }
+  .hero .stk-sparkle { top: 22%; left: 16%; width: 5vw; }
+  .hero .stk-inkpot { top: auto; bottom: 10%; left: 6%; width: 7.5vw; }
+  .hero .stk-boombox { bottom: 6%; right: 4%; width: 11vw; }
+  .hero .stk-bolt { top: 40%; left: 4%; width: 4vw; }
+  .badge { display: none; }
+}
