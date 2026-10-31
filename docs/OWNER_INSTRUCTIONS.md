@@ -19,9 +19,9 @@ themselves, not to the docs: *"you report to me and not the docs"*.
   dont want a video format afterwards or ever"*.
 - **Animation is the product.** Proper, complete, neat animated sequences;
   crazy motion graphics; clean transitions. Projects are deliberately absent.
-- **No on-screen text in the set pieces.** *"don't write any texts or
-  anything just do the animations"*. (The title, the seal and the contact
-  card are the only words.)
+- ~~No on-screen text in the set pieces.~~ **Lifted in round 41:** *"we can
+  add texts as well its no issue"*. (Earlier: *"don't write any texts or
+  anything just do the animations"*.)
 - **Show skills, not a story.** *"we are saying a story and not showing our
   skills. remember how we did it very well on the first time?"* The format
   that works: a showreel, each chapter a different craft at full strength,
@@ -74,6 +74,18 @@ themselves, not to the docs: *"you report to me and not the docs"*.
 | Anime key poses generated with ChatGPT from one character sheet | Round 11 lesson: code draws light, motion, particles and type; people come from real drawings. | Shooting star (old film) |
 
 ## 3. Decisions (most recent first)
+
+**Round 41 — a fun site, hand-drawn (FUN):** BREAK LOOSE is rejected (*"nah quite dont liek the
+idea"*). Pitched films and single concepts were all turned down (*"thats too cliche and cringe"*);
+the owner wants many cool things together, not one idea: *"we wanna ad anything lookng coopl and
+sum them up as s story or somwthing that looks great … not revolving around 1 think"*. **Text is
+allowed now** (*"we can add texts as well its no issue"*). After looking at matvoyce.tv again:
+*"i need a hell lot of animations shapes aniamtions letgters aniamtions a lot of fun in website"*.
+On the first mock (fun.html): the letter animations are liked; everything else looked bad and not
+handmade → stickers drawn with ChatGPT through the Codex CLI on the owner's own Plus account,
+*"beautiful fucking ones"*, matvoyce-level, *"i donrt need generic ones"*. The POP look (paper,
+red, yellow, ink, the stretchy Anybody letters) is kept; CANDY is dropped. Built on branch
+`claude/fun-site`. Spec: docs/FUN.md.
 
 **Round 40 — the site as a music video (BREAK LOOSE):** on the motion site: *"now tell mw what we
 can do to make it look super good currently i dont like it much"* → *"what i want What I want: a
@@ -492,3 +504,34 @@ build it".
 *(the boy: "He's the star"; then, while the build was starting:)*
 
 > it should be a scrolllable thing things happpen when scroll its scroll bases
+
+**2026-10-31 (round 41)**
+
+> doesnt load does only that skeleton load
+
+> nah quite dont liek the idea. letrs redo into something else, lets talk yopu and me. give ideas
+
+> do we already not have into the style verse
+
+> eh no. we wanna be very creativw with what we do. very eye pleasing and all. cards and some shits
+> as well
+
+> likW thaT WILL Jjust be a part of it not morre mate. rhe whole ont revolve around it. we wanna ad
+> anything lookng coopl and sum them up as s story or somwthing that looks great. thats how i think
+> not revolving around 1 think
+
+> how would you do thingd think like prpoper high class cinematography motuon graphjicsd and all. we
+> can add texts as well its no issue
+
+> thats too cliche and cringe lo. can you check matvoyce tv website
+
+> yes pelase i need a hell lot of animations shapes aniamtions letgters aniamtions a lot of fun in
+> website thats what i want. please think aboiut iut
+
+> looks fine but except the leyyers rest all lool so bad and not handmade like don ein matvotyce. you
+> can use chatgpt to create beautiful ones and i mean it.beautiful fucking ones. so yeah lets make
+> that. i suspect you donr have chatgpt so i can give you it use the cli and do the device code thingh
+> i will login
+
+> yes thats mine start doibg it then and for gods sake see matvoyce tv and do as per that i donrt
+> need generic ones. go beyond your limits to create some

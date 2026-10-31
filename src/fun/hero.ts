@@ -3,7 +3,7 @@ import { ScrambleTextPlugin } from 'gsap/ScrambleTextPlugin';
 import { CustomEase } from 'gsap/CustomEase';
 import { CustomWiggle } from 'gsap/CustomWiggle';
 import { Boy } from './boy';
-import { initShapes } from './shapes';
+import { lean, popIn, sticker, stickerUrl } from './stickers';
 gsap.registerPlugin(ScrambleTextPlugin, CustomEase, CustomWiggle);
 
 /*
@@ -27,11 +27,15 @@ export function initHero(root: HTMLElement, fine: boolean) {
       ln.append(s); letters.push(s);
     }
   }
-  const dot = document.createElement('i');
-  dot.className = 'dot';
+  const dot = document.createElement('img');
+  dot.className = 'dot'; dot.src = stickerUrl('spark'); dot.alt = ''; dot.draggable = false;
   lines[0].append(dot);
   const boy = new Boy(root.querySelector<HTMLImageElement>('.boy')!);
-  const shapes = initShapes(root.querySelector<HTMLElement>('.shapes')!, fine);
+  // the hand-drawn cast round the name, and the glove in the scroll ring
+  const layer = root.querySelector<HTMLElement>('.stickers')!;
+  const cast = ['sun', 'sparkle', 'inkpot', 'boombox', 'bolt'].map((n) => sticker(layer, n));
+  const glove = sticker(root.querySelector<HTMLElement>('.badge')!, 'glove', '', false);
+  if (fine) lean(cast, [24, -16, 20, -28, 14]);
   const wiggle = CustomWiggle.create('letterWiggle', { wiggles: 6, type: 'easeOut' });
   gsap.set(letters, { opacity: 0 });
   gsap.set(dot, { scale: 0 });
@@ -119,7 +123,8 @@ export function initHero(root: HTMLElement, fine: boolean) {
         .add(squash(el, 0.6), at + 0.44)
         .fromTo(el, { '--dg': 0.3 }, { '--dg': 0, duration: 0.6, ease: 'power2.out', immediateRender: false }, at + 0.44);
     });
-    tl.add(shapes.enter(0), 1.2);
+    tl.add(popIn(cast), 1.2);
+    tl.add(popIn([glove]), 2.2);
     tl.add(ballRun(rest), 1.55);
     tl.add(boyIn(), 3.55);
     tl.call(idle, [], 4.4);

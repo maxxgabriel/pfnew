@@ -1,6 +1,7 @@
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Boy } from './boy';
+import { popIn, sticker, stickerUrl } from './stickers';
 gsap.registerPlugin(ScrollTrigger);
 
 /*
@@ -20,8 +21,10 @@ export function initCard(card: HTMLElement, fine: boolean) {
     word.append(s);
     return s;
   });
-  const ball = document.createElement('i');
-  ball.className = 'ball';
+  const ball = document.createElement('img');
+  ball.className = 'ball'; ball.src = stickerUrl('spark'); ball.alt = ''; ball.draggable = false;
+  // stickers stuck on the card, and the stopwatch on the section title
+  const stuck = [sticker(card, 'flipbook'), sticker(card, 'badge'), sticker(document.querySelector<HTMLElement>('.made-head')!, 'stopwatch')];
   const probe = document.createElement('i'); // sits on the baseline, so the ball lands on the real tops of the letters
   probe.className = 'probe';
   word.append(probe, ball);
@@ -66,7 +69,8 @@ export function initCard(card: HTMLElement, fine: boolean) {
     onEnter: () => {
       gsap.timeline()
         .to(card, { x: 0, rotation: -2.5, opacity: 1, duration: 0.9, ease: 'back.out(1.4)' })
-        .to(card, { y: -8, rotation: -1.2, duration: 2.4, ease: 'sine.inOut', yoyo: true, repeat: -1 });
+        .add(popIn(stuck), 0.55)
+        .to(card, { y: -8, rotation: -1.2, duration: 2.4, ease: 'sine.inOut', yoyo: true, repeat: -1 }, 0.9);
     },
   });
 
