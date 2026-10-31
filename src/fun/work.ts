@@ -1,6 +1,6 @@
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { url } from '../site/art';
+import { url } from './art';
 import { Boy } from './boy';
 import { calm, fine, glitchFlash, onBeat, popOnScroll, shake, whileVisible, zoomPunch } from './kit';
 import { popIn, sticker, stickerUrl } from './stickers';

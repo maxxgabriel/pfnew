@@ -1,7 +1,6 @@
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { artUrl } from '../home/art';
-import { url } from '../site/art';
+import { faceUrl, url } from './art';
 import { calm, glitchFlash, onBeat, shake, splitChars, whileVisible, zoomPunch } from './kit';
 import './trailer.css';
 gsap.registerPlugin(ScrollTrigger);
@@ -25,7 +24,7 @@ export function initTrailer(root: HTMLElement) {
   const boy = root.querySelector<HTMLImageElement>('.tr-boy')!;
   const tc = root.querySelector<HTMLElement>('.tr-tc')!;
   const facesBox = root.querySelector<HTMLElement>('.tr-faces')!;
-  const faces = FACES.map((f) => { const im = document.createElement('img'); im.src = artUrl(`style_${f}`); im.alt = ''; facesBox.append(im); return im; });
+  const faces = FACES.map((f) => { const im = document.createElement('img'); im.src = faceUrl(f); im.alt = ''; facesBox.append(im); return im; });
   const big = cards[4];
   const bigChars = splitChars(big, 'bc');
   // speed lines behind EVERYTHING MOVES

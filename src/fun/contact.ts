@@ -1,6 +1,6 @@
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { url } from '../site/art';
+import { url } from './art';
 import { calm, onBeat, splitChars, whileVisible, zoomPunch } from './kit';
 import { popIn, sticker, stickerUrl } from './stickers';
 import './contact.css';
@@ -51,16 +51,26 @@ export function initContact(root: HTMLElement) {
     stop = () => { off(); clearInterval(id); };
   }, () => stop());
 
-  // tap: copy, burst, splash
+  // tap: copy (or, where copying is refused, select the address so it can be copied by hand), burst, splash
   pill.addEventListener('click', () => {
     const address = pill.getAttribute('href')?.replace('mailto:', '') ?? '';
-    void navigator.clipboard?.writeText(address).catch(() => undefined);
-    copied.textContent = 'COPIED!';
     zoomPunch(pill, 1.06);
+    const copy = navigator.clipboard?.writeText(address).then(() => true, () => false) ?? Promise.resolve(false);
+    void copy.then((ok) => {
+      if (!ok) {
+        const range = document.createRange();
+        range.selectNodeContents(pill.querySelector('.pill-text')!);
+        getSelection()?.removeAllRanges(); getSelection()?.addRange(range);
+      }
+      celebrate(ok ? 'COPIED!' : 'SELECTED!');
+    });
+  });
+  function celebrate(word: string) {
+    copied.textContent = word;
     gsap.timeline()
       .fromTo(boom.inner, { scale: 0, rotation: -40 }, { scale: 1, rotation: 0, duration: 0.5, ease: 'back.out(3)', overwrite: true })
       .fromTo(copied, { scale: 0, rotation: 20, opacity: 1 }, { scale: 1, rotation: -6, duration: 0.5, ease: 'back.out(3)' }, 0.05)
       .fromTo([s1.inner, s2.inner], { scale: 0, rotation: 90 }, { scale: 1, rotation: 0, duration: 0.6, ease: 'back.out(2.4)', stagger: 0.08 }, 0)
       .to([boom.inner, copied, s1.inner, s2.inner], { scale: 0, duration: 0.3, ease: 'back.in(2)', stagger: 0.04 }, '+=1.4');
-  });
+  }
 }

@@ -50,6 +50,13 @@ spark, sun, sparkle, ink pot, boombox, bolt, glove, flipbook, brush, stopwatch, 
 HI!, BOING!, envelope, megaphone, spray can, popcorn, VHS, rocket, bulb, ink splat, red and yellow
 paint splashes, graffiti MAX, speech bubble, shout burst.
 
+## Preview
+
+Private claude.ai preview (open it on a phone): https://claude.ai/artifact/B6HQHAJv1NS8RENVDFErxH
+To refresh it: `ONLY=site npx vite build --outDir <folder>` (front page only, ~110 files), then
+publish the built page's head and body content with its `assets/`, `favicon.svg` and `og-site.jpg`
+to the same artifact.
+
 ## Still to give
 
 The contact address is a placeholder (`hello@example.com`, in `index.html` twice) and the social

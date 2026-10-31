@@ -1,6 +1,6 @@
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { artUrl } from '../home/art';
+import { faceUrl } from './art';
 import { calm, popOnScroll, whileVisible, zoomPunch } from './kit';
 import './styles.css';
 gsap.registerPlugin(ScrollTrigger);
@@ -18,7 +18,7 @@ export function initStyles(root: HTMLElement) {
   const faces = STYLES.map(([k, name], i) => {
     const b = document.createElement('button');
     b.type = 'button'; b.className = 'face'; b.setAttribute('aria-label', `His face drawn in ${name.toLowerCase()}`);
-    const im = document.createElement('img'); im.src = artUrl(`style_${k}`); im.alt = ''; im.draggable = false;
+    const im = document.createElement('img'); im.src = faceUrl(k); im.alt = ''; im.draggable = false;
     b.append(im); fan.append(b);
     b.addEventListener('click', () => { turn(i); zoomPunch(b, 1.25); restart(); });
     return b;

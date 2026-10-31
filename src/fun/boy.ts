@@ -1,5 +1,5 @@
 import manifest from '../assets/sketch/manifest.json';
-import { url } from '../site/art';
+import { url } from './art';
 
 /*
  * The boy as one <img>: placed by his foot (x, y in the parent's px), sized by head size so every

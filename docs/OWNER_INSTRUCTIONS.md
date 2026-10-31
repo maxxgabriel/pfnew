@@ -53,8 +53,9 @@ themselves, not to the docs: *"you report to me and not the docs"*.
   nothing may depend on hover. Screenshot every change at phone size before
   calling it done.
 - **Previews:** publish the single-file build as a claude.ai artifact and
-  share the link (*"you can create a new link to show artifact"*). Current:
-  https://claude.ai/artifact/9d3GKN33rB1VSTR2jGoDnV
+  share the link (*"you can create a new link to show artifact"*). The film:
+  https://claude.ai/artifact/9d3GKN33rB1VSTR2jGoDnV. The fun site (round 41):
+  https://claude.ai/artifact/B6HQHAJv1NS8RENVDFErxH
 - **Git:** commit to the working branch and push; no PR unless asked; no
   model names in commits.
 - **Originality:** references are for energy and technique; never copy their

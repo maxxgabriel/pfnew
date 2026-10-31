@@ -16,6 +16,7 @@ export default defineConfig({
     assetsInlineLimit: process.env.SINGLE ? 100_000_000 : 0,
     cssCodeSplit: true,
     modulePreload: false,
-    rollupOptions: { input: { site: 'index.html', motion: 'motion.html', film: 'film.html', proof: 'proof.html', home: 'home.html', world: 'world.html', break: 'break.html' } },
+    // ONLY=site builds just the front page (for previews: far fewer files)
+    rollupOptions: { input: process.env.ONLY === 'site' ? { site: 'index.html' } : { site: 'index.html', motion: 'motion.html', film: 'film.html', proof: 'proof.html', home: 'home.html', world: 'world.html', break: 'break.html' } },
   },
 });
