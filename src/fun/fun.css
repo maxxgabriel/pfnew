@@ -54,7 +54,7 @@ a { color: inherit; }
 @media (min-width: 760px) {
   .hero .stk-sun      { top: 9%; right: 9%; width: min(12vw, 200px); }
   .hero .stk-sparkle  { top: 25%; left: 14%; width: min(6.5vw, 110px); }
-  .hero .stk-inkpot   { top: auto; bottom: 24%; left: 10%; width: min(10vw, 170px); }
+  .hero .stk-inkpot   { top: auto; bottom: 31%; left: 10%; width: min(10vw, 170px); }
   .hero .stk-boombox  { bottom: 8%; right: 7%; width: min(14vw, 240px); }
   .hero .stk-bolt     { display: block; top: 42%; left: 3.5%; width: min(5.5vw, 90px); }
 }
