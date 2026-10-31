@@ -1,0 +1,131 @@
+/*
+ * FUN — the mock: the opening screen and one card, in two looks (data-look on <html>).
+ * POP: warm paper, signal red, butter yellow, ink; Anybody, a stretchy grotesk (width 50–150 %).
+ * CANDY: a soft pastel wash, bubblegum, tangerine, lilac, mint; Fredoka, round and puffy.
+ * Letters read their width and weight from --ds / --dg (offsets the animations push around),
+ * so the same choreography plays in either look.
+ */
+:root, [data-look="pop"] {
+  --bg: #fbf7ef; --ink: #151311; --hot: #ff3d22; --sun: #ffd54a; --cool: #8fd3ff; --mint: #9be3c0;
+  --card: #fff; --line: 3px; --shadow: 7px 7px 0 var(--ink); --chip: var(--sun);
+  --display: 'Anybody', system-ui, sans-serif;
+  --wd-lo: 50; --wd-span: 100; --wg-lo: 100; --wg-span: 800;
+  --base-s: 0.24; --base-g: 0.98;
+}
+[data-look="candy"] {
+  --bg: #fff1f5; --ink: #2b1742; --hot: #ff5c8d; --sun: #ffb347; --cool: #a58bff; --mint: #6fe3c1;
+  --card: rgba(255, 255, 255, .72); --line: 0px; --shadow: 0 22px 50px rgba(90, 30, 120, .18); --chip: #fff;
+  --display: 'Fredoka', system-ui, sans-serif;
+  --wd-lo: 75; --wd-span: 50; --wg-lo: 300; --wg-span: 400;
+  --base-s: 0.1; --base-g: 1;
+}
+:root { --pad: clamp(16px, 3vw, 40px); --ui: 'Inter', system-ui, sans-serif; }
+* { box-sizing: border-box; margin: 0; }
+html { background: var(--bg); color: var(--ink); -webkit-tap-highlight-color: transparent; overflow-x: clip; transition: background-color .5s; }
+body { overflow-x: clip; font-family: var(--ui); }
+[data-look="candy"] body {
+  background:
+    radial-gradient(55% 40% at 12% 8%, #ffd9c7 0%, transparent 70%),
+    radial-gradient(50% 40% at 92% 18%, #e5d8ff 0%, transparent 70%),
+    radial-gradient(70% 50% at 40% 62%, #ffe0ee 0%, transparent 70%),
+    radial-gradient(60% 50% at 85% 95%, #d6f6ea 0%, transparent 70%),
+    var(--bg);
+}
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; padding: 0; }
+a { color: inherit; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* header */
+.top { position: fixed; inset: 0 0 auto; z-index: 20; display: flex; justify-content: space-between; align-items: center; padding: var(--pad); pointer-events: none; }
+.top > * { pointer-events: auto; }
+.mark { display: inline-flex; align-items: center; gap: 8px; text-decoration: none; font: 800 15px/1 var(--display); letter-spacing: .02em; }
+.mark-dot { width: 16px; height: 16px; border-radius: 50%; background: var(--hot); }
+.menu { display: inline-flex; gap: 6px; align-items: center; font: 800 14px/1 var(--display); letter-spacing: .06em; padding: 12px 16px; border-radius: 999px; background: var(--ink); color: var(--bg); }
+.menu b { font-size: 16px; }
+.menu-word { display: inline-flex; overflow: hidden; }
+
+/* hero */
+.hero { position: relative; min-height: 100vh; min-height: 100svh; display: grid; place-items: center; padding: 120px 0 140px; }
+.tag { position: absolute; top: calc(var(--pad) + 56px); left: var(--pad); font: 600 13px/1.35 var(--ui); max-width: 30ch; }
+.name { position: relative; z-index: 2; text-align: center; font-family: var(--display); line-height: .78; text-transform: uppercase; color: var(--ink); user-select: none; -webkit-user-select: none; }
+.name .line { display: block; white-space: nowrap; }
+.ch {
+  display: inline-block; cursor: pointer; transform-origin: 50% 92%; will-change: transform;
+  font-weight: calc(var(--wg-lo) + clamp(0, var(--base-g) + var(--dg, 0), 1) * var(--wg-span));
+  font-stretch: calc((var(--wd-lo) + clamp(0, var(--base-s) + var(--ds, 0), 1) * var(--wd-span)) * 1%);
+}
+.dot { display: inline-block; width: .2em; height: .2em; margin-left: .03em; border-radius: 50%; background: var(--hot); will-change: transform; }
+[data-look="candy"] .name { text-shadow: 0 .03em 0 #ffc4d8, 0 .06em 0 #ffb0ca, 0 .16em .22em rgba(120, 40, 130, .22); }
+[data-look="candy"] .dot { background: radial-gradient(circle at 35% 30%, #fff 0 12%, var(--hot) 13% 100%); box-shadow: 0 .05em .1em rgba(120, 40, 130, .3); }
+
+.boy { position: absolute; left: 0; top: 0; z-index: 3; pointer-events: auto; cursor: pointer; user-select: none; -webkit-user-drag: none; opacity: 0; }
+
+/* shapes */
+.shapes { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+.sh { position: absolute; pointer-events: auto; cursor: pointer; display: block; }
+.sh svg { display: block; width: 100%; height: auto; overflow: visible; }
+.sh path, .sh ellipse { vector-effect: non-scaling-stroke; }
+.sh .gloss { display: none; }
+.sh-star  { top: 15%; right: 5%; width: 24vw; }
+.sh-moon  { top: 25%; left: 6%; width: 20vw; }
+.sh-squig { top: 67%; left: -3%; width: 34vw; }
+.sh-blob  { bottom: 7%; right: -7%; width: 40vw; }
+@media (min-width: 760px) {
+  .sh-star  { top: 13%; right: 12%; width: min(13vw, 210px); }
+  .sh-moon  { top: 22%; left: 11%; width: min(10vw, 170px); }
+  .sh-squig { top: auto; bottom: 18%; left: 7%; width: min(16vw, 260px); }
+  .sh-blob  { bottom: 6%; right: 5%; width: min(18vw, 300px); }
+}
+[data-look="pop"] .sh-star path { fill: var(--sun); stroke: var(--ink); stroke-width: 3px; stroke-linejoin: round; }
+[data-look="pop"] .sh-moon path { fill: var(--hot); stroke: var(--ink); stroke-width: 3px; }
+[data-look="pop"] .sh-blob path { fill: var(--cool); stroke: var(--ink); stroke-width: 3px; }
+[data-look="pop"] .sh-squig path { fill: none; stroke: var(--ink); stroke-width: 9px; stroke-linecap: round; }
+[data-look="pop"] .sh svg { filter: drop-shadow(5px 5px 0 var(--ink)); }
+[data-look="pop"] .sh-squig svg { filter: none; }
+[data-look="candy"] .sh-star path { fill: url(#g-star); }
+[data-look="candy"] .sh-moon path { fill: url(#g-moon); }
+[data-look="candy"] .sh-blob path { fill: url(#g-blob); }
+[data-look="candy"] .sh-squig path { fill: none; stroke: url(#g-squig); stroke-width: 11px; stroke-linecap: round; }
+[data-look="candy"] .sh svg { filter: drop-shadow(0 14px 18px rgba(110, 40, 140, .22)); }
+[data-look="candy"] .sh .gloss { display: block; fill: #fff; opacity: .45; }
+
+/* the scroll badge: a ring of text that turns, an arrow that bobs */
+.badge { position: absolute; left: var(--pad); bottom: calc(var(--pad) + 46px); z-index: 4; width: 92px; height: 92px; display: grid; place-items: center; border-radius: 50%; background: var(--chip); border: var(--line) solid var(--ink); text-decoration: none; }
+[data-look="candy"] .badge { box-shadow: var(--shadow); }
+.badge svg { position: absolute; inset: 4px; width: calc(100% - 8px); height: calc(100% - 8px); }
+.badge text { font: 800 10.5px var(--display); letter-spacing: .12em; fill: var(--ink); }
+.badge i { font: 800 26px/1 var(--display); font-style: normal; }
+@media (min-width: 760px) { .badge { width: 112px; height: 112px; } .badge text { font-size: 10px; } }
+
+/* the work: one card for now */
+.made { position: relative; padding: 14vh var(--pad) 22vh; display: grid; justify-items: center; gap: clamp(36px, 6vw, 70px); }
+.made-title { font-family: var(--display); font-weight: 900; font-size: clamp(46px, 11vw, 150px); line-height: .82; text-transform: uppercase; text-align: center; font-stretch: 70%; }
+[data-look="candy"] .made-title { font-weight: 700; font-stretch: 100%; }
+.made-title .pc { display: inline-block; transform-origin: 50% 90%; }
+.card-wrap { position: relative; width: min(540px, 100%); }
+.card { position: relative; z-index: 1; width: 100%; padding: 14px; border-radius: 30px; background: var(--card); border: var(--line) solid var(--ink); box-shadow: var(--shadow); transform-style: preserve-3d; outline: none; }
+[data-look="candy"] .card { backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+.card-stage { position: relative; aspect-ratio: 4 / 3; overflow: hidden; display: grid; place-items: center; border-radius: 20px; background: var(--sun); border: var(--line) solid var(--ink); }
+[data-look="candy"] .card-stage { background: linear-gradient(135deg, #b6f3dc, #d9cbff 60%, #ffd3e4); }
+.squish { position: relative; font-family: var(--display); text-transform: uppercase; line-height: .8; white-space: nowrap; color: var(--ink); }
+.squish .sq { display: inline-block; transform-origin: 50% 96%; font-weight: calc(var(--wg-lo) + clamp(0, var(--base-g) + var(--dg, 0), 1) * var(--wg-span)); font-stretch: calc((var(--wd-lo) + clamp(0, var(--base-s) + var(--ds, 0), 1) * var(--wd-span)) * 1%); }
+.squish .ball { position: absolute; left: 0; top: 0; width: .3em; height: .3em; border-radius: 50%; background: var(--hot); border: var(--line) solid var(--ink); will-change: transform; }
+[data-look="candy"] .squish .ball { background: radial-gradient(circle at 35% 30%, #fff 0 12%, var(--hot) 13% 100%); box-shadow: 0 .08em .14em rgba(120, 40, 130, .3); }
+.glare { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(40% 40% at var(--gx, 30%) var(--gy, 20%), rgba(255, 255, 255, .5), transparent 70%); opacity: 0; transition: opacity .3s; }
+.card:hover .glare { opacity: 1; }
+.card-meta { display: grid; grid-template-columns: 1fr auto; align-items: end; gap: 4px 12px; padding: 16px 6px 4px; }
+.card-meta h3 { font: 900 clamp(28px, 6vw, 40px)/.9 var(--display); font-stretch: 70%; letter-spacing: .01em; }
+[data-look="candy"] .card-meta h3 { font-weight: 700; font-stretch: 100%; }
+.card-meta p { grid-column: 1; font: 600 14px/1.3 var(--ui); opacity: .75; }
+.tags { grid-column: 2; grid-row: 1 / span 2; display: flex; gap: 6px; list-style: none; padding: 0; }
+.tags li { font: 800 11px/1 var(--display); letter-spacing: .08em; padding: 7px 10px; border-radius: 999px; border: 2px solid var(--ink); }
+[data-look="candy"] .tags li { border: 0; background: #fff; }
+.peek { position: absolute; left: 0; top: 0; z-index: 0; pointer-events: none; user-select: none; opacity: 0; }
+
+/* the look switch (only for choosing) */
+.looks { position: fixed; left: 50%; bottom: calc(14px + env(safe-area-inset-bottom)); z-index: 30; transform: translateX(-50%); display: flex; gap: 4px; padding: 4px; border-radius: 999px; background: var(--ink); box-shadow: 0 6px 20px rgba(0, 0, 0, .18); }
+.looks button { font: 800 12px/1 var(--ui); letter-spacing: .06em; padding: 10px 16px; border-radius: 999px; color: var(--bg); }
+.looks button[aria-pressed="true"] { background: var(--bg); color: var(--ink); }
+.made-title .pw { display: inline-block; white-space: nowrap; }
+.squish .probe { display: inline-block; width: 0; height: 0; }
+@media (min-width: 760px) { .hero { padding: 30vh 0 12vh; } }

@@ -16,6 +16,6 @@ export default defineConfig({
     assetsInlineLimit: process.env.SINGLE ? 100_000_000 : 0,
     cssCodeSplit: true,
     modulePreload: false,
-    rollupOptions: { input: { site: 'index.html', film: 'film.html', proof: 'proof.html', home: 'home.html', world: 'world.html', break: 'break.html' } },
+    rollupOptions: { input: { site: 'index.html', film: 'film.html', proof: 'proof.html', home: 'home.html', world: 'world.html', break: 'break.html', fun: 'fun.html' } },
   },
 });

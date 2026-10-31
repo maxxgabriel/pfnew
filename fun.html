@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en" data-look="pop">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#fbf7ef" />
+<meta name="description" content="Max Gabriel — motion designer and animator. Letters that dance, shapes that misbehave." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anybody:wdth,wght@50..150,100..900&family=Fredoka:wdth,wght@75..125,300..700&display=swap" />
+<link rel="icon" href="./favicon.svg" />
+<title>Max Gabriel — motion designer &amp; animator</title>
+</head>
+<body>
+<header class="top">
+  <a class="mark" href="#top" aria-label="Max Gabriel, back to top"><i class="mark-dot"></i><span>MAX GABRIEL</span></a>
+  <button class="menu" type="button"><span class="menu-word">MENU</span><b>+</b></button>
+</header>
+<main id="top">
+  <section class="hero" aria-label="Max Gabriel">
+    <p class="tag"><span data-scramble>Motion designer &amp; animator.</span><br /><span data-scramble>I make letters dance and shapes misbehave.</span></p>
+    <h1 class="name" aria-label="Max Gabriel"><span class="line" data-word="MAX"></span><span class="line" data-word="GABRIEL"></span></h1>
+    <div class="shapes" aria-hidden="true"></div>
+    <img class="boy" alt="" aria-hidden="true" />
+    <a class="badge" href="#made" aria-label="Scroll to the work">
+      <svg viewBox="0 0 100 100" aria-hidden="true"><defs><path id="badge-ring" d="M50 50 m-37 0 a37 37 0 1 1 74 0 a37 37 0 1 1 -74 0" /></defs><text><textPath href="#badge-ring">SCROLL DOWN • SCROLL DOWN • SCROLL DOWN • </textPath></text></svg>
+      <i aria-hidden="true">↓</i>
+    </a>
+  </section>
+  <section class="made" id="made" aria-labelledby="made-title">
+    <h2 class="made-title" id="made-title" data-pop>THINGS THAT MOVE</h2>
+    <div class="card-wrap">
+    <img class="peek" alt="" aria-hidden="true" />
+    <article class="card" tabindex="0" aria-label="Squish: letters that feel the weight">
+      <div class="card-stage"><div class="squish" aria-hidden="true" data-word="SQUISH"></div><i class="glare"></i></div>
+      <div class="card-meta">
+        <h3>SQUISH</h3>
+        <p>Letters that feel the weight.</p>
+        <ul class="tags"><li>TYPE</li><li>LOOP</li></ul>
+      </div>
+    </article>
+    </div>
+  </section>
+</main>
+<div class="looks" role="group" aria-label="Try a look">
+  <button type="button" data-look="pop" aria-pressed="true">POP</button>
+  <button type="button" data-look="candy" aria-pressed="false">CANDY</button>
+</div>
+<script type="module" src="/src/fun/main.ts"></script>
+</body>
+</html>
