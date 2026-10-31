@@ -14,6 +14,8 @@ import { T } from '../timeline';
  */
 const P = Array.from({ length: 8 }, () => new THREE.Vector3());
 const head = new THREE.Vector3(), near = new THREE.Vector3();
+/** where he rides on the ribbon this frame (page px), for the drop to pick him up from */
+export const rider = new THREE.Vector3();
 const SHEET = new THREE.Color('#f7f7f8');
 
 /** where the ribbon flies: a slow figure over the top of the page (page px, z toward you) */
@@ -38,10 +40,10 @@ export function peel(c: Ctx) {
 
   // the nav becomes the strip (pixel-identical) the moment he grabs it
   if (b >= G + 0.6) { page.get('nav').look.vis = false; rib.vis = true; }
-  u.uRad.value = nav.h * 0.9;
-  u.uMaxA.value = lerp(1.1, 2.5, seg(b, grab, free));
+  u.uRad.value = nav.h * 1.3;
+  u.uMaxA.value = lerp(1.2, 2.8, seg(b, grab, free));
   u.uFront.value = b < curl ? lerp(len + 10, len * 0.6, inOutCubic(seg(b, grab, curl))) : lerp(len * 0.6, -40, inCubic(seg(b, curl, free)));
-  u.uSag.value = nav.h * 2.4 * smooth(seg(b, grab, curl));
+  u.uSag.value = nav.h * 3.4 * smooth(seg(b, grab, curl));
   const path = smooth(seg(b, free - 0.5, free + 1.5));
   u.uPath.value = path;
   u.uTwist.value = 0.6 * path;
@@ -54,7 +56,9 @@ export function peel(c: Ctx) {
   const k = inOutCubic(seg(b, tilt0, tilt1));
   if (k > 0) {
     const d = flatDist(L.H), drift = Math.sin(B * 0.25) * 0.08 * seg(b, tilt1, tilt1 + 2);
-    orbit(c, L.W / 2, L.H / 2 + lerp(0, L.H * 0.18, k), 0, d * lerp(1, 1.5, k), lerp(0, -0.42, k) + drift, lerp(0, 0.62, k));
+    // once he is riding, the camera tracks the ribbon's head with the tilted page behind it
+    const f = 0.7 * path * (b < T.drop ? 1 : 0);
+    orbit(c, lerp(L.W / 2, head.x, f), lerp(L.H / 2 + L.H * 0.18 * k, head.y, f), lerp(0, head.z, f), d * lerp(1, 1.5, k) * lerp(1, 0.72, path), lerp(0, -0.42, k) + drift, lerp(0, 0.62, k));
     c.bg.copy(SHEET).lerp(INK, smooth(seg(b, tilt0 + 0.5, tilt0 + 2.5)));
     if (k > 0.5) c.theme = '#1b1714';
   }
@@ -81,6 +85,7 @@ export function peel(c: Ctx) {
     c.boy.set(`swing_${frame(B, 4, 1.5)}`, end.x, end.y, end.z + 1, face, { top: true, rot: 0.16 * Math.sin((B * Math.PI) / 2) });
   } else {
     routeAt(P, 0.88, near);
+    rider.set(near.x, near.y - nav.h * 0.45, near.z + 4);
     const key = b >= power ? `powerup_${frame(B, 3, 2)}` : `ride_${frame(B, 4, 1)}`;
     const air = 1 - smooth(seg(b, free + 0.4, free + 1.6));
     c.boy.set(key, near.x, near.y - nav.h * 0.45 - air * face * 1.5, near.z + 4, face * (b >= power ? 1.15 : 1), { bill: true, flip: Math.cos(1.9 * s + 0.4) < 0 });

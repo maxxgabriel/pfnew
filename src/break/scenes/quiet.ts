@@ -79,7 +79,7 @@ export function quiet(c: Ctx) {
   let sx = bx.x, sy = bx.y, sz = -m.depth * bx.s * 0.6;
   const rise = inOutCubic(seg(b, Q + 12.5, Q + 18.5));
   sz = lerp(sz, 60, rise); sy = lerp(bx.y, top - face * 3.2, rise);
-  if (b >= R0 - 0.5) { const held = smooth(seg(b, R0 - 0.5, R0)); sx = lerp(sx, hub.x + face * 0.15, held); sy = lerp(sy, hub.y - face * 3.15, held); sz = lerp(sz, 6, held); }
+  if (b >= R0 - 0.5) { const held = smooth(seg(b, R0 - 0.5, R0)); sx = lerp(sx, hub.x + face * 0.15, held); sy = lerp(sy, hub.y - face * 3.7, held); sz = lerp(sz, 6, held); }
   // the pulse: faster and faster through the rise
   const rate = b < R0 + 4 ? 1 : b < R0 + 8 ? 2 : b < R0 + 12 ? 4 : 8;
   const P = B * rate, pulse = b >= R0 ? hit(P % 1, 6) : 0;

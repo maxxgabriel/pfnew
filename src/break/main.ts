@@ -40,7 +40,7 @@ function applySize() {
 applySize();
 
 const lenis = touch ? null : new Lenis({ duration: 1.15, smoothWheel: true });
-let b = 0, target = 0, t = 0, last = performance.now(), moved = 0;
+let b = 0, target = 0, t = 0, last = performance.now(), moved = 0, vel = 0;
 let frozen: number | null = null, forcedIdle: number | null = null;
 const read = () => (lenis ? lenis.scroll : scrollY) / ppb;
 
@@ -62,9 +62,11 @@ function tick(now: number) {
   const nt = Math.max(0, Math.min(TOTAL, read()));
   if (Math.abs(nt - target) > 1e-4) moved = t;
   target = nt;
+  const prev = b;
   b += (target - b) * (1 - Math.exp(-dt * (lenis ? 14 : 9)));
   if (Math.abs(target - b) < 1e-4) b = target;
-  dir.update(b, t, forcedIdle ?? Math.min(1, Math.max(0, (t - moved - 0.5) / 0.6)));
+  vel += ((dt > 0 ? (b - prev) / dt : 0) - vel) * (1 - Math.exp(-dt * 10));
+  dir.update(b, t, forcedIdle ?? Math.min(1, Math.max(0, (t - moved - 0.5) / 0.6)), frozen === null ? vel : 0);
   dir.render(renderer);
   if (theme.content !== dir.c.theme) theme.content = dir.c.theme;
   // the painted button becomes a real link at the end
@@ -77,11 +79,14 @@ function tick(now: number) {
 }
 requestAnimationFrame(tick);
 
+// only he reacts to a tap
+canvas.addEventListener('click', (e) => { if (dir.hits(e.clientX, e.clientY)) dir.tapped = t; });
+
 // his drawings for the opening first, the rest after
 const first = ['closeup_0', 'closeup_2', 'leap_0', 'leap_2', 'leap_3', 'fall_2', 'fall_0', 'hero_0', 'hero_1', 'hero_3'];
 const rest = [
   'still_0', 'still_3', ...seq('snap', 2), ...seq('moonwalk6', 6), ...seq('swing', 4), ...seq('ride', 4), ...seq('powerup', 3), ...floorKeys(),
-  'fine_0', 'fine_1', 'curious', ...homeKeys,
+  'fine_0', 'fine_1', 'curious', 'comedy_0', 'extra_1', ...homeKeys,
 ];
 // the button's words, in the site's marker lettering
 canvasArt('say_hi', 512, 160, async (g) => {

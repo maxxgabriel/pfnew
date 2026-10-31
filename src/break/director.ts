@@ -24,6 +24,7 @@ export const FOV = 35;
 export type Cam = { x: number; y: number; z: number; tx: number; ty: number; tz: number; fov: number; roll: number; shake: number };
 export type Ctx = {
   b: number; t: number; idle: number; calm: boolean;
+  /** scroll speed, beats per second (signed, smoothed) */ v: number;
   L: Layout; page: Page; boy: Actor; eye: Actor; post: Post; fx: { a: Shape; b: Shape; spark: Shape }; rib: Ribbon;
   /** stamped art at the end (lettering, seal, his faces) */ deco: Actor[];
   /** the contact link is live over the button */ hi: boolean;
@@ -56,13 +57,15 @@ export class Director {
   readonly boy = new Actor(20);
   readonly eye = new Actor(4);
   readonly post = new Post();
-  readonly fx = { a: new Shape(30), b: new Shape(31), spark: new Shape(25) };
+  readonly fx = { a: new Shape(30), b: new Shape(31), spark: new Shape(15) };
   readonly rib = new Ribbon();
   readonly deco = Array.from({ length: 7 }, () => new Actor(12));
   readonly c: Ctx;
+  /** clock time of the last tap on him */
+  tapped = -1e9;
   constructor(L: Layout, calm: boolean) {
     this.c = {
-      b: 0, t: 0, idle: 0, calm, L, page: this.page, boy: this.boy, eye: this.eye, post: this.post, fx: this.fx, rib: this.rib, deco: this.deco, hi: false,
+      b: 0, t: 0, idle: 0, v: 0, calm, L, page: this.page, boy: this.boy, eye: this.eye, post: this.post, fx: this.fx, rib: this.rib, deco: this.deco, hi: false,
       cam: { x: 0, y: 0, z: 1, tx: 0, ty: 0, tz: 0, fov: FOV, roll: 0, shake: 0 }, scroll: 0, bg: new THREE.Color('#f7f7f8'), theme: '#f7f7f8',
     };
     this.scene.add(this.page.root, this.boy.g, this.eye.g, this.fx.a.mesh, this.fx.b.mesh, this.fx.spark.mesh, this.rib.mesh, ...this.deco.map((a) => a.g));
@@ -74,9 +77,9 @@ export class Director {
     this.rib.build(L);
     this.camera.aspect = L.W / L.H;
   }
-  update(b: number, t: number, idle: number) {
+  update(b: number, t: number, idle: number, v = 0) {
     const c = this.c;
-    c.b = b; c.t = t; c.idle = idle;
+    c.b = b; c.t = t; c.idle = idle; c.v = v;
     c.page.reset(); c.boy.reset(); c.eye.reset(); c.post.reset();
     for (const f of Object.values(c.fx)) f.reset();
     c.rib.reset();
@@ -86,6 +89,22 @@ export class Director {
     flat(c, 0);
     shared.uTime.value = t;
     for (const s of SCENES) s(c);
+    // inner parts (card images and lines, nav links, footer lines) follow their parent into outline or out of sight
+    for (const p of c.page.pieces) {
+      if (!p.b.parent) continue;
+      const par = c.page.get(p.b.parent).look;
+      p.look.wire = Math.max(p.look.wire, par.wire);
+      p.look.alpha = Math.min(p.look.alpha, par.alpha);
+    }
+    // a tap on him: a jump of surprise, then a grin (wherever he is, whatever he was doing)
+    const r = t - this.tapped;
+    if (r >= 0 && r < 0.95 && c.boy.p.vis) {
+      const p = c.boy.p;
+      p.key = r < 0.4 ? 'comedy_0' : 'extra_1';
+      p.y -= Math.sin(Math.min(1, r / 0.5) * Math.PI) * c.L.face * 0.9;
+      p.sx *= 1 + 0.12 * Math.exp(-r * 9); p.sy *= 1 + 0.12 * Math.exp(-r * 9);
+      p.top = false; p.mid = false; p.rot = 0;
+    }
     // the camera, with any shake
     const k = c.calm ? 0 : c.cam.shake, n = (o: number) => noise(t * 23 + o) * k;
     this.camera.fov = c.cam.fov;
@@ -100,6 +119,19 @@ export class Director {
     c.rib.commit(this.camera, t);
     for (const a of c.deco) a.commit(this.camera);
     c.post.u.uTime.value = t;
+  }
+  /** is this screen point (css px) on him? */
+  hits(x: number, y: number) {
+    const m = this.boy.mesh, v = new THREE.Vector3(), L = this.c.L;
+    if (!this.boy.g.visible) return false;
+    let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+    for (const [sx, sy] of [[-0.5, -0.5], [0.5, -0.5], [0.5, 0.5], [-0.5, 0.5]]) {
+      v.set(sx, sy, 0).applyMatrix4(m.matrixWorld).project(this.camera);
+      const px = ((v.x + 1) / 2) * L.W, py = ((1 - v.y) / 2) * L.H;
+      x0 = Math.min(x0, px); y0 = Math.min(y0, py); x1 = Math.max(x1, px); y1 = Math.max(y1, py);
+    }
+    const pad = 12;
+    return x > x0 - pad && x < x1 + pad && y > y0 - pad && y < y1 + pad;
   }
   /** where the call-to-action is on screen (css px), for the real link laid over it */
   ctaRect() {

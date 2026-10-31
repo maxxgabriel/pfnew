@@ -4,7 +4,7 @@ import { INK, PAPER, RED } from '../page';
 import { T } from '../timeline';
 import { impact } from './open';
 import { floorSlot, floorTarget } from './floor';
-import { laySnake } from './peel';
+import { laySnake, rider } from './peel';
 import { members, mix, pose, put, rest, type Pose3 } from './slabs';
 
 /*
@@ -60,8 +60,11 @@ export function drop(c: Ctx) {
   bp = mix(rest(cta), bp, inOutCubic(seg(X, 0, 1.6)));
   put(cta, bp);
   cta.look.color = RED;
-  const key = settle > 0.5 ? 'still_0' : tunnel > 0.5 ? (n % 4 === 3 ? 'ride_3' : 'ride_0') : `ride_${frame(B, 4, 1)}`;
-  c.boy.set(key, bp.x, bp.y - 2, bp.z, L.face * lerp(1, 1.25, smooth(seg(X, 0, 2))), { bill: true, sy: 1 - 0.05 * hit(ph, 8) });
+  // he leaps off the ribbon onto the board as it comes up to meet him
+  const hop = smooth(seg(X, 0.15, 1.5));
+  const key = hop < 1 ? (hop < 0.5 ? 'leap_3' : 'fall_0') : settle > 0.5 ? 'still_0' : tunnel > 0.5 ? (n % 4 === 3 ? 'ride_3' : 'ride_0') : `ride_${frame(B, 4, 1)}`;
+  const fx = lerp(rider.x, bp.x, hop), fy = lerp(rider.y, bp.y - 2, hop) - Math.sin(hop * Math.PI) * L.face * 1.5, fz = lerp(rider.z, bp.z, hop);
+  c.boy.set(key, fx, fy, fz, L.face * lerp(1, 1.25, smooth(seg(X, 0, 2))), { bill: true, sy: 1 - 0.05 * hit(ph, 8) });
 
   // the ribbon rides alongside: round the ring, then down the tunnel beside him, then off into the dark
   if (tunnel > 0 || settle > 0) {
@@ -76,8 +79,8 @@ export function drop(c: Ctx) {
   // the camera: a cut every two beats round the ring, every beat in the tunnel
   const cut = tunnel < 0.5 ? Math.floor(X / 2) : Math.floor(X);
   const v = tunnel < 0.5 ? (X % 2) / 2 : X % 1;
-  const k = c.calm ? 0 : tunnel < 0.5 ? [0, 1, 2, 4, 3, 1, 5, 0][cut % 8] : 6 + [0, 1, 0, 2, 0, 1, 3, 2][cut % 8];
-  const bx = bp.x, by = bp.y - L.face * 1.3, bz = bp.z;
+  const k = c.calm ? 0 : tunnel < 0.5 ? [1, 0, 2, 4, 3, 1, 5, 0][cut % 8] : 6 + [0, 1, 0, 2, 0, 1, 3, 2][cut % 8];
+  const bx = fx, by = fy - L.face * 1.3, bz = fz;
   switch (k) {
     case 0: orbit(c, cx, cy, 0, 2.3 * d0, 0.25 + 0.25 * v, 0.42); break;
     case 1: orbit(c, bx, by, bz, 0.62 * d0, ab + Math.PI * 0.6 + 0.3 * v, 0.06); break;

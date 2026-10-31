@@ -40,7 +40,7 @@ export function opening(c: Ctx) {
       const v = knock(b - kb);
       if (v) { ks.push([fx * w, fy * h, v * a * mn, mn * 0.62]); energy += Math.max(0, v); }
     }
-    const zone = seg(b, T.pin - 0.5, T.pin + 0.5) * (1 - seg(b, T.push - 1, T.push)) * c.idle;
+    const zone = (1 - seg(b, T.push - 1, T.push)) * c.idle * (b < T.pin - 0.5 ? 0.7 : 1);
     if (zone > 0) {
       const P = 2.4, n = Math.floor(t / P), kt = beatsOf(t - n * P);
       const fx = [-0.2, 0.18, 0.02, -0.1, 0.24][n % 5], fy = [0.04, -0.06, 0.08, -0.02, 0][n % 5];

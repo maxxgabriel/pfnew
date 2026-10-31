@@ -72,6 +72,10 @@ export function snap(c: Ctx) {
     for (const p of page.pieces) p.look.shim = Math.max(p.look.shim, 0.85 * (1 - clamp(sx / 0.9)));
   }
 
+  // a fast flick stretches the page along the scroll, like a sheet of rubber
+  const flick = Math.min(0.22, Math.abs(c.v) * 0.03) * end;
+  if (flick > 0.002) for (const p of top) { p.look.sy *= 1 + flick; p.look.sx *= 1 - flick * 0.3; }
+
   // ---- the groove: each layer joins on the scroll and plays on the clock ----
   const k1 = on(S + 1), k2 = on(S + 4), k3 = on(S + 7), k4 = on(S + 10), k5 = on(S + 13);
   const build = smooth(seg(b, S + 15, T.peel)) * end;

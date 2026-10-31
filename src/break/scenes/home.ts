@@ -103,7 +103,7 @@ export function home(c: Ctx) {
   const lg = L.get('logo'), hub = riseHub(c, S);
   const fly = inOutCubic(seg(b, S, S + 1.4));
   if (fly < 1) {
-    c.fx.spark.disc(lerp(hub.x, lg.x + lg.w / 2, fly), lerp(hub.y - face * 3.1, lg.y + lg.h / 2 + s, fly), 6, lerp(face * 0.75, lg.w / 2, fly), RED, 1.2 * (1 - fly), 1);
+    c.fx.spark.disc(lerp(hub.x, lg.x + lg.w / 2, fly), lerp(hub.y - face * 3.7, lg.y + lg.h / 2 + s, fly), 6, lerp(face * 0.75, lg.w / 2, fly), RED, 1.2 * (1 - fly), 1);
   }
 
   // him: hanging in the air while it all lands, the fire tornado, the kick, down onto the button, hello

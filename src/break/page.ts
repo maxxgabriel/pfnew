@@ -81,6 +81,9 @@ void main() {
     c = uSide * l;
   }
   if (a < 0.01) discard;
+  // anything right in front of the lens dissolves (dithered, so it stays opaque) instead of blocking the shot
+  float near = smoothstep(90.0, 380.0, distance(cameraPosition, vW));
+  if (near < 1.0 && fract(sin(dot(floor(gl_FragCoord.xy / 2.0), vec2(12.9898, 78.233))) * 43758.5453) > near) discard;
   c = mix(c, uFlashC, uFlash);
   gl_FragColor = vec4(c, a);
 }`;
@@ -99,10 +102,10 @@ const BASE = fresh();
 function slab(w: number, h: number, r: number) {
   const s = new THREE.Shape(), x = -w / 2, y = -h / 2;
   r = Math.min(r, w / 2, h / 2);
-  s.moveTo(x + r, y); s.lineTo(x + w - r, y); s.quadraticCurveTo(x + w, y, x + w, y + r);
-  s.lineTo(x + w, y + h - r); s.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-  s.lineTo(x + r, y + h); s.quadraticCurveTo(x, y + h, x, y + h - r);
-  s.lineTo(x, y + r); s.quadraticCurveTo(x, y, x + r, y);
+  s.moveTo(x + r, y); s.lineTo(x + w - r, y); s.absarc(x + w - r, y + r, r, -Math.PI / 2, 0, false);
+  s.lineTo(x + w, y + h - r); s.absarc(x + w - r, y + h - r, r, 0, Math.PI / 2, false);
+  s.lineTo(x + r, y + h); s.absarc(x + r, y + h - r, r, Math.PI / 2, Math.PI, false);
+  s.lineTo(x, y + r); s.absarc(x + r, y + r, r, Math.PI, Math.PI * 1.5, false);
   const g = new THREE.ExtrudeGeometry(s, { depth: 1, bevelEnabled: false, curveSegments: r > 12 ? 10 : 5 });
   g.translate(0, 0, -1);
   return g;
@@ -280,6 +283,8 @@ export class Media {
   }
   reset() { Object.assign(this.look, BASE, { open: [0, 0, 0, 0], strain: 0, gap: 0, knocks: [] }); }
   private readonly grey = new THREE.Color(LOOK.media[0]); private readonly greyLine = new THREE.Color(LOOK.media[1]!);
+  /** on his site the X is only a scar: a soft wash line */
+  private readonly wash = new THREE.Color('#a89d8c');
   commit() {
     const L = this.look;
     this.g.visible = L.vis;
@@ -293,7 +298,7 @@ export class Media {
     for (let i = 0; i < 3; i++) { const k = L.knocks[i]; if (k) K[i].set(k[0], -k[1], k[2], k[3]); else K[i].set(0, 0, 0, 1); }
     this.u.uStrain.value = L.strain; this.u.uGap.value = L.gap; this.u.uFlash.value = L.flash;
     (this.u.uColor.value as THREE.Color).copy(this.grey).lerp(PAPER, L.ink);
-    (this.u.uLine.value as THREE.Color).copy(this.greyLine).lerp(INK, L.ink);
+    (this.u.uLine.value as THREE.Color).copy(this.greyLine).lerp(this.wash, L.ink);
     if (L.flashC) (this.u.uFlashC.value as THREE.Color).copy(L.flashC);
   }
 }
