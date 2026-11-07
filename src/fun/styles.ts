@@ -47,6 +47,10 @@ export function initStyles(root: HTMLElement) {
   layout(false);
   whileVisible(root, restart, () => tl?.kill());
   // dealt out from a stack when it arrives
-  ScrollTrigger.create({ trigger: fan, start: 'top 85%', once: true, onEnter: () => gsap.from(faces, { x: 0, y: 80, rotation: 0, scale: 0.4, duration: 0.9, ease: 'back.out(1.6)', stagger: 0.05 }) });
+  ScrollTrigger.create({ trigger: fan, start: 'top 85%', once: true, onEnter: () => {
+    gsap.from(faces, { x: 0, y: 80, rotation: 0, scale: 0.4, duration: 0.9, ease: 'back.out(1.6)', stagger: 0.05 });
+    // each one glitches in from its own dimension
+    if (!calm) faces.forEach((f, i) => gsap.delayedCall(0.3 + i * 0.09, () => { f.classList.add('gi'); gsap.delayedCall(0.55, () => f.classList.remove('gi')); }));
+  } });
   addEventListener('resize', () => layout(false));
 }

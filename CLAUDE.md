@@ -8,7 +8,9 @@ product; projects are deliberately absent.
 letter and shape animation with hand-drawn stickers made with ChatGPT — read `docs/FUN.md`. Text is
 allowed now. Round 42 rebuilt the first two pages: the name is rubber you can grab, fling and tap
 (`jelly.ts`, `hero.ts`), with stunts when poked (`stunts.ts`), and a scroll dive through the tagline
-(`dive.ts`). A timed cold open was built and cut: *"its a website and not a … annual function video"*. (Round 40's `break.html` was rejected; the round 35–37 motion site moved to `motion.html`.)
+(`dive.ts`), then the way in as comic panels (`panels.ts`) and the rooftops with the leap of faith
+(`roof.ts`), Spider-Verse language on our boy (technique only). The neo-noir trailer was cut: *"its a
+website and not a … annual function video"*. (Round 40's `break.html` was rejected; the round 35–37 motion site moved to `motion.html`.)
 The notes below describe the older canvas film.
 
 Before changing anything, read:

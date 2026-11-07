@@ -7,3 +7,12 @@
 .face:focus-visible { outline: 4px solid var(--hot); outline-offset: 4px; }
 .fan-name { margin-top: 10px; font: 400 clamp(34px, 6vw, 72px)/1 'Anton', sans-serif; letter-spacing: .04em; color: var(--bg); text-shadow: 4px 4px 0 var(--ink); min-height: 1.1em; }
 .fan-name span { display: inline-block; }
+/* arriving from another dimension: slices out of register for half a second */
+.face.gi img { animation: gi .55s steps(1) both; }
+@keyframes gi {
+  0% { clip-path: inset(0 0 60% 0); transform: translate(-8px, 0); filter: url(#boil) drop-shadow(6px 0 0 #ff2a4e) drop-shadow(-6px 0 0 #2ad9ff); }
+  25% { clip-path: inset(40% 0 20% 0); transform: translate(7px, 0); }
+  50% { clip-path: inset(20% 0 0 0); transform: translate(-5px, 2px); filter: url(#boil) drop-shadow(-5px 0 0 #ff2a4e) drop-shadow(5px 0 0 #2ad9ff); }
+  75% { clip-path: inset(0 0 30% 0); transform: translate(3px, 0); }
+  100% { clip-path: none; transform: none; filter: url(#boil); }
+}

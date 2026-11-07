@@ -16,7 +16,7 @@ gsap.registerPlugin(ScrollTrigger);
  *   DANCE           ink     a chorus line on the beat: hops, a crouch, a jump with a spin, a sway
  *   AND SHAPES      butter  letters keep turning into shapes and back
  *   MISBEHAVE       sky     letters act up; then it glitches apart and switches off like an old TV,
- *                           into the dark of the trailer
+ *                           into the dark of the rooftops
  * He falls with you the whole way. Every landing is a slam, a shake, a flash and a burst of speed
  * lines. The scroll drives the camera (scroll back and it rewinds); the beat drives the letters.
  */

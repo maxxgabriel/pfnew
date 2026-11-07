@@ -6,14 +6,16 @@ import { Boy } from './boy';
 import { Jelly, type Letter } from './jelly';
 import { C, calm, darkHeader, onBeat, shake } from './kit';
 import { Speed } from './lines';
+import { PANELS_END, panelsIn } from './panels';
 import { popIn, sticker, stickerUrl } from './stickers';
 import { makeStunts } from './stunts';
 gsap.registerPlugin(ScrambleTextPlugin, CustomEase, CustomWiggle);
 
 /*
- * HERO — the name is a playground, and the whole first screen is rubber (jelly.ts). It is there at
- * once: the letters pop in, the red ball bounces along GABRIEL into the dot after MAX, he drops onto
- * the X; two seconds, and any touch skips it. Then it is yours. Tap the paper: a ring runs through
+ * HERO — the name is a playground, and the whole first screen is rubber (jelly.ts). The way in is
+ * comic panels (panels.ts) slamming onto the paper, the last one a window onto this page; then the
+ * red ball bounces along GABRIEL into the dot after MAX and he drops onto the X; any touch skips it.
+ * Then it is yours. Tap the paper: a ring runs through
  * everything. Grab a letter: it stretches toward your finger, pulling its neighbours like a chain,
  * and twangs back when you let go. Fling it: it bounces off the edges and throws him. The big stunts
  * (stunts.ts) fire only when you poke: tap the ball, double-tap a letter, come back up from the dive.
@@ -210,23 +212,25 @@ export function initHero(root: HTMLElement) {
     else if (Math.abs(top(i).x - boy.x) < fs * 1.1) gsap.fromTo(boy, { sy: 0.8 }, { sy: 1, duration: 0.45, ease: 'elastic.out(1.2, 0.4)', overwrite: 'auto' });
   };
 
-  // the arrival: two seconds, all at once, and any touch skips it
+  // the arrival: the panels, then the ball and him; any touch skips it
   function intro() {
     const rest = letters.map((_, i) => top(i));
     const tl = gsap.timeline();
     tl.set(letters, { opacity: 1 }, 0);
-    tl.from('.top > *', { y: -140, duration: 0.6, ease: 'back.out(1.8)', stagger: 0.08 }, 0);
+    let t0 = 0.05;
+    if (calm) tl.fromTo(letters, { scale: 0, rotation: () => gsap.utils.random(-30, 30) }, { scale: 1, rotation: 0, duration: 0.55, ease: 'back.out(2.4)', stagger: { each: 0.035, from: 'random' }, immediateRender: false }, 0.05);
+    else { tl.add(panelsIn(root, act, name), 0); t0 = PANELS_END; }
+    tl.from('.top > *', { y: -140, duration: 0.6, ease: 'back.out(1.8)', stagger: 0.08 }, 0.1);
     root.querySelectorAll<HTMLElement>('[data-scramble]').forEach((el, i) => {
       const text = el.textContent ?? '';
       el.textContent = '';
-      tl.to(el, { scrambleText: { text, chars: 'upperCase', speed: 0.8 }, duration: 0.9 }, 0.1 + i * 0.25);
+      tl.to(el, { scrambleText: { text, chars: 'upperCase', speed: 0.8 }, duration: 0.9 }, t0 + 0.1 + i * 0.25);
     });
-    tl.fromTo(letters, { scale: 0, rotation: () => gsap.utils.random(-30, 30) }, { scale: 1, rotation: 0, duration: 0.55, ease: 'back.out(2.4)', stagger: { each: 0.035, from: 'random' }, immediateRender: false }, 0.05);
-    tl.add(popIn(cast), 0.3);
-    tl.add(popIn([glove]), 1.4);
-    tl.add(ballRun(rest), 0.75);
-    tl.add(boyIn(), 1.95);
-    tl.call(startLife, [], 2.8);
+    tl.add(popIn(cast), t0 + 0.1);
+    tl.add(popIn([glove]), t0 + 1.2);
+    tl.add(ballRun(rest), t0 + 0.3);
+    tl.add(boyIn(), t0 + 1.4);
+    tl.call(startLife, [], t0 + 2.3);
     const skip = () => { if (tl.progress() < 1) tl.progress(1); evs.forEach((e) => removeEventListener(e, skip)); };
     const evs = ['pointerdown', 'wheel', 'touchmove', 'keydown'] as const;
     evs.forEach((e) => addEventListener(e, skip, { passive: true }));

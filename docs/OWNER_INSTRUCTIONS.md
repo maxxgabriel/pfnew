@@ -76,6 +76,21 @@ themselves, not to the docs: *"you report to me and not the docs"*.
 
 ## 3. Decisions (most recent first)
 
+**Round 42c — it was the trailer:** *"what i mean is till now playing thing i dont want that its too
+flkashty. give me aloty of creative ideas to do there. rest of it looks great"* and *"typography in
+tehre is rweally good tho maybe we can use them somewhere"*. So "the movie" in 42b meant the **neo-noir
+trailer** (ONE ANIMATOR → NOW PLAYING), not the cold open: the trailer is cut; the rubber name and the
+dive stay (*"rest of it looks great"*); the trailer's type treatments are to be reused elsewhere.
+Ideas pitched in chat twice (process pieces, continuous takes, the typography as a poster, touch
+toys; then entrances); then *"i want some spiderman miles morales like ideas"* → pitched the film's
+language on our boy (comic print, misregistration for blur, panels, onomatopoeia stickers, twos,
+graffiti, dimension glitches, the leap of faith) → *"do it then add all somehow even sbtle"*. Built:
+**the way in** = comic panels slamming onto the paper, the last one a window onto the landing
+(`panels.ts`); **the slot** = the rooftops (`roof.ts`): the trailer's lines as a skyline of towers he
+runs across at night, ending in the leap of faith into the work; folded in: the misregistration snap
+on arrival, the graffiti tag, the train crossing behind, billboard lights that turn him pixel/comic,
+comic insets on the big jumps, the seven styles glitching in. No webs, masks, logos or their text.
+
 **Round 42b — the cold open is too flashy; pitch the opening again:** *"this was really nice just
 dont do artifacts from on. i ddleted it, so what i woulkd change is the first part the movie we do,
 its a bit lot flashy lol its nice i like the aniamtiions but its a website and not a yknow tannual
@@ -597,3 +612,17 @@ build it".
 > suiggeyts me real good ones as well thjat wpuld look crazy.
 
 *(Asked: the opening → "Jelly page"; the stunts → "Only when you poke it".)*
+
+**2026-11-07 (round 42c)**
+
+> what i mean is till now playing thing i dont want that its too flkashty. give me aloty of creative
+> ideas to do there. rest of it looks great
+
+> typography in tehre is rweally good tho maybe we can use them somewhere
+
+> nah think more for the landing one as well it doesnt look that good i mean once we are in its nice
+> but we need craxzy transition into landing at first]
+
+> i want some spiderman miles morales like ideas
+
+> do it then add all somehow even sbtle
