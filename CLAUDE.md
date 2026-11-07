@@ -6,11 +6,11 @@ product; projects are deliberately absent.
 
 **Round 41 (branch `claude/fun-site`):** the site is now `index.html` (src/fun), a fun site full of
 letter and shape animation with hand-drawn stickers made with ChatGPT — read `docs/FUN.md`. Text is
-allowed now. Round 42 rebuilt the first two pages: the name is rubber you can grab, fling and tap
-(`jelly.ts`, `hero.ts`), with stunts when poked (`stunts.ts`), and a scroll dive through the tagline
-(`dive.ts`), then the way in as comic panels (`panels.ts`). The neo-noir trailer and, after it, a
-rooftops run were both cut: **no scroll-driven story set piece** (*"the whole scroll to story i dont
-need it anymorw"*). (Round 40's `break.html` was rejected; the round 35–37 motion site moved to `motion.html`.)
+allowed now. Round 42: the name is rubber you can grab, fling and tap (`jelly.ts`, `hero.ts`), with
+stunts when poked (`stunts.ts`), and comic panels as the way in (`panels.ts`). The neo-noir trailer, a
+rooftops run and the scroll dive were all cut: **no scroll-driven set pieces** (*"the whole scroll to
+story i dont need it anymorw"*, *"dive not needed as well"*). The owner now wants a **major revamp**
+or major additions, not small ones. (Round 40's `break.html` was rejected; the round 35–37 motion site moved to `motion.html`.)
 The notes below describe the older canvas film.
 
 Before changing anything, read:

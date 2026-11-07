@@ -27,19 +27,14 @@ a { color: inherit; }
 .menu b { font-size: 16px; }
 .menu-word { display: inline-flex; overflow: hidden; }
 
-/* the opening: the hero and the dive share one pinned screen (the dive is in dive.css) */
-.opening { position: relative; height: 100vh; height: 100svh; overflow: hidden; }
-.hero { position: absolute; inset: 0; z-index: 1; }
+/* the hero: one screen, the name in the middle */
+.hero { position: relative; height: 100vh; height: 100svh; overflow: hidden; }
 .hero-act { position: absolute; inset: 0; z-index: 1; display: grid; grid-template-columns: 100%; place-items: center; padding: 120px 0 140px; transform-origin: 50% 0; }
 @media (min-width: 760px) { .hero-act { padding: 28vh 0 10vh; } }
 .hero-lines { position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; pointer-events: none; }
 /* the ring a tap sends through the paper */
 .ripple { position: absolute; left: 0; top: 0; z-index: 0; width: 40px; height: 40px; margin: -20px 0 0 -20px; pointer-events: none; opacity: 0;
   border: 3px solid var(--ink); border-radius: 48% 52% 50% 50% / 50% 48% 52% 50%; filter: url(#boil); }
-/* the ball that flies at the lens when the sheet snaps, and the red it leaves */
-.hero-ball { position: absolute; z-index: 5; visibility: hidden; pointer-events: none; border-radius: 50%; transform-origin: 50% 50%;
-  background: radial-gradient(circle at 36% 30%, #ff9a86 0 14%, var(--hot) 24% 100%); }
-.hero-fill { position: absolute; inset: 0; z-index: 6; pointer-events: none; opacity: 0; background: var(--hot); }
 .hero.impact { filter: invert(1); }
 .tag { position: absolute; top: calc(var(--pad) + 56px + env(safe-area-inset-top, 0px)); left: calc(var(--pad) + env(safe-area-inset-left, 0px)); z-index: 4; font: 600 13px/1.35 var(--ui); max-width: 30ch; }
 .name { position: relative; z-index: 2; width: max-content; justify-self: center; text-align: center; font-family: var(--display); line-height: .78; text-transform: uppercase; user-select: none; -webkit-user-select: none; touch-action: pan-y; }

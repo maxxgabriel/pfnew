@@ -4,7 +4,7 @@ import { CustomEase } from 'gsap/CustomEase';
 import { CustomWiggle } from 'gsap/CustomWiggle';
 import { Boy } from './boy';
 import { Jelly, type Letter } from './jelly';
-import { C, calm, darkHeader, onBeat, shake } from './kit';
+import { calm, onBeat } from './kit';
 import { Speed } from './lines';
 import { PANELS_END, panelsIn } from './panels';
 import { popIn, sticker, stickerUrl } from './stickers';
@@ -18,13 +18,10 @@ gsap.registerPlugin(ScrambleTextPlugin, CustomEase, CustomWiggle);
  * Then it is yours. Tap the paper: a ring runs through
  * everything. Grab a letter: it stretches toward your finger, pulling its neighbours like a chain,
  * and twangs back when you let go. Fling it: it bounces off the edges and throws him. The big stunts
- * (stunts.ts) fire only when you poke: tap the ball, double-tap a letter, come back up from the dive.
- * Scroll, and the sheet stretches down with your thumb until it snaps: the ball flies at the lens,
- * red fills the screen, the dive begins.
+ * (stunts.ts) fire only when you poke: tap the ball, double-tap a letter.
  */
 export const HERO_POSES = ['fall_0', 'fall_1', 'fall_2', 'hero_0', 'hero_3', 'still_0', 'leap_0', 'leap_2', 'comedy_0', 'comedy_3', 'extra_1', 'snap_0', 'snap_1', 'powerup_0', 'powerup_2'];
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
-const SNAP = 0.66; // of the scroll before the dive: stretched until here, then it snaps
 
 /** what the stunts get to play with */
 export type Rig = {
@@ -56,11 +53,7 @@ export function initHero(root: HTMLElement) {
   const layer = act.querySelector<HTMLElement>('.stickers')!;
   const cast = ['sun', 'sparkle', 'inkpot', 'boombox', 'bolt'].map((n) => sticker(layer, n));
   const glove = sticker(root.querySelector<HTMLElement>('.badge')!, 'glove', '', false);
-  const ui = [...root.querySelectorAll<HTMLElement>('.tag, .badge')];
   const speed = new Speed(root, 'hero-lines');
-  const fill = document.createElement('i'), ball = document.createElement('i');
-  fill.className = 'hero-fill'; ball.className = 'hero-ball';
-  root.append(ball, fill);
   const rings = [0, 1, 2].map(() => { const r = document.createElement('i'); r.className = 'ripple'; act.prepend(r); return r; });
   let ringN = 0;
   const wiggle = CustomWiggle.create('letterWiggle', { wiggles: 6, type: 'easeOut' });
@@ -99,7 +92,7 @@ export function initHero(root: HTMLElement) {
     jelly.measure(W, H);
   }
 
-  // act px from the screen (the act may be stretched or punched in)
+  // act px from the screen (the act may be punched in by a stunt)
   const scaleOf = () => { const b = act.getBoundingClientRect(); return { b, kx: b.width / (act.offsetWidth || 1) || 1, ky: b.height / (act.offsetHeight || 1) || 1 }; };
   // where a letter's top is, in act px (follows squashes, tricks and the rubber)
   const top = (i: number) => {
@@ -289,14 +282,14 @@ export function initHero(root: HTMLElement) {
   // the small life, always on; the stunts, only when poked
   const rig: Rig = { root, act, name, lines, letters, dot, boy, speed, fs: () => fs, on: () => on, top, squash, air };
   const stunts = makeStunts(rig);
-  let alive = false, paused = false, phrase = 0;
+  let alive = false, phrase = 0;
   let live: gsap.core.Timeline | null = null;
   function startLife() {
     if (alive) return;
     alive = true;
     if (calm) return;
     onBeat((n) => {
-      if (paused || document.hidden || live || jelly.excited || drag) return;
+      if (document.hidden || live || jelly.excited || drag) return;
       const b = n % 16;
       if (b === 4) gsap.to(letters, { '--ds': 0.16, duration: 0.42, ease: 'sine.inOut', yoyo: true, repeat: 1, stagger: 0.05 });
       if (b === 9) { const c = letters.map((_, i) => i).filter((i) => i !== on); trick(c[Math.floor(Math.random() * c.length)]); }
@@ -311,93 +304,12 @@ export function initHero(root: HTMLElement) {
   }
   /** a poke: the next stunt, if nothing else is going on */
   function poke() {
-    if (!alive || calm || paused || live || busy || scrolling) return false;
+    if (!alive || calm || live || busy) return false;
     jelly.settle();
     live = stunts[phrase++ % stunts.length]();
     live.eventCallback('onComplete', () => { live = null; });
     return true;
   }
-  /** everything back to rest, nothing new starts (the scroll has the screen) */
-  function pause() {
-    if (paused) return;
-    paused = true;
-    drag = null;
-    if (live) { live.progress(1); live = null; }
-    jelly.settle();
-    gsap.killTweensOf(letters); gsap.killTweensOf(name); gsap.killTweensOf(act);
-    gsap.set(letters, { x: 0, y: 0, yPercent: 0, rotation: 0, rotationY: 0, scaleX: 1, scaleY: 1, '--ds': 0, '--dg': 0, transformOrigin: '50% 92%', color: '' });
-    gsap.set(name, { scale: 1, y: 0, '--mis': '0px', visibility: '' });
-    gsap.set(act, { x: 0, y: 0, scale: 1 });
-    name.classList.remove('plates');
-    root.style.backgroundColor = root.style.color = name.style.color = boy.el.style.filter = '';
-    root.classList.remove('impact');
-    darkHeader('hero-flip', false);
-    speed.clear();
-  }
-  let wake: gsap.core.Tween | null = null;
-  function resume(celebrate: boolean) {
-    wake?.kill();
-    wake = gsap.delayedCall(0.5, () => { paused = false; if (celebrate) gsap.delayedCall(0.4, () => void poke()); });
-  }
-
-  // the scroll: the sheet stretches down with your thumb, snaps, and the ball flies at the lens
-  let scrolling = false, snapped = false, deep = false, pop = 1;
-  const popT = { v: 1 };
-  function snap() {
-    snapped = true; deep = true;
-    jelly.sheet = 0;
-    gsap.fromTo(act, { scaleY: 1 + 1.15 }, { scaleY: 1, duration: 0.5, ease: 'elastic.out(1.3, 0.32)', overwrite: true });
-    shake(root, 12, 0.3);
-    if (standing && !busy) launch(gsap.utils.random(-1, 1) * fs, -fs * 4);
-    // where the ball sits once the sheet is back to size (it is still stretched at this moment)
-    const r = dot.getBoundingClientRect(), { b, kx, ky } = scaleOf(), rb = root.getBoundingClientRect();
-    const x = (r.left - b.left) / kx + b.left - rb.left, y = (r.top - b.top) / ky + b.top - rb.top, w = r.width / kx, h = r.height / ky;
-    Object.assign(ball.style, { left: `${x}px`, top: `${y}px`, width: `${w}px`, height: `${h}px`, visibility: 'visible' });
-    dot.style.visibility = 'hidden';
-    pop = 1.5;
-    gsap.to(popT, { v: 1, duration: 0.45, ease: 'elastic.out(1.4, 0.35)', overwrite: true, onUpdate: () => { pop = popT.v; } });
-  }
-  function unsnap() {
-    snapped = false;
-    gsap.killTweensOf(act);
-    ball.style.visibility = ''; dot.style.visibility = '';
-    fill.style.opacity = '0';
-    speed.clear();
-  }
-  function zoom(u: number) {
-    if (u <= 0.0005) {
-      if (!scrolling) return;
-      scrolling = false;
-      if (snapped) unsnap();
-      gsap.set(act, { scaleY: 1 });
-      jelly.sheet = 0;
-      ui.forEach((el) => { el.style.opacity = ''; });
-      darkHeader('hero-zoom', false);
-      resume(deep);
-      deep = false;
-      return;
-    }
-    if (!scrolling) { scrolling = true; wake?.kill(); pause(); }
-    if (u < SNAP) {
-      if (snapped) unsnap();
-      const S = u / SNAP;
-      gsap.set(act, { scaleY: 1 + 1.15 * S, transformOrigin: '50% 0' });
-      jelly.sheet = S;
-      ui.forEach((el) => { el.style.opacity = String(Math.max(0, 1 - S * 2.5)); });
-      darkHeader('hero-zoom', false);
-      return;
-    }
-    if (!snapped) snap();
-    // the ball to the lens: it grows and drifts to the middle until red is all there is
-    const v = (u - SNAP) / (1 - SNAP), e = Math.pow(v, 1.4);
-    const bw = ball.offsetWidth || 1, Z = (Math.hypot(W, H) / bw) * 1.15, s = Math.pow(Z, e) * pop, q = (s - 1) / (Z - 1);
-    const cx = ball.offsetLeft + bw / 2, cy = ball.offsetTop + ball.offsetHeight / 2;
-    ball.style.transform = `translate(${(W / 2 - cx) * q}px, ${(H / 2 - cy) * q}px) scale(${s})`;
-    fill.style.opacity = String(gsap.utils.clamp(0, 1, (v - 0.82) / 0.14));
-    if (!calm) speed.draw(0.3 + 0.7 * v, W / 2, H / 2, C.ink);
-    darkHeader('hero-zoom', v > 0.7 && u < 0.999); // once the dive has the screen, it owns the header
-  }
-
   // touch: taps, grabs, flings
   let drag: { n: Letter; i: number; id: number; x0: number; y0: number; moved: boolean; lx: number; ly: number; lt: number; vx: number; vy: number } | null = null;
   let lastTap = 0, lastTapI = -1;
@@ -412,7 +324,7 @@ export function initHero(root: HTMLElement) {
   }
   wraps.forEach((w, i) => {
     w.addEventListener('pointerdown', (e) => {
-      if (live || paused || scrolling || drag) return;
+      if (live || drag) return;
       const p = toAct(e), n = nodes[i];
       drag = { n, i, id: e.pointerId, x0: p.x, y0: p.y, moved: false, lx: p.x, ly: p.y, lt: performance.now(), vx: 0, vy: 0 };
       w.setPointerCapture(e.pointerId);
@@ -444,7 +356,7 @@ export function initHero(root: HTMLElement) {
   // the paper: a tap (not a scroll) sends a ring out from under your finger
   let paper: { id: number; x: number; y: number } | null = null;
   root.addEventListener('pointerdown', (e) => {
-    if (paused || scrolling || (e.target as Element).closest('.chw, .stk, .boy, .dot, .badge, .tag, a, button')) { paper = null; return; }
+    if ((e.target as Element).closest('.chw, .stk, .boy, .dot, .badge, .tag, a, button')) { paper = null; return; }
     const p = toAct(e);
     paper = { id: e.pointerId, x: p.x, y: p.y };
   });
@@ -452,11 +364,11 @@ export function initHero(root: HTMLElement) {
     if (!paper || paper.id !== e.pointerId) return;
     const p = toAct(e), q = paper;
     paper = null;
-    if (Math.hypot(p.x - q.x, p.y - q.y) < 8 && !paused && !scrolling) ripple(q.x, q.y, 1);
+    if (Math.hypot(p.x - q.x, p.y - q.y) < 8) ripple(q.x, q.y, 1);
   });
   root.addEventListener('pointercancel', () => { paper = null; });
   boy.el.addEventListener('pointerdown', () => {
-    if (!standing || busy || live || paused) return;
+    if (!standing || busy || live) return;
     busy = true;
     ripple(boy.x, boy.y, 0.5);
     gsap.timeline({ onComplete: () => { busy = false; } })
@@ -473,5 +385,5 @@ export function initHero(root: HTMLElement) {
 
   /** for checking: run stunt i now */
   const stunt = (i: number) => { live?.progress(1); jelly.settle(); live = stunts[i % stunts.length](); live.eventCallback('onComplete', () => { live = null; }); };
-  return { fit, intro, boy, zoom, stunt, ripple, jelly };
+  return { fit, intro, boy, stunt, ripple, jelly };
 }

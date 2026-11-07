@@ -9,7 +9,6 @@ import { initBoil } from './boil';
 import { Boy } from './boy';
 import { initComic } from './comic';
 import { initContact } from './contact';
-import { initDive } from './dive';
 import { initFoot } from './foot';
 import { initFx } from './fx';
 import { HERO_POSES, initHero } from './hero';
@@ -22,8 +21,7 @@ import { initWork } from './work';
 gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 
 /*
- * MAX GABRIEL — a fun site that never stops playing. In order: the name as a rubber playground, a
- * dive through the tagline (one giant word per world) that switches off onto the paper,
+ * MAX GABRIEL — a fun site that never stops playing. In order: the name as a rubber playground,
  * six little loops, what I do (every word moves its own way), about as a comic page, one boy in seven
  * styles, say hi, and a graffiti footer.
  * Smooth wheel on fine pointers, native scrolling on phones. Nothing starts until the type, his
@@ -40,14 +38,12 @@ if (lenis) {
   gsap.ticker.lagSmoothing(0);
 }
 const go = (target: string) => {
-  // the dive lives inside a pinned screen, so its place is the pin's, a little way in
-  const el = target === '#top' ? 0 : target === '#dive' ? dive.startY() : q(target);
-  if (lenis) lenis.scrollTo(el, { duration: target === '#dive' ? 2.2 : 1.6 });
-  else gsap.to(window, { scrollTo: el, duration: target === '#dive' ? 1.8 : 1.2, ease: 'power3.inOut' });
+  const el = target === '#top' ? 0 : q(target);
+  if (lenis) lenis.scrollTo(el, { duration: 1.6 });
+  else gsap.to(window, { scrollTo: el, duration: 1.2, ease: 'power3.inOut' });
 };
 
 const hero = initHero(q('.hero'));
-const dive = initDive(q('.opening'), hero);
 const work = initWork(q('.work'));
 initSkills(q('.skills'));
 initComic(q('.comic'));
@@ -71,7 +67,7 @@ const ready = Promise.race([
   new Promise((r) => setTimeout(r, 3000)),
 ]);
 void ready.then(() => {
-  hero.fit(); dive.fit(); work.fit();
+  hero.fit(); work.fit();
   hero.intro();
   ScrollTrigger.refresh();
 });
@@ -79,6 +75,6 @@ let rw = innerWidth;
 addEventListener('resize', () => {
   if (innerWidth === rw) return; // phone toolbars: ignore
   rw = innerWidth;
-  hero.fit(); dive.fit(); work.fit(); ScrollTrigger.refresh();
+  hero.fit(); work.fit(); ScrollTrigger.refresh();
 });
 (window as unknown as { __fun: object }).__fun = { ready, gsap, go, hero };

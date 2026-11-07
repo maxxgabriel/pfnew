@@ -76,6 +76,13 @@ themselves, not to the docs: *"you report to me and not the docs"*.
 
 ## 3. Decisions (most recent first)
 
+**Round 42d — the dive goes too; think major:** *"dive not needed as well. and for landing and other
+we need to plan something else. you are thinking minor adding im thinkiung major revamo or major
+additionms so give ideas like that"*. The dive is cut; nothing pinned or scroll-driven remains (the
+hero is one screen, then the page scrolls to the work). Standing rule: **no scroll-driven set
+pieces**. The owner wants ideas at the scale of a whole-site revamp or a major addition, for the
+landing and the rest; pitched in chat. See the next entry once chosen.
+
 **Round 42c — it was the trailer:** *"what i mean is till now playing thing i dont want that its too
 flkashty. give me aloty of creative ideas to do there. rest of it looks great"* and *"typography in
 tehre is rweally good tho maybe we can use them somewhere"*. So "the movie" in 42b meant the **neo-noir
@@ -631,3 +638,6 @@ build it".
 > do it then add all somehow even sbtle
 
 > whay io meant is i dont want that at all. the whole scroll to story i dont need it anymorw
+
+> dive not needed as well. and for landing and other we need to plan something else. you are thinking
+> minor adding im thinkiung major revamo or major additionms\ so give ideas like that
