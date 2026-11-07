@@ -6,8 +6,9 @@ product; projects are deliberately absent.
 
 **Round 41 (branch `claude/fun-site`):** the site is now `index.html` (src/fun), a fun site full of
 letter and shape animation with hand-drawn stickers made with ChatGPT — read `docs/FUN.md`. Text is
-allowed now. Round 42 rebuilt the first two pages: a cold open, a name that pulls a stunt every two
-bars, and a scroll dive through the tagline (`coldopen.ts`, `stunts.ts`, `dive.ts`). (Round 40's `break.html` was rejected; the round 35–37 motion site moved to `motion.html`.)
+allowed now. Round 42 rebuilt the first two pages: the name is rubber you can grab, fling and tap
+(`jelly.ts`, `hero.ts`), with stunts when poked (`stunts.ts`), and a scroll dive through the tagline
+(`dive.ts`). A timed cold open was built and cut: *"its a website and not a … annual function video"*. (Round 40's `break.html` was rejected; the round 35–37 motion site moved to `motion.html`.)
 The notes below describe the older canvas film.
 
 Before changing anything, read:
@@ -64,6 +65,8 @@ Before changing anything, read:
   least; `shoot.mjs` takes any `WxH`. Nothing may depend on hover.
 - Don't put model names in commits. Commit to the working branch and push. No
   PR unless asked.
+- **No claude.ai artifact previews** (round 42: the owner deleted them and asked
+  for no more). Show work on the dev server; `npx vite --host` for their phone.
 
 ## Skills (`.claude/skills/`)
 

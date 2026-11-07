@@ -23,8 +23,8 @@ import { initWork } from './work';
 gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 
 /*
- * MAX GABRIEL — a fun site that never stops playing. In order: a cold open, the name that never sits
- * still, a dive through the tagline (one giant word per world), a neo-noir trailer the scroll plays,
+ * MAX GABRIEL — a fun site that never stops playing. In order: the name as a rubber playground, a
+ * dive through the tagline (one giant word per world), a neo-noir trailer the scroll plays,
  * six little loops, what I do (every word moves its own way), about as a comic page, one boy in seven
  * styles, say hi, and a graffiti footer.
  * Smooth wheel on fine pointers, native scrolling on phones. Nothing starts until the type, his
@@ -47,7 +47,7 @@ const go = (target: string) => {
   else gsap.to(window, { scrollTo: el, duration: target === '#dive' ? 1.8 : 1.2, ease: 'power3.inOut' });
 };
 
-const hero = initHero(q('.hero'), fine);
+const hero = initHero(q('.hero'));
 const dive = initDive(q('.opening'), hero);
 initTrailer(q('.trailer'));
 const work = initWork(q('.work'));

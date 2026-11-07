@@ -1,6 +1,6 @@
 # FUN — the site (round 41)
 
-Round 42 rebuilt the first two pages (*"come on man we need to maker it look crazy"*): a cold open, a loud name and the dive replace the calm hero and the crossing tapes.
+Round 42 rebuilt the first two pages (*"come on man we need to maker it look crazy"*); round 42b dropped the cold open (*"its a website and not a … annual function video"*) for the jelly page: the opening is a place that answers touch and scroll, not a clip that plays.
 
 The owner: *"i need a hell lot of animations shapes aniamtions letgters aniamtions a lot of fun in
 website"*, matvoyce.tv as the bar, art that is hand-made, *"premium aesthetic elegant and polished"*,
@@ -14,9 +14,8 @@ the beat. **Entry:** `index.html` → `src/fun/main.ts` (the round 35–37 motio
 
 | # | Section | File | What happens |
 |---|---|---|---|
-| 0 | Cold open | `coldopen.ts` | Black, then the name one letter per hit, each a full-screen smash cut to its own colour and typeface (zoom punch, shake, RGB split; MAX on the beat, GABRIEL on the half beats), the typeface named small in the corner like a specimen. Drawn on one canvas. Any tap, key or scroll fast-forwards it. |
-| 1 | The name, loud | `hero.ts`, `stunts.ts` | The whole name smashes onto the page frozen in misregistered print (halftone over it); a beat later it plays: plates snap into register, the red ball bounces along GABRIEL into the dot, he falls onto the X. Then on the first beat of every two bars a stunt: STRETCH past both edges, SLOT (every letter spins through five typefaces), PUNCH (camera punches in on him, impact frame, speed lines), SLICE (he snaps, the name tears into strips), FLIP (four colour smash cuts), DOMINO (letters topple and spring back). He jumps clear or rides along. Tricks, hops and the ball keeping time in between. |
-| 2 | The dive | `dive.ts`, `deep.ts`, `lines.ts` | Pinned with the hero (one screen, ~4 screens of scroll). The camera flies into the A (it turns red) until red fills the screen, then falls through the tagline one giant word per world, each world the colour of the letter you fell into: I MAKE LETTERS (red; typeface swaps every beat), DANCE (ink; a chorus line), AND SHAPES (butter; letters turn into shapes), MISBEHAVE (sky; letters act up, then it glitches and switches off like an old TV into the trailer). He falls alongside; every landing slams with a shake, flash and speed lines. `deep.ts` finds the thickest ink in a letter so its colour covers the screen. Scroll back and it rewinds. |
+| 1 | The name is rubber | `hero.ts`, `jelly.ts` | There at once: the letters pop in, the red ball bounces along GABRIEL into the dot after MAX, he drops onto the X (two seconds; any touch skips it). Each line of the name is an elastic string glued to the paper (`jelly.ts`): grab a letter and it comes with your finger, the letters behind it stretch wide and the ones ahead squash condensed (the font's width axis), let go and the line twangs; fling it and it bounces off the screen edges and throws him (he lands on whatever letter is under him). Tap the paper: a drawn ring runs out and kicks everything it passes; the stickers are loose weights on their own springs. Small life always on (width wave, tricks, his hops, the ball keeping time). The big stunts (`stunts.ts`: STRETCH, SLOT, PUNCH, SLICE, FLIP, DOMINO) fire only when poked: tap the ball, double-tap a letter, come back up from the dive. |
+| 2 | The dive | `dive.ts`, `deep.ts`, `lines.ts` | Pinned with the hero (one screen, ~4 screens of scroll). First the sheet stretches down with your thumb (the letters thin), then it SNAPS back and the red ball flies at the lens until red is all there is; then a fall through the tagline one giant word per world: I MAKE LETTERS (red; typeface swaps every beat), DANCE (ink; a chorus line), AND SHAPES (butter; letters turn into shapes), MISBEHAVE (sky; letters act up, then it glitches and switches off like an old TV into the trailer). He falls alongside; every landing slams with a shake, flash and speed lines. `deep.ts` finds the thickest ink in a letter so its colour covers the screen. Scroll back and it rewinds. |
 | 3 | The trailer | `trailer.ts` | Pinned, played by the scroll, neo-noir (teal-black, one red light, letterbox, VHS lines, REC timecode, his silhouette rimmed in red): ONE ANIMATOR. (zoom punch) → SEVEN STYLES. (smash cut, his faces strobing a frame each) → ZERO STILL FRAMES. (glitch, RGB split) → a FREEZE FRAME (print, halftone, stamp) → EVERYTHING MOVES. (whip pan; punches + shake on the beat over speed lines) → NOW PLAYING (neon). |
 | 4 | Things that move | `work.ts` | Six live cards dealt in as they arrive, leaning to the pointer: SQUISH, GLITCH, INK (brush paints, splat blooms), POW! (halftone, burst, offset print on the beat), ON TWOS (run cycle on twos with onion skins; tap: ones/twos/fours), WHOOSH (smear, speed lines, smeared letters). Loops run only on screen. |
 | 5 | What I do | `skills.ts` | Five huge words; the one nearest the middle is lit and moves its own way (walk on twos, wave, stretch, code scramble, off-register print); the ground tints per word; a sticker pops beside it. |
@@ -55,10 +54,9 @@ paint splashes, graffiti MAX, speech bubble, shout burst.
 
 ## Preview
 
-Private claude.ai preview (open it on a phone): https://claude.ai/artifact/EjLhsMsfWUAVhBTJ414Sc7 (round 42; the round 41 link was on a different Claude account)
-To refresh it: `ONLY=site npx vite build --outDir <folder>` (front page only, ~110 files), then
-publish the built page's head and body content with its `assets/`, `favicon.svg` and `og-site.jpg`
-to the same artifact.
+No claude.ai artifacts (the owner asked, round 42, and deleted the earlier ones). Dev server:
+`npx vite --port 5173 --strictPort`; on the iPhone, `npx vite --host --port 5173` and the LAN address
+it prints. `ONLY=site npx vite build --outDir <folder>` builds the front page alone (~110 files).
 
 ## Still to give
 
@@ -71,6 +69,6 @@ links point at the sites' home pages.
 npx vite --port 5199 --strictPort            # dev server; the site is /
 npx tsc -p tsconfig.app.json --noEmit && npx oxlint src/fun
 ```
-`window.__fun`: `ready` (fonts and drawings in), `go('#section')` (`#dive` goes to the first word), `gsap`, `hero.stunt(i)` (run a stunt now, for checking).
+`window.__fun`: `ready` (fonts and drawings in), `go('#section')` (`#dive` goes to the first word), `gsap`, `hero.stunt(i)` (run a stunt now), `hero.ripple(x, y)`, `hero.jelly` (the rubber: `letters`, `grab/drag/release`), for checking.
 Checked at 390×844 @2x, 1440×900, 844×390 and 2560×1080; 60 fps through every section on the dev
 machine; prefers-reduced-motion calms the shake, flashes, boil and loops.

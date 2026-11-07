@@ -52,11 +52,10 @@ themselves, not to the docs: *"you report to me and not the docs"*.
 - **Phone first.** The owner watches on an iPhone (390×844). Touch only;
   nothing may depend on hover. Screenshot every change at phone size before
   calling it done.
-- **Previews:** publish the single-file build as a claude.ai artifact and
-  share the link (*"you can create a new link to show artifact"*). The film:
-  https://claude.ai/artifact/9d3GKN33rB1VSTR2jGoDnV. The fun site (round 41):
-  https://claude.ai/artifact/B6HQHAJv1NS8RENVDFErxH; round 42 (new opening):
-  https://claude.ai/artifact/EjLhsMsfWUAVhBTJ414Sc7
+- **No claude.ai artifact previews any more** (round 42: *"just dont do
+  artifacts from on. i ddleted it"*; the earlier ones were deleted). Show the
+  work on the dev server: `npx vite --port 5173 --strictPort`; to watch on the
+  iPhone, `npx vite --host --port 5173` and open the LAN address it prints.
 - **Git:** commit to the working branch and push; no PR unless asked; no
   model names in commits.
 - **Originality:** references are for energy and technique; never copy their
@@ -76,6 +75,20 @@ themselves, not to the docs: *"you report to me and not the docs"*.
 | Anime key poses generated with ChatGPT from one character sheet | Round 11 lesson: code draws light, motion, particles and type; people come from real drawings. | Shooting star (old film) |
 
 ## 3. Decisions (most recent first)
+
+**Round 42b — the cold open is too flashy; pitch the opening again:** *"this was really nice just
+dont do artifacts from on. i ddleted it, so what i woulkd change is the first part the movie we do,
+its a bit lot flashy lol its nice i like the aniamtiions but its a website and not a yknow tannual
+function video. think about it. lets get creative we can do much much better the whole satrting part.
+we dontr necesarily have to be narrow in term sof onkly this, suiggeyts me real good ones as well thjat
+wpuld look crazy."* → the timed title-card intro reads as a video; the opening should be a place that
+answers the visitor (scroll, tap, drag), not a clip that plays. Picked **"Jelly page"**: the first screen is rubber. No
+intro beyond a two-second arrival any touch skips; tap the paper and a ring runs through letters and
+stickers; grab a letter and it stretches toward the finger (the font's width axis), pulling its
+neighbours like a chain, and twangs back; fling it and it bounces off the edges and throws the boy;
+scroll and the sheet stretches down with the thumb, then snaps, the red ball hits the lens, red
+fills the screen, the dive begins. Stunts: **"only when you poke it"** (small life always on; the
+big stunts on tapping the ball, double-tapping a letter, coming back up from the dive).
 
 **Round 42 — the first two pages go crazy:** on the finished fun site: *"the first two pages need
 creativity we dont reallyt need to copy matvoyce but come on man we need to maker it look crazy"*.
@@ -574,3 +587,13 @@ build it".
 > to maker it look crazy
 
 *(Asked: page 1 → "Cold open + loud name"; page 2 → "The dive".)*
+
+**2026-11-07 (round 42b)**
+
+> this was really nice just dont do artifacts from on. i ddleted it, so what i woulkd change is the
+> first part the movie we do, its a bit lot flashy lol its nice i like the aniamtiions but its a
+> website and not a yknow tannual function video. think about it. lets get creative we can do much
+> much better the whole satrting part. we dontr necesarily have to be narrow in term sof onkly this,
+> suiggeyts me real good ones as well thjat wpuld look crazy.
+
+*(Asked: the opening → "Jelly page"; the stunts → "Only when you poke it".)*

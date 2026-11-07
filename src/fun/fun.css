@@ -30,29 +30,31 @@ a { color: inherit; }
 /* the opening: the hero and the dive share one pinned screen (the dive is in dive.css) */
 .opening { position: relative; height: 100vh; height: 100svh; overflow: hidden; }
 .hero { position: absolute; inset: 0; z-index: 1; }
-.hero-cam, .hero-act { position: absolute; inset: 0; transform-origin: 0 0; }
-.hero-cam { z-index: 1; }
-.hero-act { display: grid; grid-template-columns: 100%; place-items: center; padding: 120px 0 140px; }
+.hero-act { position: absolute; inset: 0; z-index: 1; display: grid; grid-template-columns: 100%; place-items: center; padding: 120px 0 140px; transform-origin: 50% 0; }
 @media (min-width: 760px) { .hero-act { padding: 28vh 0 10vh; } }
 .hero-lines { position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; pointer-events: none; }
-/* the freeze frame when the name lands: a halftone screen over everything */
-.hero .freeze { position: absolute; inset: 0; z-index: 5; pointer-events: none; opacity: 0; mix-blend-mode: multiply;
-  background: radial-gradient(circle, rgba(21, 19, 17, .22) 27%, transparent 31%) 0 0 / 7px 7px; }
+/* the ring a tap sends through the paper */
+.ripple { position: absolute; left: 0; top: 0; z-index: 0; width: 40px; height: 40px; margin: -20px 0 0 -20px; pointer-events: none; opacity: 0;
+  border: 3px solid var(--ink); border-radius: 48% 52% 50% 50% / 50% 48% 52% 50%; filter: url(#boil); }
+/* the ball that flies at the lens when the sheet snaps, and the red it leaves */
+.hero-ball { position: absolute; z-index: 5; visibility: hidden; pointer-events: none; border-radius: 50%; transform-origin: 50% 50%;
+  background: radial-gradient(circle at 36% 30%, #ff9a86 0 14%, var(--hot) 24% 100%); }
 .hero-fill { position: absolute; inset: 0; z-index: 6; pointer-events: none; opacity: 0; background: var(--hot); }
 .hero.impact { filter: invert(1); }
 .tag { position: absolute; top: calc(var(--pad) + 56px + env(safe-area-inset-top, 0px)); left: calc(var(--pad) + env(safe-area-inset-left, 0px)); z-index: 4; font: 600 13px/1.35 var(--ui); max-width: 30ch; }
-.name { position: relative; z-index: 2; width: max-content; justify-self: center; text-align: center; font-family: var(--display); line-height: .78; text-transform: uppercase; user-select: none; -webkit-user-select: none; }
+.name { position: relative; z-index: 2; width: max-content; justify-self: center; text-align: center; font-family: var(--display); line-height: .78; text-transform: uppercase; user-select: none; -webkit-user-select: none; touch-action: pan-y; }
 .name .line { display: block; white-space: nowrap; }
+/* each letter: the wrapper is the rubber (where it is, how far it is stretched), the letter inside does its tricks */
+.chw { display: inline-block; transform-origin: 50% 50%; cursor: grab; }
+.chw:active { cursor: grabbing; }
 .ch {
-  display: inline-block; cursor: pointer; transform-origin: 50% 92%; will-change: transform;
+  display: inline-block; transform-origin: 50% 92%; will-change: transform;
   font-weight: calc(var(--wg-lo) + clamp(0, var(--base-g) + var(--dg, 0), 1) * var(--wg-span));
-  font-stretch: calc((var(--wd-lo) + clamp(0, var(--base-s) + var(--ds, 0), 1) * var(--wd-span)) * 1%);
+  font-stretch: calc((var(--wd-lo) + clamp(0, var(--base-s) + var(--ds, 0) + var(--dsp, 0), 1) * var(--wd-span)) * 1%);
 }
 /* the dot after MAX is the drawn red ball */
 .dot { display: inline-block; width: .3em; height: auto; margin-left: .02em; will-change: transform; cursor: pointer; filter: url(#boil); }
 .boy { position: absolute; left: 0; top: 0; z-index: 3; cursor: pointer; user-select: none; -webkit-user-drag: none; opacity: 0; }
-/* while the camera flies into the A, the letters are painted at the camera's scale (crisp edges) */
-.hero.zooming .ch, .hero.zooming .dot { will-change: auto; }
 /* the colour plates slipping out of register (the landing, the slice, the colour cuts) */
 .name.plates .ch { text-shadow: calc(var(--mis, 0px) * -1) calc(var(--mis, 0px) * .6) 0 rgba(79, 182, 255, .88), var(--mis, 0px) calc(var(--mis, 0px) * -.6) 0 rgba(255, 61, 34, .88); }
 .name.slice { position: absolute; margin: 0; pointer-events: none; }
@@ -61,7 +63,7 @@ a { color: inherit; }
 
 /* stickers: host (placed) > inner (pops, tricks) > img (life, boil) */
 .stickers { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
-.stk { position: absolute; display: block; pointer-events: auto; cursor: pointer; }
+.stk { position: absolute; display: block; pointer-events: auto; cursor: pointer; touch-action: pan-y; }
 .stk-in { display: block; }
 .stk img { display: block; width: 100%; height: auto; filter: url(#boil); user-select: none; -webkit-user-drag: none; }
 .hero .stk-sun      { top: 11%; right: 1%; width: 31vw; }

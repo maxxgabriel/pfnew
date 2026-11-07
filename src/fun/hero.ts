@@ -3,24 +3,26 @@ import { ScrambleTextPlugin } from 'gsap/ScrambleTextPlugin';
 import { CustomEase } from 'gsap/CustomEase';
 import { CustomWiggle } from 'gsap/CustomWiggle';
 import { Boy } from './boy';
-import { COLD_LAND, coldOpen } from './coldopen';
-import { deepPoint, flyInto } from './deep';
-import { BEAT, C, calm, darkHeader, onBeat, shake } from './kit';
+import { Jelly, type Letter } from './jelly';
+import { C, calm, darkHeader, onBeat, shake } from './kit';
 import { Speed } from './lines';
-import { lean, popIn, sticker, stickerUrl } from './stickers';
+import { popIn, sticker, stickerUrl } from './stickers';
 import { makeStunts } from './stunts';
 gsap.registerPlugin(ScrambleTextPlugin, CustomEase, CustomWiggle);
 
 /*
- * HERO — the name is a playground, and it is loud. After the cold open the whole name smashes onto
- * the page frozen in misregistered print; a beat later it comes alive: the plates snap into
- * register, the red ball bounces along GABRIEL into the dot after MAX, he falls in onto the X. Then
- * it never calms down: on the first beat of every two bars the name pulls a stunt (stunts.ts), and
- * between them letters do tricks, he hops letter to letter, the ball keeps time. Tap anything.
- * When the scroll starts, the camera flies into the A (it turns red) and the dive takes over.
+ * HERO — the name is a playground, and the whole first screen is rubber (jelly.ts). It is there at
+ * once: the letters pop in, the red ball bounces along GABRIEL into the dot after MAX, he drops onto
+ * the X; two seconds, and any touch skips it. Then it is yours. Tap the paper: a ring runs through
+ * everything. Grab a letter: it stretches toward your finger, pulling its neighbours like a chain,
+ * and twangs back when you let go. Fling it: it bounces off the edges and throws him. The big stunts
+ * (stunts.ts) fire only when you poke: tap the ball, double-tap a letter, come back up from the dive.
+ * Scroll, and the sheet stretches down with your thumb until it snaps: the ball flies at the lens,
+ * red fills the screen, the dive begins.
  */
-export const HERO_POSES = ['fall_0', 'hero_0', 'hero_3', 'still_0', 'leap_0', 'leap_2', 'comedy_0', 'comedy_3', 'extra_1', 'snap_0', 'snap_1', 'powerup_0', 'powerup_2'];
+export const HERO_POSES = ['fall_0', 'fall_1', 'fall_2', 'hero_0', 'hero_3', 'still_0', 'leap_0', 'leap_2', 'comedy_0', 'comedy_3', 'extra_1', 'snap_0', 'snap_1', 'powerup_0', 'powerup_2'];
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+const SNAP = 0.66; // of the scroll before the dive: stretched until here, then it snaps
 
 /** what the stunts get to play with */
 export type Rig = {
@@ -32,16 +34,16 @@ export type Rig = {
   air: (dur: number) => void;
 };
 
-export function initHero(root: HTMLElement, fine: boolean) {
-  const cam = root.querySelector<HTMLElement>('.hero-cam')!, act = root.querySelector<HTMLElement>('.hero-act')!;
+export function initHero(root: HTMLElement) {
+  const act = root.querySelector<HTMLElement>('.hero-act')!;
   const name = act.querySelector<HTMLElement>('.name')!;
   const lines = [...name.querySelectorAll<HTMLElement>('.line')];
-  const letters: HTMLElement[] = [];
+  const letters: HTMLElement[] = [], wraps: HTMLElement[] = [];
   for (const ln of lines) {
     for (const ch of ln.dataset.word!) {
-      const s = document.createElement('span');
-      s.className = 'ch'; s.textContent = ch; s.setAttribute('aria-hidden', 'true');
-      ln.append(s); letters.push(s);
+      const w = document.createElement('span'), s = document.createElement('span');
+      w.className = 'chw'; s.className = 'ch'; s.textContent = ch; s.setAttribute('aria-hidden', 'true');
+      w.append(s); ln.append(w); letters.push(s); wraps.push(w);
     }
   }
   const dot = document.createElement('img');
@@ -52,23 +54,31 @@ export function initHero(root: HTMLElement, fine: boolean) {
   const layer = act.querySelector<HTMLElement>('.stickers')!;
   const cast = ['sun', 'sparkle', 'inkpot', 'boombox', 'bolt'].map((n) => sticker(layer, n));
   const glove = sticker(root.querySelector<HTMLElement>('.badge')!, 'glove', '', false);
-  if (fine) lean(cast, [24, -16, 20, -28, 14]);
   const ui = [...root.querySelectorAll<HTMLElement>('.tag, .badge')];
   const speed = new Speed(root, 'hero-lines');
-  const freeze = document.createElement('i'), fill = document.createElement('i');
-  freeze.className = 'freeze'; fill.className = 'hero-fill';
-  root.append(freeze, fill);
+  const fill = document.createElement('i'), ball = document.createElement('i');
+  fill.className = 'hero-fill'; ball.className = 'hero-ball';
+  root.append(ball, fill);
+  const rings = [0, 1, 2].map(() => { const r = document.createElement('i'); r.className = 'ripple'; act.prepend(r); return r; });
+  let ringN = 0;
   const wiggle = CustomWiggle.create('letterWiggle', { wiggles: 6, type: 'easeOut' });
   gsap.set(letters, { opacity: 0 });
   gsap.set(dot, { scale: 0 });
 
+  // the rubber
+  const jelly = new Jelly(act);
+  const nodes = wraps.map((w) => jelly.addLetter(w));
+  cast.forEach((c) => jelly.addFree(c.host));
+
   // both lines share one size, set by GABRIEL filling the width without running out of height
-  let fs = 100, base0 = 0;
+  let fs = 100, W = 1, H = 1;
   const capK = letters.map(() => 0.1);
   const span = (from: number, to: number) => letters[to].getBoundingClientRect().right - letters[from].getBoundingClientRect().left;
   function fit() {
+    jelly.settle();
     name.style.fontSize = '100px';
-    const W = root.clientWidth, H = root.clientHeight, phone = W < 760;
+    W = root.clientWidth; H = root.clientHeight;
+    const phone = W < 760;
     // headroom: the letters stretch as they play, so the resting name stays inside the edges
     fs = Math.min((100 * W * (phone ? 0.86 : 0.76)) / span(3, letters.length - 1), (H * (phone ? 0.6 : 0.5)) / 1.6);
     name.style.fontSize = `${fs}px`;
@@ -77,21 +87,24 @@ export function initHero(root: HTMLElement, fine: boolean) {
     const g = document.createElement('canvas').getContext('2d')!, cs = getComputedStyle(letters[0]);
     g.font = `${cs.fontWeight} ${fs}px ${cs.fontFamily}`;
     const cap = g.measureText('H').actualBoundingBoxAscent;
-    base0 = dot.offsetTop + dot.offsetHeight;
+    const base0 = dot.offsetTop + dot.offsetHeight;
     letters.forEach((el, i) => {
-      const line = el.parentElement!, base = base0 + line.offsetTop - lines[0].offsetTop;
+      const line = el.parentElement!.parentElement!, base = base0 + line.offsetTop - lines[0].offsetTop;
       capK[i] = (base - cap - el.offsetTop) / el.offsetHeight;
     });
     speed.size(W, H);
-    if (zoomAt) zoomAt = target();
+    jelly.pull = fs * 2.2;
+    jelly.measure(W, H);
   }
 
-  // where a letter's top is, in the stage's own px (follows squashes and tricks, ignores the camera)
+  // act px from the screen (the act may be stretched or punched in)
+  const scaleOf = () => { const b = act.getBoundingClientRect(); return { b, kx: b.width / (act.offsetWidth || 1) || 1, ky: b.height / (act.offsetHeight || 1) || 1 }; };
+  // where a letter's top is, in act px (follows squashes, tricks and the rubber)
   const top = (i: number) => {
-    const r = letters[i].getBoundingClientRect(), b = act.getBoundingClientRect();
-    const k = b.width / (act.offsetWidth || 1) || 1;
-    return { x: (r.left - b.left + r.width / 2) / k, y: (r.top - b.top + r.height * capK[i]) / k };
+    const r = letters[i].getBoundingClientRect(), { b, kx, ky } = scaleOf();
+    return { x: (r.left - b.left + r.width / 2) / kx, y: (r.top - b.top + r.height * capK[i]) / ky };
   };
+  const toAct = (e: PointerEvent) => { const { b, kx, ky } = scaleOf(); return { x: (e.clientX - b.left) / kx, y: (e.clientY - b.top) / ky }; };
   const squash = (el: HTMLElement, k = 0.72) => gsap.timeline()
     .to(el, { scaleY: k, scaleX: 2 - k, duration: 0.07, ease: 'power1.out' })
     .to(el, { scaleY: 1, scaleX: 1, duration: 0.85, ease: 'elastic.out(1.1, 0.3)' });
@@ -138,6 +151,36 @@ export function initHero(root: HTMLElement, fine: boolean) {
       .to(boy, { sy: 1, duration: 0.3, ease: 'back.out(3)' })
       .call(() => { boy.pose('hero_3'); });
   }
+  /** thrown: he flies, tumbles, picks a letter on the way down and lands on it */
+  function launch(vx: number, vy: number) {
+    if (!standing || busy) return;
+    busy = true; standing = false;
+    let x = boy.x, y = boy.y, ux = gsap.utils.clamp(-fs * 3, fs * 3, vx * 0.6), uy = gsap.utils.clamp(-fs * 4.5, -fs * 2.6, vy * 0.7), aim = -1;
+    const g = fs * 9, t0 = performance.now();
+    const land = (j: number) => {
+      gsap.ticker.remove(tk);
+      on = j; standing = true; boy.rot = 0; boy.flip = false; boy.pose('hero_0'); boy.sy = 0.8;
+      const t = top(j);
+      squash(letters[j], 0.62);
+      jelly.ripple(t.x, t.y, 0.45);
+      gsap.timeline({ onComplete: () => { busy = false; } }).to(boy, { sy: 1, duration: 0.35, ease: 'back.out(3)' }).call(() => boy.pose('hero_3'), [], '+=0.2');
+    };
+    const tk = (_t: number, dms: number) => {
+      const dt = Math.min(dms / 1000, 1 / 30);
+      uy += g * dt; x += ux * dt; y += uy * dt;
+      x = gsap.utils.clamp(fs * 0.25, W - fs * 0.25, x);
+      if (uy > 0) {
+        // on the way down: the letter nearest to where he is heading, and a drift onto it
+        if (aim < 0) { let best = Infinity; letters.forEach((_, i) => { const d = Math.abs(top(i).x - x); if (d < best) { best = d; aim = i; } }); }
+        const t = top(aim);
+        ux *= Math.max(0, 1 - 4 * dt); x += (t.x - x) * Math.min(1, 5 * dt);
+        if (y >= t.y || performance.now() - t0 > 2500) { land(aim); return; }
+      }
+      boy.flip = ux < 0; boy.rot = gsap.utils.clamp(-40, 40, (ux / fs) * 9);
+      boy.x = x; boy.y = y; boy.pose(uy < 0 ? 'fall_1' : 'comedy_3').apply();
+    };
+    gsap.ticker.add(tk);
+  }
 
   // a letter's little tricks (between the stunts, and when tapped)
   const TRICKS: ((el: HTMLElement) => gsap.core.Animation)[] = [
@@ -151,43 +194,42 @@ export function initHero(root: HTMLElement, fine: boolean) {
   const trick = (i: number, k = Math.floor(Math.random() * TRICKS.length)) => TRICKS[k](letters[i]);
   const dotHop = () => gsap.timeline().to(dot, { y: -fs * 0.22, duration: 0.2, ease: 'power2.out' }).to(dot, { y: 0, duration: 0.18, ease: 'power2.in' })
     .to(dot, { scaleY: 0.65, scaleX: 1.3, duration: 0.05 }).to(dot, { scaleY: 1, scaleX: 1, duration: 0.45, ease: 'elastic.out(1.2, 0.35)' });
+  // the ring a tap sends out (drawn), and the kick it gives (physics)
+  function ripple(x: number, y: number, a = 1) {
+    if (calm) return;
+    jelly.ripple(x, y, a);
+    const r = rings[ringN++ % rings.length];
+    gsap.fromTo(r, { x, y, scale: 0.3, opacity: 0.55, rotation: gsap.utils.random(0, 90) }, { scale: (Math.max(W, H) * (0.55 + 0.35 * a)) / 40, opacity: 0, rotation: '+=40', duration: 0.7, ease: 'power2.out', overwrite: true });
+  }
+  jelly.probes.push({ at: () => ({ x: boy.x, y: boy.y - boy.height / 2 }), hit: (a) => { if (standing && !busy) gsap.fromTo(boy, { sy: 0.78 - 0.1 * a }, { sy: 1, duration: 0.5, ease: 'elastic.out(1.2, 0.4)', overwrite: 'auto' }); } });
+  // a fling of his letter, or a hard knock, throws him
+  jelly.onShock = (n, s) => {
+    const i = nodes.indexOf(n as Letter);
+    if (i < 0 || !standing || busy) return;
+    if (i === on && s > 1100) launch(n.vx, n.vy);
+    else if (Math.abs(top(i).x - boy.x) < fs * 1.1) gsap.fromTo(boy, { sy: 0.8 }, { sy: 1, duration: 0.45, ease: 'elastic.out(1.2, 0.4)', overwrite: 'auto' });
+  };
 
-  // the opening: the cold open, the name lands frozen, a beat later everything starts
+  // the arrival: two seconds, all at once, and any touch skips it
   function intro() {
-    const tl = gsap.timeline();
-    const co = document.querySelector<HTMLElement>('.coldopen');
-    let t0 = 0;
-    if (co && !calm) { tl.add(coldOpen(co), 0); t0 = COLD_LAND; } else co?.remove();
     const rest = letters.map((_, i) => top(i));
-    tl.from('.top > *', { y: -140, duration: 0.7, ease: 'back.out(1.8)', stagger: 0.08 }, t0 + (calm ? 0 : BEAT));
-    const tags = [...root.querySelectorAll<HTMLElement>('[data-scramble]')];
-    tags.forEach((el, i) => {
+    const tl = gsap.timeline();
+    tl.set(letters, { opacity: 1 }, 0);
+    tl.from('.top > *', { y: -140, duration: 0.6, ease: 'back.out(1.8)', stagger: 0.08 }, 0);
+    root.querySelectorAll<HTMLElement>('[data-scramble]').forEach((el, i) => {
       const text = el.textContent ?? '';
       el.textContent = '';
-      tl.to(el, { scrambleText: { text, chars: 'upperCase', speed: 0.8 }, duration: 0.9 }, t0 + BEAT + 0.1 + i * 0.25);
+      tl.to(el, { scrambleText: { text, chars: 'upperCase', speed: 0.8 }, duration: 0.9 }, 0.1 + i * 0.25);
     });
-    // SMASH: the whole name, frozen in misregistered print
-    tl.call(() => {
-      gsap.set(letters, { opacity: 1 });
-      if (calm) return;
-      name.classList.add('plates');
-      gsap.set(name, { '--mis': `${Math.max(5, fs * 0.045)}px` });
-      freeze.style.opacity = '1';
-    }, [], t0);
-    if (!calm) tl.add(() => { shake(act, 14, 0.3); }, t0);
-    // a beat later it plays: the plates snap into register and the letters land
-    const t1 = t0 + (calm ? 0 : BEAT);
-    tl.call(() => { freeze.style.opacity = '0'; }, [], t1);
-    if (!calm) {
-      tl.to(name, { '--mis': '0px', duration: 0.7, ease: 'elastic.out(1.2, 0.4)' }, t1);
-      tl.call(() => name.classList.remove('plates'), [], t1 + 0.75);
-      letters.forEach((el, i) => tl.add(squash(el, 0.7), t1 + i * 0.035));
-    }
-    tl.add(popIn(cast), t1 + 0.25);
-    tl.add(popIn([glove]), t1 + 0.9);
-    tl.add(ballRun(rest), t1 + 0.3);
-    tl.add(boyIn(), t1 + 2.7);
-    tl.call(startLoud, [], t1 + 3.8);
+    tl.fromTo(letters, { scale: 0, rotation: () => gsap.utils.random(-30, 30) }, { scale: 1, rotation: 0, duration: 0.55, ease: 'back.out(2.4)', stagger: { each: 0.035, from: 'random' }, immediateRender: false }, 0.05);
+    tl.add(popIn(cast), 0.3);
+    tl.add(popIn([glove]), 1.4);
+    tl.add(ballRun(rest), 0.75);
+    tl.add(boyIn(), 1.95);
+    tl.call(startLife, [], 2.8);
+    const skip = () => { if (tl.progress() < 1) tl.progress(1); evs.forEach((e) => removeEventListener(e, skip)); };
+    const evs = ['pointerdown', 'wheel', 'touchmove', 'keydown'] as const;
+    evs.forEach((e) => addEventListener(e, skip, { passive: true }));
     return tl;
   }
 
@@ -208,12 +250,12 @@ export function initHero(root: HTMLElement, fine: boolean) {
       prev = to;
     };
     for (let i = 3; i < letters.length; i++) {
-      hop(at(i), fs * 0.32, 0.26, () => {
+      hop(at(i), fs * 0.3, 0.2, () => {
         squash(letters[i], 0.74);
         gsap.fromTo(dot, { scaleY: 0.6, scaleX: 1.35 }, { scaleY: 1, scaleX: 1, duration: 0.5, ease: 'elastic.out(1.2, 0.35)' });
       });
     }
-    hop({ x: 0, y: 0 }, fs * 0.9, 0.55, () => {
+    hop({ x: 0, y: 0 }, fs * 0.9, 0.48, () => {
       gsap.fromTo(dot, { scaleY: 0.55, scaleX: 1.4 }, { scaleY: 1, scaleX: 1, duration: 0.7, ease: 'elastic.out(1.3, 0.3)' });
       squash(letters[2], 0.85);
     });
@@ -229,7 +271,7 @@ export function initHero(root: HTMLElement, fine: boolean) {
       boy.pose('fall_0'); boy.x = x.x; boy.y = -fs; boy.flip = false; boy.apply();
       boy.el.style.opacity = '1';
     });
-    tl.to(p, { y: 1, duration: 0.55, ease: 'power2.in', onUpdate: () => { const x = top(2); boy.x = x.x; boy.y = lerp(-fs * 1.5, x.y, p.y); boy.apply(); } });
+    tl.to(p, { y: 1, duration: 0.5, ease: 'power2.in', onUpdate: () => { const x = top(2); boy.x = x.x; boy.y = lerp(-fs * 1.5, x.y, p.y); boy.apply(); } });
     tl.call(() => {
       boy.pose('hero_0'); boy.sy = 0.86; standing = true; on = 2;
       squash(letters[2], 0.62);
@@ -240,42 +282,44 @@ export function initHero(root: HTMLElement, fine: boolean) {
     return tl;
   }
 
-  // LOUD: a stunt on the first beat of every two bars; little things in between
+  // the small life, always on; the stunts, only when poked
   const rig: Rig = { root, act, name, lines, letters, dot, boy, speed, fs: () => fs, on: () => on, top, squash, air };
   const stunts = makeStunts(rig);
-  let loud = false, paused = false, pending = false, phrase = 0;
+  let alive = false, paused = false, phrase = 0;
   let live: gsap.core.Timeline | null = null;
-  function startLoud() {
-    if (loud || calm) return;
-    loud = true;
+  function startLife() {
+    if (alive) return;
+    alive = true;
+    if (calm) return;
     onBeat((n) => {
-      if (paused || document.hidden) return;
-      const b = n % 8;
-      if (b === 0) pending = true;
-      if (b > 2) pending = false;
-      if (pending && !busy && !live) {
-        pending = false;
-        live = stunts[phrase++ % stunts.length]();
-        live.eventCallback('onComplete', () => { live = null; });
-        return;
-      }
-      if (live) return;
-      if (b === 4 && n % 16 === 4) gsap.to(letters, { '--ds': 0.16, duration: 0.42, ease: 'sine.inOut', yoyo: true, repeat: 1, stagger: 0.05 });
-      if (b === 5) { const c = letters.map((_, i) => i).filter((i) => i !== on); trick(c[Math.floor(Math.random() * c.length)]); }
-      if (b === 6 && Math.random() < 0.7) {
+      if (paused || document.hidden || live || jelly.excited || drag) return;
+      const b = n % 16;
+      if (b === 4) gsap.to(letters, { '--ds': 0.16, duration: 0.42, ease: 'sine.inOut', yoyo: true, repeat: 1, stagger: 0.05 });
+      if (b === 9) { const c = letters.map((_, i) => i).filter((i) => i !== on); trick(c[Math.floor(Math.random() * c.length)]); }
+      if (b === 13 && Math.random() < 0.7) {
         const step = Math.random() < 0.5 ? -1 : 1;
         let j = on + step * (1 + Math.floor(Math.random() * 2));
         if (j < 0 || j >= letters.length) j = on - step;
         hopTo(Math.max(0, Math.min(letters.length - 1, j)));
       }
-      if (b === 3 || b === 7) dotHop();
+      if (n % 4 === 3) dotHop();
     });
   }
-  /** everything back to rest, nothing new starts (the dive has the screen) */
+  /** a poke: the next stunt, if nothing else is going on */
+  function poke() {
+    if (!alive || calm || paused || live || busy || scrolling) return false;
+    jelly.settle();
+    live = stunts[phrase++ % stunts.length]();
+    live.eventCallback('onComplete', () => { live = null; });
+    return true;
+  }
+  /** everything back to rest, nothing new starts (the scroll has the screen) */
   function pause() {
     if (paused) return;
-    paused = true; pending = false;
+    paused = true;
+    drag = null;
     if (live) { live.progress(1); live = null; }
+    jelly.settle();
     gsap.killTweensOf(letters); gsap.killTweensOf(name); gsap.killTweensOf(act);
     gsap.set(letters, { x: 0, y: 0, yPercent: 0, rotation: 0, rotationY: 0, scaleX: 1, scaleY: 1, '--ds': 0, '--dg': 0, transformOrigin: '50% 92%', color: '' });
     gsap.set(name, { scale: 1, y: 0, '--mis': '0px', visibility: '' });
@@ -287,57 +331,130 @@ export function initHero(root: HTMLElement, fine: boolean) {
     speed.clear();
   }
   let wake: gsap.core.Tween | null = null;
-  function resume() { wake?.kill(); wake = gsap.delayedCall(0.5, () => { paused = false; }); }
+  function resume(celebrate: boolean) {
+    wake?.kill();
+    wake = gsap.delayedCall(0.5, () => { paused = false; if (celebrate) gsap.delayedCall(0.4, () => void poke()); });
+  }
 
-  // the camera flies into the A (it turns red first) until red fills the screen
-  let zoomAt: { x: number; y: number; r: number } | null = null;
-  function target() {
-    const A = letters[1], cs = getComputedStyle(A);
-    const d = deepPoint('A', cs.fontFamily, cs.fontWeight, 'condensed', 0.4);
-    const sx = d.adv ? A.offsetWidth / (d.adv * fs) : 1;
-    return { x: name.offsetLeft + A.offsetLeft + d.x * fs * sx, y: name.offsetTop + base0 + d.y * fs, r: d.r * fs * Math.min(1, sx) };
+  // the scroll: the sheet stretches down with your thumb, snaps, and the ball flies at the lens
+  let scrolling = false, snapped = false, deep = false, pop = 1;
+  const popT = { v: 1 };
+  function snap() {
+    snapped = true; deep = true;
+    jelly.sheet = 0;
+    gsap.fromTo(act, { scaleY: 1 + 1.15 }, { scaleY: 1, duration: 0.5, ease: 'elastic.out(1.3, 0.32)', overwrite: true });
+    shake(root, 12, 0.3);
+    if (standing && !busy) launch(gsap.utils.random(-1, 1) * fs, -fs * 4);
+    // where the ball sits once the sheet is back to size (it is still stretched at this moment)
+    const r = dot.getBoundingClientRect(), { b, kx, ky } = scaleOf(), rb = root.getBoundingClientRect();
+    const x = (r.left - b.left) / kx + b.left - rb.left, y = (r.top - b.top) / ky + b.top - rb.top, w = r.width / kx, h = r.height / ky;
+    Object.assign(ball.style, { left: `${x}px`, top: `${y}px`, width: `${w}px`, height: `${h}px`, visibility: 'visible' });
+    dot.style.visibility = 'hidden';
+    pop = 1.5;
+    gsap.to(popT, { v: 1, duration: 0.45, ease: 'elastic.out(1.4, 0.35)', overwrite: true, onUpdate: () => { pop = popT.v; } });
+  }
+  function unsnap() {
+    snapped = false;
+    gsap.killTweensOf(act);
+    ball.style.visibility = ''; dot.style.visibility = '';
+    fill.style.opacity = '0';
+    speed.clear();
   }
   function zoom(u: number) {
     if (u <= 0.0005) {
-      if (!zoomAt) return;
-      zoomAt = null;
-      root.classList.remove('zooming');
-      cam.style.transform = '';
-      fill.style.opacity = '0';
-      layer.style.visibility = '';
+      if (!scrolling) return;
+      scrolling = false;
+      if (snapped) unsnap();
+      gsap.set(act, { scaleY: 1 });
+      jelly.sheet = 0;
       ui.forEach((el) => { el.style.opacity = ''; });
-      gsap.to(letters[1], { color: C.ink, duration: 0.25, onComplete: () => { letters[1].style.color = ''; } });
-      speed.clear();
       darkHeader('hero-zoom', false);
-      resume();
+      resume(deep);
+      deep = false;
       return;
     }
-    if (!zoomAt) {
-      wake?.kill();
-      pause();
-      zoomAt = target();
-      root.classList.add('zooming');
-      gsap.fromTo(letters[1], { scale: 1.18 }, { scale: 1, color: C.hot, duration: 0.45, ease: 'back.out(3)' });
+    if (!scrolling) { scrolling = true; wake?.kill(); pause(); }
+    if (u < SNAP) {
+      if (snapped) unsnap();
+      const S = u / SNAP;
+      gsap.set(act, { scaleY: 1 + 1.15 * S, transformOrigin: '50% 0' });
+      jelly.sheet = S;
+      ui.forEach((el) => { el.style.opacity = String(Math.max(0, 1 - S * 2.5)); });
+      darkHeader('hero-zoom', false);
+      return;
     }
-    const W = root.clientWidth, H = root.clientHeight;
-    const z = Math.max(2, (Math.hypot(W, H) / 2 / Math.max(1.5, zoomAt.r)) * 1.2);
-    cam.style.transform = flyInto(zoomAt.x, zoomAt.y, z, u, W, H);
-    fill.style.opacity = String(gsap.utils.clamp(0, 1, (u - 0.84) / 0.13));
-    layer.style.visibility = u > 0.1 ? 'hidden' : '';
-    ui.forEach((el) => { el.style.opacity = String(Math.max(0, 1 - u * 6)); });
-    if (!calm) speed.draw(u < 0.92 ? Math.min(1, u * 1.5) : 0, W / 2, H / 2, C.ink);
-    darkHeader('hero-zoom', u > 0.6);
+    if (!snapped) snap();
+    // the ball to the lens: it grows and drifts to the middle until red is all there is
+    const v = (u - SNAP) / (1 - SNAP), e = Math.pow(v, 1.4);
+    const bw = ball.offsetWidth || 1, Z = (Math.hypot(W, H) / bw) * 1.15, s = Math.pow(Z, e) * pop, q = (s - 1) / (Z - 1);
+    const cx = ball.offsetLeft + bw / 2, cy = ball.offsetTop + ball.offsetHeight / 2;
+    ball.style.transform = `translate(${(W / 2 - cx) * q}px, ${(H / 2 - cy) * q}px) scale(${s})`;
+    fill.style.opacity = String(gsap.utils.clamp(0, 1, (v - 0.82) / 0.14));
+    if (!calm) speed.draw(0.3 + 0.7 * v, W / 2, H / 2, C.ink);
+    darkHeader('hero-zoom', v > 0.7);
   }
 
-  // taps
-  letters.forEach((el, i) => el.addEventListener('pointerdown', () => {
-    if (live || zoomAt) return;
+  // touch: taps, grabs, flings
+  let drag: { n: Letter; i: number; id: number; x0: number; y0: number; moved: boolean; lx: number; ly: number; lt: number; vx: number; vy: number } | null = null;
+  let lastTap = 0, lastTapI = -1;
+  function tapLetter(i: number) {
+    const now = performance.now();
+    if (now - lastTap < 340 && lastTapI === i && poke()) { lastTap = 0; return; }
+    lastTap = now; lastTapI = i;
     if (i === on && standing) { hopTo(i === letters.length - 1 ? i - 1 : i + 1); return; }
     trick(i);
-  }));
+    const t = top(i);
+    ripple(t.x, t.y + fs * 0.4, 0.4);
+  }
+  wraps.forEach((w, i) => {
+    w.addEventListener('pointerdown', (e) => {
+      if (live || paused || scrolling || drag) return;
+      const p = toAct(e), n = nodes[i];
+      drag = { n, i, id: e.pointerId, x0: p.x, y0: p.y, moved: false, lx: p.x, ly: p.y, lt: performance.now(), vx: 0, vy: 0 };
+      w.setPointerCapture(e.pointerId);
+    });
+    w.addEventListener('pointermove', (e) => {
+      if (!drag || drag.id !== e.pointerId) return;
+      const p = toAct(e), now = performance.now(), dt = Math.max(1, now - drag.lt) / 1000;
+      if (!drag.moved) {
+        if (Math.hypot(p.x - drag.x0, p.y - drag.y0) < 6) return;
+        drag.moved = true;
+        jelly.grab(drag.n, drag.x0, drag.y0);
+      }
+      drag.vx = drag.vx * 0.5 + ((p.x - drag.lx) / dt) * 0.5; drag.vy = drag.vy * 0.5 + ((p.y - drag.ly) / dt) * 0.5;
+      drag.lx = p.x; drag.ly = p.y; drag.lt = now;
+      const k = calm ? 0.35 : 1;
+      jelly.drag(drag.n, drag.x0 + (p.x - drag.x0) * k, drag.y0 + (p.y - drag.y0) * k, drag.vx, drag.vy);
+    });
+    const end = (e: PointerEvent) => {
+      if (!drag || drag.id !== e.pointerId) return;
+      const d = drag;
+      drag = null;
+      if (!d.moved) { if (e.type === 'pointerup') tapLetter(i); return; }
+      const idle = performance.now() - d.lt > 80;
+      jelly.release(d.n, idle || calm ? 0 : d.vx, idle || calm ? 0 : d.vy);
+    };
+    w.addEventListener('pointerup', end);
+    w.addEventListener('pointercancel', end);
+  });
+  // the paper: a tap (not a scroll) sends a ring out from under your finger
+  let paper: { id: number; x: number; y: number } | null = null;
+  root.addEventListener('pointerdown', (e) => {
+    if (paused || scrolling || (e.target as Element).closest('.chw, .stk, .boy, .dot, .badge, .tag, a, button')) { paper = null; return; }
+    const p = toAct(e);
+    paper = { id: e.pointerId, x: p.x, y: p.y };
+  });
+  root.addEventListener('pointerup', (e) => {
+    if (!paper || paper.id !== e.pointerId) return;
+    const p = toAct(e), q = paper;
+    paper = null;
+    if (Math.hypot(p.x - q.x, p.y - q.y) < 8 && !paused && !scrolling) ripple(q.x, q.y, 1);
+  });
+  root.addEventListener('pointercancel', () => { paper = null; });
   boy.el.addEventListener('pointerdown', () => {
-    if (!standing || busy || live) return;
+    if (!standing || busy || live || paused) return;
     busy = true;
+    ripple(boy.x, boy.y, 0.5);
     gsap.timeline({ onComplete: () => { busy = false; } })
       .call(() => { boy.pose('comedy_0'); })
       .to(boy, { sy: 1.12, duration: 0.12, ease: 'power2.out' })
@@ -345,9 +462,12 @@ export function initHero(root: HTMLElement, fine: boolean) {
       .call(() => { boy.pose('extra_1'); }, [], '+=0.2')
       .call(() => { boy.pose('hero_3'); }, [], '+=0.9');
   });
-  dot.addEventListener('pointerdown', () => gsap.timeline().to(dot, { y: -fs * 0.9, duration: 0.35, ease: 'power2.out' }).to(dot, { y: 0, duration: 0.3, ease: 'power2.in' }).to(dot, { scaleY: 0.5, scaleX: 1.45, duration: 0.06 }).to(dot, { scaleY: 1, scaleX: 1, duration: 0.6, ease: 'elastic.out(1.3, 0.3)' }));
+  dot.addEventListener('pointerdown', () => {
+    if (poke()) return;
+    gsap.timeline().to(dot, { y: -fs * 0.9, duration: 0.35, ease: 'power2.out' }).to(dot, { y: 0, duration: 0.3, ease: 'power2.in' }).to(dot, { scaleY: 0.5, scaleX: 1.45, duration: 0.06 }).to(dot, { scaleY: 1, scaleX: 1, duration: 0.6, ease: 'elastic.out(1.3, 0.3)' });
+  });
 
   /** for checking: run stunt i now */
-  const stunt = (i: number) => { live?.progress(1); live = stunts[i % stunts.length](); live.eventCallback('onComplete', () => { live = null; }); };
-  return { fit, intro, boy, zoom, stunt };
+  const stunt = (i: number) => { live?.progress(1); jelly.settle(); live = stunts[i % stunts.length](); live.eventCallback('onComplete', () => { live = null; }); };
+  return { fit, intro, boy, zoom, stunt, ripple, jelly };
 }
