@@ -1,0 +1,112 @@
+/*
+ * The seven universes: each one redefines the tokens (paper, ink, the four colours, the typefaces)
+ * and dresses the paper its own way. Everything else on the site is built from the tokens.
+ */
+
+/* ---- the strip in the header: seven swatches, the current one bigger */
+.uni-strip { display: flex; align-items: center; gap: 7px; padding: 8px 10px; border-radius: 999px; background: color-mix(in srgb, var(--bg) 72%, transparent); backdrop-filter: blur(6px); pointer-events: auto; }
+.uni-dot { width: 14px; height: 14px; padding: 0; border: 2px solid var(--ink); border-radius: 50%; background: var(--bg); cursor: pointer; transition: transform .25s, box-shadow .25s; }
+.uni-dot.on { transform: scale(1.35); box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--hot); }
+.uni-dot-ink { background: #151311; }
+.uni-dot-pixel { border-radius: 2px; background: linear-gradient(90deg, #ff4d6d 50%, #4cc9f0 50%); image-rendering: pixelated; }
+.uni-dot-comic { background: radial-gradient(circle, #1a1512 32%, #ffd23f 36%); }
+.uni-dot-water { border-radius: 60% 40% 55% 45% / 50% 60% 40% 50%; background: radial-gradient(circle at 35% 35%, #7fb7d6, #2b3a55); border-color: transparent; }
+.uni-dot-clay { background: radial-gradient(circle at 35% 30%, #f6b4a6, #f0553d 70%); border-color: #3b2f2a; box-shadow: inset -2px -2px 0 rgba(0, 0, 0, .18); }
+.uni-dot-chalk { background: #1f3a34; border-color: #f2efe6; border-style: dashed; }
+.uni-dot-hose { background: radial-gradient(circle at 50% 50%, #1a1a1a 38%, #f4f1ea 42%); border-color: #1a1a1a; }
+@media (max-width: 420px) { .uni-strip { gap: 5px; padding: 7px 8px; } .uni-dot { width: 12px; height: 12px; } }
+
+/* ---- the glitch between universes: slices, a split, a stutter */
+.uni-switching main, .uni-switching footer, .uni-switching .menu-panel { animation: uni-glitch .5s steps(1) both; }
+@keyframes uni-glitch {
+  0% { clip-path: inset(0 0 72% 0); transform: translate(-10px, 0); filter: drop-shadow(8px 0 0 rgba(255, 42, 78, .8)) drop-shadow(-8px 0 0 rgba(42, 217, 255, .8)); }
+  12% { clip-path: inset(30% 0 40% 0); transform: translate(12px, 0); }
+  24% { clip-path: inset(60% 0 0 0); transform: translate(-6px, 2px); filter: drop-shadow(-6px 0 0 rgba(255, 42, 78, .8)) drop-shadow(6px 0 0 rgba(42, 217, 255, .8)) hue-rotate(60deg); }
+  36% { clip-path: none; transform: translate(0, 0) scaleY(1.02); filter: invert(1); }
+  44% { clip-path: inset(10% 0 55% 0); transform: translate(14px, 0); filter: none; }
+  58% { clip-path: inset(45% 0 20% 0); transform: translate(-9px, 0); filter: drop-shadow(5px 0 0 rgba(255, 42, 78, .8)) drop-shadow(-5px 0 0 rgba(42, 217, 255, .8)); }
+  72% { clip-path: none; transform: translate(3px, 0); }
+  86% { transform: translate(-2px, 0); filter: none; }
+  100% { clip-path: none; transform: none; filter: none; }
+}
+
+/* ---- PIXEL: an arcade at night */
+html[data-uni="pixel"] {
+  --bg: #12152b; --ink: #f1f3ff; --hot: #ff4d6d; --sun: #ffe66d; --cool: #4cc9f0; --mint: #7cf5d2; --card: #1c2040;
+  --f-display: 'Press Start 2P', monospace; --f-title: 'Press Start 2P', monospace; --f-comic: 'Press Start 2P', monospace;
+  --f-label: 'VT323', monospace; --f-clean: 'Press Start 2P', monospace; --f-eyebrow: 'VT323', monospace; --ui: 'VT323', monospace;
+  --base-s: 0.24; letter-spacing: .01em;
+}
+html[data-uni="pixel"] body { font-size: 18px; }
+html[data-uni="pixel"] img, html[data-uni="pixel"] canvas { image-rendering: pixelated; }
+html[data-uni="pixel"] { --grain-img: repeating-linear-gradient(0deg, rgba(0, 0, 0, .42) 0 1px, transparent 1px 3px); --grain-size: auto; }
+html[data-uni="pixel"] .grain { opacity: .55; mix-blend-mode: normal; }
+html[data-uni="pixel"] .mark { font-size: 10px; } html[data-uni="pixel"] .menu { font-size: 10px; }
+html[data-uni="pixel"] .boy:not(.uni-art) { filter: invert(1) hue-rotate(180deg) brightness(1.1); }
+html[data-uni="pixel"] .cursor { border-radius: 0; }
+html[data-uni="pixel"] .stk img, html[data-uni="pixel"] .dot, html[data-uni="pixel"] .boy { filter: none; }
+html[data-uni="pixel"] .ripple { border-radius: 0; }
+
+/* ---- COMIC: newsprint, Ben-Day dots, the plates a hair out */
+html[data-uni="comic"] {
+  --bg: #fff6e5; --ink: #1a1512; --hot: #e8382a; --sun: #ffd23f; --cool: #2a9df4; --mint: #78d6a4; --card: #fffdf7;
+  --f-display: 'Bangers', var(--f-title); --f-title: var(--f-comic); --f-comic: var(--f-comic); --f-label: var(--f-label); --f-clean: var(--f-comic);
+  --base-g: 0.98;
+}
+html[data-uni="comic"] { --grain-img: radial-gradient(circle, #1a1512 26%, transparent 30%); --grain-size: 6px 6px; }
+html[data-uni="comic"] .grain { opacity: .14; mix-blend-mode: multiply; }
+html[data-uni="comic"] .mark, html[data-uni="comic"] .menu { letter-spacing: .06em; }
+html[data-uni="comic"] .name .ch, html[data-uni="comic"] .sec-title, html[data-uni="comic"] .hi-title, html[data-uni="comic"] .skill { text-shadow: -.025em .012em 0 rgba(42, 157, 244, .85), .025em -.012em 0 rgba(232, 56, 42, .85); }
+html[data-uni="comic"] .name .ch { letter-spacing: .02em; }
+
+/* ---- WATERCOLOUR: cold-pressed paper, washes, nothing hard */
+html[data-uni="water"] {
+  --bg: #f6f1e6; --ink: #2b3a55; --hot: #e4572e; --sun: #e9b949; --cool: #7fb7d6; --mint: #a7d7c5; --card: #fbf8f0;
+  --f-display: 'Caveat Brush', cursive; --f-title: 'Caveat Brush', cursive; --f-comic: 'Caveat Brush', cursive; --f-label: 'Jost', sans-serif; --f-clean: 'Caveat Brush', cursive;
+}
+html[data-uni="water"] body::before { content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background: radial-gradient(60% 50% at 20% 25%, rgba(127, 183, 214, .22), transparent 70%), radial-gradient(50% 45% at 80% 70%, rgba(228, 87, 46, .14), transparent 70%), radial-gradient(45% 40% at 60% 20%, rgba(233, 185, 73, .16), transparent 70%); }
+html[data-uni="water"] .grain { opacity: .16; }
+html[data-uni="water"] .name .ch, html[data-uni="water"] .sec-title, html[data-uni="water"] .hi-title, html[data-uni="water"] .skill, html[data-uni="water"] .card h3 { opacity: .94; text-shadow: 0 0 .03em currentColor, .02em .03em 0 rgba(43, 58, 85, .12); }
+html[data-uni="water"] .stk img, html[data-uni="water"] .boy, html[data-uni="water"] .dot { filter: url(#boil) saturate(.85) contrast(.95); }
+html[data-uni="water"] .name { line-height: .95; }
+
+/* ---- CLAY: a studio backdrop, everything sculpted and lit */
+html[data-uni="clay"] {
+  --bg: #efe6dc; --ink: #3b2f2a; --hot: #f0553d; --sun: #f4c542; --cool: #5aa9e6; --mint: #8fd3b2; --card: #fff6ee;
+  --f-display: 'Fredoka', sans-serif; --f-title: 'Fredoka', sans-serif; --f-comic: 'Fredoka', sans-serif; --f-label: 'Fredoka', sans-serif; --f-clean: 'Fredoka', sans-serif; --f-eyebrow: 'Fredoka', sans-serif;
+}
+html[data-uni="clay"] body::before { content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none; background: radial-gradient(90% 80% at 50% 30%, transparent 40%, rgba(59, 47, 42, .22)); }
+html[data-uni="clay"] .name .ch, html[data-uni="clay"] .sec-title, html[data-uni="clay"] .hi-title, html[data-uni="clay"] .skill { font-weight: 700; text-shadow: .03em .05em 0 rgba(59, 47, 42, .22), -.01em -.01em 0 rgba(255, 255, 255, .5); }
+html[data-uni="clay"] .stk img, html[data-uni="clay"] .boy, html[data-uni="clay"] .dot, html[data-uni="clay"] .card { filter: drop-shadow(3px 6px 0 rgba(59, 47, 42, .2)); }
+html[data-uni="clay"] .stk img, html[data-uni="clay"] .ch { animation: clay-jitter .33s steps(2) infinite; }
+@keyframes clay-jitter { 50% { translate: .4px -.6px; } }
+html[data-uni="clay"] .name { line-height: .9; }
+
+/* ---- CHALK: the board */
+html[data-uni="chalk"] {
+  --bg: #1f3a34; --ink: #f2efe6; --hot: #f5a7a0; --sun: #f7e6a2; --cool: #a7d3e8; --mint: #bfe7d0; --card: #2a4a43;
+  --f-display: 'Fredericka the Great', serif; --f-title: 'Fredericka the Great', serif; --f-comic: 'Cabin Sketch', sans-serif; --f-label: 'Cabin Sketch', sans-serif; --f-clean: 'Fredericka the Great', serif; --f-eyebrow: 'Cabin Sketch', sans-serif;
+}
+html[data-uni="chalk"] .grain { opacity: .2; mix-blend-mode: screen; }
+html[data-uni="chalk"] .mark, html[data-uni="chalk"] .menu { font-size: 13px; }
+html[data-uni="chalk"] body::before { content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: .35; background: radial-gradient(70% 60% at 30% 70%, rgba(255, 255, 255, .14), transparent 70%), radial-gradient(50% 40% at 75% 25%, rgba(255, 255, 255, .1), transparent 70%); }
+html[data-uni="chalk"] .name .ch, html[data-uni="chalk"] .sec-title, html[data-uni="chalk"] .hi-title, html[data-uni="chalk"] .skill { text-shadow: 0 0 1px rgba(255, 255, 255, .5), 0 0 .04em rgba(242, 239, 230, .35); filter: url(#chalk); }
+html[data-uni="chalk"] .stk img, html[data-uni="chalk"] .boy, html[data-uni="chalk"] .dot { filter: grayscale(1) invert(1) brightness(1.15) contrast(.9) url(#chalk); }
+html[data-uni="chalk"] .stk img.uni-art, html[data-uni="chalk"] .boy.uni-art, html[data-uni="chalk"] .dot.uni-art { filter: url(#chalk); }
+html[data-uni="chalk"] .name { line-height: .95; }
+
+/* ---- RUBBER HOSE: 1930s, black and white, the gate weaving */
+html[data-uni="hose"] {
+  --bg: #e8e4da; --ink: #1a1a1a; --hot: #5a5a5a; --sun: #c4c0b6; --cool: #8a8a8a; --mint: #a8a8a8; --card: #f4f1ea;
+  --f-display: 'Limelight', serif; --f-title: 'Limelight', serif; --f-comic: 'Londrina Solid', sans-serif; --f-label: 'Londrina Solid', sans-serif; --f-clean: 'Limelight', serif; --f-eyebrow: 'Londrina Solid', sans-serif;
+}
+html[data-uni="hose"] main, html[data-uni="hose"] footer, html[data-uni="hose"] .menu-panel, html[data-uni="hose"] .top { filter: grayscale(1) contrast(1.08); }
+html[data-uni="hose"] main { animation: hose-gate 1.3s steps(3) infinite; }
+@keyframes hose-gate { 0% { translate: 0 0; } 33% { translate: .6px -.5px; } 66% { translate: -.4px .6px; } 100% { translate: 0 0; } }
+html[data-uni="hose"] .grain { opacity: .22; animation: hose-flicker .9s steps(2) infinite; }
+@keyframes hose-flicker { 50% { opacity: .16; } }
+html[data-uni="hose"] body::before { content: ''; position: fixed; inset: 0; z-index: 91; pointer-events: none; background: radial-gradient(80% 70% at 50% 50%, transparent 55%, rgba(0, 0, 0, .38)); }
+html[data-uni="hose"] .name { line-height: 1; }
+html[data-uni="hose"] .mark, html[data-uni="hose"] .menu { font-size: 12px; }
+html[data-uni="water"] .mark, html[data-uni="water"] .menu { font-size: 17px; }

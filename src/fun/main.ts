@@ -17,6 +17,8 @@ import { initMenu } from './menu';
 import { initSkills } from './skills';
 import { stickerUrl } from './stickers';
 import { initStyles } from './styles';
+import { initUniverse, onUniverse } from './universe';
+import { retypeset, visibleChars } from './kinetic';
 import { initWork } from './work';
 gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 
@@ -34,7 +36,8 @@ initFx();
 const lenis = fine ? new Lenis({ duration: 1.1, smoothWheel: true }) : null;
 if (lenis) {
   lenis.on('scroll', ScrollTrigger.update);
-  gsap.ticker.add((t) => lenis.raf(t * 1000));
+  const raf = (t: number) => { lenis.raf(t); requestAnimationFrame(raf); };
+  requestAnimationFrame(raf);
   gsap.ticker.lagSmoothing(0);
 }
 const go = (target: string) => {
@@ -43,6 +46,7 @@ const go = (target: string) => {
   else gsap.to(window, { scrollTo: el, duration: 1.2, ease: 'power3.inOut' });
 };
 
+const uni = initUniverse({ header: q('.top') });
 const hero = initHero(q('.hero'));
 const work = initWork(q('.work'));
 initSkills(q('.skills'));
@@ -51,6 +55,7 @@ initStyles(q('.styles'));
 initContact(q('.contact'));
 initFoot(q('.foot'), () => go('#top'));
 initMenu(go);
+onUniverse((u) => { work.fit(); ScrollTrigger.refresh(); retypeset(visibleChars(), u, 0.05); });
 document.querySelectorAll<HTMLAnchorElement>('a[href^="#"]:not(.menu-panel a):not(.up)').forEach((a) => a.addEventListener('click', (e) => { e.preventDefault(); go(a.getAttribute('href') ?? '#top'); }));
 
 // the header turns light over the dark sections
@@ -68,7 +73,8 @@ const ready = Promise.race([
 ]);
 void ready.then(() => {
   hero.fit(); work.fit();
-  hero.intro();
+  // the landing: ink, and a little after it settles, a stutter into pixel
+  hero.intro().eventCallback('onComplete', () => gsap.delayedCall(2.4, () => uni.stutter('pixel')));
   ScrollTrigger.refresh();
 });
 let rw = innerWidth;
@@ -77,4 +83,4 @@ addEventListener('resize', () => {
   rw = innerWidth;
   hero.fit(); work.fit(); ScrollTrigger.refresh();
 });
-(window as unknown as { __fun: object }).__fun = { ready, gsap, go, hero };
+(window as unknown as { __fun: object }).__fun = { ready, gsap, go, hero, uni };

@@ -19,8 +19,7 @@ export function initFx() {
   g.putImageData(img, 0, 0);
   const grain = document.querySelector<HTMLElement>('.grain')!;
   const noise = `url(${cv.toDataURL()})`;
-  grain.style.backgroundImage = noise;
-  document.documentElement.style.setProperty('--noise', noise); // dark sections add it back in screen mode
+  document.documentElement.style.setProperty('--noise', noise); // the grain layer and the dark sections read it; a universe may replace it
   if (!calm) setInterval(() => { grain.style.backgroundPosition = `${Math.random() * S}px ${Math.random() * S}px`; }, 83);
 
   // cursor

@@ -6,7 +6,9 @@
  */
 :root {
   --bg: #fbf7ef; --ink: #151311; --hot: #ff3d22; --sun: #ffd54a; --cool: #4fb6ff; --mint: #7fddb4;
-  --display: 'Anybody', system-ui, sans-serif; --ui: 'Inter', system-ui, sans-serif;
+  --f-display: 'Anybody', system-ui, sans-serif; --f-title: var(--f-title); --f-comic: var(--f-comic); --f-label: var(--f-label);
+  --f-clean: 'Montserrat', sans-serif; --f-eyebrow: 'Jost', 'Inter', sans-serif; --card: #fff;
+  --display: var(--f-display); --ui: 'Inter', system-ui, sans-serif;
   --wd-lo: 50; --wd-span: 100; --wg-lo: 100; --wg-span: 800;
   --base-s: 0.24; --base-g: 0.98;
   --pad: clamp(16px, 3vw, 40px);
@@ -21,7 +23,7 @@ a { color: inherit; }
 .top { position: fixed; inset: 0 0 auto; z-index: 20; display: flex; justify-content: space-between; align-items: center; pointer-events: none;
   padding: calc(var(--pad) + env(safe-area-inset-top, 0px)) calc(var(--pad) + env(safe-area-inset-right, 0px)) var(--pad) calc(var(--pad) + env(safe-area-inset-left, 0px)); }
 .top > * { pointer-events: auto; }
-.mark { display: inline-flex; align-items: center; gap: 8px; text-decoration: none; font: 800 15px/1 var(--display); letter-spacing: .02em; }
+.mark { display: inline-flex; flex: none; align-items: center; gap: 8px; text-decoration: none; font: 800 15px/1 var(--display); letter-spacing: .02em; white-space: nowrap; }
 .mark-dot { width: 16px; height: 16px; border-radius: 50%; background: var(--hot); border: 2px solid var(--ink); }
 .menu { display: inline-flex; gap: 6px; align-items: center; font: 800 14px/1 var(--display); letter-spacing: .06em; padding: 12px 16px; border-radius: 999px; background: var(--ink); color: var(--bg); box-shadow: 3px 3px 0 var(--hot); }
 .menu b { font-size: 16px; }

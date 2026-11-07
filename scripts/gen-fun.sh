@@ -10,7 +10,7 @@ gen() { # name, prompt
   [ -n "$ONLY" ] && [ "$ONLY" != "$1" ] && return
   [ -f "$1.png" ] && return
   echo "== $1"
-  timeout 900 codex exec -m gpt-6-sol -c model_reasoning_effort=low --skip-git-repo-check -s workspace-write --color never \
+  timeout 900 codex exec -m gpt-6-luna -c model_reasoning_effort=low --skip-git-repo-check -s workspace-write --color never \
     "Use your image generation tool to create ONE image, then save the generated PNG into the current directory as $1.png. $STYLE The subject: $2 $BG" > "$1.log" 2>&1
   [ -f "$1.png" ] && echo "   ok $1" || echo "   FAILED $1 (see $1.log)"
 }

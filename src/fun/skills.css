@@ -2,7 +2,7 @@
 .skills { position: relative; padding: 16vh var(--pad) 22vh; text-align: center; transition: none; }
 .skills .eyebrow { margin-bottom: 8vh; }
 .skill-list { list-style: none; padding: 0; margin: 0 auto; max-width: 1300px; display: grid; gap: clamp(18px, 4vh, 44px); }
-.skill { position: relative; font: 400 clamp(46px, 10.5vw, 160px)/.86 'Anton', sans-serif; text-transform: uppercase; opacity: .12; transition: opacity .5s; }
+.skill { position: relative; font: 400 clamp(46px, 10.5vw, 160px)/.86 var(--f-title); text-transform: uppercase; opacity: .12; transition: opacity .5s; }
 .skill.on { opacity: 1; }
 .skill .w { display: inline-block; white-space: nowrap; }
 .skill .sk { display: inline-block; transform-origin: 50% 80%; }

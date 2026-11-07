@@ -1,12 +1,13 @@
 // Cut the fun stickers out of their magenta backgrounds, in a headless browser (no Python needed).
 //   node scripts/cutout-fun.mjs [name ...]     art/raw/fun/<name>.png → src/assets/fun/<name>.webp + manifest.json
+//   SRC=art/raw/uni/pixel OUT=src/assets/uni/pixel node scripts/cutout-fun.mjs     (a universe's set)
 // Alpha comes from how magenta a pixel is (min(R,B) - G), edge pixels are un-mixed from the magenta so
 // no pink fringe is left (same maths as scripts/cutout.py), then the sticker is cropped to its ink and
 // scaled so its longest side is at most 640 px.
 import { chromium } from 'playwright';
 import { readFileSync, writeFileSync, readdirSync, mkdirSync, existsSync } from 'node:fs';
 
-const SRC = 'art/raw/fun', OUT = 'src/assets/fun', MAX = 640;
+const SRC = process.env.SRC ?? 'art/raw/fun', OUT = process.env.OUT ?? 'src/assets/fun', MAX = 640;
 mkdirSync(OUT, { recursive: true });
 const names = process.argv.slice(2).length ? process.argv.slice(2) : readdirSync(SRC).filter((f) => f.endsWith('.png') && !f.includes('test')).map((f) => f.slice(0, -4));
 const manifest = existsSync(`${OUT}/manifest.json`) ? JSON.parse(readFileSync(`${OUT}/manifest.json`, 'utf8')) : {};

@@ -44,7 +44,7 @@ self-host them to swap in.
 crisp hand-inked 1930s rubber-hose props on a modern studio sticker sheet, flat magenta ground);
 `node scripts/cutout-fun.mjs [names]` keys the magenta out (or keeps the alpha when an image came back
 transparent) and writes `src/assets/fun/<name>.webp`. The global Codex config names a model a
-ChatGPT login can't use, so the script passes `-m gpt-6-sol`. Raw PNGs stay in `art/raw/fun/`
+ChatGPT login can't use, so the script passes `-m gpt-6-luna`. Raw PNGs stay in `art/raw/fun/`
 (git-ignored).
 
 spark, sun, sparkle, ink pot, boombox, bolt, glove, flipbook, brush, stopwatch, FRAME BY FRAME badge,

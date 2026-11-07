@@ -2,7 +2,7 @@
 .contact { position: relative; padding: 16vh var(--pad) 20vh; text-align: center; color: var(--bg); overflow: hidden; -webkit-mask: var(--splat) 50% 30% / var(--m, 600%) no-repeat; mask: var(--splat) 50% 30% / var(--m, 600%) no-repeat;
   background: var(--hot) radial-gradient(circle, rgba(21, 19, 17, .14) 24%, transparent 26%) 0 0 / 16px 16px; }
 .contact .eyebrow { color: var(--bg); }
-.hi-title { position: relative; display: inline-flex; align-items: center; gap: .1em; font: 400 clamp(84px, 20vw, 280px)/.86 'Anton', sans-serif; letter-spacing: .01em; color: var(--bg); text-shadow: 7px 7px 0 var(--ink); }
+.hi-title { position: relative; display: inline-flex; align-items: center; gap: .1em; font: 400 clamp(84px, 20vw, 280px)/.86 var(--f-title); letter-spacing: .01em; color: var(--bg); text-shadow: 7px 7px 0 var(--ink); }
 .hi-title .say { display: inline-block; overflow: hidden; padding: 0 .04em; }
 .hi-title .w { display: inline-block; }
 .hi-title .hc { display: inline-block; }
@@ -15,9 +15,9 @@
 .pill:active { translate: 4px 4px; box-shadow: 4px 4px 0 var(--ink); }
 .pill-run { position: absolute; inset: 0; opacity: .5; background: repeating-linear-gradient(-45deg, var(--sun) 0 18px, transparent 18px 36px); background-size: 51px 51px; animation: pill-run 1.2s linear infinite; }
 @keyframes pill-run { to { background-position: 51px 0; } }
-.pill-text { position: relative; font: 400 clamp(26px, 5.4vw, 70px)/1 'Anton', sans-serif; letter-spacing: .02em; }
+.pill-text { position: relative; font: 400 clamp(26px, 5.4vw, 70px)/1 var(--f-title); letter-spacing: .02em; }
 .hi-boy { position: absolute; left: 12%; bottom: calc(100% - 8px); height: clamp(110px, 14vw, 180px); pointer-events: none; }
-.copied { position: absolute; right: -2%; top: -42%; z-index: 6; font: 400 clamp(26px, 3.6vw, 44px)/1 'Bangers', sans-serif; letter-spacing: .06em; color: var(--ink); transform: scale(0); pointer-events: none; }
+.copied { position: absolute; right: -2%; top: -42%; z-index: 6; font: 400 clamp(26px, 3.6vw, 44px)/1 var(--f-comic); letter-spacing: .06em; color: var(--ink); transform: scale(0); pointer-events: none; }
 .contact .stk { position: absolute; }
 .c-mega { left: 4%; top: 18%; width: clamp(90px, 15vw, 220px); }
 .c-env { right: 5%; bottom: 12%; width: clamp(90px, 14vw, 200px); }

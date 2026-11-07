@@ -22,7 +22,7 @@ const FACES = [
   { family: 'Montserrat', weight: '900' },
   { family: 'Jost', weight: '800' },
 ];
-const HUES = [C.hot, C.cool, C.ink, C.sun];
+const HUES = () => [C.hot, C.cool, C.ink, C.sun];
 
 export function makeStunts(r: Rig): (() => gsap.core.Timeline)[] {
   return [stretch, slot, punch, slice, flip, domino];
@@ -60,7 +60,7 @@ export function makeStunts(r: Rig): (() => gsap.core.Timeline)[] {
         if (stopped[i]) return;
         const face = FACES[(f + i * 2) % FACES.length];
         s.style.fontFamily = face.family; s.style.fontWeight = face.weight;
-        s.style.color = HUES[(f + i) % HUES.length];
+        const hues = HUES(); s.style.color = hues[(f + i) % hues.length];
         gsap.set(s, { yPercent: (f + i) % 2 ? -10 : 10, scaleY: 1.3 });
       });
     } }, 0.02);

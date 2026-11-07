@@ -134,7 +134,7 @@ export class Jelly {
 
   private tick = (_t: number, dms: number) => {
     if (!this.awake) return;
-    const dt = Math.min(dms / 1000, 1 / 30), now = performance.now() / 1000;
+    const dt = Math.min(dms / 1000, 0.1), now = performance.now() / 1000;
     // the rings: a kick outward as each one passes
     for (const p of this.pulses) {
       const R = (now - p.t0) * RING, reach = 0.45 * Math.max(this.W, this.H);
@@ -159,7 +159,7 @@ export class Jelly {
     this.pulses = this.pulses.filter((p) => (now - p.t0) * RING < far);
 
     // the strings, in small steps
-    const STEPS = 6, h = dt / STEPS;
+    const STEPS = Math.min(40, Math.max(3, Math.ceil(dt * 360))), h = dt / STEPS;
     for (let s = 0; s < STEPS; s++) {
       for (const n of this.nodes) {
         let ax = -K_GLUE * n.glue * (n.x - n.rx) - DAMP * n.vx, ay = -K_GLUE * n.glue * (n.y - n.ry) - DAMP * n.vy;

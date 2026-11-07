@@ -81,7 +81,12 @@ we need to plan something else. you are thinking minor adding im thinkiung major
 additionms so give ideas like that"*. The dive is cut; nothing pinned or scroll-driven remains (the
 hero is one screen, then the page scrolls to the work). Standing rule: **no scroll-driven set
 pieces**. The owner wants ideas at the scale of a whole-site revamp or a major addition, for the
-landing and the rest; pitched in chat. See the next entry once chosen.
+landing and the rest; pitched in chat (seven universes / the instrument / kinetic type as the
+layout / he is the interface / the print shop / make one yourself). **Picked: "ues 1 and 4 and 3
+where you can"** = SEVEN UNIVERSES (the whole site in seven styles, glitching between them, with
+the art, type and motion rules changing) + HE IS THE INTERFACE (the boy as a living character who
+notices you and performs the transitions, and switches the universes) + KINETIC TYPE wherever it
+fits (re-typesetting choreography on the universe switch, the menu, the section titles).
 
 **Round 42c — it was the trailer:** *"what i mean is till now playing thing i dont want that its too
 flkashty. give me aloty of creative ideas to do there. rest of it looks great"* and *"typography in
@@ -641,3 +646,5 @@ build it".
 
 > dive not needed as well. and for landing and other we need to plan something else. you are thinking
 > minor adding im thinkiung major revamo or major additionms\ so give ideas like that
+
+> ues 1 and 4 and 3 where you can

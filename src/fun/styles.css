@@ -2,10 +2,10 @@
 .styles { position: relative; padding: 16vh var(--pad) 14vh; text-align: center; background: var(--cool); color: var(--ink); overflow: hidden; }
 .styles .sec-title { color: var(--bg); text-shadow: 6px 6px 0 var(--ink); }
 .fan { position: relative; height: clamp(250px, 34vw, 400px); margin: clamp(30px, 6vw, 70px) auto 0; max-width: 1100px; }
-.face { --s: clamp(176px, 26vw, 290px); position: absolute; left: 50%; top: 4%; width: var(--s); aspect-ratio: 1; margin-left: calc(var(--s) / -2); padding: 0; border-radius: 50%; background: #fff; border: 4px solid var(--ink); box-shadow: 7px 7px 0 var(--ink); cursor: pointer; transform-origin: 50% 120%; overflow: hidden; }
+.face { --s: clamp(176px, 26vw, 290px); position: absolute; left: 50%; top: 4%; width: var(--s); aspect-ratio: 1; margin-left: calc(var(--s) / -2); padding: 0; border-radius: 50%; background: var(--card); border: 4px solid var(--ink); box-shadow: 7px 7px 0 var(--ink); cursor: pointer; transform-origin: 50% 120%; overflow: hidden; }
 .face img { width: 100%; height: 100%; object-fit: cover; filter: url(#boil); }
 .face:focus-visible { outline: 4px solid var(--hot); outline-offset: 4px; }
-.fan-name { margin-top: 10px; font: 400 clamp(34px, 6vw, 72px)/1 'Anton', sans-serif; letter-spacing: .04em; color: var(--bg); text-shadow: 4px 4px 0 var(--ink); min-height: 1.1em; }
+.fan-name { margin-top: 10px; font: 400 clamp(34px, 6vw, 72px)/1 var(--f-title); letter-spacing: .04em; color: var(--bg); text-shadow: 4px 4px 0 var(--ink); min-height: 1.1em; }
 .fan-name span { display: inline-block; }
 /* arriving from another dimension: slices out of register for half a second */
 .face.gi img { animation: gi .55s steps(1) both; }

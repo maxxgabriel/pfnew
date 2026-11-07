@@ -1,5 +1,5 @@
 /* the finish: grain over everything, the glitch flash, the cursor, the skip link */
-.grain { position: fixed; inset: 0; z-index: 90; pointer-events: none; opacity: .07; mix-blend-mode: multiply; background-size: 160px 160px; }
+.grain { position: fixed; inset: 0; z-index: 90; pointer-events: none; opacity: .07; mix-blend-mode: multiply; background-image: var(--grain-img, var(--noise)); background-size: var(--grain-size, 160px 160px); }
 .glitch-flash { position: fixed; inset: 0; z-index: 95; pointer-events: none; opacity: 0; }
 .glitch-flash.go { animation: gflash .32s steps(1) both; background:
   linear-gradient(transparent 0 12%, rgba(255, 61, 34, .9) 12% 15%, transparent 15% 41%, rgba(79, 182, 255, .85) 41% 47%, transparent 47% 63%, rgba(255, 213, 74, .9) 63% 65%, transparent 65% 82%, rgba(21, 19, 17, .9) 82% 88%, transparent 88%); }

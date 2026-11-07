@@ -9,10 +9,20 @@ gsap.registerPlugin(CustomEase, CustomWiggle);
  * does its trick when tapped) > img (its own little life, and the line boil). Each has a personality:
  * the sun swaggers, the boombox pumps on the beat, the ink pot hops, the glove points the way down.
  */
+import { onUniverse, universe } from './universe';
 const files = import.meta.glob('../assets/fun/*.webp', { query: '?url', import: 'default', eager: true }) as Record<string, string>;
-/** a sticker's url (falls back to the sparkle if that one hasn't been drawn yet) */
-export const stickerUrl = (name: string) => files[`../assets/fun/${name}.webp`] ?? files['../assets/fun/sparkle.webp'];
+const uniFiles = import.meta.glob('../assets/uni/*/*.webp', { query: '?url', import: 'default', eager: true }) as Record<string, string>;
+const baseUrl = (name: string) => files[`../assets/fun/${name}.webp`] ?? files['../assets/fun/sparkle.webp'];
+/** the universe's own drawing of a sticker, if it has been drawn */
+export const uniUrl = (u: string, name: string) => uniFiles[`../assets/uni/${u}/${name}.webp`];
+/** a sticker's url in the current universe (falls back to the ink drawing, then to the sparkle) */
+export const stickerUrl = (name: string) => uniUrl(universe(), name) ?? baseUrl(name);
 export const hasSticker = (name: string) => !!files[`../assets/fun/${name}.webp`];
+const live = new Set<{ img: HTMLImageElement; name: string }>();
+const dress = (img: HTMLImageElement, name: string) => { const u = uniUrl(universe(), name); img.src = u ?? baseUrl(name); img.classList.toggle('uni-art', !!u || universe() === 'ink'); };
+/** dress an image as the sticker, for this universe; it is redressed whenever the universe changes */
+export function trackSticker(img: HTMLImageElement, name: string) { dress(img, name); live.add({ img, name }); }
+onUniverse(() => { for (const { img, name } of live) dress(img, name); });
 const BEAT = 60 / 118;
 
 type Bits = { host: HTMLElement; inner: HTMLElement; img: HTMLImageElement };
@@ -56,7 +66,7 @@ export function sticker(parent: HTMLElement, name: string, cls = '', spin = true
   const inner = document.createElement('b');
   inner.className = 'stk-in';
   const img = document.createElement('img');
-  img.src = stickerUrl(name); img.alt = ''; img.draggable = false; img.decoding = 'async';
+  trackSticker(img, name); img.alt = ''; img.draggable = false; img.decoding = 'async';
   inner.append(img); host.append(inner); parent.append(host);
   lives[name]?.(img);
   host.addEventListener('pointerdown', () => tap(inner, spin));

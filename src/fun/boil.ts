@@ -11,6 +11,10 @@ export function initBoil(calm: boolean) {
   svg.innerHTML = `<filter id="boil" x="-5%" y="-5%" width="110%" height="110%">
     <feTurbulence type="fractalNoise" baseFrequency="0.028" numOctaves="2" seed="1" result="n"/>
     <feDisplacementMap in="SourceGraphic" in2="n" scale="4.5" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+  <filter id="chalk" x="-5%" y="-5%" width="110%" height="110%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="3" result="c"/>
+    <feDisplacementMap in="SourceGraphic" in2="c" scale="1.8" xChannelSelector="R" yChannelSelector="G"/>
   </filter>`;
   document.body.prepend(svg);
   if (calm) return;

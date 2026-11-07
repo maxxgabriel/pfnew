@@ -2,6 +2,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { faceUrl } from './art';
 import { calm, popOnScroll, whileVisible, zoomPunch } from './kit';
+import { setUniverse, type Uni } from './universe';
 import './styles.css';
 gsap.registerPlugin(ScrollTrigger);
 
@@ -20,7 +21,7 @@ export function initStyles(root: HTMLElement) {
     b.type = 'button'; b.className = 'face'; b.setAttribute('aria-label', `His face drawn in ${name.toLowerCase()}`);
     const im = document.createElement('img'); im.src = faceUrl(k); im.alt = ''; im.draggable = false;
     b.append(im); fan.append(b);
-    b.addEventListener('click', () => { turn(i); zoomPunch(b, 1.25); restart(); });
+    b.addEventListener('click', () => { turn(i); zoomPunch(b, 1.25); restart(); void setUniverse(k as Uni, 'face'); });
     return b;
   });
   let at = 0;

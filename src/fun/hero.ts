@@ -6,9 +6,11 @@ import { Boy } from './boy';
 import { Jelly, type Letter } from './jelly';
 import { calm, onBeat } from './kit';
 import { Speed } from './lines';
+import { retypeset } from './kinetic';
 import { PANELS_END, panelsIn } from './panels';
-import { popIn, sticker, stickerUrl } from './stickers';
+import { popIn, sticker, trackSticker } from './stickers';
 import { makeStunts } from './stunts';
+import { nextUniverse, onUniverse, setUniverse } from './universe';
 gsap.registerPlugin(ScrambleTextPlugin, CustomEase, CustomWiggle);
 
 /*
@@ -18,7 +20,8 @@ gsap.registerPlugin(ScrambleTextPlugin, CustomEase, CustomWiggle);
  * Then it is yours. Tap the paper: a ring runs through
  * everything. Grab a letter: it stretches toward your finger, pulling its neighbours like a chain,
  * and twangs back when you let go. Fling it: it bounces off the edges and throws him. The big stunts
- * (stunts.ts) fire only when you poke: tap the ball, double-tap a letter.
+ * (stunts.ts) fire only when you poke: tap the ball, double-tap a letter. Tap him and he snaps his
+ * fingers: the universe changes, and the letters tumble and land again in the new face.
  */
 export const HERO_POSES = ['fall_0', 'fall_1', 'fall_2', 'hero_0', 'hero_3', 'still_0', 'leap_0', 'leap_2', 'comedy_0', 'comedy_3', 'extra_1', 'snap_0', 'snap_1', 'powerup_0', 'powerup_2'];
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
@@ -46,7 +49,7 @@ export function initHero(root: HTMLElement) {
     }
   }
   const dot = document.createElement('img');
-  dot.className = 'dot'; dot.src = stickerUrl('spark'); dot.alt = ''; dot.draggable = false;
+  dot.className = 'dot'; trackSticker(dot, 'spark'); dot.alt = ''; dot.draggable = false;
   lines[0].append(dot);
   const boy = new Boy(act.querySelector<HTMLImageElement>('.boy')!);
   // the hand-drawn cast round the name, and the glove in the scroll ring
@@ -367,16 +370,21 @@ export function initHero(root: HTMLElement) {
     if (Math.hypot(p.x - q.x, p.y - q.y) < 8) ripple(q.x, q.y, 1);
   });
   root.addEventListener('pointercancel', () => { paper = null; });
+  // tap him: he snaps his fingers and the universe changes
   boy.el.addEventListener('pointerdown', () => {
     if (!standing || busy || live) return;
     busy = true;
     ripple(boy.x, boy.y, 0.5);
     gsap.timeline({ onComplete: () => { busy = false; } })
-      .call(() => { boy.pose('comedy_0'); })
-      .to(boy, { sy: 1.12, duration: 0.12, ease: 'power2.out' })
-      .to(boy, { sy: 1, duration: 0.5, ease: 'elastic.out(1.2, 0.3)' })
-      .call(() => { boy.pose('extra_1'); }, [], '+=0.2')
-      .call(() => { boy.pose('hero_3'); }, [], '+=0.9');
+      .call(() => { boy.pose('snap_0'); })
+      .call(() => { boy.pose('snap_1'); void setUniverse(nextUniverse(), 'boy'); }, [], 0.18)
+      .call(() => { boy.pose('hero_3'); }, [], 1.1);
+  });
+  // a new universe: the type is measured again and the letters tumble into the new face
+  onUniverse((u) => {
+    if (live) { live.progress(1); live = null; }
+    fit();
+    retypeset(letters, u);
   });
   dot.addEventListener('pointerdown', () => {
     if (poke()) return;
