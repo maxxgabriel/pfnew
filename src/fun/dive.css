@@ -1,5 +1,5 @@
 /* the dive: one pinned screen over the hero; a colour ground, speed lines, a giant word, him falling */
-.dive { position: absolute; inset: 0; z-index: 2; visibility: hidden; background: #050607; overflow: hidden; }
+.dive { position: absolute; inset: 0; z-index: 2; visibility: hidden; background: var(--bg); overflow: hidden; }
 .dive.on { visibility: visible; }
 .dv-screen { position: absolute; inset: 0; overflow: hidden; transform-origin: 50% 50%; }
 .dv-bg { position: absolute; inset: 0; z-index: 0; }

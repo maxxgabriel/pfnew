@@ -86,10 +86,13 @@ toys; then entrances); then *"i want some spiderman miles morales like ideas"* �
 language on our boy (comic print, misregistration for blur, panels, onomatopoeia stickers, twos,
 graffiti, dimension glitches, the leap of faith) → *"do it then add all somehow even sbtle"*. Built:
 **the way in** = comic panels slamming onto the paper, the last one a window onto the landing
-(`panels.ts`); **the slot** = the rooftops (`roof.ts`): the trailer's lines as a skyline of towers he
-runs across at night, ending in the leap of faith into the work; folded in: the misregistration snap
-on arrival, the graffiti tag, the train crossing behind, billboard lights that turn him pixel/comic,
-comic insets on the big jumps, the seven styles glitching in. No webs, masks, logos or their text.
+(`panels.ts`); **the slot** = the rooftops (the trailer's lines as a skyline of towers he
+runs across at night, ending in the leap of faith) → **rejected the same day**: *"whay io meant is i
+dont want that at all. the whole scroll to story i dont need it anymorw"*. Standing rule from this:
+**no scroll-driven story set piece** (a pinned section that tells a story as you scroll) between
+the landing and the work; the dive stays (the owner called the rest great while it was there), and
+switches off onto the paper. Kept from the Spider-Verse round: the comic-panel way in, the seven
+styles glitching in. No webs, masks, logos or their text.
 
 **Round 42b — the cold open is too flashy; pitch the opening again:** *"this was really nice just
 dont do artifacts from on. i ddleted it, so what i woulkd change is the first part the movie we do,
@@ -626,3 +629,5 @@ build it".
 > i want some spiderman miles morales like ideas
 
 > do it then add all somehow even sbtle
+
+> whay io meant is i dont want that at all. the whole scroll to story i dont need it anymorw

@@ -4,9 +4,8 @@
  */
 const poses = import.meta.glob(
   [
-    '../assets/sketch/{bye,closeup,comedy,extra,fall,ftkick,hero,idle,leap,lookback,powerup,run8,snap,still}_*.webp',
-    '../assets/sketch/{pixel-run8,comic-fall}_*.webp',
-    '../assets/sketch/{curious,comic-leap}.webp',
+    '../assets/sketch/{bye,closeup,comedy,extra,fall,ftkick,hero,leap,powerup,run8,snap,still}_*.webp',
+    '../assets/sketch/curious.webp',
   ],
   { query: '?url', import: 'default', eager: true },
 ) as Record<string, string>;

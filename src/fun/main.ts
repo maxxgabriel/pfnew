@@ -18,13 +18,12 @@ import { initMenu } from './menu';
 import { initSkills } from './skills';
 import { stickerUrl } from './stickers';
 import { initStyles } from './styles';
-import { ROOF_POSES, initRoof } from './roof';
 import { initWork } from './work';
 gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 
 /*
  * MAX GABRIEL — a fun site that never stops playing. In order: the name as a rubber playground, a
- * dive through the tagline (one giant word per world), the rooftops he runs across at night,
+ * dive through the tagline (one giant word per world) that switches off onto the paper,
  * six little loops, what I do (every word moves its own way), about as a comic page, one boy in seven
  * styles, say hi, and a graffiti footer.
  * Smooth wheel on fine pointers, native scrolling on phones. Nothing starts until the type, his
@@ -49,7 +48,6 @@ const go = (target: string) => {
 
 const hero = initHero(q('.hero'));
 const dive = initDive(q('.opening'), hero);
-const roof = initRoof(q('.roof'));
 const work = initWork(q('.work'));
 initSkills(q('.skills'));
 initComic(q('.comic'));
@@ -60,20 +58,20 @@ initMenu(go);
 document.querySelectorAll<HTMLAnchorElement>('a[href^="#"]:not(.menu-panel a):not(.up)').forEach((a) => a.addEventListener('click', (e) => { e.preventDefault(); go(a.getAttribute('href') ?? '#top'); }));
 
 // the header turns light over the dark sections
-for (const s of ['.roof', '.foot']) ScrollTrigger.create({ trigger: s, start: 'top 40px', end: 'bottom 40px', onToggle: (st) => darkHeader(s, st.isActive) });
+for (const s of ['.foot']) ScrollTrigger.create({ trigger: s, start: 'top 40px', end: 'bottom 40px', onToggle: (st) => darkHeader(s, st.isActive) });
 new MutationObserver(() => document.documentElement.classList.toggle('menu-open', q('.menu').getAttribute('aria-expanded') === 'true')).observe(q('.menu'), { attributes: true });
 
 // start once the type, his drawings and the stickers are ready (but never wait more than 3 s)
 const decode = (src: string) => { const im = new Image(); im.src = src; return im.decode().catch(() => undefined); };
 const fonts = ['900 100px Anybody', '100px Anton', '100px Bangers', '100px "Bebas Neue"', '900 100px Montserrat', '800 100px Jost'];
-const poses = [...HERO_POSES, ...ROOF_POSES, 'fall_3', 'curious', 'bye_0', 'bye_1', 'bye_2', 'bye_3', 'leap_3', ...Array.from({ length: 8 }, (_, i) => `run8_${i}`)];
+const poses = [...HERO_POSES, 'closeup_0', 'closeup_1', 'closeup_2', 'fall_3', 'curious', 'bye_0', 'bye_1', 'bye_2', 'bye_3', 'leap_3', ...Array.from({ length: 8 }, (_, i) => `run8_${i}`)];
 const stickers = ['spark', 'sun', 'sparkle', 'inkpot', 'boombox', 'bolt', 'glove', 'shout', 'boing'].map((n) => stickerUrl(n));
 const ready = Promise.race([
   Promise.all([...fonts.map((f) => document.fonts.load(f)), Boy.load(poses), ...stickers.map(decode)]),
   new Promise((r) => setTimeout(r, 3000)),
 ]);
 void ready.then(() => {
-  hero.fit(); dive.fit(); roof.fit(); work.fit();
+  hero.fit(); dive.fit(); work.fit();
   hero.intro();
   ScrollTrigger.refresh();
 });
@@ -81,6 +79,6 @@ let rw = innerWidth;
 addEventListener('resize', () => {
   if (innerWidth === rw) return; // phone toolbars: ignore
   rw = innerWidth;
-  hero.fit(); dive.fit(); roof.fit(); work.fit(); ScrollTrigger.refresh();
+  hero.fit(); dive.fit(); work.fit(); ScrollTrigger.refresh();
 });
 (window as unknown as { __fun: object }).__fun = { ready, gsap, go, hero };

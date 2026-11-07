@@ -395,7 +395,7 @@ export function initHero(root: HTMLElement) {
     ball.style.transform = `translate(${(W / 2 - cx) * q}px, ${(H / 2 - cy) * q}px) scale(${s})`;
     fill.style.opacity = String(gsap.utils.clamp(0, 1, (v - 0.82) / 0.14));
     if (!calm) speed.draw(0.3 + 0.7 * v, W / 2, H / 2, C.ink);
-    darkHeader('hero-zoom', v > 0.7);
+    darkHeader('hero-zoom', v > 0.7 && u < 0.999); // once the dive has the screen, it owns the header
   }
 
   // touch: taps, grabs, flings

@@ -16,7 +16,7 @@ gsap.registerPlugin(ScrollTrigger);
  *   DANCE           ink     a chorus line on the beat: hops, a crouch, a jump with a spin, a sway
  *   AND SHAPES      butter  letters keep turning into shapes and back
  *   MISBEHAVE       sky     letters act up; then it glitches apart and switches off like an old TV,
- *                           into the dark of the rooftops
+ *                           leaving the paper of the next section
  * He falls with you the whole way. Every landing is a slam, a shake, a flash and a burst of speed
  * lines. The scroll drives the camera (scroll back and it rewinds); the beat drives the letters.
  */
@@ -288,7 +288,7 @@ export function initDive(opening: HTMLElement, hero: { zoom: (u: number) => void
     if (!inDive) { show(-1); darkHeader('dive', false); return; }
     const q = p - Z0, k = Math.min(3, Math.floor(q / SEG)), local = q - k * SEG, w = worlds[k];
     show(k);
-    darkHeader('dive', w.dark || local > HOLD + CHAOS);
+    darkHeader('dive', (w.dark || local > HOLD + CHAOS) && local < HOLD + CHAOS + CRT * 0.98);
     let m = 'hold', v = 0;
     if (local > HOLD) {
       if (k < 3) { m = 'zoom'; v = Math.min(1, (local - HOLD) / ZOOM); }
