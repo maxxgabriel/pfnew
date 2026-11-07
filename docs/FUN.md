@@ -1,5 +1,7 @@
 # FUN — the site (round 41)
 
+Round 42 rebuilt the first two pages (*"come on man we need to maker it look crazy"*): a cold open, a loud name and the dive replace the calm hero and the crossing tapes.
+
 The owner: *"i need a hell lot of animations shapes aniamtions letgters aniamtions a lot of fun in
 website"*, matvoyce.tv as the bar, art that is hand-made, *"premium aesthetic elegant and polished"*,
 with comic book / pop art, kinetic type, glitch, graffiti, offset print, frame stepping, speed lines
@@ -12,8 +14,9 @@ the beat. **Entry:** `index.html` → `src/fun/main.ts` (the round 35–37 motio
 
 | # | Section | File | What happens |
 |---|---|---|---|
-| 1 | The name is a playground | `hero.ts` | MAX GABRIEL drops in letter by letter (squash on landing), the red ball bounces along GABRIEL into the dot after MAX, he falls in onto the X. Then forever: a width wave, a letter trick every couple of seconds, he hops letter to letter. Sun, sparkle, ink pot, boombox, bolt round it; the glove in a turning SCROLL DOWN ring. Tap anything. |
-| 2 | Bands | `bands.ts` | Two tapes of trailer type crossing (red/black); faster and turning with the scroll; one word punches on every beat. |
+| 0 | Cold open | `coldopen.ts` | Black, then the name one letter per hit, each a full-screen smash cut to its own colour and typeface (zoom punch, shake, RGB split; MAX on the beat, GABRIEL on the half beats), the typeface named small in the corner like a specimen. Drawn on one canvas. Any tap, key or scroll fast-forwards it. |
+| 1 | The name, loud | `hero.ts`, `stunts.ts` | The whole name smashes onto the page frozen in misregistered print (halftone over it); a beat later it plays: plates snap into register, the red ball bounces along GABRIEL into the dot, he falls onto the X. Then on the first beat of every two bars a stunt: STRETCH past both edges, SLOT (every letter spins through five typefaces), PUNCH (camera punches in on him, impact frame, speed lines), SLICE (he snaps, the name tears into strips), FLIP (four colour smash cuts), DOMINO (letters topple and spring back). He jumps clear or rides along. Tricks, hops and the ball keeping time in between. |
+| 2 | The dive | `dive.ts`, `deep.ts`, `lines.ts` | Pinned with the hero (one screen, ~4 screens of scroll). The camera flies into the A (it turns red) until red fills the screen, then falls through the tagline one giant word per world, each world the colour of the letter you fell into: I MAKE LETTERS (red; typeface swaps every beat), DANCE (ink; a chorus line), AND SHAPES (butter; letters turn into shapes), MISBEHAVE (sky; letters act up, then it glitches and switches off like an old TV into the trailer). He falls alongside; every landing slams with a shake, flash and speed lines. `deep.ts` finds the thickest ink in a letter so its colour covers the screen. Scroll back and it rewinds. |
 | 3 | The trailer | `trailer.ts` | Pinned, played by the scroll, neo-noir (teal-black, one red light, letterbox, VHS lines, REC timecode, his silhouette rimmed in red): ONE ANIMATOR. (zoom punch) → SEVEN STYLES. (smash cut, his faces strobing a frame each) → ZERO STILL FRAMES. (glitch, RGB split) → a FREEZE FRAME (print, halftone, stamp) → EVERYTHING MOVES. (whip pan; punches + shake on the beat over speed lines) → NOW PLAYING (neon). |
 | 4 | Things that move | `work.ts` | Six live cards dealt in as they arrive, leaning to the pointer: SQUISH, GLITCH, INK (brush paints, splat blooms), POW! (halftone, burst, offset print on the beat), ON TWOS (run cycle on twos with onion skins; tap: ones/twos/fours), WHOOSH (smear, speed lines, smeared letters). Loops run only on screen. |
 | 5 | What I do | `skills.ts` | Five huge words; the one nearest the middle is lit and moves its own way (walk on twos, wave, stretch, code scramble, off-register print); the ground tints per word; a sticker pops beside it. |
@@ -23,7 +26,7 @@ the beat. **Entry:** `index.html` → `src/fun/main.ts` (the round 35–37 motio
 | 9 | Footer | `foot.ts` | Night with a red glow; the spray can crosses and the graffiti MAX appears behind it; the rocket takes you back up. |
 | — | Menu | `menu.ts` | Opens in a circle from the button, links rise with their stickers, MENU rolls to CLOSE. |
 
-Shared: `kit.ts` (one 118 bpm beat, letter splitting, pop / zoom punch / shake / glitch flash,
+Shared: `kit.ts` (one 118 bpm beat, the header's dark mode (`darkHeader`), letter splitting, pop / zoom punch / shake / glitch flash,
 loops only while visible), `fx.ts` (grain, cursor), `boil.ts` (line boil on every sticker),
 `stickers.ts` (each sticker's life and tap trick), `boy.ts` (his drawings by the foot).
 
@@ -68,6 +71,6 @@ links point at the sites' home pages.
 npx vite --port 5199 --strictPort            # dev server; the site is /
 npx tsc -p tsconfig.app.json --noEmit && npx oxlint src/fun
 ```
-`window.__fun`: `ready` (fonts and drawings in), `go('#section')`, `gsap`.
+`window.__fun`: `ready` (fonts and drawings in), `go('#section')` (`#dive` goes to the first word), `gsap`, `hero.stunt(i)` (run a stunt now, for checking).
 Checked at 390×844 @2x, 1440×900, 844×390 and 2560×1080; 60 fps through every section on the dev
 machine; prefers-reduced-motion calms the shake, flashes, boil and loops.

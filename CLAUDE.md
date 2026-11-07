@@ -6,7 +6,8 @@ product; projects are deliberately absent.
 
 **Round 41 (branch `claude/fun-site`):** the site is now `index.html` (src/fun), a fun site full of
 letter and shape animation with hand-drawn stickers made with ChatGPT — read `docs/FUN.md`. Text is
-allowed now. (Round 40's `break.html` was rejected; the round 35–37 motion site moved to `motion.html`.)
+allowed now. Round 42 rebuilt the first two pages: a cold open, a name that pulls a stunt every two
+bars, and a scroll dive through the tagline (`coldopen.ts`, `stunts.ts`, `dive.ts`). (Round 40's `break.html` was rejected; the round 35–37 motion site moved to `motion.html`.)
 The notes below describe the older canvas film.
 
 Before changing anything, read:
