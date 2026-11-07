@@ -55,7 +55,7 @@ paint splashes, graffiti MAX, speech bubble, shout burst.
 
 ## Preview
 
-Private claude.ai preview (open it on a phone): https://claude.ai/artifact/B6HQHAJv1NS8RENVDFErxH
+Private claude.ai preview (open it on a phone): https://claude.ai/artifact/EjLhsMsfWUAVhBTJ414Sc7 (round 42; the round 41 link was on a different Claude account)
 To refresh it: `ONLY=site npx vite build --outDir <folder>` (front page only, ~110 files), then
 publish the built page's head and body content with its `assets/`, `favicon.svg` and `og-site.jpg`
 to the same artifact.
